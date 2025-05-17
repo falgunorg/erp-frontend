@@ -1,0 +1,262 @@
+// CameraFileInput.module.scss
+
+.camera-file-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  // margin-top: 20px;
+  font-family: 'Helvetica Neue';
+
+  .camera-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .camera-preview {
+      margin-top: 10px;
+      border: 2px solid $blue;
+      border-radius: 8px;
+      width: 320px;
+      height: 240px;
+      background-color: #f0f0f0;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      video {
+        width: 100%;
+        height: 100%;
+      }
+    }
+
+    .open-camera-button,
+    .open-camera-again-button,
+    .capture-button {
+      margin-top: 10px;
+      padding: 12px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: $blue;
+        color: $white;
+      }
+    }
+  }
+
+  .captured-image-container {
+    text-align: center;
+
+    .captured-image {
+      width: 320px;
+      height: 240px;
+      border: 2px solid #2ecc71;
+      border-radius: 8px;
+      margin-top: 15px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.bg-falgun {
+  background: $theme_color_v1 !important;
+}
+
+.bg-black {
+  background: $black !important;
+}
+
+.bg-falgun-middle {
+  background: rgba(239, 193, 116, 0.8) !important;
+}
+
+.bg-falgun-light {
+  background: rgba(239, 193, 116, 0.5) !important;
+}
+
+.bg-modiste-blue {
+  background: #41abc5 !important;
+}
+
+.bg-modiste-purple {
+  background: rgba(167, 106, 163, 1);
+}
+
+.bg-modiste-purple-light {
+  background: rgba(167, 106, 163, 0.6);
+}
+
+.bg-modiste-green {
+  background: rgba(160, 191, 124, 1);
+}
+
+.bg-modiste-blue-light {
+  background: rgba(65, 171, 197, 0.5) !important;
+}
+
+.text-falgun {
+  color: $theme_color_v1 !important;
+}
+
+.text-purple {
+  color: rgba(167, 106, 163, 1);
+}
+
+.line_limit_one {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 200px;
+}
+
+.margin_bottom_0 {
+  margin-bottom: 0 !important;
+}
+
+.margin_top_0 {
+  margin-top: 0 !important;
+}
+
+.border_none {
+  border: none !important;
+}
+
+.react-calendar {
+  background: none !important;
+  border: none !important;
+  font-family: 'Helvetica Neue';
+
+  .weekend {
+    background-color: #f2dede;
+    color: $red;
+  }
+
+  .react-calendar__month-view__days__day--weekend {
+    color: #191c24;
+  }
+
+  .react-calendar__tile--active {
+    background: gray !important;
+  }
+}
+
+.back-to-top {
+  position: fixed;
+  display: none;
+  right: 0;
+  bottom: 0;
+  // z-index: 99;
+}
+
+// #spinner {
+//   opacity: 0;
+//   visibility: hidden;
+//   transition: opacity 0.5s ease-out, visibility 0s linear 0.5s;
+//   z-index: 99999;
+
+//   &.show {
+//     transition: opacity 0.5s ease-out, visibility 0s linear 0s;
+//     visibility: visible;
+//     opacity: 1;
+//   }
+// }
+
+.btn {
+  transition: 0.5s;
+
+  &.btn-primary {
+    color: $white;
+  }
+
+  &-square {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: normal;
+    border-radius: 50px;
+
+    &-sm {
+      width: 32px;
+      height: 32px;
+    }
+
+    &-lg {
+      width: 48px;
+      height: 48px;
+    }
+  }
+}
+.bootstrap-datetimepicker-widget.bottom {
+  top: auto !important;
+}
+
+.bootstrap-datetimepicker-widget {
+  .table {
+    * {
+      border-bottom-width: 0;
+    }
+
+    th {
+      font-weight: 500;
+    }
+  }
+
+  table {
+    td.active {
+      background: $blue;
+
+      &:hover {
+        background: $blue;
+      }
+    }
+
+    td.today {
+      &::before {
+        border-bottom-color: $blue;
+      }
+    }
+  }
+}
+
+.bootstrap-datetimepicker-widget.dropdown-menu {
+  padding: 10px;
+  border-radius: 2px;
+}
+
+.progress {
+  .progress-bar {
+    width: 0;
+    transition: 2s;
+  }
+}
+
+.testimonial-carousel {
+  .owl-dots {
+    margin-top: 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .owl-dot {
+    position: relative;
+    display: inline-block;
+    margin: 0 5px;
+    width: 15px;
+    height: 15px;
+    border: 5px solid $blue;
+    border-radius: 15px;
+    transition: 0.5s;
+  }
+
+  .owl-dot.active {
+    background: #191c24;
+    border-color: $blue;
+  }
+}

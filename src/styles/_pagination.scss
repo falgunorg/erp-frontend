@@ -1,0 +1,36 @@
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  justify-content: center;
+  margin-top: 15px;
+
+  .page-item {
+    margin: 0 5px;
+
+    .page-link {
+      color: $blue;
+      background-color: $white;
+      border: 1px solid #dee2e6;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+
+      &:hover {
+        background-color: $blue;
+        color: $white;
+      }
+      &.active {
+        background-color: $blue;
+        color: $white;
+      }
+
+      &[disabled] {
+        color: #6c757d;
+        pointer-events: none;
+        background-color: $white;
+        border-color: #dee2e6;
+      }
+    }
+  }
+}

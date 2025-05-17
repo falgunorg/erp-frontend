@@ -1,0 +1,54 @@
+.jo_editor_area {
+  margin: 15px 0;
+  // padding: 0 0 0 0 !important;
+  // box-shadow: none !important;
+
+  .jodit-react-container {
+    .jodit-container {
+      background: $white !important;
+      border: none !important;
+      .jodit-toolbar__box {
+        // height: 40px !important;
+        background: $white !important;
+        // box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.16) !important;
+        border-radius: 5px !important;
+        border: none !important;
+        padding: 7px 5px !important;
+        margin-bottom: 10px !important;
+
+        .jodit-toolbar-editor-collection_mode_horizontal {
+          background-image: none !important;
+        }
+
+        .jodit-toolbar-editor-collection_mode_horizontal::after {
+          display: none !important;
+        }
+        .jodit-ui-group {
+          gap: 2px !important;
+          .jodit-toolbar-button {
+            background: $light-gray-4 !important;
+            width: fit-content !important;
+            border: none !important;
+            outline: none !important;
+            &:hover {
+              button {
+                background: none !important;
+              }
+            }
+
+            button {
+              min-width: unset !important;
+            }
+
+            .jodit-toolbar-button_size_small {
+              button {
+                min-width: unset !important;
+                max-width: 15px !important;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

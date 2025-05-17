@@ -1,0 +1,126 @@
+.vertical-megamenu {
+  font-family: "Helvetica Neue" !important;
+
+  width: 55px;
+  background-color: $light-gray-2;
+  position: relative;
+  height: calc(100vh - 460px);
+  overflow-x: auto; /* Allow horizontal scrolling */
+
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $light-gray-2;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #9d9d9d;
+    width: 3px;
+    border-radius: 3px;
+    border: 0.2px solid $light-gray-2;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: $white;
+    cursor: pointer;
+  }
+
+  .menu-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 999;
+
+    .menu-item {
+      position: relative;
+      margin-bottom: 5px;
+      .menu-button {
+        width: 100%;
+        height: 50px;
+        padding: 0 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: $light-gray-2;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s ease;
+        &.active {
+          color: $white !important;
+          background-color: $theme_color_v1 !important;
+        }
+
+        &:hover {
+          background-color: $theme_color_v1;
+        }
+
+        .menu-icon {
+          font-size: 20px;
+          margin: 0;
+        }
+
+        &.active {
+          background-color: $blue;
+          color: $white;
+        }
+      }
+
+      .submenu {
+        background-color: $light-gray-2;
+        display: block;
+        padding: 10px;
+        z-index: 9999;
+        background-image: url("../assets/images/megamenu-bg.png");
+        // box-shadow: inset 0px 0px 3px rgba(0, 0, 0, 0.26);
+
+        .submenu-column {
+          margin: 0;
+          padding: 30px;
+          list-style: none;
+          z-index: 9999;
+          background-color: $light-gray-2 !important;
+          .submenu-item {
+            margin-bottom: 10px;
+
+            strong {
+              display: block;
+              font-weight: bold;
+              margin-bottom: 5px;
+              white-space: nowrap;
+              display: inline-block;
+            }
+
+            .submenu-sublist {
+              margin-top: 5px;
+              padding: 0 0 0 0 !important;
+              list-style: none;
+
+              li {
+                margin-bottom: 5px;
+
+                a {
+                  text-decoration: none;
+                  color: $blue;
+                  transition: color 0.3s ease;
+                  white-space: nowrap; /* Prevents text wrapping */
+                  display: inline-block; /* Ensures it remains on one line */
+
+                  &:hover {
+                    text-decoration: underline;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      &:hover .submenu {
+        display: inline-flex; /* Show submenu on hover */
+      }
+    }
+  }
+}

@@ -1,0 +1,223 @@
+@media print {
+  .purchase_order_page_when_print {
+    width: 100% !important;
+    display: block;
+    grid-template-columns: none !important;
+  }
+  .details_area_scroller {
+    height: 100% !important;
+    padding: 0 10px !important;
+  }
+
+  
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .table-responsive {
+    overflow-x: hidden !important;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .print-table,
+  .print-thead {
+    page-break-inside: avoid;
+  }
+
+  .print-thead {
+    display: table-header-group;
+  }
+
+  .print-thead .table_heading_tr {
+    background-color: #f1f1f1;
+  }
+
+  #pdf_container {
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .non_printing_area,
+  .falgun_app_sidebar,
+  .falgun_app header,
+  .all_pages .create_edit_page .create_page_heading,
+  .preview_print .soft_copy_div,
+  .back-to-top {
+    display: none !important;
+  }
+
+  .email_layout {
+    height: auto !important;
+
+    .email-detail {
+      width: 100% !important;
+      height: auto;
+    }
+  }
+
+  .falgun_app_content {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .all_pages .create_edit_page {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .preview_print {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    scroll-behavior: smooth !important;
+
+    .table tr td {
+      font-size: 12px !important;
+    }
+  }
+
+  .signature_block {
+    margin-top: 0 !important;
+
+    .item {
+      margin-left: -40px !important;
+
+      img {
+        width: 80px !important;
+      }
+    }
+  }
+}
+
+.signature_block {
+  height: 120px;
+  margin-top: 60px;
+  padding: 15px;
+  display: block;
+  margin-bottom: 30px;
+  .item {
+    rotate: -60deg;
+    width: 120px;
+    float: left;
+    margin-left: 0;
+    margin-right: 0;
+
+    .sign_time {
+      font-size: 10px;
+      margin-top: -5px;
+      font-style: italic;
+    }
+
+    img {
+      width: 120px;
+    }
+  }
+}
+
+.preview_print {
+  .border {
+    border-color: black !important;
+  }
+
+  border-color: black !important;
+  color: black !important;
+
+  table.table-bordered {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+
+  .table-bordered {
+    thead {
+      tr {
+        border: 1px solid black !important;
+
+        th {
+          border: 1px solid black !important;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        border: 1px dotted black !important;
+        border-style: dotted !important;
+
+        td {
+          border: 1px dotted black !important;
+          border-style: dotted !important;
+        }
+      }
+    }
+  }
+}
+
+table {
+  font-family: "Helvetica Neue";
+
+  thead {
+    tr {
+      th {
+        padding: 5px 2px !important;
+        font-size: 12px !important;
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      transition: all 300ms ease-in-out;
+
+      &.border_bottom_none {
+        border-bottom: none !important;
+
+        td {
+          border-bottom: none !important;
+        }
+      }
+
+      td {
+        padding: 5px 2px !important;
+        font-size: 12px !important;
+
+        .form-control,
+        .form-select {
+          font-size: 13px !important;
+        }
+
+        .file-label {
+          position: relative;
+          display: inline-block;
+        }
+
+        .file-input {
+          display: none;
+        }
+
+        .camera-icon {
+          padding-left: 15px;
+          font-size: 20px;
+          color: #333;
+
+          i {
+            cursor: pointer;
+          }
+        }
+
+        img {
+          max-width: 120px;
+          max-height: 80px;
+          display: block;
+        }
+      }
+    }
+  }
+}

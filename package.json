@@ -1,0 +1,151 @@
+{
+  "name": "falgun-erp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A comprehensive ERP solution for managing various business processes.",
+  "author": "FALGUN",
+  "dependencies": {
+    "@azure/msal-browser": "^2.31.0",
+    "@azure/msal-react": "^1.5.5",
+    "@babel/core": "^7.16.0",
+    "@babel/preset-env": "^7.25.8",
+    "@babel/preset-react": "^7.25.7",
+    "@chatscope/chat-ui-kit-react": "^2.0.3",
+    "@chatscope/chat-ui-kit-styles": "^1.4.0",
+    "@devexpress/dx-react-core": "4.0.6",
+    "@devexpress/dx-react-scheduler": "^4.0.8",
+    "@devexpress/dx-react-scheduler-material-ui": "^4.0.6",
+    "@emotion/react": "^11.4.1",
+    "@emotion/styled": "^11.3.0",
+    "@fortawesome/fontawesome-svg-core": "^6.3.0",
+    "@fortawesome/free-solid-svg-icons": "^6.3.0",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@mui/icons-material": "^5.11.0",
+    "@mui/lab": "^5.0.0-alpha.117",
+    "@mui/material": "^5.11.6",
+    "@mui/x-date-pickers": "^5.0.15",
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^11.2.7",
+    "axios": "^0.24.0",
+    "babel-loader": "^9.2.1",
+    "bootstrap": "^5.3.2",
+    "browse-directory": "^0.0.3",
+    "chart.js": "^3.9.1",
+    "concurrently": "^9.1.0",
+    "cropperjs": "^1.6.2",
+    "datatables.net": "^1.13.8",
+    "datatables.net-buttons": "^2.4.2",
+    "dompurify": "^2.3.6",
+    "emailjs-mime-parser": "^2.0.7",
+    "file-saver": "^2.0.5",
+    "google-map-react": "^2.2.1",
+    "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.10.3",
+    "jodit-react": "^1.3.39",
+    "jquery": "^3.7.1",
+    "jspdf": "^2.5.1",
+    "laravel-echo": "^1.16.1",
+    "local-storage": "^2.0.0",
+    "mailparser": "^3.7.2",
+    "moment": "^2.29.1",
+    "msg-parser": "^1.0.10",
+    "prop-types": "^15.7.2",
+    "pusher-js": "^8.4.0-rc2",
+    "quill": "^2.0.2",
+    "quill-better-table": "^1.2.10",
+    "quill-image-resize-module-react": "^3.0.0",
+    "react": "^17.0.2",
+    "react-beautiful-dnd": "^13.1.1",
+    "react-bootstrap": "^2.0.4",
+    "react-chartjs-2": "^4.3.1",
+    "react-datepicker": "^4.7.0",
+    "react-dom": "^17.0.2",
+    "react-easy-crop": "^5.1.0",
+    "react-helmet": "^6.1.0",
+    "react-icons": "^5.2.1",
+    "react-otp-input": "^3.1.1",
+    "react-push-notification": "^1.5.4",
+    "react-qr-code": "^2.0.12",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^5.0.1",
+    "react-select": "^5.7.7",
+    "sass": "^1.79.5",
+    "socket.io-client": "^4.7.5",
+    "sweetalert": "^2.1.2",
+    "wait-on": "^8.0.1",
+    "web-vitals": "^1.1.2",
+    "xlsx": "^0.18.5"
+  },
+  "scripts": {
+    "check-unused": "depcheck",
+    "start-bak": "react-scripts start",
+    "build-bak": "react-scripts build",
+    "start": "SET NODE_OPTIONS=--openssl-legacy-provider && react-app-rewired start",
+    "build": "SET NODE_OPTIONS=--openssl-legacy-provider && react-app-rewired build",
+    "https": "HTTPS=true yarn start",
+    "startBak": "node translate.js && react-app-rewired start",
+    "buildBak": "node translate.js && react-app-rewired build",
+    "test": "react-app-rewired test",
+    "eject": "react-scripts eject",
+    "electron-start": "electron .",
+    "make": "electron-builder"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "babel-plugin-module-resolver": "^4.1.0",
+    "customize-cra": "^1.0.0",
+    "depcheck": "^1.4.7",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "react-app-rewired": "^2.2.1"
+  },
+  "build": {
+    "appId": "com.falgun.erp",
+    "productName": "FALGUNERP",
+    "directories": {
+      "buildResources": "build"
+    },
+    "files": [
+      "build/**/*",
+      "node_modules/**/*",
+      "public/electron.js"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "ia32",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/favicon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/favicon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "build/icon.png"
+    }
+  }
+}

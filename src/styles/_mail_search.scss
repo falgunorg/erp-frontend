@@ -1,0 +1,117 @@
+.mail_searching {
+  border-radius: 3px;
+  position: relative;
+  width: calc(100% - 125px);
+
+  &.bottom_radious_none {
+    border-radius: 5px 5px 0 0 !important;
+  }
+
+  .mail_search_area {
+    position: relative;
+
+    .search_icon {
+      position: absolute;
+      left: 10px;
+      top: 0px;
+    }
+
+    .filter_icon {
+      position: absolute;
+      right: 10px;
+      top: 0px;
+    }
+
+    .inside_searchbar {
+      outline: none;
+      box-shadow: none;
+      padding-left: 30px;
+      width: 100%;
+      background: $light-gray-5 !important;
+      border-radius: 3px;
+      height: 26px !important;
+    }
+  }
+
+  .search-container {
+    position: absolute;
+    width: 100%;
+    border-radius: 0 0 3px 3px;
+    background: $light-gray-5 !important;
+
+    .to_cc {
+      .to_field {
+        border: 1px solid #dee2e6 !important;
+        font-family: "Helvetica Neue" !important;
+        margin-bottom: 10px;
+        border-radius: 3px;
+        // height: 18px;
+      }
+
+      .MuiAutocomplete-input {
+        padding: 0 !important;
+        border: none !important;
+        font-size: 16px !important;
+        line-height: 100%;
+        font-family: "Helvetica Neue" !important;
+      }
+
+      .css-1d3z3hw-MuiOutlinedInput-notchedOutline {
+        border-style: unset !important;
+        font-family: "Helvetica Neue" !important;
+      }
+    }
+
+    .form-group {
+      label {
+        font-weight: bold;
+        font-size: 12px;
+      }
+
+      .form-control {
+        font-size: 12px;
+        padding: 2px !important;
+        border-radius: 3px;
+        height: 25px;
+        line-height: 100%;
+        margin-bottom: 7px !important;
+
+        &:focus {
+          outline: none;
+          box-shadow: none;
+        }
+      }
+    }
+
+    .form-check-label {
+      font-size: 14px;
+    }
+
+    .button-group {
+      margin-top: 1.5rem;
+
+      .btn {
+        font-size: 14px;
+        padding: 0.5rem 1rem;
+      }
+
+      .btn-primary {
+        background-color: #0078d4;
+        border: none;
+
+        &:hover {
+          background-color: #005a9e;
+        }
+      }
+
+      .btn-outline-secondary {
+        border-color: #0078d4;
+        color: #0078d4;
+
+        &:hover {
+          background-color: #f2f2f2;
+        }
+      }
+    }
+  }
+}

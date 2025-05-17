@@ -1,0 +1,221 @@
+.create_edit_page {
+  font-family: "Helvetica Neue";
+
+  .create_page_heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 2px solid $light-gray-2;
+    margin-bottom: 30px;
+
+    .page_name {
+      font-size: 20px;
+      color: $black;
+
+      &.user_area {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+
+        .item {
+          img {
+            height: 50px;
+            width: 50px;
+            border: 2px solid $light-gray-2;
+          }
+        }
+
+        .credentials {
+          font-size: 14px;
+        }
+      }
+    }
+
+    .actions {
+      display: flex;
+      gap: 40px;
+
+      .form-control {
+        margin-bottom: 0 !important;
+      }
+
+      .back_btn {
+        background: $red;
+        height: 37px;
+        width: 37px;
+        font-size: 27px;
+        border: none;
+        color: $white;
+        padding: 0;
+        text-align: center;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .attendance_summery {
+    .single_box {
+      margin-bottom: 15px;
+
+      .item {
+        font-size: 30px;
+        padding: 25px 0;
+        text-align: center;
+        border-radius: 20px;
+      }
+    }
+  }
+
+  .previw_upload_image {
+    position: relative;
+    cursor: pointer;
+
+    i {
+      font-size: 40px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: $red;
+    }
+  }
+
+  .announcements_lists {
+    .single_announcement {
+      display: grid;
+      grid-template-columns: 100px auto auto;
+      align-items: center;
+      background-color: $white;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+      .description {
+        display: -webkit-box !important;
+        -webkit-line-clamp: 1 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+      }
+
+      &.small {
+        grid-template-columns: 60px auto auto;
+        padding: 5px;
+
+        .item {
+          img {
+            height: 50px;
+            width: 50px;
+            border: 2px solid $light-gray-2;
+          }
+
+          button {
+            height: 30px;
+            width: 30px;
+            padding: 0 !important;
+          }
+        }
+      }
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .item {
+        img {
+          height: 75px;
+          width: 75px;
+          border: 2px solid $light-gray-2;
+        }
+
+        button {
+          height: 30px;
+          width: 30px;
+          padding: 0 !important;
+        }
+      }
+    }
+  }
+
+  .attachment_list {
+    margin-top: 50px;
+
+    .single_attachment {
+      float: left;
+      margin-right: 10px;
+      background: $white;
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      gap: 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+
+      i {
+        font-size: 50px;
+      }
+    }
+
+    ul {
+      li {
+        font-size: 20px;
+        border-bottom: 1px solid $light-gray-2;
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+
+        .right {
+          a {
+            margin-left: 10px;
+          }
+        }
+      }
+    }
+  }
+
+  .employee_lists {
+    .list_heading,
+    .data_row {
+      display: grid;
+      grid-template-columns: repeat(12, auto);
+
+      .item {
+        border: 1px solid $light-gray-2;
+        padding: 10px 0;
+        text-align: center;
+        font-weight: 700;
+      }
+    }
+  }
+
+  .create_employee_tabs {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    margin-bottom: 40px;
+  }
+
+  .right_sideNav {
+    .sidenav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      // z-index: 9999;
+      top: 0;
+      right: -80px;
+      background-color: #f2f2f2;
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding: 15px;
+
+      &.width_full {
+        width: 60%;
+        right: 0px;
+      }
+
+      &.width_100 {
+        width: 100% !important;
+        right: 0px;
+      }
+    }
+  }
+}
