@@ -99,7 +99,7 @@ export default function CreateTechnicalPackage(props) {
     { id: 3, title: "MANGO" },
   ];
 
-  const season = [
+  const seasons = [
     { id: 1, title: "FAL 24" },
     { id: 2, title: "SUMMER 25" },
     { id: 3, title: "SPRING 25" },
@@ -144,6 +144,8 @@ export default function CreateTechnicalPackage(props) {
   ];
   //image uploading area
 
+  const [frontImageFile, setFrontImageFile] = useState(null);
+  const [backImageFile, setBackImageFile] = useState(null);
   const [frontImagePreviewUrl, setFrontImagePreviewUrl] = useState(null);
   const [backImagePreviewUrl, setBackImagePreviewUrl] = useState(null);
   const [fullScreenImage, setFullScreenImage] = useState(null);
@@ -152,6 +154,7 @@ export default function CreateTechnicalPackage(props) {
   // Handle Front Image Change
   const handleFrontImageChange = (event) => {
     const file = event.target.files[0];
+    setFrontImageFile(file);
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setFrontImagePreviewUrl(imageUrl);
@@ -161,6 +164,7 @@ export default function CreateTechnicalPackage(props) {
   // Handle Back Image Change
   const handleBackImageChange = (event) => {
     const file = event.target.files[0];
+    setBackImageFile(file);
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setBackImagePreviewUrl(imageUrl);
@@ -287,6 +291,7 @@ export default function CreateTechnicalPackage(props) {
   // Function to add a row within the respective materialType
   const addRow = (materialTypeId) => {
     const newItem = {
+      item_type_id: materialTypeId,
       item_id: "",
       description: "",
       unit: "",
@@ -353,6 +358,31 @@ export default function CreateTechnicalPackage(props) {
     validateTitle();
   }, [consumptionItems]);
 
+  const [formDataSet, setFormDataSet] = useState({
+    po_id: "",
+    wo_id: "",
+    received_date: "",
+    techpack_number: "",
+    buyer_id: "",
+    buyer_style_name: "",
+    brand: "",
+    item_name: "",
+    season: "",
+    item_type: "",
+    department: "",
+    description: "",
+    company_id: "",
+    wash_details: "",
+    special_operations: [],
+  });
+
+  const handleInputChange = (name, value) => {
+    setFormDataSet((prevDataSet) => ({
+      ...prevDataSet,
+      [name]: value,
+    }));
+  };
+
   return (
     <div className="create_technical_pack">
       <div className="row create_tp_header align-items-center">
@@ -370,14 +400,24 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <input type="text" />
+              <input
+                type="text"
+                name="po_id"
+                value={formDataSet.po_id}
+                onChange={(e) => handleInputChange("po_id", e.target.value)}
+              />
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <input type="text" />
+              <input
+                name="wo_id"
+                value={formDataSet.wo_id}
+                onChange={(e) => handleInputChange("wo_id", e.target.value)}
+                type="text"
+              />
             </div>
           </div>
         </div>
@@ -393,13 +433,28 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Received Date</label>
             </div>
             <div className="col-lg-3">
-              <input type="date" />
+              <input
+                name="received_date"
+                value={formDataSet.received_date}
+                onChange={(e) =>
+                  handleInputChange("received_date", e.target.value)
+                }
+                type="date"
+              />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack#</label>
             </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Tech Pack Number" />
+              <input
+                name="techpack_number"
+                value={formDataSet.techpack_number}
+                onChange={(e) =>
+                  handleInputChange("techpack_number", e.target.value)
+                }
+                type="text"
+                placeholder="Tech Pack Number"
+              />
             </div>
           </div>
 
@@ -417,13 +472,25 @@ export default function CreateTechnicalPackage(props) {
                 }))}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("buyer_id", selectedOption.value)
+                }
+                name="buyer_id"
               />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Buyer Style Name" />
+              <input
+                name="buyer_style_name"
+                value={formDataSet.buyer_style_name}
+                onChange={(e) =>
+                  handleInputChange("buyer_style_name", e.target.value)
+                }
+                type="text"
+                placeholder="Buyer Style Name"
+              />
             </div>
           </div>
 
@@ -441,13 +508,23 @@ export default function CreateTechnicalPackage(props) {
                 }))}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("brand", selectedOption.value)
+                }
+                name="brand"
               />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Item Name" />
+              <input
+                name="item_name"
+                value={formDataSet.item_name}
+                onChange={(e) => handleInputChange("item_name", e.target.value)}
+                type="text"
+                placeholder="Item Name"
+              />
             </div>
           </div>
 
@@ -459,12 +536,16 @@ export default function CreateTechnicalPackage(props) {
               <Select
                 className="select_wo"
                 placeholder="Season"
-                options={season.map(({ id, title }) => ({
+                options={seasons.map(({ id, title }) => ({
                   value: id,
                   label: title,
                 }))}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("season", selectedOption.value)
+                }
+                name="season"
               />
             </div>
             <div className="col-lg-2">
@@ -480,6 +561,10 @@ export default function CreateTechnicalPackage(props) {
                 }))}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("item_type", selectedOption.value)
+                }
+                name="item_type"
               />
             </div>
           </div>
@@ -498,6 +583,10 @@ export default function CreateTechnicalPackage(props) {
                 }))}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("department", selectedOption.value)
+                }
+                name="department"
               />
             </div>
             <div className="col-lg-2">
@@ -507,6 +596,11 @@ export default function CreateTechnicalPackage(props) {
               <input
                 type="text"
                 placeholder="97% Cotton 3% Elastane Ps Chino Trouser"
+                name="description"
+                value={formDataSet.description}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
               />
             </div>
           </div>
@@ -525,6 +619,10 @@ export default function CreateTechnicalPackage(props) {
                 }))}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("company_id", selectedOption.value)
+                }
+                name="company_id"
               />
             </div>
             <div className="col-lg-2">
@@ -540,6 +638,10 @@ export default function CreateTechnicalPackage(props) {
                 }))}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("wash_details", selectedOption.value)
+                }
+                name="wash_details"
               />
             </div>
           </div>
@@ -559,6 +661,15 @@ export default function CreateTechnicalPackage(props) {
                 }))}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOptions) =>
+                  handleInputChange(
+                    "special_operations",
+                    selectedOptions
+                      ? selectedOptions.map((option) => option.label)
+                      : []
+                  )
+                }
+                name="special_operations"
               />
             </div>
           </div>
