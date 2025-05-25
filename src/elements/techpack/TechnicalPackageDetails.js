@@ -8,7 +8,7 @@ import html2pdf from "html2pdf.js";
 
 import { ArrowRightIcon, ArrowDownIcon } from "../SvgIcons";
 
-export default function TechnicalPackageDetails(props) {
+export default function TechnicalPackageDetails({ tpDetails }) {
   const DropdownIndicator = (props) => {
     return (
       <components.DropdownIndicator {...props}>
@@ -87,63 +87,6 @@ export default function TechnicalPackageDetails(props) {
       },
     }),
   };
-
-  const buyers = [
-    { id: 1, title: "NSLBD" },
-    { id: 2, title: "WALMART" },
-    { id: 3, title: "FIVE STAR LLC" },
-  ];
-
-  const brands = [
-    { id: 1, title: "NEXT" },
-    { id: 2, title: "GARAN" },
-    { id: 3, title: "MANGO" },
-  ];
-
-  const season = [
-    { id: 1, title: "FAL 24" },
-    { id: 2, title: "SUMMER 25" },
-    { id: 3, title: "SPRING 25" },
-  ];
-
-  const departments = [
-    { id: 1, title: "Mens" },
-    { id: 2, title: "Womens" },
-    { id: 3, title: "Kids" },
-  ];
-
-  const companies = [
-    { id: 1, title: "JMS" },
-    { id: 2, title: "MCL" },
-    { id: 3, title: "MBL" },
-  ];
-
-  const itemTypes = [
-    { id: 1, title: "TOP" },
-    { id: 2, title: "BOTTOM" },
-    { id: 3, title: "SWIMWEAR" },
-  ];
-
-  const washes = [
-    { id: 1, title: "Garment Wash" },
-    { id: 2, title: "Enzyme Wash" },
-    { id: 3, title: "Bleach Wash" },
-    { id: 4, title: "Stone Wash" },
-    { id: 5, title: "Acid Wash" },
-    { id: 6, title: "Rinse Wash" },
-    { id: 7, title: "Sand Wash" },
-    { id: 8, title: "Silicon Wash" },
-    { id: 9, title: "Moonshine Wash" },
-    { id: 10, title: "Distressed Wash" },
-  ];
-
-  const specialOperations = [
-    { id: 1, title: "Embroadary" },
-    { id: 2, title: "Printing" },
-    { id: 3, title: "Fusing" },
-    { id: 4, title: "Dying" },
-  ];
-  //image uploading area
 
   const [frontImagePreviewUrl, setFrontImagePreviewUrl] = useState(null);
   const [backImagePreviewUrl, setBackImagePreviewUrl] = useState(null);
@@ -403,14 +346,14 @@ export default function TechnicalPackageDetails(props) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">#PO23587</div>
+              <div className="form-value">{tpDetails.po_id}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">#WO23587</div>
+              <div className="form-value">{tpDetails.wo_id}</div>
             </div>
           </div>
         </div>
@@ -432,13 +375,13 @@ export default function TechnicalPackageDetails(props) {
               <label className="form-label">Received Date</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">11/02/2025</div>
+              <div className="form-value">{tpDetails.received_date}</div>
             </div>
             <div className="col-lg-2">
-              <label className="form-label">Tech Pack#</label>
+              <label className="form-label">Tech Pack</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">#TP70987</div>
+              <div className="form-value">{tpDetails.techpack_number}</div>
             </div>
           </div>
 
@@ -447,13 +390,13 @@ export default function TechnicalPackageDetails(props) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">NSLBD</div>
+              <div className="form-value">{tpDetails.buyer_id}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">PC CHINO TROSER</div>
+              <div className="form-value">{tpDetails.buyer_style_name}</div>
             </div>
           </div>
 
@@ -462,13 +405,13 @@ export default function TechnicalPackageDetails(props) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">NEXT</div>
+              <div className="form-value">{tpDetails.brand}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Chino Trouser</div>
+              <div className="form-value">{tpDetails.item_name}</div>
             </div>
           </div>
 
@@ -477,13 +420,13 @@ export default function TechnicalPackageDetails(props) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">Fall 25</div>
+              <div className="form-value">{tpDetails.season}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Bottom</div>
+              <div className="form-value">{tpDetails.item_type}</div>
             </div>
           </div>
 
@@ -492,15 +435,13 @@ export default function TechnicalPackageDetails(props) {
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">Womens</div>
+              <div className="form-value">{tpDetails.department}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Description</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">
-                97% Cotton 3% Elastane Ps Chino Trouser
-              </div>
+              <div className="form-value">{tpDetails.description}</div>
             </div>
           </div>
 
@@ -509,13 +450,13 @@ export default function TechnicalPackageDetails(props) {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">MCL</div>
+              <div className="form-value">{tpDetails.company_id}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Silicon Wash</div>
+              <div className="form-value">{tpDetails.wash_details}</div>
             </div>
           </div>
 
@@ -524,7 +465,7 @@ export default function TechnicalPackageDetails(props) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              <div className="form-value">Printing, Diyeing, Embroadary</div>
+              <div className="form-value">{tpDetails.special_operation}</div>
             </div>
           </div>
         </div>

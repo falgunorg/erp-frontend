@@ -4,6 +4,7 @@ import Select, { components } from "react-select";
 import { Modal, Button, Spinner } from "react-bootstrap";
 import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
+import swal from "sweetalert";
 
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 
@@ -143,7 +144,6 @@ export default function CreateTechnicalPackage(props) {
     { id: 4, title: "Dying" },
   ];
   //image uploading area
-
   const [frontImageFile, setFrontImageFile] = useState(null);
   const [backImageFile, setBackImageFile] = useState(null);
   const [frontImagePreviewUrl, setFrontImagePreviewUrl] = useState(null);
@@ -174,12 +174,14 @@ export default function CreateTechnicalPackage(props) {
   // Remove Front Image Preview
   const removeFrontImagePreviewUrl = () => {
     setFrontImagePreviewUrl(null);
+    setFrontImageFile(null);
     document.getElementById("front_image").value = ""; // Reset input value
   };
 
   // Remove Back Image Preview
   const removeBackImagePreviewUrl = () => {
     setBackImagePreviewUrl(null);
+    setBackImageFile(null);
     document.getElementById("back_image").value = ""; // Reset input value
   };
 
@@ -204,12 +206,16 @@ export default function CreateTechnicalPackage(props) {
   const [selectedSpecialOperationFiles, setSelectedSpecialOperationFiles] =
     useState([]);
 
+  const allFiles = [
+    ...selectedTechpackFiles,
+    ...selectedSpecSheetFiles,
+    ...selectedBlockPatternFiles,
+    ...selectedSpecialOperationFiles,
+  ];
   ///added
 
   const [spinner, setSpinner] = useState(false);
-
   const [materialTypes, setMaterialTypes] = useState([]);
-
   const getMaterialTypes = async () => {
     setSpinner(true);
     var response = await api.post("/item-types");
@@ -220,7 +226,6 @@ export default function CreateTechnicalPackage(props) {
   };
 
   const [items, setItems] = useState([]);
-
   const getItems = async () => {
     setSpinner(true);
     var response = await api.post("/items");
@@ -342,22 +347,6 @@ export default function CreateTechnicalPackage(props) {
     });
   };
 
-  // Validate title presence
-  const [titleValidation, setTitleValidation] = useState({});
-  const validateTitle = () => {
-    const validation = {};
-    Object.keys(consumptionItems).forEach((materialTypeId) => {
-      validation[materialTypeId] = consumptionItems[materialTypeId].every(
-        (item) => !!item.item_id
-      );
-    });
-    setTitleValidation(validation);
-  };
-
-  useEffect(() => {
-    validateTitle();
-  }, [consumptionItems]);
-
   const [formDataSet, setFormDataSet] = useState({
     po_id: "",
     wo_id: "",
@@ -381,6 +370,114 @@ export default function CreateTechnicalPackage(props) {
       ...prevDataSet,
       [name]: value,
     }));
+  };
+
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    let formErrors = {};
+
+    if (!formDataSet.received_date) {
+      formErrors.received_date = "Received date is required";
+    }
+    if (!formDataSet.techpack_number) {
+      formErrors.techpack_number = "Techpack Number is required";
+    }
+    if (!formDataSet.buyer_id) {
+      formErrors.buyer_id = "Buyer is required";
+    }
+    if (!formDataSet.buyer_style_name) {
+      formErrors.buyer_style_name = "Buyer style name is required";
+    }
+
+    if (!formDataSet.brand) {
+      formErrors.brand = "Brand is required";
+    }
+    if (!formDataSet.item_name) {
+      formErrors.item_name = "Item name is required";
+    }
+    if (!formDataSet.season) {
+      formErrors.season = "Season is required";
+    }
+    if (!formDataSet.item_type) {
+      formErrors.item_type = "Item type is required";
+    }
+
+    if (!formDataSet.department) {
+      formErrors.department = "Department is required";
+    }
+    if (!formDataSet.company_id) {
+      formErrors.company_id = "Company is required";
+    }
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
+
+  console.log("ALL FILES", allFiles);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const tp_items = Object.values(consumptionItems).flat();
+    if (tp_items.length === 0) {
+      swal({
+        title: "Please Select Materials",
+        icon: "error",
+      });
+      return; // Prevent form submission
+    }
+
+    if (frontImageFile === null) {
+      swal({
+        title: "Please Select Front Part Image",
+        icon: "error",
+      });
+      return; // Prevent form submission
+    }
+
+    if (backImageFile === null) {
+      swal({
+        title: "Please Select Back Part Image",
+        icon: "error",
+      });
+      return; // Prevent form submission
+    }
+
+    if (validateForm()) {
+      var data = new FormData();
+      data.append("po_id", formDataSet.po_id);
+      data.append("wo_id", formDataSet.wo_id);
+      data.append("received_date", formDataSet.received_date);
+      data.append("techpack_number", formDataSet.techpack_number);
+      data.append("buyer_id", formDataSet.buyer_id);
+      data.append("buyer_style_name", formDataSet.buyer_style_name);
+      data.append("brand", formDataSet.brand);
+      data.append("item_name", formDataSet.item_name);
+      data.append("season", formDataSet.season);
+      data.append("item_type", formDataSet.item_type);
+      data.append("department", formDataSet.department);
+      data.append("description", formDataSet.description);
+      data.append("company_id", formDataSet.company_id);
+      data.append("wash_details", formDataSet.wash_details);
+      data.append("special_operation", formDataSet.special_operations);
+      data.append("tp_items", JSON.stringify(tp_items));
+
+      data.append("front_photo", frontImageFile);
+      data.append("back_photo", backImageFile);
+      allFiles.forEach((file) => {
+        data.append("attatchments[]", file); // real file
+        data.append("file_types[]", file.file_type); // custom property
+      });
+
+      setSpinner(true);
+      var response = await api.post("/technical-package-create", data);
+      if (response.status === 200 && response.data) {
+        alert("Successfully Added");
+      } else {
+        setErrors(response.data.errors);
+      }
+      setSpinner(false);
+    }
   };
 
   return (
@@ -422,7 +519,13 @@ export default function CreateTechnicalPackage(props) {
           </div>
         </div>
         <div className="col-lg-2">
-          <button className="btn btn-default submit_button"> Submit </button>
+          <button
+            onClick={handleSubmit}
+            className="btn btn-default submit_button"
+          >
+            {" "}
+            Submit{" "}
+          </button>
         </div>
       </div>
       <br />
@@ -441,6 +544,11 @@ export default function CreateTechnicalPackage(props) {
                 }
                 type="date"
               />
+              {errors.received_date && (
+                <small className="form-label text-danger">
+                  {errors.received_date}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack#</label>
@@ -455,6 +563,11 @@ export default function CreateTechnicalPackage(props) {
                 type="text"
                 placeholder="Tech Pack Number"
               />
+              {errors.techpack_number && (
+                <small className="form-label text-danger">
+                  {errors.techpack_number}
+                </small>
+              )}
             </div>
           </div>
 
@@ -477,6 +590,11 @@ export default function CreateTechnicalPackage(props) {
                 }
                 name="buyer_id"
               />
+              {errors.buyer_id && (
+                <small className="form-label text-danger">
+                  {errors.buyer_id}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
@@ -491,6 +609,12 @@ export default function CreateTechnicalPackage(props) {
                 type="text"
                 placeholder="Buyer Style Name"
               />
+
+              {errors.buyer_style_name && (
+                <small className="form-label text-danger">
+                  {errors.buyer_style_name}
+                </small>
+              )}
             </div>
           </div>
 
@@ -513,6 +637,10 @@ export default function CreateTechnicalPackage(props) {
                 }
                 name="brand"
               />
+
+              {errors.brand && (
+                <small className="form-label text-danger">{errors.brand}</small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
@@ -525,6 +653,11 @@ export default function CreateTechnicalPackage(props) {
                 type="text"
                 placeholder="Item Name"
               />
+              {errors.item_name && (
+                <small className="form-label text-danger">
+                  {errors.item_name}
+                </small>
+              )}
             </div>
           </div>
 
@@ -547,6 +680,11 @@ export default function CreateTechnicalPackage(props) {
                 }
                 name="season"
               />
+              {errors.season && (
+                <small className="form-label text-danger">
+                  {errors.season}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
@@ -566,6 +704,11 @@ export default function CreateTechnicalPackage(props) {
                 }
                 name="item_type"
               />
+              {errors.item_type && (
+                <small className="form-label text-danger">
+                  {errors.item_type}
+                </small>
+              )}
             </div>
           </div>
 
@@ -578,7 +721,7 @@ export default function CreateTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Department"
                 options={departments.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
                 styles={customStyles}
@@ -588,6 +731,12 @@ export default function CreateTechnicalPackage(props) {
                 }
                 name="department"
               />
+
+              {errors.department && (
+                <small className="form-label text-danger">
+                  {errors.department}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Description</label>
@@ -602,6 +751,11 @@ export default function CreateTechnicalPackage(props) {
                   handleInputChange("description", e.target.value)
                 }
               />
+              {errors.description && (
+                <small className="form-label text-danger">
+                  {errors.description}
+                </small>
+              )}
             </div>
           </div>
 
@@ -624,6 +778,11 @@ export default function CreateTechnicalPackage(props) {
                 }
                 name="company_id"
               />
+              {errors.company_id && (
+                <small className="form-label text-danger">
+                  {errors.company_id}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
@@ -643,6 +802,11 @@ export default function CreateTechnicalPackage(props) {
                 }
                 name="wash_details"
               />
+              {errors.wash_details && (
+                <small className="form-label text-danger">
+                  {errors.wash_details}
+                </small>
+              )}
             </div>
           </div>
 
@@ -671,6 +835,11 @@ export default function CreateTechnicalPackage(props) {
                 }
                 name="special_operations"
               />
+              {errors.special_operations && (
+                <small className="form-label text-danger">
+                  {errors.special_operations}
+                </small>
+              )}
             </div>
           </div>
         </div>
@@ -749,13 +918,13 @@ export default function CreateTechnicalPackage(props) {
       <div className="create_tp_attatchment">
         <MultipleFileInput
           label="Buyer Tech Pack Attachment"
-          inputId="buyer_techpacks"
+          inputId="technical_package"
           selectedFiles={selectedTechpackFiles}
           setSelectedFiles={setSelectedTechpackFiles}
         />
         <MultipleFileInput
           label="Spec Sheet Attachment"
-          inputId="specsheet"
+          inputId="spec_sheet"
           selectedFiles={selectedSpecSheetFiles}
           setSelectedFiles={setSelectedSpecSheetFiles}
         />

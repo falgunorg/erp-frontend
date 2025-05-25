@@ -4,10 +4,12 @@ import Dropdown from "react-bootstrap/Dropdown";
 import Logo from "../assets/images/logos/logo-short.png";
 import CreateTechnicalPackage from "../elements/techpack/CreateTechnicalPackage";
 import TechnicalPackageDetails from "../elements/techpack/TechnicalPackageDetails";
+import api from "services/api";
 
 import {
   FilterIcon,
   ArrowRightIcon,
+  ArrowDownIcon,
   ToggleCheckboxIcon,
   ToggleCheckboxActiveIcon,
 } from "../elements/SvgIcons";
@@ -18,27 +20,6 @@ import EditTechnicalPackage from "elements/techpack/EditTechnicalPackage";
 
 export default function TechnicalPackage(props) {
   const [renderArea, setRenderArea] = useState("blank");
-
-  const handleExportPDF = () => {
-    const input = document.querySelector(".po_print_area");
-
-    html2canvas(input, {
-      scale: 2,
-      useCORS: true, // Ensure external images are loaded
-      allowTaint: true,
-      logging: false, // Remove unnecessary console logs
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-
-      // Calculate the PDF height based on content
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save("purchase_order.pdf");
-    });
-  };
 
   const DropdownIndicator = (props) => {
     return (
@@ -101,13 +82,6 @@ export default function TechnicalPackage(props) {
     })
   );
 
-  const [sizes, setSizes] = useState(
-    Array.from({ length: 15 }, (_, index) => {
-      const serial = String(index + 1).padStart(2, "0");
-      return { value: `Size-${serial}`, label: `Size-${serial}` };
-    })
-  );
-
   useEffect(async () => {
     props.setHeaderData({
       pageName: "Tech Packs",
@@ -155,6 +129,57 @@ export default function TechnicalPackage(props) {
 
   const toggleMarkAble = () => {
     setMarkAble(!markAble);
+  };
+
+  const [technicalPackages, setTechnicalPackages] = useState({});
+  const [expandedGroups, setExpandedGroups] = useState({});
+
+  const getTechnicalPackages = async () => {
+    const response = await api.post("/technical-packages");
+    if (response.status === 200 && response.data) {
+      const data = response.data.techpacks.data;
+      setTechnicalPackages(data);
+
+      // Initialize all groups as expanded (true)
+      const initialExpandedState = {};
+      Object.keys(data).forEach((group) => {
+        initialExpandedState[group] = true;
+      });
+      setExpandedGroups(initialExpandedState);
+    }
+  };
+
+  const toggleGroup = (groupName) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName],
+    }));
+  };
+
+  const expandAll = () => {
+    const allExpanded = {};
+    Object.keys(technicalPackages).forEach((group) => {
+      allExpanded[group] = true;
+    });
+    setExpandedGroups(allExpanded);
+  };
+
+  const collapseAll = () => {
+    const allCollapsed = {};
+    Object.keys(technicalPackages).forEach((group) => {
+      allCollapsed[group] = false;
+    });
+    setExpandedGroups(allCollapsed);
+  };
+
+  useEffect(async () => {
+    getTechnicalPackages();
+  }, []);
+
+  const [selectedTp, setSelectedTp] = useState();
+  const handleTpDetails = (pkg) => {
+    setRenderArea("details");
+    setSelectedTp(pkg);
   };
 
   return (
@@ -324,924 +349,101 @@ export default function TechnicalPackage(props) {
           </div>
 
           <div className="tp_list">
-            <div className="group">
-              <div className="group-header">
-                <span className="me-2">
-                  <ArrowRightIcon />
-                </span>
-                Mens
+            {Object.entries(technicalPackages).map(([groupName, packages]) => (
+              <div key={groupName} className="group">
+                <div
+                  onClick={() => toggleGroup(groupName)}
+                  className="group-header"
+                >
+                  <span className="me-2">
+                    {expandedGroups[groupName] ? (
+                      <ArrowDownIcon />
+                    ) : (
+                      <ArrowRightIcon />
+                    )}
+                  </span>
+                  {groupName}
+                </div>
+
+                {expandedGroups[groupName] && (
+                  <div className="group-tps">
+                    {packages.map((pkg) => (
+                      <div
+                        onClick={() => handleTpDetails(pkg)}
+                        className="single_tp_item"
+                      >
+                        <div className="tp_text d-flex align-items-center">
+                          <span
+                            className="marker"
+                            style={{ width: "20px", display: "inline-block" }}
+                          >
+                            {markAble ? <input type="checkbox" /> : ""}
+                          </span>
+                          <span className="me-2">{pkg.techpack_number}</span>
+                        </div>
+                        <div className="tp_text">
+                          <span className="step_border"></span>
+                          {pkg.item_name}
+                        </div>
+                        <div className="tp_text">
+                          <span className="step_border"></span>
+                          {pkg.po_id}
+                        </div>
+                        <div className="tp_text">
+                          <span className="step_border"></span>
+                          {pkg.wo_id}
+                        </div>
+                        <div className="tp_text">
+                          <span className="step_border"></span>
+                          1000 PCS
+                        </div>
+                        <div className="tp_text d-flex justify-content-between align-items-center">
+                          <div>
+                            <span className="step_border"></span>
+                            <span className="date area me-2">
+                              {pkg.received_date}
+                            </span>
+                          </div>
+
+                          <div className="icon_area">
+                            <svg
+                              className="me-2"
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="12"
+                              height="13"
+                              viewBox="0 0 12 13"
+                            >
+                              <path
+                                id="Polygon_170"
+                                data-name="Polygon 170"
+                                d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
+                                transform="translate(12) rotate(90)"
+                                fill="#ff4a4a"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="11"
+                              height="11"
+                              viewBox="0 0 11 11"
+                            >
+                              <rect
+                                id="Rectangle_184"
+                                data-name="Rectangle 184"
+                                width="11"
+                                height="11"
+                                rx="1"
+                                fill="#91cfff"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-              <div className="group-tps">
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="group">
-              <div className="group-header">
-                <span className="me-2">
-                  <ArrowRightIcon />
-                </span>
-                Womens
-              </div>
-              <div className="group-tps">
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="group">
-              <div className="group-header">
-                <span className="me-2">
-                  <ArrowRightIcon />
-                </span>
-                Kids
-              </div>
-              <div className="group-tps">
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  onClick={() => setRenderArea("details")}
-                  className="single_tp_item"
-                >
-                  <div className="tp_text d-flex align-items-center">
-                    <span
-                      className="marker"
-                      style={{ width: "20px", display: "inline-block" }}
-                    >
-                      {markAble ? (
-                        <input type="checkbox" />
-                      ) : (
-                        <ArrowRightIcon />
-                      )}
-                    </span>
-                    <span className="me-2">TPNXT01245</span>
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    Menswear 20 PRT Belt FGray ST dsad jsadksadsioau disopajdi
-                    sadjisa
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    N96472
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    FGTRIAL
-                  </div>
-                  <div className="tp_text">
-                    <span className="step_border"></span>
-                    1000 PCS
-                  </div>
-                  <div className="tp_text d-flex justify-content-between align-items-center">
-                    <div>
-                      <span className="step_border"></span>
-                      <span className="date area me-2">12/23/2025</span>
-                    </div>
-
-                    <div className="icon_area">
-                      <svg
-                        className="me-2"
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="12"
-                        height="13"
-                        viewBox="0 0 12 13"
-                      >
-                        <path
-                          id="Polygon_170"
-                          data-name="Polygon 170"
-                          d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
-                          transform="translate(12) rotate(90)"
-                          fill="#ff4a4a"
-                        />
-                      </svg>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="11"
-                        height="11"
-                        viewBox="0 0 11 11"
-                      >
-                        <rect
-                          id="Rectangle_184"
-                          data-name="Rectangle 184"
-                          width="11"
-                          height="11"
-                          rx="1"
-                          fill="#91cfff"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -1259,7 +461,9 @@ export default function TechnicalPackage(props) {
             </div>
           )}
           {renderArea === "add" && <CreateTechnicalPackage />}
-          {renderArea === "details" && <TechnicalPackageDetails />}
+          {renderArea === "details" && (
+            <TechnicalPackageDetails tpDetails={selectedTp} />
+          )}
           {renderArea === "update" && <EditTechnicalPackage />}
         </div>
       </div>

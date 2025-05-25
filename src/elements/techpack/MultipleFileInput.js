@@ -9,9 +9,24 @@ const MultipleFileInput = ({
 }) => {
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
 
+  // const handleFileSelection = (event) => {
+  //   const newFiles = [...selectedFiles, ...event.target.files];
+  //   setSelectedFiles(newFiles);
+  // };
+
   const handleFileSelection = (event) => {
-    const newFiles = [...selectedFiles, ...event.target.files];
-    setSelectedFiles(newFiles);
+    const newFiles = Array.from(event.target.files).map((file) => {
+      // Wrap the file with labelName
+      const fileWithLabel = new File([file], file.name, {
+        type: file.type,
+        lastModified: file.lastModified,
+      });
+
+      fileWithLabel.file_type = inputId; // Attaching extra property manually
+      return fileWithLabel;
+    });
+
+    setSelectedFiles([...selectedFiles, ...newFiles]);
   };
 
   const handleFileDelete = (fileIndex) => {
