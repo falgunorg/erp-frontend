@@ -2,127 +2,11 @@ import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import Select, { components } from "react-select";
 import { Modal, Button, Spinner } from "react-bootstrap";
-import MultipleFileInput from "./MultipleFileInput";
-import api from "services/api";
+import MultipleFileView from "./MultipleFileView";
 import html2pdf from "html2pdf.js";
-
-import { ArrowRightIcon, ArrowDownIcon } from "../SvgIcons";
-
 export default function TechnicalPackageDetails({ tpDetails }) {
-  const DropdownIndicator = (props) => {
-    return (
-      <components.DropdownIndicator {...props}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="9"
-          height="7"
-          viewBox="0 0 9 7"
-        >
-          <path
-            id="Polygon_60"
-            data-name="Polygon 60"
-            d="M3.659,1.308a1,1,0,0,1,1.682,0L8.01,5.459A1,1,0,0,1,7.168,7H1.832A1,1,0,0,1,.99,5.459Z"
-            transform="translate(9 7) rotate(180)"
-            fill="#707070"
-          />
-        </svg>
-      </components.DropdownIndicator>
-    );
-  };
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      background: "none",
-      border: "none",
-      minHeight: "21px",
-      fontSize: "12px",
-      height: "21px",
-      background: "#ECECEC",
-      lineHeight: "19px",
-      boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.18)",
-      boxShadow: state.isFocused ? "" : "",
-    }),
-
-    valueContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-      padding: "0 6px",
-    }),
-
-    input: (provided, state) => ({
-      ...provided,
-      margin: "0px",
-      fontSize: "12px", // Ensure input text is also 12px
-    }),
-
-    indicatorSeparator: () => ({
-      display: "none",
-    }),
-
-    indicatorsContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-    }),
-
-    menu: (provided) => ({
-      ...provided,
-      fontSize: "12px", // Set menu font size to 12px
-      padding: "3px", // Ensure padding is a maximum of 3px
-    }),
-
-    option: (provided, state) => ({
-      ...provided,
-      fontSize: "12px", // Ensure each option has 12px font size
-      padding: "3px", // Limit option padding to 3px
-      backgroundColor: state.isSelected
-        ? "#ef9a3e"
-        : state.isFocused
-        ? "#f0f0f0"
-        : "#fff",
-      color: state.isSelected ? "#fff" : "#333",
-      cursor: "pointer",
-      "&:hover": {
-        backgroundColor: "#ef9a3e",
-        color: "#fff",
-      },
-    }),
-  };
-
-  const [frontImagePreviewUrl, setFrontImagePreviewUrl] = useState(null);
-  const [backImagePreviewUrl, setBackImagePreviewUrl] = useState(null);
   const [fullScreenImage, setFullScreenImage] = useState(null);
   const [imageModal, setImageModal] = useState(false);
-
-  // Handle Front Image Change
-  const handleFrontImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setFrontImagePreviewUrl(imageUrl);
-    }
-  };
-
-  // Handle Back Image Change
-  const handleBackImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setBackImagePreviewUrl(imageUrl);
-    }
-  };
-
-  // Remove Front Image Preview
-  const removeFrontImagePreviewUrl = () => {
-    setFrontImagePreviewUrl(null);
-    document.getElementById("front_image").value = ""; // Reset input value
-  };
-
-  // Remove Back Image Preview
-  const removeBackImagePreviewUrl = () => {
-    setBackImagePreviewUrl(null);
-    document.getElementById("back_image").value = ""; // Reset input value
-  };
-
   // Open Image Modal
   const openImageModal = (previewUrl) => {
     setFullScreenImage(previewUrl);
@@ -135,185 +19,9 @@ export default function TechnicalPackageDetails({ tpDetails }) {
     setImageModal(false);
   };
 
-  const [selectedTechpackFiles, setSelectedTechpackFiles] = useState([
-    { id: 1, name: "Attatchment 1" },
-    { id: 2, name: "Attatchment 2" },
-    { id: 3, name: "Attatchment 3" },
-    { id: 4, name: "Attatchment 4" },
-  ]);
-  const [selectedSpecSheetFiles, setSelectedSpecSheetFiles] = useState([
-    { id: 1, name: "Attatchment 1" },
-    { id: 2, name: "Attatchment 2" },
-    { id: 3, name: "Attatchment 3" },
-    { id: 4, name: "Attatchment 4" },
-  ]);
-  const [selectedBlockPatternFiles, setSelectedBlockPatternFiles] = useState([
-    { id: 1, name: "Attatchment 1" },
-    { id: 2, name: "Attatchment 2" },
-    { id: 3, name: "Attatchment 3" },
-    { id: 4, name: "Attatchment 4" },
-  ]);
-
-  const [selectedSpecialOperationFiles, setSelectedSpecialOperationFiles] =
-    useState([
-      { id: 1, name: "Attatchment 1" },
-      { id: 2, name: "Attatchment 2" },
-      { id: 3, name: "Attatchment 3" },
-      { id: 4, name: "Attatchment 4" },
-    ]);
-
   ///added
 
   const [spinner, setSpinner] = useState(false);
-
-  const [materialTypes, setMaterialTypes] = useState([]);
-
-  const getMaterialTypes = async () => {
-    setSpinner(true);
-    var response = await api.post("/item-types");
-    if (response.status === 200 && response.data) {
-      setMaterialTypes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [items, setItems] = useState([]);
-
-  const getItems = async () => {
-    setSpinner(true);
-    var response = await api.post("/items");
-    if (response.status === 200 && response.data) {
-      setItems(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [units, setUnits] = useState([]);
-  const getUnits = async () => {
-    setSpinner(true);
-    var response = await api.post("/units");
-    if (response.status === 200 && response.data) {
-      setUnits(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [sizes, setSizes] = useState([]);
-  const getSizes = async () => {
-    setSpinner(true);
-    var response = await api.post("/sizes");
-    if (response.status === 200 && response.data) {
-      setSizes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [colors, setColors] = useState([]);
-  const getColors = async () => {
-    setSpinner(true);
-    var response = await api.post("/colors");
-    if (response.status === 200 && response.data) {
-      setColors(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  useEffect(() => {
-    getItems();
-    getSizes();
-    getColors();
-    getUnits();
-    getMaterialTypes();
-  }, []);
-
-  const [collapsedMaterialTypes, setCollapsedMaterialTypes] = useState({}); // Track collapsed state
-
-  const toggleMaterialType = (materialTypeId) => {
-    setCollapsedMaterialTypes((prev) => ({
-      ...prev,
-      [materialTypeId]: !prev[materialTypeId], // Toggle collapse state
-    }));
-  };
-
-  const [consumptionItems, setConsumptionItems] = useState({});
-
-  // Function to remove row
-  const removeRow = (materialTypeId, index) => {
-    setConsumptionItems((prevItems) => {
-      const updatedMaterialTypeItems = [...(prevItems[materialTypeId] || [])];
-      updatedMaterialTypeItems.splice(index, 1);
-      return { ...prevItems, [materialTypeId]: updatedMaterialTypeItems };
-    });
-  };
-
-  // Function to add a row within the respective materialType
-  const addRow = (materialTypeId) => {
-    const newItem = {
-      item_id: "",
-      description: "",
-      unit: "",
-      size: "",
-      color: "",
-      actual: "",
-      wastage_parcentage: 0,
-      cons_total: "",
-      unit_price: "",
-      total: "",
-    };
-
-    setConsumptionItems((prevItems) => ({
-      ...prevItems,
-      [materialTypeId]: [...(prevItems[materialTypeId] || []), newItem],
-    }));
-  };
-
-  // Function to handle changes in an item
-  const handleItemChange = (materialTypeId, index, field, value) => {
-    setConsumptionItems((prevItems) => {
-      const updatedMaterialTypeItems = [...(prevItems[materialTypeId] || [])];
-      updatedMaterialTypeItems[index] = {
-        ...updatedMaterialTypeItems[index],
-        [field]: value,
-      };
-
-      // Auto-calculate values
-      if (field === "actual" || field === "wastage_parcentage") {
-        const actual =
-          parseFloat(updatedMaterialTypeItems[index]["actual"]) || 0;
-        const wastagePercentage =
-          parseFloat(updatedMaterialTypeItems[index]["wastage_parcentage"]) ||
-          0;
-        updatedMaterialTypeItems[index]["cons_total"] =
-          actual + (actual * wastagePercentage) / 100;
-      }
-
-      if (field === "cons_total" || field === "unit_price") {
-        const consTotal =
-          parseFloat(updatedMaterialTypeItems[index]["cons_total"]) || 0;
-        const unitPrice =
-          parseFloat(updatedMaterialTypeItems[index]["unit_price"]) || 0;
-        updatedMaterialTypeItems[index]["total"] = consTotal * unitPrice;
-      }
-
-      return { ...prevItems, [materialTypeId]: updatedMaterialTypeItems };
-    });
-  };
-
-  // Validate title presence
-  const [titleValidation, setTitleValidation] = useState({});
-  const validateTitle = () => {
-    const validation = {};
-    Object.keys(consumptionItems).forEach((materialTypeId) => {
-      validation[materialTypeId] = consumptionItems[materialTypeId].every(
-        (item) => !!item.item_id
-      );
-    });
-    setTitleValidation(validation);
-  };
-
-  useEffect(() => {
-    validateTitle();
-  }, [consumptionItems]);
 
   const tpRef = React.useRef();
   const handleGeneratePDF = () => {
@@ -328,6 +36,24 @@ export default function TechnicalPackageDetails({ tpDetails }) {
 
     html2pdf().set(opt).from(element).save();
   };
+
+  const buyerTechpackFiles = tpDetails?.files?.filter(
+    (file) => file.file_type === "technical_package"
+  );
+
+  const selectedSpecSheetFiles = tpDetails?.files?.filter(
+    (file) => file.file_type === "spec_sheet"
+  );
+
+  const selectedBlockPatternFiles = tpDetails?.files?.filter(
+    (file) => file.file_type === "block_pattern"
+  );
+
+  const selectedSpecialOperationFiles = tpDetails?.files?.filter(
+    (file) => file.file_type === "special_operation"
+  );
+
+  console.log("Materials", tpDetails.materials);
 
   return (
     <div className="create_technical_pack" ref={tpRef}>
@@ -346,7 +72,7 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{tpDetails.po_id}</div>
+              <div className="form-value">{tpDetails.po?.po_number}</div>
             </div>
 
             <div className="col-lg-2">
@@ -390,7 +116,7 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">{tpDetails.buyer_id}</div>
+              <div className="form-value">{tpDetails.buyer?.name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
@@ -450,7 +176,7 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">{tpDetails.company_id}</div>
+              <div className="form-value">{tpDetails.company?.title}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
@@ -473,99 +199,55 @@ export default function TechnicalPackageDetails({ tpDetails }) {
           <div className="photo_upload_area">
             <div className="photo">
               <label htmlFor="front_image">
-                {frontImagePreviewUrl ? (
-                  <img src={frontImagePreviewUrl} alt="Frontside Preview" />
+                {tpDetails.front_photo_url ? (
+                  <img
+                    onClick={() => openImageModal(tpDetails.front_photo_url)}
+                    src={tpDetails.front_photo_url}
+                    alt="Frontside Preview"
+                  />
                 ) : (
                   <p>Garment Frontside Image</p>
                 )}
               </label>
-              <input
-                onChange={handleFrontImageChange}
-                accept="image/*"
-                hidden
-                type="file"
-                id="front_image"
-              />
-
-              {frontImagePreviewUrl ? (
-                <div className="action_buttons">
-                  <i
-                    onClick={removeFrontImagePreviewUrl}
-                    className="fa fa-trash text-danger"
-                    style={{ cursor: "pointer" }}
-                  ></i>
-                  <i
-                    onClick={() => openImageModal(frontImagePreviewUrl)}
-                    class="fa fa-expand text-falgun"
-                    style={{ cursor: "pointer" }}
-                  ></i>
-                </div>
-              ) : (
-                ""
-              )}
             </div>
             <div className="photo">
               <label htmlFor="back_image">
-                {backImagePreviewUrl ? (
-                  <img src={backImagePreviewUrl} alt="Backside Preview" />
+                {tpDetails.back_photo_url ? (
+                  <img
+                    onClick={() => openImageModal(tpDetails.back_photo_url)}
+                    src={tpDetails.back_photo_url}
+                    alt="Backside Preview"
+                  />
                 ) : (
                   <p>Garment Backside Image</p>
                 )}
               </label>
-              <input
-                onChange={handleBackImageChange}
-                accept="image/*"
-                hidden
-                type="file"
-                id="back_image"
-              />
-
-              {backImagePreviewUrl ? (
-                <div className="action_buttons">
-                  <i
-                    onClick={removeBackImagePreviewUrl}
-                    className="fa fa-trash text-danger"
-                    style={{ cursor: "pointer" }}
-                  ></i>
-                  <i
-                    onClick={() => openImageModal(backImagePreviewUrl)}
-                    class="fa fa-expand text-falgun"
-                    style={{ cursor: "pointer" }}
-                  ></i>
-                </div>
-              ) : (
-                ""
-              )}
             </div>
           </div>
         </div>
       </div>
 
       <div className="create_tp_attatchment">
-        <MultipleFileInput
+        <MultipleFileView
           label="Buyer Tech Pack Attachment"
           inputId="buyer_techpacks"
-          selectedFiles={selectedTechpackFiles}
-          setSelectedFiles={setSelectedTechpackFiles}
+          selectedFiles={buyerTechpackFiles}
         />
-        <MultipleFileInput
+        <MultipleFileView
           label="Spec Sheet Attachment"
           inputId="specsheet"
           selectedFiles={selectedSpecSheetFiles}
-          setSelectedFiles={setSelectedSpecSheetFiles}
         />
-        <MultipleFileInput
+        <MultipleFileView
           label="Block Pattern Attachment"
           inputId="block_pattern"
           selectedFiles={selectedBlockPatternFiles}
-          setSelectedFiles={setSelectedBlockPatternFiles}
         />
 
-        <MultipleFileInput
+        <MultipleFileView
           label="Block Pattern Attachment"
           inputId="special_operation"
           selectedFiles={selectedSpecialOperationFiles}
-          setSelectedFiles={setSelectedSpecialOperationFiles}
         />
       </div>
 
@@ -587,259 +269,21 @@ export default function TechnicalPackageDetails({ tpDetails }) {
             </tr>
           </thead>
           <tbody>
-            {materialTypes.map((materialType) => (
-              <React.Fragment key={materialType.id}>
+            {tpDetails?.materials.length > 0 &&
+              tpDetails?.materials.map((material) => (
                 <tr>
-                  <td
-                    colSpan={10}
-                    style={{
-                      background: "#ECECEC",
-                      cursor: "pointer",
-                      height: "20px",
-                    }}
-                  >
-                    <div
-                      className="materialType"
-                      style={{
-                        padding: "0 5px",
-                        display: "flex",
-                        gap: "5px",
-                        alignItems: "center",
-                        fontSize: "12px",
-                      }}
-                    >
-                      <span
-                        onClick={() => toggleMaterialType(materialType.id)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        {collapsedMaterialTypes[materialType.id] ? (
-                          <ArrowRightIcon />
-                        ) : (
-                          <ArrowDownIcon />
-                        )}
-                      </span>
-                      <span
-                        onClick={() => toggleMaterialType(materialType.id)}
-                        className="me-2"
-                      >
-                        {materialType.title}
-                      </span>
-                      <span
-                        onClick={() => addRow(materialType.id)}
-                        style={{
-                          background: "#f1a655",
-                          height: "17px",
-                          width: "17px",
-                          borderRadius: "50%",
-                          textAlign: "center",
-                          lineHeight: "17px",
-                          fontSize: "11px",
-                          color: "white",
-                        }}
-                      >
-                        <i className="fa fa-plus"></i>
-                      </span>
-                    </div>
-                  </td>
+                  <td>{material.item_type?.title}</td>
+                  <td>{material.item_name}</td>
+                  <td>{material.item_details}</td>
+                  <td>{material.color}</td>
+                  <td>{material.size}</td>
+                  <td>{material.position}</td>
+                  <td>{material.unit}</td>
+                  <td>{material.consumption}</td>
+                  <td>{material.wastage}</td>
+                  <td>{material.total}</td>
                 </tr>
-
-                {/* Show items only if the materialType is expanded */}
-                {!collapsedMaterialTypes[materialType.id] &&
-                  (consumptionItems[materialType.id] || []).map(
-                    (item, index) => (
-                      <tr key={`${materialType.id}-${index}`}>
-                        <td>
-                          <select
-                            required
-                            value={item.item_id}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "item_id",
-                                e.target.value
-                              )
-                            }
-                            className="form-select"
-                          >
-                            <option value="">Select Item</option>
-
-                            {items
-                              .filter(
-                                (it) => it.item_type_id === materialType.id
-                              ) // Filter items based on materialType.id
-                              .map((it) => (
-                                <option key={it.id} value={it.id}>
-                                  {it.title}
-                                </option>
-                              ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <input
-                            type="text"
-                            value={item.name}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "name",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <textarea
-                            value={item.description}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "description",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <select
-                            value={item.color}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "color",
-                                e.target.value
-                              )
-                            }
-                          >
-                            <option value="">Select</option>
-                            {colors.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <select
-                            value={item.size}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "size",
-                                e.target.value
-                              )
-                            }
-                          >
-                            <option value="">Select</option>
-                            {sizes.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "80px" }}
-                            type="text"
-                            value={item.position}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "position",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <select
-                            className="text-lowercase"
-                            value={item.unit}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "unit",
-                                e.target.value
-                              )
-                            }
-                          >
-                            <option value="">Select</option>
-                            {units.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "70px" }}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.actual}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "actual",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "50px" }}
-                            type="number"
-                            min="0"
-                            value={item.wastage_parcentage}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "wastage_parcentage",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td className="d-flex align-items-center">
-                          <input
-                            style={{ width: "70px" }}
-                            type="text"
-                            min="0"
-                            readOnly
-                            value={item.cons_total}
-                            className="me-1"
-                          />
-                          <i
-                            style={{ cursor: "pointer" }}
-                            onClick={() => removeRow(materialType.id, index)}
-                            className="fa fa-times text-danger me-2"
-                          ></i>
-                        </td>
-                      </tr>
-                    )
-                  )}
-              </React.Fragment>
-            ))}
+              ))}
           </tbody>
         </table>
       </div>

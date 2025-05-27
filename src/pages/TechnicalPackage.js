@@ -370,7 +370,11 @@ export default function TechnicalPackage(props) {
                     {packages.map((pkg) => (
                       <div
                         onClick={() => handleTpDetails(pkg)}
-                        className="single_tp_item"
+                        className={
+                          pkg.id === selectedTp?.id
+                            ? "single_tp_item active"
+                            : "single_tp_item"
+                        }
                       >
                         <div className="tp_text d-flex align-items-center">
                           <span
@@ -387,7 +391,7 @@ export default function TechnicalPackage(props) {
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          {pkg.po_id}
+                          {pkg.po?.po_number}
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
@@ -464,7 +468,9 @@ export default function TechnicalPackage(props) {
           {renderArea === "details" && (
             <TechnicalPackageDetails tpDetails={selectedTp} />
           )}
-          {renderArea === "update" && <EditTechnicalPackage />}
+          {renderArea === "update" && (
+            <EditTechnicalPackage tpDetails={selectedTp} />
+          )}
         </div>
       </div>
     </div>

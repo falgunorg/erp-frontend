@@ -627,7 +627,7 @@ export default function CreateTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Brand"
                 options={brands.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
                 styles={customStyles}
@@ -670,7 +670,7 @@ export default function CreateTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Season"
                 options={seasons.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
                 styles={customStyles}
@@ -694,7 +694,7 @@ export default function CreateTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Type"
                 options={itemTypes.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
                 styles={customStyles}
@@ -792,7 +792,7 @@ export default function CreateTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Wash Detail"
                 options={washes.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
                 styles={customStyles}

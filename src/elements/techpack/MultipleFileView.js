@@ -1,38 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { ArrowDownIcon, AttatchmentIcon } from "elements/SvgIcons";
+import api from "services/api";
 
-const MultipleFileInput = ({
-  label,
-  inputId,
-  selectedFiles,
-  setSelectedFiles,
-}) => {
+const MultipleFileView = ({ label, selectedFiles, filled }) => {
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
   const menuRefs = useRef([]);
-
-  const handleFileSelection = (event) => {
-    const newFiles = Array.from(event.target.files).map((file) => {
-      const fileWithLabel = new File([file], file.name, {
-        type: file.type,
-        lastModified: file.lastModified,
-      });
-      fileWithLabel.file_type = inputId;
-      return fileWithLabel;
-    });
-
-    setSelectedFiles([...selectedFiles, ...newFiles]);
-  };
-
-  const handleFileDelete = (fileIndex) => {
-    const updatedFiles = selectedFiles.filter((_, i) => i !== fileIndex);
-    setSelectedFiles(updatedFiles);
-  };
 
   const toggleMenu = (index) => {
     setOpenMenuIndex(openMenuIndex === index ? null : index);
   };
 
-  // Close menu on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -50,26 +27,24 @@ const MultipleFileInput = ({
     };
   }, [openMenuIndex]);
 
+  const deleteFile = async (id) => {
+    var response = await api.post("/technical-package-file-delete", { id: id });
+    if (response.status === 200 && response.data) {
+      alert("Successfully Deleted");
+    }
+  };
+
   return (
     <div className="row create_tp_body">
       <div className="col-lg-3">
-        <label className="form-label fill">{label}</label>
+        <label
+          className={filled ? "form-label fill bg-falgun" : "form-label fill "}
+        >
+          {label}
+        </label>
       </div>
       <div className="col-lg-9" style={{ paddingLeft: 0 }}>
         <div className="show_attatchment_area">
-          <div className="add_button">
-            <label htmlFor={inputId}>
-              <AttatchmentIcon />
-            </label>
-            <input
-              multiple
-              onChange={handleFileSelection}
-              id={inputId}
-              hidden
-              type="file"
-            />
-          </div>
-
           <div className="attatchments_displaying_area">
             {selectedFiles.map((file, index) => (
               <div
@@ -83,7 +58,7 @@ const MultipleFileInput = ({
                     openMenuIndex === index ? "item_label active" : "item_label"
                   }
                 >
-                  <div className="item_title">{file.name}</div>
+                  <div className="item_title">{file.filename}</div>
                   <div className="item_toggle">
                     <ArrowDownIcon />
                   </div>
@@ -92,10 +67,15 @@ const MultipleFileInput = ({
                   <div className="item_menu">
                     <ul>
                       <li
-                        onClick={() => handleFileDelete(index)}
+                        onClick={() => deleteFile(file.id)}
                         className="text-danger"
                       >
-                        Remove
+                        Delete
+                      </li>
+                      <li>
+                        <a target="_blank" download href={file.file_url}>
+                          Preview
+                        </a>
                       </li>
                       <li onClick={() => toggleMenu(index)}>Cancel</li>
                     </ul>
@@ -110,4 +90,4 @@ const MultipleFileInput = ({
   );
 };
 
-export default MultipleFileInput;
+export default MultipleFileView;

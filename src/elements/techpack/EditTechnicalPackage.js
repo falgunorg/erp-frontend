@@ -3,11 +3,13 @@ import Logo from "../../assets/images/logos/logo-short.png";
 import Select, { components } from "react-select";
 import { Modal, Button, Spinner } from "react-bootstrap";
 import MultipleFileInput from "./MultipleFileInput";
+import MultipleFileView from "./MultipleFileView";
 import api from "services/api";
+import swal from "sweetalert";
 
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 
-export default function EditTechnicalPackage(props) {
+export default function EditTechnicalPackage({ tpDetails }) {
   const DropdownIndicator = (props) => {
     return (
       <components.DropdownIndicator {...props}>
@@ -99,7 +101,7 @@ export default function EditTechnicalPackage(props) {
     { id: 3, title: "MANGO" },
   ];
 
-  const season = [
+  const seasons = [
     { id: 1, title: "FAL 24" },
     { id: 2, title: "SUMMER 25" },
     { id: 3, title: "SPRING 25" },
@@ -143,7 +145,8 @@ export default function EditTechnicalPackage(props) {
     { id: 4, title: "Dying" },
   ];
   //image uploading area
-
+  const [frontImageFile, setFrontImageFile] = useState(null);
+  const [backImageFile, setBackImageFile] = useState(null);
   const [frontImagePreviewUrl, setFrontImagePreviewUrl] = useState(null);
   const [backImagePreviewUrl, setBackImagePreviewUrl] = useState(null);
   const [fullScreenImage, setFullScreenImage] = useState(null);
@@ -152,6 +155,7 @@ export default function EditTechnicalPackage(props) {
   // Handle Front Image Change
   const handleFrontImageChange = (event) => {
     const file = event.target.files[0];
+    setFrontImageFile(file);
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setFrontImagePreviewUrl(imageUrl);
@@ -161,6 +165,7 @@ export default function EditTechnicalPackage(props) {
   // Handle Back Image Change
   const handleBackImageChange = (event) => {
     const file = event.target.files[0];
+    setBackImageFile(file);
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setBackImagePreviewUrl(imageUrl);
@@ -170,12 +175,14 @@ export default function EditTechnicalPackage(props) {
   // Remove Front Image Preview
   const removeFrontImagePreviewUrl = () => {
     setFrontImagePreviewUrl(null);
+    setFrontImageFile(null);
     document.getElementById("front_image").value = ""; // Reset input value
   };
 
   // Remove Back Image Preview
   const removeBackImagePreviewUrl = () => {
     setBackImagePreviewUrl(null);
+    setBackImageFile(null);
     document.getElementById("back_image").value = ""; // Reset input value
   };
 
@@ -200,12 +207,16 @@ export default function EditTechnicalPackage(props) {
   const [selectedSpecialOperationFiles, setSelectedSpecialOperationFiles] =
     useState([]);
 
+  const allFiles = [
+    ...selectedTechpackFiles,
+    ...selectedSpecSheetFiles,
+    ...selectedBlockPatternFiles,
+    ...selectedSpecialOperationFiles,
+  ];
   ///added
 
   const [spinner, setSpinner] = useState(false);
-
   const [materialTypes, setMaterialTypes] = useState([]);
-
   const getMaterialTypes = async () => {
     setSpinner(true);
     var response = await api.post("/item-types");
@@ -216,7 +227,6 @@ export default function EditTechnicalPackage(props) {
   };
 
   const [items, setItems] = useState([]);
-
   const getItems = async () => {
     setSpinner(true);
     var response = await api.post("/items");
@@ -287,6 +297,7 @@ export default function EditTechnicalPackage(props) {
   // Function to add a row within the respective materialType
   const addRow = (materialTypeId) => {
     const newItem = {
+      item_type_id: materialTypeId,
       item_id: "",
       description: "",
       unit: "",
@@ -337,21 +348,237 @@ export default function EditTechnicalPackage(props) {
     });
   };
 
-  // Validate title presence
-  const [titleValidation, setTitleValidation] = useState({});
-  const validateTitle = () => {
-    const validation = {};
-    Object.keys(consumptionItems).forEach((materialTypeId) => {
-      validation[materialTypeId] = consumptionItems[materialTypeId].every(
-        (item) => !!item.item_id
-      );
-    });
-    setTitleValidation(validation);
+  const [formDataSet, setFormDataSet] = useState({
+    po_id: "",
+    wo_id: "",
+    received_date: "",
+    techpack_number: "",
+    buyer_id: "",
+    buyer_style_name: "",
+    brand: "",
+    item_name: "",
+    season: "",
+    item_type: "",
+    department: "",
+    description: "",
+    company_id: "",
+    wash_details: "",
+    special_operations: [],
+  });
+
+  const handleInputChange = (name, value) => {
+    setFormDataSet((prevDataSet) => ({
+      ...prevDataSet,
+      [name]: value,
+    }));
+  };
+
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    let formErrors = {};
+
+    if (!formDataSet.received_date) {
+      formErrors.received_date = "Received date is required";
+    }
+    if (!formDataSet.techpack_number) {
+      formErrors.techpack_number = "Techpack Number is required";
+    }
+    if (!formDataSet.buyer_id) {
+      formErrors.buyer_id = "Buyer is required";
+    }
+    if (!formDataSet.buyer_style_name) {
+      formErrors.buyer_style_name = "Buyer style name is required";
+    }
+
+    if (!formDataSet.brand) {
+      formErrors.brand = "Brand is required";
+    }
+    if (!formDataSet.item_name) {
+      formErrors.item_name = "Item name is required";
+    }
+    if (!formDataSet.season) {
+      formErrors.season = "Season is required";
+    }
+    if (!formDataSet.item_type) {
+      formErrors.item_type = "Item type is required";
+    }
+
+    if (!formDataSet.department) {
+      formErrors.department = "Department is required";
+    }
+    if (!formDataSet.company_id) {
+      formErrors.company_id = "Company is required";
+    }
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
+
+  console.log("TP_ITEMS", Object.values(consumptionItems).flat());
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const tp_items = Object.values(consumptionItems).flat();
+    if (tp_items.length === 0) {
+      swal({
+        title: "Please Select Materials",
+        icon: "error",
+      });
+      return; // Prevent form submission
+    }
+
+    if (frontImageFile === null) {
+      swal({
+        title: "Please Select Front Part Image",
+        icon: "error",
+      });
+      return; // Prevent form submission
+    }
+
+    if (backImageFile === null) {
+      swal({
+        title: "Please Select Back Part Image",
+        icon: "error",
+      });
+      return; // Prevent form submission
+    }
+
+    if (validateForm()) {
+      var data = new FormData();
+      data.append("po_id", formDataSet.po_id);
+      data.append("wo_id", formDataSet.wo_id);
+      data.append("received_date", formDataSet.received_date);
+      data.append("techpack_number", formDataSet.techpack_number);
+      data.append("buyer_id", formDataSet.buyer_id);
+      data.append("buyer_style_name", formDataSet.buyer_style_name);
+      data.append("brand", formDataSet.brand);
+      data.append("item_name", formDataSet.item_name);
+      data.append("season", formDataSet.season);
+      data.append("item_type", formDataSet.item_type);
+      data.append("department", formDataSet.department);
+      data.append("description", formDataSet.description);
+      data.append("company_id", formDataSet.company_id);
+      data.append("wash_details", formDataSet.wash_details);
+      data.append("special_operation", formDataSet.special_operations);
+      data.append("tp_items", JSON.stringify(tp_items));
+
+      data.append("front_photo", frontImageFile);
+      data.append("back_photo", backImageFile);
+      allFiles.forEach((file) => {
+        data.append("attatchments[]", file); // real file
+        data.append("file_types[]", file.file_type); // custom property
+      });
+
+      setSpinner(true);
+      var response = await api.post("/technical-package-create", data);
+      if (response.status === 200 && response.data) {
+        alert("Successfully Added");
+      } else {
+        setErrors(response.data.errors);
+      }
+      setSpinner(false);
+    }
   };
 
   useEffect(() => {
-    validateTitle();
-  }, [consumptionItems]);
+    if (tpDetails) {
+      const {
+        po_id,
+        wo_id,
+        received_date,
+        techpack_number,
+        buyer_id,
+        buyer_style_name,
+        brand,
+        item_name,
+        season,
+        item_type,
+        department,
+        description,
+        company_id,
+        wash_details,
+        special_operation,
+        materials,
+      } = tpDetails;
+
+      setFormDataSet({
+        po_id,
+        wo_id,
+        received_date,
+        techpack_number,
+        buyer_id,
+        buyer_style_name,
+        brand,
+        item_name,
+        season,
+        item_type,
+        department,
+        description,
+        company_id,
+        wash_details,
+        special_operations: special_operation?.split(",") || [],
+      });
+    }
+  }, [tpDetails]);
+
+  useEffect(() => {
+    if (tpDetails?.materials.length) {
+      const groupedByType = {};
+
+      tpDetails.materials.forEach((mat) => {
+        const item = {
+          item_type_id: mat.item_type_id,
+          item_id: mat.item_id,
+          name: mat.item_name || "", // in case you want to allow user to change the name
+          description: mat.item_details || "",
+          color: mat.color || "",
+          size: mat.size || "",
+          position: mat.position || "",
+          unit: mat.unit || "",
+          actual: parseFloat(mat.consumption) || 0,
+          wastage_parcentage: parseFloat(mat.wastage) || 0,
+          cons_total:
+            parseFloat(mat.total) -
+            (parseFloat(mat.unit_price || 0) * parseFloat(mat.wastage)) / 100, // optional logic
+
+          total: parseFloat(mat.total) || 0,
+        };
+
+        if (!groupedByType[mat.item_type_id]) {
+          groupedByType[mat.item_type_id] = [];
+        }
+
+        groupedByType[mat.item_type_id].push(item);
+      });
+
+      setConsumptionItems(groupedByType);
+    }
+  }, [tpDetails?.materials]);
+
+  useEffect(() => {
+    const expanded = {};
+    materialTypes.forEach((type) => {
+      expanded[type.id] = false;
+    });
+    setCollapsedMaterialTypes(expanded);
+  }, [materialTypes]);
+
+  const existingTechpackFiles = tpDetails?.files?.filter(
+    (file) => file.file_type === "technical_package"
+  );
+
+  const existingSpecSheetFiles = tpDetails?.files?.filter(
+    (file) => file.file_type === "spec_sheet"
+  );
+
+  const existingBlockPatternFiles = tpDetails?.files?.filter(
+    (file) => file.file_type === "block_pattern"
+  );
+
+  const existingSpecialOperationFiles = tpDetails?.files?.filter(
+    (file) => file.file_type === "special_operation"
+  );
 
   return (
     <div className="create_technical_pack">
@@ -370,19 +597,35 @@ export default function EditTechnicalPackage(props) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <input type="text" />
+              <input
+                type="text"
+                name="po_id"
+                value={formDataSet.po_id}
+                onChange={(e) => handleInputChange("po_id", e.target.value)}
+              />
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <input type="text" />
+              <input
+                name="wo_id"
+                value={formDataSet.wo_id}
+                onChange={(e) => handleInputChange("wo_id", e.target.value)}
+                type="text"
+              />
             </div>
           </div>
         </div>
         <div className="col-lg-2">
-          <button className="btn btn-default submit_button"> Save </button>
+          <button
+            onClick={handleSubmit}
+            className="btn btn-default submit_button"
+          >
+            {" "}
+            Update{" "}
+          </button>
         </div>
       </div>
       <br />
@@ -393,13 +636,38 @@ export default function EditTechnicalPackage(props) {
               <label className="form-label">Received Date</label>
             </div>
             <div className="col-lg-3">
-              <input type="date" />
+              <input
+                name="received_date"
+                value={formDataSet.received_date}
+                onChange={(e) =>
+                  handleInputChange("received_date", e.target.value)
+                }
+                type="date"
+              />
+              {errors.received_date && (
+                <small className="form-label text-danger">
+                  {errors.received_date}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack#</label>
             </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Tech Pack Number" />
+              <input
+                name="techpack_number"
+                value={formDataSet.techpack_number}
+                onChange={(e) =>
+                  handleInputChange("techpack_number", e.target.value)
+                }
+                type="text"
+                placeholder="Tech Pack Number"
+              />
+              {errors.techpack_number && (
+                <small className="form-label text-danger">
+                  {errors.techpack_number}
+                </small>
+              )}
             </div>
           </div>
 
@@ -415,15 +683,45 @@ export default function EditTechnicalPackage(props) {
                   value: id,
                   label: title,
                 }))}
+                value={buyers
+                  .map(({ id, title }) => ({
+                    value: id,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.buyer_id)}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("buyer_id", selectedOption.value)
+                }
+                name="buyer_id"
               />
+
+              {errors.buyer_id && (
+                <small className="form-label text-danger">
+                  {errors.buyer_id}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Buyer Style Name" />
+              <input
+                name="buyer_style_name"
+                value={formDataSet.buyer_style_name}
+                onChange={(e) =>
+                  handleInputChange("buyer_style_name", e.target.value)
+                }
+                type="text"
+                placeholder="Buyer Style Name"
+              />
+
+              {errors.buyer_style_name && (
+                <small className="form-label text-danger">
+                  {errors.buyer_style_name}
+                </small>
+              )}
             </div>
           </div>
 
@@ -436,18 +734,43 @@ export default function EditTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Brand"
                 options={brands.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
+                value={brands
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.brand)}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("brand", selectedOption.value)
+                }
+                name="brand"
               />
+
+              {errors.brand && (
+                <small className="form-label text-danger">{errors.brand}</small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Item Name" />
+              <input
+                name="item_name"
+                value={formDataSet.item_name}
+                onChange={(e) => handleInputChange("item_name", e.target.value)}
+                type="text"
+                placeholder="Item Name"
+              />
+              {errors.item_name && (
+                <small className="form-label text-danger">
+                  {errors.item_name}
+                </small>
+              )}
             </div>
           </div>
 
@@ -459,13 +782,28 @@ export default function EditTechnicalPackage(props) {
               <Select
                 className="select_wo"
                 placeholder="Season"
-                options={season.map(({ id, title }) => ({
-                  value: id,
+                options={seasons.map(({ id, title }) => ({
+                  value: title,
                   label: title,
                 }))}
+                value={seasons
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.season)}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("season", selectedOption.value)
+                }
+                name="season"
               />
+              {errors.season && (
+                <small className="form-label text-danger">
+                  {errors.season}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
@@ -475,12 +813,27 @@ export default function EditTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Type"
                 options={itemTypes.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
+                value={itemTypes
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.item_type)}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("item_type", selectedOption.value)
+                }
+                name="item_type"
               />
+              {errors.item_type && (
+                <small className="form-label text-danger">
+                  {errors.item_type}
+                </small>
+              )}
             </div>
           </div>
 
@@ -493,12 +846,28 @@ export default function EditTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Department"
                 options={departments.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
+                value={departments
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.department)}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("department", selectedOption.value)
+                }
+                name="department"
               />
+
+              {errors.department && (
+                <small className="form-label text-danger">
+                  {errors.department}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Description</label>
@@ -507,7 +876,17 @@ export default function EditTechnicalPackage(props) {
               <input
                 type="text"
                 placeholder="97% Cotton 3% Elastane Ps Chino Trouser"
+                name="description"
+                value={formDataSet.description}
+                onChange={(e) =>
+                  handleInputChange("description", e.target.value)
+                }
               />
+              {errors.description && (
+                <small className="form-label text-danger">
+                  {errors.description}
+                </small>
+              )}
             </div>
           </div>
 
@@ -523,9 +902,24 @@ export default function EditTechnicalPackage(props) {
                   value: id,
                   label: title,
                 }))}
+                value={companies
+                  .map(({ id, title }) => ({
+                    value: id,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.company_id)}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("company_id", selectedOption.value)
+                }
+                name="company_id"
               />
+              {errors.company_id && (
+                <small className="form-label text-danger">
+                  {errors.company_id}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
@@ -535,12 +929,27 @@ export default function EditTechnicalPackage(props) {
                 className="select_wo"
                 placeholder="Wash Detail"
                 options={washes.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
+                value={washes
+                  .map(({ id, title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.wash_details)}
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("wash_details", selectedOption.value)
+                }
+                name="wash_details"
               />
+              {errors.wash_details && (
+                <small className="form-label text-danger">
+                  {errors.wash_details}
+                </small>
+              )}
             </div>
           </div>
 
@@ -557,9 +966,30 @@ export default function EditTechnicalPackage(props) {
                   value: id,
                   label: title,
                 }))}
+                value={
+                  formDataSet.special_operations?.map((op) =>
+                    specialOperations
+                      .map(({ id, title }) => ({ value: id, label: title }))
+                      .find((option) => option.label === op)
+                  ) || []
+                }
                 styles={customStyles}
                 components={{ DropdownIndicator }}
+                onChange={(selectedOptions) =>
+                  handleInputChange(
+                    "special_operations",
+                    selectedOptions
+                      ? selectedOptions.map((option) => option.label)
+                      : []
+                  )
+                }
+                name="special_operations"
               />
+              {errors.special_operations && (
+                <small className="form-label text-danger">
+                  {errors.special_operations}
+                </small>
+              )}
             </div>
           </div>
         </div>
@@ -569,6 +999,11 @@ export default function EditTechnicalPackage(props) {
               <label htmlFor="front_image">
                 {frontImagePreviewUrl ? (
                   <img src={frontImagePreviewUrl} alt="Frontside Preview" />
+                ) : tpDetails?.front_photo_url ? (
+                  <img
+                    src={tpDetails.front_photo_url}
+                    alt="Frontside Preview"
+                  />
                 ) : (
                   <p>Garment Frontside Image</p>
                 )}
@@ -602,6 +1037,8 @@ export default function EditTechnicalPackage(props) {
               <label htmlFor="back_image">
                 {backImagePreviewUrl ? (
                   <img src={backImagePreviewUrl} alt="Backside Preview" />
+                ) : tpDetails?.back_photo_url ? (
+                  <img src={tpDetails.back_photo_url} alt="Backside Preview" />
                 ) : (
                   <p>Garment Backside Image</p>
                 )}
@@ -636,17 +1073,40 @@ export default function EditTechnicalPackage(props) {
       </div>
 
       <div className="create_tp_attatchment">
+        <MultipleFileView
+          filled={true}
+          label="Existing Tech Pack Files"
+          inputId="buyer_techpacks"
+          selectedFiles={existingTechpackFiles}
+        />
         <MultipleFileInput
           label="Buyer Tech Pack Attachment"
-          inputId="buyer_techpacks"
+          inputId="technical_package"
           selectedFiles={selectedTechpackFiles}
           setSelectedFiles={setSelectedTechpackFiles}
         />
+        <hr />
+
+        <MultipleFileView
+          filled={true}
+          label="Existing Spec Sheet Files"
+          inputId="spec_sheet"
+          selectedFiles={existingSpecSheetFiles}
+        />
+
         <MultipleFileInput
           label="Spec Sheet Attachment"
-          inputId="specsheet"
+          inputId="spec_sheet"
           selectedFiles={selectedSpecSheetFiles}
           setSelectedFiles={setSelectedSpecSheetFiles}
+        />
+        <hr />
+
+        <MultipleFileView
+          filled={true}
+          label="Existing Block Pattern Files"
+          inputId="block_pattern"
+          selectedFiles={existingBlockPatternFiles}
         />
         <MultipleFileInput
           label="Block Pattern Attachment"
@@ -654,14 +1114,21 @@ export default function EditTechnicalPackage(props) {
           selectedFiles={selectedBlockPatternFiles}
           setSelectedFiles={setSelectedBlockPatternFiles}
         />
-
+        <hr />
+        <MultipleFileView
+          filled={true}
+          label="Existing Special Operation Files"
+          inputId="special_operation"
+          selectedFiles={existingSpecialOperationFiles}
+        />
         <MultipleFileInput
-          label="Block Pattern Attachment"
+          label="Special Operation Attachment"
           inputId="special_operation"
           selectedFiles={selectedSpecialOperationFiles}
           setSelectedFiles={setSelectedSpecialOperationFiles}
-        />
+        /> 
       </div>
+      <br/>
 
       <div className="create_tp_materials_area create_tp_body">
         <h6>Material Descriptions</h6>
