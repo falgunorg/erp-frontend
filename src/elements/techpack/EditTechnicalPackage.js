@@ -299,15 +299,14 @@ export default function EditTechnicalPackage({ tpDetails }) {
     const newItem = {
       item_type_id: materialTypeId,
       item_id: "",
-      description: "",
+      item_name: "",
+      item_details: "",
       unit: "",
       size: "",
       color: "",
-      actual: "",
-      wastage_parcentage: 0,
-      cons_total: "",
-      unit_price: "",
-      total: "",
+      consumption: 0,
+      wastage: 0,
+      total: 0,
     };
 
     setConsumptionItems((prevItems) => ({
@@ -326,22 +325,13 @@ export default function EditTechnicalPackage({ tpDetails }) {
       };
 
       // Auto-calculate values
-      if (field === "actual" || field === "wastage_parcentage") {
-        const actual =
-          parseFloat(updatedMaterialTypeItems[index]["actual"]) || 0;
+      if (field === "consumption" || field === "wastage") {
+        const consumption =
+          parseFloat(updatedMaterialTypeItems[index]["consumption"]) || 0;
         const wastagePercentage =
-          parseFloat(updatedMaterialTypeItems[index]["wastage_parcentage"]) ||
-          0;
-        updatedMaterialTypeItems[index]["cons_total"] =
-          actual + (actual * wastagePercentage) / 100;
-      }
-
-      if (field === "cons_total" || field === "unit_price") {
-        const consTotal =
-          parseFloat(updatedMaterialTypeItems[index]["cons_total"]) || 0;
-        const unitPrice =
-          parseFloat(updatedMaterialTypeItems[index]["unit_price"]) || 0;
-        updatedMaterialTypeItems[index]["total"] = consTotal * unitPrice;
+          parseFloat(updatedMaterialTypeItems[index]["wastage"]) || 0;
+        updatedMaterialTypeItems[index]["total"] =
+          consumption + (consumption * wastagePercentage) / 100;
       }
 
       return { ...prevItems, [materialTypeId]: updatedMaterialTypeItems };
@@ -428,24 +418,9 @@ export default function EditTechnicalPackage({ tpDetails }) {
       return; // Prevent form submission
     }
 
-    if (frontImageFile === null) {
-      swal({
-        title: "Please Select Front Part Image",
-        icon: "error",
-      });
-      return; // Prevent form submission
-    }
-
-    if (backImageFile === null) {
-      swal({
-        title: "Please Select Back Part Image",
-        icon: "error",
-      });
-      return; // Prevent form submission
-    }
-
     if (validateForm()) {
       var data = new FormData();
+      data.append("id", tpDetails.id);
       data.append("po_id", formDataSet.po_id);
       data.append("wo_id", formDataSet.wo_id);
       data.append("received_date", formDataSet.received_date);
@@ -462,7 +437,6 @@ export default function EditTechnicalPackage({ tpDetails }) {
       data.append("wash_details", formDataSet.wash_details);
       data.append("special_operation", formDataSet.special_operations);
       data.append("tp_items", JSON.stringify(tp_items));
-
       data.append("front_photo", frontImageFile);
       data.append("back_photo", backImageFile);
       allFiles.forEach((file) => {
@@ -471,9 +445,9 @@ export default function EditTechnicalPackage({ tpDetails }) {
       });
 
       setSpinner(true);
-      var response = await api.post("/technical-package-create", data);
+      var response = await api.post("/technical-package-update", data);
       if (response.status === 200 && response.data) {
-        alert("Successfully Added");
+        window.location.reload();
       } else {
         setErrors(response.data.errors);
       }
@@ -530,18 +504,14 @@ export default function EditTechnicalPackage({ tpDetails }) {
         const item = {
           item_type_id: mat.item_type_id,
           item_id: mat.item_id,
-          name: mat.item_name || "", // in case you want to allow user to change the name
-          description: mat.item_details || "",
+          item_name: mat.item_name || "", // in case you want to allow user to change the name
+          item_details: mat.item_details || "",
           color: mat.color || "",
           size: mat.size || "",
           position: mat.position || "",
           unit: mat.unit || "",
-          actual: parseFloat(mat.consumption) || 0,
-          wastage_parcentage: parseFloat(mat.wastage) || 0,
-          cons_total:
-            parseFloat(mat.total) -
-            (parseFloat(mat.unit_price || 0) * parseFloat(mat.wastage)) / 100, // optional logic
-
+          consumption: parseFloat(mat.consumption) || 0,
+          wastage: parseFloat(mat.wastage) || 0,
           total: parseFloat(mat.total) || 0,
         };
 
@@ -1126,9 +1096,9 @@ export default function EditTechnicalPackage({ tpDetails }) {
           inputId="special_operation"
           selectedFiles={selectedSpecialOperationFiles}
           setSelectedFiles={setSelectedSpecialOperationFiles}
-        /> 
+        />
       </div>
-      <br/>
+      <br />
 
       <div className="create_tp_materials_area create_tp_body">
         <h6>Material Descriptions</h6>
@@ -1240,12 +1210,12 @@ export default function EditTechnicalPackage({ tpDetails }) {
                         <td>
                           <input
                             type="text"
-                            value={item.name}
+                            value={item.item_name}
                             onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
-                                "name",
+                                "item_name",
                                 e.target.value
                               )
                             }
@@ -1254,12 +1224,12 @@ export default function EditTechnicalPackage({ tpDetails }) {
 
                         <td>
                           <textarea
-                            value={item.description}
+                            value={item.item_details}
                             onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
-                                "description",
+                                "item_details",
                                 e.target.value
                               )
                             }
@@ -1352,12 +1322,12 @@ export default function EditTechnicalPackage({ tpDetails }) {
                             type="number"
                             min="0"
                             step="0.01"
-                            value={item.actual}
+                            value={item.consumption}
                             onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
-                                "actual",
+                                "consumption",
                                 e.target.value
                               )
                             }
@@ -1369,12 +1339,12 @@ export default function EditTechnicalPackage({ tpDetails }) {
                             style={{ width: "50px" }}
                             type="number"
                             min="0"
-                            value={item.wastage_parcentage}
+                            value={item.wastage}
                             onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
-                                "wastage_parcentage",
+                                "wastage",
                                 e.target.value
                               )
                             }
@@ -1387,7 +1357,7 @@ export default function EditTechnicalPackage({ tpDetails }) {
                             type="text"
                             min="0"
                             readOnly
-                            value={item.cons_total}
+                            value={item.total}
                             className="me-1"
                           />
                           <i

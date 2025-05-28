@@ -182,6 +182,13 @@ export default function TechnicalPackage(props) {
     setSelectedTp(pkg);
   };
 
+  const handleDelete = async (id) => {
+    var response = await api.post("/technical-package-delete", { id: id });
+    if (response.status === 200 && response.data) {
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="purchase_order_page">
       <div className="purchase_action_header non_printing_area">
@@ -196,7 +203,12 @@ export default function TechnicalPackage(props) {
           >
             Edit
           </button>
-          <button disabled={renderArea !== "details"}>Delete</button>
+          <button
+            onClick={() => handleDelete(selectedTp.id)}
+            disabled={renderArea !== "details"}
+          >
+            Delete
+          </button>
         </div>
       </div>
 

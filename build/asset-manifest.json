@@ -1,0 +1,38 @@
+{
+  "files": {
+    "main.css": "/static/css/main.d567ccee.css",
+    "main.js": "/static/js/main.3739df47.js",
+    "static/js/32.4574c248.chunk.js": "/static/js/32.4574c248.chunk.js",
+    "static/js/249.fe16a7d6.chunk.js": "/static/js/249.fe16a7d6.chunk.js",
+    "static/js/106.081cc95f.chunk.js": "/static/js/106.081cc95f.chunk.js",
+    "static/js/542.5d828c10.chunk.js": "/static/js/542.5d828c10.chunk.js",
+    "static/media/HelveticaNeue-BlackItalic.ttf": "/static/media/HelveticaNeue-BlackItalic.e55990dfa65ff4778cf8.ttf",
+    "static/media/HelveticaNeue-HeavyItalic.ttf": "/static/media/HelveticaNeue-HeavyItalic.76c92dc451224ea54627.ttf",
+    "static/media/HelveticaNeue-Roman.ttf": "/static/media/HelveticaNeue-Roman.834eb2533bf740b80b86.ttf",
+    "static/media/HelveticaNeue-Black.ttf": "/static/media/HelveticaNeue-Black.5f59684d3c8e7f0a3c1d.ttf",
+    "static/media/HelveticaNeue-Heavy.ttf": "/static/media/HelveticaNeue-Heavy.370b3c7eea2192e7a9f2.ttf",
+    "static/media/HelveticaNeue-Bold.ttf": "/static/media/HelveticaNeue-Bold.14f0d4686d0b348adc31.ttf",
+    "static/media/HelveticaNeue-BoldItalic.ttf": "/static/media/HelveticaNeue-BoldItalic.25e8826aa4a3cb796072.ttf",
+    "static/media/HelveticaNeue-Italic.ttf": "/static/media/HelveticaNeue-Italic.3418a2e570c681ef9d38.ttf",
+    "static/media/2.webp": "/static/media/2.20f1b029c5bb0834378f.webp",
+    "static/media/3.webp": "/static/media/3.83b402b36efc2364e36b.webp",
+    "static/media/4.webp": "/static/media/4.ba00ba4f063bc3f4bdf7.webp",
+    "static/media/HelveticaNeue-Thin.ttf": "/static/media/HelveticaNeue-Thin.a34dffc08a2fa0cd1443.ttf",
+    "static/media/HelveticaNeue-UltraLight.ttf": "/static/media/HelveticaNeue-UltraLight.87c19d9da51587fa7111.ttf",
+    "static/media/1.webp": "/static/media/1.330b4215a85b73b19c87.webp",
+    "static/media/HelveticaNeue-Light.ttf": "/static/media/HelveticaNeue-Light.eb0257f098db93155c1c.ttf",
+    "static/media/HelveticaNeue-Medium.ttf": "/static/media/HelveticaNeue-Medium.049e3eecfbb9d52ce90e.ttf",
+    "static/media/HelveticaNeue-UltraLightItalic.ttf": "/static/media/HelveticaNeue-UltraLightItalic.b7bed371ee2d66408c48.ttf",
+    "static/media/HelveticaNeue-LightItalic.ttf": "/static/media/HelveticaNeue-LightItalic.f2f30180fcef13f422dc.ttf",
+    "static/media/HelveticaNeue-ThinItalic.ttf": "/static/media/HelveticaNeue-ThinItalic.b9075346288f8ab043e7.ttf",
+    "static/media/HelveticaNeue-MediumItalic.ttf": "/static/media/HelveticaNeue-MediumItalic.a0afb296e927d9e02306.ttf",
+    "static/media/5.webp": "/static/media/5.5ae62cd3735d487c67cd.webp",
+    "static/media/logo.png": "/static/media/logo.d807ca6c2f98cbf1d9ea.png",
+    "static/media/logo-short.png": "/static/media/logo-short.dbb7b212dbb5eb12b2d5.png",
+    "index.html": "/index.html"
+  },
+  "entrypoints": [
+    "static/css/main.d567ccee.css",
+    "static/js/main.3739df47.js"
+  ]
+}

@@ -110,6 +110,7 @@ export default function CreateTechnicalPackage(props) {
     { id: 1, title: "Mens" },
     { id: 2, title: "Womens" },
     { id: 3, title: "Kids" },
+    { id: 4, title: "School Wear" },
   ];
 
   const companies = [
@@ -298,15 +299,14 @@ export default function CreateTechnicalPackage(props) {
     const newItem = {
       item_type_id: materialTypeId,
       item_id: "",
-      description: "",
+      item_name: "",
+      item_details: "",
       unit: "",
       size: "",
       color: "",
-      actual: "",
-      wastage_parcentage: 0,
-      cons_total: "",
-      unit_price: "",
-      total: "",
+      consumption: 0,
+      wastage: 0,
+      total: 0,
     };
 
     setConsumptionItems((prevItems) => ({
@@ -325,22 +325,13 @@ export default function CreateTechnicalPackage(props) {
       };
 
       // Auto-calculate values
-      if (field === "actual" || field === "wastage_parcentage") {
-        const actual =
-          parseFloat(updatedMaterialTypeItems[index]["actual"]) || 0;
+      if (field === "consumption" || field === "wastage") {
+        const consumption =
+          parseFloat(updatedMaterialTypeItems[index]["consumption"]) || 0;
         const wastagePercentage =
-          parseFloat(updatedMaterialTypeItems[index]["wastage_parcentage"]) ||
-          0;
-        updatedMaterialTypeItems[index]["cons_total"] =
-          actual + (actual * wastagePercentage) / 100;
-      }
-
-      if (field === "cons_total" || field === "unit_price") {
-        const consTotal =
-          parseFloat(updatedMaterialTypeItems[index]["cons_total"]) || 0;
-        const unitPrice =
-          parseFloat(updatedMaterialTypeItems[index]["unit_price"]) || 0;
-        updatedMaterialTypeItems[index]["total"] = consTotal * unitPrice;
+          parseFloat(updatedMaterialTypeItems[index]["wastage"]) || 0;
+        updatedMaterialTypeItems[index]["total"] =
+          consumption + (consumption * wastagePercentage) / 100;
       }
 
       return { ...prevItems, [materialTypeId]: updatedMaterialTypeItems };
@@ -415,6 +406,9 @@ export default function CreateTechnicalPackage(props) {
   };
 
   console.log("ALL FILES", allFiles);
+  const tp_items = Object.values(consumptionItems).flat();
+
+  console.log("TP ITEMS", JSON.stringify(tp_items));
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -472,7 +466,7 @@ export default function CreateTechnicalPackage(props) {
       setSpinner(true);
       var response = await api.post("/technical-package-create", data);
       if (response.status === 200 && response.data) {
-        alert("Successfully Added");
+        window.location.reload();
       } else {
         setErrors(response.data.errors);
       }
@@ -669,7 +663,7 @@ export default function CreateTechnicalPackage(props) {
               <Select
                 className="select_wo"
                 placeholder="Season"
-                options={seasons.map(({ id, title }) => ({
+                options={seasons.map(({ title }) => ({
                   value: title,
                   label: title,
                 }))}
@@ -1053,12 +1047,12 @@ export default function CreateTechnicalPackage(props) {
                         <td>
                           <input
                             type="text"
-                            value={item.name}
+                            value={item.item_name}
                             onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
-                                "name",
+                                "item_name",
                                 e.target.value
                               )
                             }
@@ -1067,12 +1061,12 @@ export default function CreateTechnicalPackage(props) {
 
                         <td>
                           <textarea
-                            value={item.description}
+                            value={item.item_details}
                             onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
-                                "description",
+                                "item_details",
                                 e.target.value
                               )
                             }
@@ -1165,12 +1159,12 @@ export default function CreateTechnicalPackage(props) {
                             type="number"
                             min="0"
                             step="0.01"
-                            value={item.actual}
+                            value={item.consumption}
                             onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
-                                "actual",
+                                "consumption",
                                 e.target.value
                               )
                             }
@@ -1182,12 +1176,12 @@ export default function CreateTechnicalPackage(props) {
                             style={{ width: "50px" }}
                             type="number"
                             min="0"
-                            value={item.wastage_parcentage}
+                            value={item.wastage}
                             onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
-                                "wastage_parcentage",
+                                "wastage",
                                 e.target.value
                               )
                             }
@@ -1200,7 +1194,7 @@ export default function CreateTechnicalPackage(props) {
                             type="text"
                             min="0"
                             readOnly
-                            value={item.cons_total}
+                            value={item.total}
                             className="me-1"
                           />
                           <i

@@ -1,6 +1,6 @@
-var configEnv = "development";
+// var configEnv = "development";
 // var configEnv = "staging";
-// var configEnv = "production";
+var configEnv = "production";
 
 var config = {
   //######### Staging config ##########
