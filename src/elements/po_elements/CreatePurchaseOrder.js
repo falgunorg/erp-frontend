@@ -106,6 +106,7 @@ export default function CreatePurchaseOrder(props) {
     { id: 1, title: "Mens" },
     { id: 2, title: "Womens" },
     { id: 3, title: "Kids" },
+    { id: 4, title: "School Wear" },
   ];
 
   const companies = [
@@ -169,6 +170,40 @@ export default function CreatePurchaseOrder(props) {
     getColors();
   }, []);
 
+  const [formData, setFormData] = useState({
+    po_number: "",
+    wo_id: "",
+    issued_date: "",
+    delivery_date: "",
+    purchase_contract_id: "",
+    company_id: "",
+    buyer_id: "",
+    brand: "",
+    season: "",
+    description: "",
+    technical_package_id: "",
+    buyer_style_name: "",
+    item_name: "",
+    item_type: "",
+    department: "",
+    wash_details: "",
+    destination: "",
+    ship_mode: "",
+    shipping_terms: "",
+    packing_method: "",
+    payment_terms: "",
+    total_qty: "",
+    total_value: "",
+    special_operations: [],
+  });
+
+  const handleChange = (name, value) => {
+    setFormData((prevDataSet) => ({
+      ...prevDataSet,
+      [name]: value,
+    }));
+  };
+
   const [poItems, setPoItems] = useState([]);
 
   const handleAddItem = () => {
@@ -231,14 +266,24 @@ export default function CreatePurchaseOrder(props) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <input type="text" />
+              <input
+                value={formData.po_number}
+                name="po_number"
+                onChange={(e) => handleChange("po_number", e.target.value)}
+                type="text"
+              />
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <input type="text" />
+              <input
+                value={formData.wo_id}
+                name="wo_id"
+                onChange={(e) => handleChange("wo_id", e.target.value)}
+                type="text"
+              />
             </div>
           </div>
         </div>
@@ -254,7 +299,12 @@ export default function CreatePurchaseOrder(props) {
               <label className="form-label">PO Issue</label>
             </div>
             <div className="col-lg-2">
-              <input type="date" />
+              <input
+                name="issued_date"
+                value={formData.issued_date}
+                onChange={(e) => handleChange("issued_date", e.target.value)}
+                type="date"
+              />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack</label>
@@ -267,6 +317,9 @@ export default function CreatePurchaseOrder(props) {
                   value: id,
                   label: title,
                 }))}
+                onChange={(selectedOption) =>
+                  handleChange("technical_package_id", selectedOption.value)
+                }
                 styles={customStyles}
                 components={{ DropdownIndicator }}
               />
@@ -279,9 +332,12 @@ export default function CreatePurchaseOrder(props) {
                 className="select_wo"
                 placeholder="Destination"
                 options={brands.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
+                onChange={(selectedOption) =>
+                  handleChange("destination", selectedOption.value)
+                }
                 styles={customStyles}
                 components={{ DropdownIndicator }}
               />
@@ -293,13 +349,26 @@ export default function CreatePurchaseOrder(props) {
               <label className="form-label">PO Delivery</label>
             </div>
             <div className="col-lg-2">
-              <input type="date" />
+              <input
+                name="delivery_date"
+                value={formData.delivery_date}
+                onChange={(e) => handleChange("delivery_date", e.target.value)}
+                type="date"
+              />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-2">
-              <input type="text" placeholder="Buyer Style Name" />
+              <input
+                name="buyer_style_name"
+                value={formData.buyer_style_name}
+                onChange={(e) =>
+                  handleChange("buyer_style_name", e.target.value)
+                }
+                type="text"
+                placeholder="Buyer Style Name"
+              />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Ship Mode</label>
@@ -338,7 +407,11 @@ export default function CreatePurchaseOrder(props) {
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-2">
-              <input type="text" placeholder="Buyer Style Name" />
+              <input  name="item_name"
+                value={formData.item_name}
+                onChange={(e) =>
+                  handleChange("item_name", e.target.value)
+                } type="text" placeholder="Buyer Style Name" />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Terms of Shipping</label>
@@ -678,7 +751,7 @@ export default function CreatePurchaseOrder(props) {
               </tr>
             ))}
             <br />
-          
+
             {/* GRAND TOTAL */}
             <tr>
               <td>
