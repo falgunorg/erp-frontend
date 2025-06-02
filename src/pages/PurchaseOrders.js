@@ -197,10 +197,10 @@ export default function PurchaseOrders(props) {
     getPos();
   }, []);
 
-  const [selectedTp, setSelectedTp] = useState();
-  const handleTpDetails = (pkg) => {
+  const [selectedPo, setSelectedPo] = useState();
+  const handlePoDetails = (po) => {
     setRenderArea("details");
-    setSelectedTp(pkg);
+    setSelectedPo(po);
   };
 
   const handleDelete = async (id) => {
@@ -224,7 +224,12 @@ export default function PurchaseOrders(props) {
           >
             Edit
           </button>
-          <button disabled={renderArea !== "details"}>Delete</button>
+          <button
+            onClick={() => handleDelete(selectedPo.id)}
+            disabled={renderArea !== "details"}
+          >
+            Delete
+          </button>
         </div>
       </div>
 
@@ -395,11 +400,12 @@ export default function PurchaseOrders(props) {
 
                 {expandedGroups[groupName] && (
                   <div className="group-tps">
-                    {packages.map((pkg) => (
+                    {packages.map((po) => (
                       <div
-                        onClick={() => handleTpDetails(pkg)}
+                        key={po.id}
+                        onClick={() => handlePoDetails(po)}
                         className={
-                          pkg.id === selectedTp?.id
+                          po.id === selectedPo?.id
                             ? "single_tp_item active"
                             : "single_tp_item"
                         }
@@ -411,19 +417,19 @@ export default function PurchaseOrders(props) {
                           >
                             {markAble ? <input type="checkbox" /> : ""}
                           </span>
-                          <span className="me-2">{pkg.po_number}</span>
+                          <span className="me-2">{po.po_number}</span>
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          {pkg.item_name}
+                          {po.item_name}
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          {pkg.item_type}
+                          {po.item_type}
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          {pkg.wo_id}
+                          {po.wo_id}
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
@@ -433,7 +439,7 @@ export default function PurchaseOrders(props) {
                           <div>
                             <span className="step_border"></span>
                             <span className="date area me-2">
-                              {pkg.received_date}
+                              {po.received_date}
                             </span>
                           </div>
 
@@ -493,8 +499,12 @@ export default function PurchaseOrders(props) {
             </div>
           )}
           {renderArea === "add" && <CreatePurchaseOrder />}
-          {renderArea === "details" && <PurchaseOrderDetails />}
-          {renderArea === "update" && <EditPurchaseOrder />}
+          {renderArea === "details" && (
+            <PurchaseOrderDetails selectedPo={selectedPo} />
+          )}
+          {renderArea === "update" && (
+            <EditPurchaseOrder selectedPo={selectedPo} />
+          )}
         </div>
       </div>
     </div>

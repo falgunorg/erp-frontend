@@ -97,7 +97,7 @@ export default function CreatePurchaseOrder(props) {
     { id: 3, title: "MANGO" },
   ];
 
-  const season = [
+  const seasons = [
     { id: 1, title: "FAL 24" },
     { id: 2, title: "SUMMER 25" },
     { id: 3, title: "SPRING 25" },
@@ -140,17 +140,6 @@ export default function CreatePurchaseOrder(props) {
     { id: 2, title: "Printing" },
     { id: 3, title: "Fusing" },
     { id: 4, title: "Dying" },
-  ];
-
-  const techpacks = [
-    { id: 1, title: "TPNXMCLX001" },
-    { id: 2, title: "TPNXMCLX002" },
-    { id: 3, title: "TPNXMCLX003" },
-    { id: 4, title: "TPNXMCLX004" },
-    { id: 5, title: "TPNXMCLX005" },
-    { id: 6, title: "TPNXMCLX006" },
-    { id: 7, title: "TPNXMCLX007" },
-    { id: 8, title: "TPNXMCLX008" },
   ];
 
   const destinations = [
@@ -247,12 +236,42 @@ export default function CreatePurchaseOrder(props) {
     special_operations: [],
   });
 
-  const handleChange = (name, value) => {
-    setFormData((prevDataSet) => ({
-      ...prevDataSet,
-      [name]: value,
-    }));
+  const handleChange = async (name, value) => {
+    if (name === "technical_package_id") {
+      try {
+        const response = await api.post("/technical-package-show", {
+          id: value,
+        });
+
+        if (response.status === 200 && response.data) {
+          const data = response.data;
+          setFormData((prevDataSet) => ({
+            ...prevDataSet,
+            company_id: data.company_id || "", // Ensure this is set correctly
+            buyer_id: data.buyer_id || "",
+            brand: data.brand || "",
+            season: data.season || "",
+            description: data.description || "",
+            buyer_style_name: data.buyer_style_name || "",
+            item_name: data.item_name || "",
+            item_type: data.item_type || "",
+            department: data.department || "",
+            wash_details: data.wash_details || "",
+            special_operations: data.special_operation?.split(",") || [],
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching technical package data", error);
+      }
+    } else {
+      setFormData((prevDataSet) => ({
+        ...prevDataSet,
+        [name]: value,
+      }));
+    }
   };
+
+  console.log("Data", formData);
 
   const [errors, setErrors] = useState({});
 
@@ -432,6 +451,23 @@ export default function CreatePurchaseOrder(props) {
     }
   };
 
+  //fetch techpacks
+  const [techpacks, setTechpacks] = useState([]);
+
+  const getTechpacks = async () => {
+    const response = await api.post("/technical-packages-all-desc", {
+      mode: "self",
+    });
+
+    if (response.status === 200 && response.data) {
+      setTechpacks(response.data.data);
+    }
+  };
+
+  useEffect(() => {
+    getTechpacks();
+  }, []);
+
   return (
     <div className="create_technical_pack">
       <div className="row create_tp_header align-items-center">
@@ -509,9 +545,9 @@ export default function CreatePurchaseOrder(props) {
                     : "select_wo"
                 }
                 placeholder="Techpack"
-                options={techpacks.map(({ id, title }) => ({
+                options={techpacks.map(({ id, techpack_number }) => ({
                   value: id,
-                  label: title,
+                  label: techpack_number,
                 }))}
                 onChange={(selectedOption) =>
                   handleChange("technical_package_id", selectedOption.value)
@@ -658,11 +694,18 @@ export default function CreatePurchaseOrder(props) {
                   value: id,
                   label: title,
                 }))}
+                value={companies
+                  .map(({ id, title }) => ({
+                    value: id,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formData.company_id)}
+                styles={customStyles}
+                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleChange("company_id", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
+                name="company_id"
               />
             </div>
             <div className="col-lg-2">
@@ -678,6 +721,12 @@ export default function CreatePurchaseOrder(props) {
                   value: title,
                   label: title,
                 }))}
+                value={itemTypes
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formData.item_type)}
                 onChange={(selectedOption) =>
                   handleChange("item_type", selectedOption.value)
                 }
@@ -720,6 +769,12 @@ export default function CreatePurchaseOrder(props) {
                   value: id,
                   label: title,
                 }))}
+                value={buyers
+                  .map(({ id, title }) => ({
+                    value: id,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formData.buyer_id)}
                 onChange={(selectedOption) =>
                   handleChange("buyer_id", selectedOption.value)
                 }
@@ -741,6 +796,12 @@ export default function CreatePurchaseOrder(props) {
                   value: title,
                   label: title,
                 }))}
+                value={departments
+                  .map(({ id, title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formData.department)}
                 onChange={(selectedOption) =>
                   handleChange("department", selectedOption.value)
                 }
@@ -780,9 +841,15 @@ export default function CreatePurchaseOrder(props) {
                 className={errors.brand ? "select_wo red-border" : "select_wo"}
                 placeholder="Brand"
                 options={brands.map(({ id, title }) => ({
-                  value: id,
+                  value: title,
                   label: title,
                 }))}
+                value={brands
+                  .map(({ id, title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formData.brand)}
                 onChange={(selectedOption) =>
                   handleChange("brand", selectedOption.value)
                 }
@@ -800,6 +867,12 @@ export default function CreatePurchaseOrder(props) {
                   errors.wash_details ? "select_wo red-border" : "select_wo"
                 }
                 placeholder="Wash Detail"
+                value={washes
+                  .map(({ id, title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formData.wash_details)}
                 options={washes.map(({ id, title }) => ({
                   value: title,
                   label: title,
@@ -832,10 +905,16 @@ export default function CreatePurchaseOrder(props) {
               <Select
                 className={errors.season ? "select_wo red-border" : "select_wo"}
                 placeholder="Season"
-                options={season.map(({ id, title }) => ({
+                options={seasons.map(({ id, title }) => ({
                   value: title,
                   label: title,
                 }))}
+                value={seasons
+                  .map(({ id, title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formData.season)}
                 onChange={(selectedOption) =>
                   handleChange("season", selectedOption.value)
                 }
@@ -890,6 +969,12 @@ export default function CreatePurchaseOrder(props) {
                   value: id,
                   label: title,
                 }))}
+                value={
+                  formData.special_operations.map((operation) => ({
+                    value: operation,
+                    label: operation,
+                  })) || []
+                }
                 styles={customStyles}
                 components={{ DropdownIndicator }}
                 onChange={(selectedOptions) =>
@@ -915,7 +1000,6 @@ export default function CreatePurchaseOrder(props) {
           setSelectedFiles={setSelectedTechpackFiles}
         />
       </div>
-      <br />
 
       <div
         style={{ padding: "0 15px" }}
@@ -1030,7 +1114,6 @@ export default function CreatePurchaseOrder(props) {
                 </td>
               </tr>
             ))}
-            <br />
 
             {/* GRAND TOTAL */}
             <tr>
@@ -1050,8 +1133,6 @@ export default function CreatePurchaseOrder(props) {
           </tbody>
         </table>
       </div>
-      <br></br>
-      <br></br>
 
       <table className="table table-bordered">
         <tbody>
