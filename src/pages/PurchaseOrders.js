@@ -425,21 +425,21 @@ export default function PurchaseOrders(props) {
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          {po.item_type}
+                          {po.technical_package?.techpack_number}
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          {po.wo_id}
+                          {po.total_qty} PCS
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          1000 PCS
+                         $ {po.total_value}
                         </div>
                         <div className="tp_text d-flex justify-content-between align-items-center">
                           <div>
                             <span className="step_border"></span>
                             <span className="date area me-2">
-                              {po.received_date}
+                              {po.delivery_date}
                             </span>
                           </div>
 

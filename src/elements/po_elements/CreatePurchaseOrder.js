@@ -209,6 +209,8 @@ export default function CreatePurchaseOrder(props) {
     getColors();
   }, []);
 
+  const [errors, setErrors] = useState({});
+
   const [formData, setFormData] = useState({
     po_number: "",
     wo_id: "",
@@ -227,7 +229,7 @@ export default function CreatePurchaseOrder(props) {
     department: "",
     wash_details: "",
     destination: "",
-    ship_mode: "",
+    ship_mode: "Ocean",
     shipping_terms: "",
     packing_method: "",
     payment_terms: "",
@@ -245,9 +247,11 @@ export default function CreatePurchaseOrder(props) {
 
         if (response.status === 200 && response.data) {
           const data = response.data;
-          setFormData((prevDataSet) => ({
-            ...prevDataSet,
-            company_id: data.company_id || "", // Ensure this is set correctly
+
+          setFormData((prev) => ({
+            ...prev,
+            technical_package_id: value,
+            company_id: data.company_id || "",
             buyer_id: data.buyer_id || "",
             brand: data.brand || "",
             season: data.season || "",
@@ -257,84 +261,118 @@ export default function CreatePurchaseOrder(props) {
             item_type: data.item_type || "",
             department: data.department || "",
             wash_details: data.wash_details || "",
-            special_operations: data.special_operation?.split(",") || [],
+            special_operations:
+              data.special_operation?.split(",").filter(Boolean) || [],
           }));
         }
       } catch (error) {
-        console.error("Error fetching technical package data", error);
+        console.error("Error fetching technical package data:", error);
       }
     } else {
-      setFormData((prevDataSet) => ({
-        ...prevDataSet,
+      setFormData((prev) => ({
+        ...prev,
         [name]: value,
       }));
     }
   };
 
-  console.log("Data", formData);
+  const handleOperationChange = (selectedOptions) => {
+    const selectedOpTitles = selectedOptions.map((option) => option.value);
+    setFormData((prevData) => ({
+      ...prevData,
+      special_operations: selectedOpTitles,
+    }));
+  };
 
-  const [errors, setErrors] = useState({});
+  console.log("OPERATIONS", formData.special_operations);
 
   const validateForm = () => {
+    const requiredFields = {
+      po_number: "Please insert a PO number.",
+      issued_date: "Please insert the issue date.",
+      technical_package_id: "Please select a technical package.",
+      destination: "Please select a destination.",
+      delivery_date: "Delivery date is required.",
+      buyer_style_name: "Buyer style name is required.",
+      ship_mode: "Please select a shipping mode.",
+      purchase_contract_id: "Please select a purchase contract.",
+      item_name: "Item name is required.",
+      shipping_terms: "Please select shipping terms.",
+      company_id: "Company is required.",
+      item_type: "Item type is required.",
+      packing_method: "Please select a packing method.",
+      buyer_id: "Buyer is required.",
+      department: "Department is required.",
+      payment_terms: "Please select payment terms.",
+      brand: "Brand is required.",
+      season: "Season is required.",
+    };
+
     const formErrors = {};
 
-    if (!formData.po_number) {
-      formErrors.po_number = "Please insert a PO number.";
-    }
-    if (!formData.issued_date) {
-      formErrors.issued_date = "Please insert the issue date.";
-    }
-    if (!formData.technical_package_id) {
-      formErrors.technical_package_id = "Please select a technical package.";
-    }
-    if (!formData.destination) {
-      formErrors.destination = "Please select a destination.";
-    }
-    if (!formData.delivery_date) {
-      formErrors.delivery_date = "Delivery date is required.";
-    }
-    if (!formData.buyer_style_name) {
-      formErrors.buyer_style_name = "Buyer style name is required.";
-    }
-    if (!formData.ship_mode) {
-      formErrors.ship_mode = "Please select a shipping mode.";
-    }
-    if (!formData.purchase_contract_id) {
-      formErrors.purchase_contract_id = "Please select a purchase contract.";
-    }
-    if (!formData.item_name) {
-      formErrors.item_name = "Item name is required.";
-    }
-    if (!formData.shipping_terms) {
-      formErrors.shipping_terms = "Please select shipping terms.";
-    }
-    if (!formData.company_id) {
-      formErrors.company_id = "Company is required.";
-    }
-    if (!formData.item_type) {
-      formErrors.item_type = "Item type is required.";
-    }
-    if (!formData.packing_method) {
-      formErrors.packing_method = "Please select a packing method.";
-    }
-    if (!formData.buyer_id) {
-      formErrors.buyer_id = "Buyer is required.";
-    }
-    if (!formData.department) {
-      formErrors.department = "Department is required.";
-    }
-    if (!formData.payment_terms) {
-      formErrors.payment_terms = "Please select payment terms.";
-    }
-    if (!formData.brand) {
-      formErrors.brand = "Brand is required.";
-    }
-    if (!formData.season) {
-      formErrors.season = "Season is required.";
+    for (const field in requiredFields) {
+      if (!formData[field]) {
+        formErrors[field] = requiredFields[field];
+      }
     }
 
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (poItems.length === 0) {
+      swal({
+        title: "Please select items.",
+        icon: "error",
+      });
+      return;
+    }
+
+    if (!validateForm()) return;
+
+    try {
+      const data = new FormData();
+
+      // Append form fields
+      Object.entries(formData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          data.append(key, JSON.stringify(value));
+        } else {
+          data.append(key, value);
+        }
+      });
+
+      // Set calculated values
+      data.set("total_qty", totalQuantity);
+      data.set("total_value", grandTotalFob);
+      data.append("po_items", JSON.stringify(poItems));
+
+      for (let i = 0; i < selectedTechpackFiles.length; i++) {
+        data.append("attatchments[]", selectedTechpackFiles[i]);
+      }
+
+      setSpinner(true);
+
+      const response = await api.post("/pos-create", data);
+
+      if (response.status === 200 && response.data) {
+        window.location.reload();
+      } else {
+        setErrors(response.data.errors || {});
+      }
+    } catch (error) {
+      console.error("Form submission failed:", error);
+      swal({
+        title: "Submission Failed",
+        text: "Something went wrong while submitting the form.",
+        icon: "error",
+      });
+    } finally {
+      setSpinner(false);
+    }
   };
 
   const [poItems, setPoItems] = useState([]);
@@ -381,75 +419,6 @@ export default function CreatePurchaseOrder(props) {
     (sum, item) => sum + Number(item.total || 0),
     0
   );
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    if (poItems.length === 0) {
-      swal({
-        title: "Please select items.",
-        icon: "error",
-      });
-      return;
-    }
-
-    if (!validateForm()) return;
-
-    try {
-      const data = new FormData();
-
-      // Append form fields
-      data.append("po_number", formData.po_number);
-      data.append("wo_id", formData.wo_id);
-      data.append("issued_date", formData.issued_date);
-      data.append("delivery_date", formData.delivery_date);
-      data.append("purchase_contract_id", formData.purchase_contract_id);
-      data.append("company_id", formData.company_id);
-      data.append("buyer_id", formData.buyer_id);
-      data.append("brand", formData.brand);
-      data.append("season", formData.season);
-      data.append("description", formData.description);
-      data.append("technical_package_id", formData.technical_package_id);
-      data.append("buyer_style_name", formData.buyer_style_name);
-      data.append("item_name", formData.item_name);
-      data.append("item_type", formData.item_type);
-      data.append("department", formData.department);
-      data.append("wash_details", formData.wash_details);
-      data.append("destination", formData.destination);
-      data.append("ship_mode", formData.ship_mode);
-      data.append("shipping_terms", formData.shipping_terms);
-      data.append("packing_method", formData.packing_method);
-      data.append("payment_terms", formData.payment_terms);
-      data.append("total_qty", totalQuantity);
-      data.append("total_value", grandTotalFob);
-      data.append("special_operations", formData.special_operations);
-      data.append("po_items", JSON.stringify(poItems));
-
-      // Append selected files
-      selectedTechpackFiles.forEach((file) => {
-        data.append("attachments[]", file); // Fixed typo here
-      });
-
-      setSpinner(true);
-
-      const response = await api.post("/pos-create", data);
-
-      if (response.status === 200 && response.data) {
-        window.location.reload();
-      } else {
-        setErrors(response.data.errors || {});
-      }
-    } catch (error) {
-      console.error("Form submission failed:", error);
-      swal({
-        title: "Submission Failed",
-        text: "Something went wrong while submitting the form.",
-        icon: "error",
-      });
-    } finally {
-      setSpinner(false);
-    }
-  };
 
   //fetch techpacks
   const [techpacks, setTechpacks] = useState([]);
@@ -957,7 +926,7 @@ export default function CreatePurchaseOrder(props) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              <Select
+              {/* <Select
                 isMulti
                 className={
                   errors.special_operations
@@ -986,6 +955,33 @@ export default function CreatePurchaseOrder(props) {
                   )
                 }
                 name="special_operations"
+              /> */}
+
+              <Select
+                isMulti
+                styles={customStyles}
+                components={{ DropdownIndicator }}
+                className={
+                  errors.special_operations
+                    ? "select_wo red-border"
+                    : "select_wo"
+                }
+                placeholder="Select or Search"
+                name="special_operations"
+                value={formData.special_operations.map((title) => {
+                  const selectedOperation = specialOperations.find(
+                    (op) => op.title === title
+                  );
+                  return {
+                    value: title,
+                    label: selectedOperation ? selectedOperation.title : title,
+                  };
+                })}
+                onChange={handleOperationChange}
+                options={specialOperations.map((op) => ({
+                  value: op.title,
+                  label: op.title,
+                }))}
               />
             </div>
           </div>
@@ -1133,25 +1129,6 @@ export default function CreatePurchaseOrder(props) {
           </tbody>
         </table>
       </div>
-
-      <table className="table table-bordered">
-        <tbody>
-          <tr>
-            <td>
-              <b>Merchant:</b> Anik Das{" "}
-            </td>
-            <td>
-              <b>FG ID:</b>
-            </td>
-            <td>
-              <b>FG Pass:</b>
-            </td>
-            <td>
-              <b>Buyer Confirmation Mail:</b>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   );
 }

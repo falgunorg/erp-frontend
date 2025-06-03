@@ -28,7 +28,7 @@ export default function TechnicalPackageDetails({ tpDetails }) {
     const element = tpRef.current;
     const opt = {
       margin: 0.2,
-      filename: "cost-sheet.pdf",
+      filename: tpDetails.techpack_number + ".pdf",
       image: { type: "jpeg", quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
