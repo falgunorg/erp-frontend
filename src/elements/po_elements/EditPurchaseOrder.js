@@ -345,6 +345,8 @@ export default function EditPurchaseOrder({ selectedPo }) {
       });
 
       // Set calculated values
+      const precessedOperations = formData.special_operations.join(",");
+      data.set("special_operations", precessedOperations);
       data.set("total_qty", totalQuantity);
       data.set("total_value", grandTotalFob);
       data.append("po_items", JSON.stringify(poItems));
@@ -357,7 +359,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
       const response = await api.post("/pos-update", data);
 
       if (response.status === 200 && response.data) {
-        // window.location.reload();
+        window.location.reload();
       } else {
         setErrors(response.data.errors || {});
       }

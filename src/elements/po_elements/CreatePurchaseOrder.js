@@ -4,8 +4,9 @@ import Select, { components } from "react-select";
 import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
 import swal from "sweetalert";
-
-export default function CreatePurchaseOrder(props) {
+export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
+  console.log("RENDERaREA", renderArea);
+  
   const DropdownIndicator = (props) => {
     return (
       <components.DropdownIndicator {...props}>
@@ -276,6 +277,8 @@ export default function CreatePurchaseOrder(props) {
     }
   };
 
+  console.log("SPECIAL OPERATIONS", formData);
+
   const handleOperationChange = (selectedOptions) => {
     const selectedOpTitles = selectedOptions.map((option) => option.value);
     setFormData((prevData) => ({
@@ -346,6 +349,9 @@ export default function CreatePurchaseOrder(props) {
       });
 
       // Set calculated values
+
+      const precessedOperations = formData.special_operations.join(",");
+      data.set("special_operations", precessedOperations);
       data.set("total_qty", totalQuantity);
       data.set("total_value", grandTotalFob);
       data.append("po_items", JSON.stringify(poItems));
@@ -359,7 +365,7 @@ export default function CreatePurchaseOrder(props) {
       const response = await api.post("/pos-create", data);
 
       if (response.status === 200 && response.data) {
-        window.location.reload();
+        // window.location.reload();
       } else {
         setErrors(response.data.errors || {});
       }
@@ -926,37 +932,6 @@ export default function CreatePurchaseOrder(props) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              {/* <Select
-                isMulti
-                className={
-                  errors.special_operations
-                    ? "select_wo red-border"
-                    : "select_wo"
-                }
-                placeholder="Operation"
-                options={specialOperations.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                value={
-                  formData.special_operations.map((operation) => ({
-                    value: operation,
-                    label: operation,
-                  })) || []
-                }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
-                onChange={(selectedOptions) =>
-                  handleChange(
-                    "special_operations",
-                    selectedOptions
-                      ? selectedOptions.map((option) => option.label)
-                      : []
-                  )
-                }
-                name="special_operations"
-              /> */}
-
               <Select
                 isMulti
                 styles={customStyles}

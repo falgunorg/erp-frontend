@@ -432,8 +432,8 @@ export default function PurchaseOrders(props) {
                           {po.total_qty} PCS
                         </div>
                         <div className="tp_text">
-                          <span className="step_border"></span>
-                         $ {po.total_value}
+                          <span className="step_border"></span>${" "}
+                          {po.total_value}
                         </div>
                         <div className="tp_text d-flex justify-content-between align-items-center">
                           <div>
@@ -498,12 +498,29 @@ export default function PurchaseOrders(props) {
               <div className="text-muted">Nothing is selected</div>
             </div>
           )}
-          {renderArea === "add" && <CreatePurchaseOrder />}
+          {renderArea === "add" && (
+            <CreatePurchaseOrder
+              renderArea={renderArea}
+              setRenderArea={setRenderArea}
+              selectedPo={selectedPo}
+              setSelectedPo={setSelectedPo}
+            />
+          )}
           {renderArea === "details" && (
-            <PurchaseOrderDetails selectedPo={selectedPo} />
+            <PurchaseOrderDetails
+              renderArea={renderArea}
+              setRenderArea={setRenderArea}
+              selectedPo={selectedPo}
+              setSelectedPo={setSelectedPo}
+            />
           )}
           {renderArea === "update" && (
-            <EditPurchaseOrder selectedPo={selectedPo} />
+            <EditPurchaseOrder
+              renderArea={renderArea}
+              setRenderArea={setRenderArea}
+              selectedPo={selectedPo}
+              setSelectedPo={setSelectedPo}
+            />
           )}
         </div>
       </div>
