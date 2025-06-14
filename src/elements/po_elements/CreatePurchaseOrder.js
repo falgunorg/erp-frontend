@@ -6,7 +6,7 @@ import api from "services/api";
 import swal from "sweetalert";
 export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
   console.log("RENDERaREA", renderArea);
-  
+
   const DropdownIndicator = (props) => {
     return (
       <components.DropdownIndicator {...props}>
@@ -338,7 +338,6 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
 
     try {
       const data = new FormData();
-
       // Append form fields
       Object.entries(formData).forEach(([key, value]) => {
         if (Array.isArray(value)) {
@@ -347,25 +346,19 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
           data.append(key, value);
         }
       });
-
-      // Set calculated values
-
+      //Set calculated values
       const precessedOperations = formData.special_operations.join(",");
       data.set("special_operations", precessedOperations);
       data.set("total_qty", totalQuantity);
       data.set("total_value", grandTotalFob);
       data.append("po_items", JSON.stringify(poItems));
-
       for (let i = 0; i < selectedTechpackFiles.length; i++) {
         data.append("attatchments[]", selectedTechpackFiles[i]);
       }
-
       setSpinner(true);
-
       const response = await api.post("/pos-create", data);
-
       if (response.status === 200 && response.data) {
-        // window.location.reload();
+        window.location.reload();
       } else {
         setErrors(response.data.errors || {});
       }
