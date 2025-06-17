@@ -357,8 +357,8 @@ export default function WorkOrders(props) {
                 onClick={() => handlePoDetails(po)}
                 className={
                   po.id === selectedWo?.id
-                    ? "single_tp_item active"
-                    : "single_tp_item"
+                    ? "single_tp_item on_wo active"
+                    : "single_tp_item on_wo"
                 }
               >
                 <div className="tp_text d-flex align-items-center">
@@ -380,7 +380,7 @@ export default function WorkOrders(props) {
                 </div>
                 <div className="tp_text">
                   <span className="step_border"></span>
-                  {po.total_qty} PCS
+                  {po.pc?.title}
                 </div>
                 <div className="tp_text">
                   <span className="step_border"></span>$ {po.total_value}

@@ -33,7 +33,7 @@ export default function WorkOrderDetails({ selectedWo }) {
               <span className="purchase_text">PO</span>
             </div>
             <div className="col-lg-2">
-              <label className="form-label">PO Number</label>
+              <label className="form-label">Pc</label>
             </div>
             <div className="col-lg-2">
               <div className="form-value">{selectedWo.po_number}</div>

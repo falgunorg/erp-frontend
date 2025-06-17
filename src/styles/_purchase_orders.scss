@@ -375,6 +375,10 @@
             color: $black; // Ensure unread text is black when item is active
           }
         }
+
+        &.on_wo{
+           grid-template-columns: 30% 10% 10% 20% 10% 20%;
+        }
       }
 
       .load_more_tp_btn {

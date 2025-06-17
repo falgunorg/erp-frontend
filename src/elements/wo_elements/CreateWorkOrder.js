@@ -4,8 +4,6 @@ import Select, { components } from "react-select";
 import api from "services/api";
 import swal from "sweetalert";
 export default function CreateWorkOrder({ renderArea, setRenderArea }) {
-  console.log("RENDERaREA", renderArea);
-
   const DropdownIndicator = (props) => {
     return (
       <components.DropdownIndicator {...props}>
@@ -87,14 +85,12 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
 
   const buyers = [
     { id: 1, title: "NSLBD" },
-    { id: 2, title: "WALMART" },
-    { id: 3, title: "FIVE STAR LLC" },
-  ];
-
-  const brands = [
-    { id: 1, title: "NEXT" },
-    { id: 2, title: "GARAN" },
-    { id: 3, title: "MANGO" },
+    { id: 2, title: "CHAPS/O5" },
+    { id: 3, title: "BASS PRO" },
+    { id: 4, title: "GARAN" },
+    { id: 5, title: "LC WAIKIKI" },
+    { id: 6, title: "CENTRIC" },
+    { id: 7, title: "HOT SOURCE" },
   ];
 
   const seasons = [
@@ -109,115 +105,28 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
     { id: 3, title: "2023" },
     { id: 4, title: "2022" },
   ];
-
-  const departments = [
-    { id: 1, title: "Mens" },
-    { id: 2, title: "Womens" },
-    { id: 3, title: "Kids" },
-    { id: 4, title: "School Wear" },
-  ];
-
   const companies = [
     { id: 1, title: "JMS" },
     { id: 2, title: "MCL" },
     { id: 3, title: "MBL" },
   ];
 
-  const itemTypes = [
-    { id: 1, title: "TOP" },
-    { id: 2, title: "BOTTOM" },
-    { id: 3, title: "SWIMWEAR" },
-  ];
-
-  const washes = [
-    { id: 1, title: "Garment Wash" },
-    { id: 2, title: "Enzyme Wash" },
-    { id: 3, title: "Bleach Wash" },
-    { id: 4, title: "Stone Wash" },
-    { id: 5, title: "Acid Wash" },
-    { id: 6, title: "Rinse Wash" },
-    { id: 7, title: "Sand Wash" },
-    { id: 8, title: "Silicon Wash" },
-    { id: 9, title: "Moonshine Wash" },
-    { id: 10, title: "Distressed Wash" },
-  ];
-
-  const specialOperations = [
-    { id: 1, title: "Embroadary" },
-    { id: 2, title: "Printing" },
-    { id: 3, title: "Fusing" },
-    { id: 4, title: "Dying" },
-  ];
-
-  const destinations = [
-    { id: 1, title: "UK" },
-    { id: 2, title: "USA" },
-    { id: 3, title: "TURKEY" },
-    { id: 4, title: "UAE" },
-  ];
-
-  const contracts = [
-    { id: 1, title: "PCNXTMCLX001" },
-    { id: 2, title: "PCNXTMCLX002" },
-    { id: 3, title: "PCNXTMCLX003" },
-    { id: 4, title: "PCNXTMCLX004" },
-    { id: 5, title: "PCNXTMCLX005" },
-    { id: 6, title: "PCNXTMCLX006" },
-    { id: 7, title: "PCNXTMCLX007" },
-    { id: 8, title: "PCNXTMCLX008" },
-  ];
-
-  const terms = [
-    { id: 1, title: "FALTR001" },
-    { id: 2, title: "FALTR002" },
-    { id: 3, title: "FALTR003" },
-    { id: 4, title: "FALTR004" },
-    { id: 5, title: "FALTR005" },
-    { id: 6, title: "FALTR006" },
-    { id: 7, title: "FALTR007" },
-    { id: 8, title: "FALTR008" },
-  ];
-
-  const packings = [
-    { id: 1, title: "Dozen in Box" },
-    { id: 2, title: "Dozen in Poly" },
-    { id: 3, title: "Single in Poly" },
-    { id: 4, title: "Single in Hanger" },
-    { id: 5, title: "Pair In Poly" },
-    { id: 6, title: "Other" },
-  ];
-
-  const [selectedTechpackFiles, setSelectedTechpackFiles] = useState([]);
-
+  const [contracts, setContracts] = useState([]);
   const [spinner, setSpinner] = useState(false);
-
-  const [sizes, setSizes] = useState([]);
-  const getSizes = async () => {
+  const getContracts = async () => {
     setSpinner(true);
-    var response = await api.post("/sizes");
+    var response = await api.post("/public-purchase-contracts");
     if (response.status === 200 && response.data) {
-      setSizes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [colors, setColors] = useState([]);
-  const getColors = async () => {
-    setSpinner(true);
-    var response = await api.post("/colors");
-    if (response.status === 200 && response.data) {
-      setColors(response.data.data);
+      setContracts(response.data.data);
     }
     setSpinner(false);
   };
 
   useEffect(() => {
-    getSizes();
-    getColors();
+    getContracts();
   }, []);
 
   const [errors, setErrors] = useState({});
-
   const [formData, setFormData] = useState({
     purchase_contract_id: "",
     company_id: "",
@@ -228,10 +137,34 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
   });
 
   const handleChange = async (name, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === "purchase_contract_id") {
+      try {
+        const response = await api.post("/purchase-contracts-show", {
+          id: value,
+        });
+
+        if (response.status === 200 && response.data) {
+          const data = response.data.data;
+
+          setFormData((prev) => ({
+            ...prev,
+            purchase_contract_id: value,
+            company_id: data.company_id || "",
+            buyer_id: data.buyer_id || "",
+            season: data.season || "",
+            year: data.year || "",
+            description: data.description || "",
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching technical package data:", error);
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const validateForm = () => {
@@ -289,7 +222,8 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
     }
   };
 
- 
+  console.log("FORMDATA", formData);
+
   return (
     <div className="create_technical_pack">
       <div className="row create_tp_header align-items-center">
@@ -371,6 +305,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
           </div>
           <div className="col-lg-4">
             <Select
+              isDisabled
               className={
                 errors.company_id ? "select_wo red-border" : "select_wo"
               }
@@ -398,6 +333,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
           </div>
           <div className="col-lg-4">
             <Select
+              isDisabled
               className={errors.buyer_id ? "select_wo red-border" : "select_wo"}
               placeholder="Buyer"
               options={buyers.map(({ id, title }) => ({
@@ -422,6 +358,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
           </div>
           <div className="col-lg-4">
             <Select
+              isDisabled
               className={errors.season ? "select_wo red-border" : "select_wo"}
               placeholder="Season"
               options={seasons.map(({ id, title }) => ({
@@ -449,6 +386,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
           </div>
           <div className="col-lg-2">
             <Select
+              isDisabled
               className={errors.year ? "select_wo red-border" : "select_wo"}
               placeholder="Year"
               options={years.map(({ id, title }) => ({
@@ -456,11 +394,11 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
                 label: title,
               }))}
               value={years
-                .map(({ id, title }) => ({
+                .map(({ title }) => ({
                   value: title,
                   label: title,
                 }))
-                .find((option) => option.value === formData.season)}
+                .find((option) => option.value === formData.year)}
               onChange={(selectedOption) =>
                 handleChange("year", selectedOption.value)
               }
