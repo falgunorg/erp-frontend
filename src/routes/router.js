@@ -285,17 +285,17 @@ class PrivateRoutes extends Component {
           {/* v-1.1.0 */}
           <PrivateRoute
             exact
-            path="/purchase-orders"
+            path="/purchase-orders/:id?"
             component={PurchaseOrders}
           ></PrivateRoute>
           <PrivateRoute
             exact
-            path="/work-orders"
+            path="/work-orders/:id?"
             component={WorkOrders}
           ></PrivateRoute>
           <PrivateRoute
             exact
-            path="/purchase-contracts"
+            path="/purchase-contracts/:id?"
             component={PurchaseContractsList}
           ></PrivateRoute>
           <PrivateRoute exact path="/tasks" component={Tasks}></PrivateRoute>

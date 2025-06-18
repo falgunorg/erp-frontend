@@ -5,13 +5,12 @@ import Logo from "../assets/images/logos/logo-short.png";
 import CreateWorkOrder from "elements/wo_elements/CreateWorkOrder";
 import WorkOrderDetails from "elements/wo_elements/WorkOrderDetails";
 import EditWorkOrder from "elements/wo_elements/EditWorkOrder";
+import moment from "moment";
 
 import api from "services/api";
 
 import {
   FilterIcon,
-  ArrowRightIcon,
-  ArrowDownIcon,
   ToggleCheckboxIcon,
   ToggleCheckboxActiveIcon,
 } from "../elements/SvgIcons";
@@ -22,26 +21,7 @@ import html2canvas from "html2canvas";
 export default function WorkOrders(props) {
   const [renderArea, setRenderArea] = useState("blank");
 
-  const handleExportPDF = () => {
-    const input = document.querySelector(".po_print_area");
 
-    html2canvas(input, {
-      scale: 2,
-      useCORS: true, // Ensure external images are loaded
-      allowTaint: true,
-      logging: false, // Remove unnecessary console logs
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-
-      // Calculate the PDF height based on content
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save("workorders.pdf");
-    });
-  };
 
   const DropdownIndicator = (props) => {
     return (
@@ -388,7 +368,9 @@ export default function WorkOrders(props) {
                 <div className="tp_text d-flex justify-content-between align-items-center">
                   <div>
                     <span className="step_border"></span>
-                    <span className="date area me-2">{po.delivery_date}</span>
+                    <span className="date area me-2">
+                      {moment(po.updated_at).format("L")}
+                    </span>
                   </div>
 
                   <div className="icon_area">

@@ -237,31 +237,11 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
               />
               <span className="purchase_text">WO</span>
             </div>
-            <div className="col-lg-2">
-              {/* <label className="form-label">PO Number</label> */}
-            </div>
-            <div className="col-lg-2">
-              {/* <input
-                value={formData.po_number}
-                name="po_number"
-                className={errors.po_number ? "red-border" : ""}
-                onChange={(e) => handleChange("po_number", e.target.value)}
-                type="text"
-              /> */}
-            </div>
+            <div className="col-lg-2"></div>
+            <div className="col-lg-2"></div>
 
-            <div className="col-lg-2">
-              {/* <label className="form-label">WO Number</label> */}
-            </div>
-            <div className="col-lg-2">
-              {/* <input
-                className={errors.wo_id ? "red-border" : ""}
-                value={formData.wo_id}
-                name="wo_id"
-                onChange={(e) => handleChange("wo_id", e.target.value)}
-                type="text"
-              /> */}
-            </div>
+            <div className="col-lg-2"></div>
+            <div className="col-lg-2"></div>
           </div>
         </div>
         <div className="col-lg-2">
@@ -269,8 +249,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
             onClick={handleSubmit}
             className="btn btn-default submit_button"
           >
-            {" "}
-            Submit{" "}
+            Submit
           </button>
         </div>
       </div>

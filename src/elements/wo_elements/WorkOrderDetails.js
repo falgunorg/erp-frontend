@@ -30,20 +30,16 @@ export default function WorkOrderDetails({ selectedWo }) {
                 src={Logo}
                 alt="Logo"
               />
-              <span className="purchase_text">PO</span>
+              <span className="purchase_text">WO</span>
             </div>
-            <div className="col-lg-2">
-              <label className="form-label">Pc</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.po_number}</div>
-            </div>
+            <div className="col-lg-2"></div>
+            <div className="col-lg-2"></div>
 
             <div className="col-lg-2">
-              <label className="form-label">WO Number</label>
+              <label className="form-label">PC/LC</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{selectedWo.wo_id}</div>
+              <div className="form-value">{selectedWo.pc?.title}</div>
             </div>
           </div>
         </div>
@@ -62,170 +58,36 @@ export default function WorkOrderDetails({ selectedWo }) {
         <div className="col-lg-12">
           <div className="row">
             <div className="col-lg-2">
-              <label className="form-label">PO Issue</label>
+              <label className="form-label">Buyer</label>
             </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.issued_date}</div>
+            <div className="col-lg-4">
+              <div className="form-value">{selectedWo.buyer?.name}</div>
             </div>
-            <div className="col-lg-2">
-              <label className="form-label">Tech Pack</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">
-                {selectedWo.technical_package?.techpack_number}
-              </div>
-            </div>
-            <div className="col-lg-2">
-              <label className="form-label">Destination</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.destination}</div>
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="col-lg-2">
-              <label className="form-label">PO Delivery</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.delivery_date}</div>
-            </div>
-            <div className="col-lg-2">
-              <label className="form-label">Buyer Style Name</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.buyer_style_name}</div>
-            </div>
-            <div className="col-lg-2">
-              <label className="form-label">Ship Mode</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.ship_mode}</div>
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="col-lg-2">
-              <label className="form-label">PC/LC</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">
-                {selectedWo.purchase_contract?.title ||
-                  selectedWo.purchase_contract_id}
-              </div>
-            </div>
-            <div className="col-lg-2">
-              <label className="form-label">Item Name</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.item_name}</div>
-            </div>
-            <div className="col-lg-2">
-              <label className="form-label">Terms of Shipping</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.shipping_terms}</div>
-            </div>
-          </div>
-
-          <div className="row">
             <div className="col-lg-2">
               <label className="form-label">Factory</label>
             </div>
-            <div className="col-lg-2">
+            <div className="col-lg-4">
               <div className="form-value">{selectedWo.company?.title}</div>
             </div>
-            <div className="col-lg-2">
-              <label className="form-label">Item Type</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.item_type}</div>
-            </div>
-            <div className="col-lg-2">
-              <label className="form-label">Packing Method</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.packing_method}</div>
-            </div>
           </div>
-          <div className="row">
-            <div className="col-lg-2">
-              <label className="form-label">Buyer</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.buyer?.name}</div>
-            </div>
-
-            <div className="col-lg-2">
-              <label className="form-label">Department</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.department}</div>
-            </div>
-
-            <div className="col-lg-2">
-              <label className="form-label">Payment Terms</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.payment_terms}</div>
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="col-lg-2">
-              <label className="form-label">Brand</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.brand}</div>
-            </div>
-
-            <div className="col-lg-2">
-              <label className="form-label">Wash Detail</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.wash_details}</div>
-            </div>
-
-            <div className="col-lg-2">
-              <label className="form-label">Total Quantity</label>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.total_qty}</div>
-            </div>
-          </div>
-
           <div className="row">
             <div className="col-lg-2">
               <label className="form-label">Season</label>
             </div>
-            <div className="col-lg-2">
+            <div className="col-lg-4">
               <div className="form-value">{selectedWo.season}</div>
             </div>
-
-            <div className="col-lg-2"></div>
-            <div className="col-lg-2"></div>
-
             <div className="col-lg-2">
-              <label className="form-label">Total Value</label>
+              <label className="form-label">Year</label>
             </div>
-            <div className="col-lg-2">
-              <div className="form-value">{selectedWo.total_value}</div>
+            <div className="col-lg-4">
+              <div className="form-value">{selectedWo.year}</div>
             </div>
-          </div>
-
-          <div className="row">
             <div className="col-lg-2">
               <label className="form-label">Description</label>
             </div>
-            <div className="col-lg-4">
+            <div className="col-lg-10">
               <div className="form-value">{selectedWo.description}</div>
-            </div>
-
-            <div className="col-lg-2">
-              <label className="form-label">Special Operation</label>
-            </div>
-            <div className="col-lg-4">
-              <div className="form-value">{selectedWo.special_operations}</div>
             </div>
           </div>
         </div>
@@ -237,72 +99,67 @@ export default function WorkOrderDetails({ selectedWo }) {
         className="create_tp_materials_area create_tp_body"
       >
         <div className="d-flex justify-content-between">
-          <h6>PO Details</h6>
+          <h6>PO's</h6>
         </div>
 
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>Color</th>
-              <th>Size</th>
-              <th>Inseam</th>
-              <th>Quantity</th>
-              <th>FOB</th>
-              <th>Total FOB</th>
-            </tr>
-          </thead>
-          <tbody>
-            {selectedWo.items?.map((item, index) => (
-              <tr key={index}>
-                <td>{item.color}</td>
-                <td>{item.size}</td>
-                <td>{item.inseam}</td>
-                <td>{item.qty}</td>
-                <td>{item.fob}</td>
-                <td>{item.total}</td>
+        {selectedWo.pos?.length > 0 ? (
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Brand</th>
+                <th>Department</th>
+                <th>Techpack</th>
+                <th>Item name</th>
+                <th>Quantity</th>
+                <th>Total Value</th>
               </tr>
-            ))}
-            <br />
-
-            {/* GRAND TOTAL */}
-            <tr>
-              <td>
-                <strong>Grand Total</strong>
-              </td>
-              <td></td>
-              <td></td>
-              <td>
-                <strong>{selectedWo.total_qty}</strong>
-              </td>
-              <td></td>
-              <td>
-                $ <strong>{selectedWo.total_value}</strong>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {selectedWo.pos?.map((item, index) => (
+                <tr key={index}>
+                  <td>{item.brand}</td>
+                  <td>{item.department}</td>
+                  <td>{item.technical_package?.techpack_number}</td>
+                  <td>{item.item_name}</td>
+                  <td>{item.total_qty}</td>
+                  <td>${item.total_value}</td>
+                </tr>
+              ))}
+              <br />
+              <tr>
+                <td>
+                  <strong>Grand Total</strong>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                  <strong>
+                    {selectedWo.pos?.reduce(
+                      (sum, item) => sum + (Number(item.total_qty) || 0),
+                      0
+                    )}{" "}
+                    PCS
+                  </strong>
+                </td>
+                <td>
+                  $
+                  <strong>
+                    {selectedWo.pos
+                      ?.reduce(
+                        (sum, item) => sum + (Number(item.total_value) || 0),
+                        0
+                      )
+                      .toFixed(2)}
+                  </strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          <p>No Po is associated to this WorkOrder</p>
+        )}
       </div>
-      <br></br>
-      <br></br>
-
-      <table className="table table-bordered">
-        <tbody>
-          <tr>
-            <td>
-              <b>Merchant:</b> {selectedWo.user?.full_name}{" "}
-            </td>
-            <td>
-              <b>FG ID:</b>
-            </td>
-            <td>
-              <b>FG Pass:</b>
-            </td>
-            <td>
-              <b>Buyer Confirmation Mail:</b>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   );
 }
