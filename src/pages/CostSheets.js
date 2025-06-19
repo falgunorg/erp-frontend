@@ -6,7 +6,7 @@ import {
   ArrowRightIcon,
   ToggleCheckboxIcon,
   ToggleCheckboxActiveIcon,
-} from "../elements/SvgIcons";
+} from "../elements/SvgIcons"; 
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";

@@ -6,7 +6,6 @@ import CreateWorkOrder from "elements/wo_elements/CreateWorkOrder";
 import WorkOrderDetails from "elements/wo_elements/WorkOrderDetails";
 import EditWorkOrder from "elements/wo_elements/EditWorkOrder";
 import moment from "moment";
-
 import api from "services/api";
 
 import {
@@ -20,8 +19,6 @@ import html2canvas from "html2canvas";
 
 export default function WorkOrders(props) {
   const [renderArea, setRenderArea] = useState("blank");
-
-
 
   const DropdownIndicator = (props) => {
     return (
@@ -93,8 +90,9 @@ export default function WorkOrders(props) {
       isInnerSearch: true,
       innerSearchValue: "",
     });
-  }, []);
+  }, []);  
 
+  
   const months = [
     "January",
     "February",
