@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Select, { components } from "react-select";
 import Dropdown from "react-bootstrap/Dropdown";
-import Logo from "../assets/images/logos/logo-short.png";
 import CreateTechnicalPackage from "../elements/techpack/CreateTechnicalPackage";
 import TechnicalPackageDetails from "../elements/techpack/TechnicalPackageDetails";
 import api from "services/api";
+import swal from "sweetalert";
 
 import {
   FilterIcon,
@@ -13,9 +13,6 @@ import {
   ToggleCheckboxIcon,
   ToggleCheckboxActiveIcon,
 } from "../elements/SvgIcons";
-
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 import EditTechnicalPackage from "elements/techpack/EditTechnicalPackage";
 
 export default function TechnicalPackage(props) {
@@ -128,10 +125,9 @@ export default function TechnicalPackage(props) {
   const [markAble, setMarkAble] = useState(false);
 
   const toggleMarkAble = () => {
+    setSelectedItems([]);
     setMarkAble(!markAble);
   };
-
-  
 
   const [technicalPackages, setTechnicalPackages] = useState({});
   const [expandedGroups, setExpandedGroups] = useState({});
@@ -184,10 +180,98 @@ export default function TechnicalPackage(props) {
     setSelectedTp(pkg);
   };
 
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  // Flatten all item IDs
+  const allItemsIds = useMemo(() => {
+    return Object.values(technicalPackages)
+      .flat()
+      .map((item) => item.id);
+  }, [technicalPackages]);
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedItems.length === allItemsIds.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(allItemsIds);
+    }
+  }, [selectedItems, allItemsIds]);
+
+  const toggleSelectChange = useCallback(
+    (id) => {
+      setSelectedItems((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+    },
+    [setSelectedItems]
+  );
+
   const handleDelete = async (id) => {
-    var response = await api.post("/technical-package-delete", { id: id });
-    if (response.status === 200 && response.data) {
-      window.location.reload();
+    const confirmed = await swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this technical package!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    });
+
+    if (confirmed) {
+      try {
+        const response = await api.post("/technical-package-delete", { id });
+        if (response.status === 200 && response.data) {
+          swal(
+            "Deleted!",
+            "The technical package has been deleted.",
+            "success"
+          ).then(() => {
+            window.location.reload();
+          });
+        }
+      } catch (error) {
+        swal("Error", "Something went wrong while deleting.", "error");
+      }
+    }
+  };
+
+  const handleDeleteMultiple = async () => {
+    if (selectedItems.length === 0) {
+      swal(
+        "No items selected",
+        "Please select at least one item to delete.",
+        "info"
+      );
+      return;
+    }
+
+    const confirmed = await swal({
+      title: "Are you sure?",
+      text: "This will permanently delete all selected technical packages!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    });
+
+    if (confirmed) {
+      try {
+        const response = await api.post("/technical-package-delete-multiple", {
+          ids: selectedItems,
+        });
+        if (response.status === 200 && response.data) {
+          swal(
+            "Deleted!",
+            "Selected technical packages have been deleted.",
+            "success"
+          ).then(() => {
+            window.location.reload();
+          });
+        }
+      } catch (error) {
+        swal(
+          "Error",
+          "Something went wrong while deleting multiple items.",
+          "error"
+        );
+      }
     }
   };
 
@@ -205,12 +289,22 @@ export default function TechnicalPackage(props) {
           >
             Edit
           </button>
-          <button
-            onClick={() => handleDelete(selectedTp.id)}
-            disabled={renderArea !== "details"}
-          >
-            Delete
-          </button>
+
+          {selectedItems.length > 1 ? (
+            <button
+              onClick={handleDeleteMultiple}
+              disabled={renderArea !== "details"}
+            >
+              Delete All
+            </button>
+          ) : (
+            <button
+              onClick={() => handleDelete(selectedTp.id)}
+              disabled={renderArea !== "details"}
+            >
+              Delete
+            </button>
+          )}
         </div>
       </div>
 
@@ -309,7 +403,17 @@ export default function TechnicalPackage(props) {
           <div className="purchase_list_header d-flex justify-content-between">
             <div className="purchase_header_left">
               <div className="title">
-                <input type="checkbox" style={{ marginTop: "3px" }} /> TP View
+                {markAble && (
+                  <>
+                    <input
+                      onChange={toggleSelectAll}
+                      checked={selectedItems.length === allItemsIds.length}
+                      type="checkbox"
+                      style={{ marginTop: "3px" }}
+                    />{" "}
+                  </>
+                )}
+                TP View
               </div>
 
               <div className="buttons_group">
@@ -395,7 +499,15 @@ export default function TechnicalPackage(props) {
                             className="marker"
                             style={{ width: "20px", display: "inline-block" }}
                           >
-                            {markAble ? <input type="checkbox" /> : ""}
+                            {markAble ? (
+                              <input
+                                onChange={() => toggleSelectChange(pkg.id)}
+                                type="checkbox"
+                                checked={selectedItems.includes(pkg.id)}
+                              />
+                            ) : (
+                              ""
+                            )}
                           </span>
                           <span className="me-2">{pkg.techpack_number}</span>
                         </div>

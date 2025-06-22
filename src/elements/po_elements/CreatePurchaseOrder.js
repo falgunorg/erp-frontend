@@ -205,9 +205,19 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
     setSpinner(false);
   };
 
+  const [workOrders, setWorkOrders] = useState([]);
+  const getWorkOrders = async () => {
+    const response = await api.post("/public-workorders");
+    if (response.status === 200 && response.data) {
+      const data = response.data.data;
+      setWorkOrders(data);
+    }
+  };
+
   useEffect(() => {
     getSizes();
     getColors();
+    getWorkOrders();
   }, []);
 
   const [errors, setErrors] = useState({});
@@ -466,12 +476,19 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <input
-                className={errors.wo_id ? "red-border" : ""}
-                value={formData.wo_id}
+              <Select
+                className="select_wo"
+                placeholder="WO"
+                options={workOrders.map(({ id, wo_number }) => ({
+                  value: id,
+                  label: wo_number,
+                }))}
+                styles={customStyles}
+                components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleChange("wo_id", selectedOption.value)
+                }
                 name="wo_id"
-                onChange={(e) => handleChange("wo_id", e.target.value)}
-                type="text"
               />
             </div>
           </div>

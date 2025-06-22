@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import Select, { components } from "react-select";
-import { Modal, Button, Spinner } from "react-bootstrap";
-import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
 
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
@@ -36,6 +34,7 @@ export default function CreateCostSheet(props) {
       minHeight: "21px",
       fontSize: "12px",
       height: "21px",
+      minWidth: "100px",
       background: "#ECECEC",
       lineHeight: "19px",
       boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.18)",
@@ -45,7 +44,7 @@ export default function CreateCostSheet(props) {
     valueContainer: (provided, state) => ({
       ...provided,
       height: "21px",
-      padding: "0 6px",
+      padding: "0 3px",
     }),
 
     input: (provided, state) => ({
@@ -66,13 +65,13 @@ export default function CreateCostSheet(props) {
     menu: (provided) => ({
       ...provided,
       fontSize: "12px", // Set menu font size to 12px
-      padding: "3px", // Ensure padding is a maximum of 3px
+      padding: "2px", // Ensure padding is a maximum of 3px
     }),
 
     option: (provided, state) => ({
       ...provided,
       fontSize: "12px", // Ensure each option has 12px font size
-      padding: "3px", // Limit option padding to 3px
+      padding: "2px", // Limit option padding to 3px
       backgroundColor: state.isSelected
         ? "#ef9a3e"
         : state.isFocused
@@ -242,16 +241,18 @@ export default function CreateCostSheet(props) {
   // Function to add a row within the respective materialType
   const addRow = (materialTypeId) => {
     const newItem = {
+      item_type_id: materialTypeId,
       item_id: "",
       item_name: "",
-      description: "",
+      item_details: "",
       color: "",
       size: "",
       unit: "",
       position: "",
-      actual: "",
-      wastage_parcentage: 0,
-      cons_total: "",
+      supplier_id: "",
+      consumption: "",
+      wastage: 0,
+      total: "",
       unit_price: "",
       total_price: "",
     };
@@ -272,12 +273,12 @@ export default function CreateCostSheet(props) {
       };
 
       // Parse values
-      const actual = parseFloat(currentItem.actual) || 0;
-      const wastagePercentage = parseFloat(currentItem.wastage_parcentage) || 0;
+      const consumption = parseFloat(currentItem.consumption) || 0;
+      const wastagePercentage = parseFloat(currentItem.wastage) || 0;
       const unitPrice = parseFloat(currentItem.unit_price) || 0;
-      // Recalculate cons_total
-      const consTotal = actual + (actual * wastagePercentage) / 100;
-      currentItem.cons_total = consTotal.toFixed(2);
+      // Recalculate total
+      const consTotal = consumption + (consumption * wastagePercentage) / 100;
+      currentItem.total = consTotal.toFixed(2);
 
       // Recalculate total_price
       const totalPrice = consTotal * unitPrice;
@@ -550,345 +551,351 @@ export default function CreateCostSheet(props) {
 
       <div className="create_tp_materials_area create_tp_body">
         <h6>Material Descriptions</h6>
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>Item Type</th>
-              <th>Item Name</th>
-              <th>Item Details</th>
-              <th>Color</th>
-              <th>Size</th>
-              <th>Position</th>
-              <th>Supplier</th>
-              <th>Unit</th>
-              <th>Consmp</th>
-              <th>Wstg %</th>
-              <th>Total</th>
-              <th>Unit Price</th>
-              <th>Price Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {materialTypes.map((materialType) => (
-              <React.Fragment key={materialType.id}>
-                <tr>
-                  <td
-                    colSpan={13}
-                    style={{
-                      background: "#ECECEC",
-                      cursor: "pointer",
-                      height: "20px",
-                    }}
-                  >
-                    <div
-                      className="materialType"
+
+        <div className="table-responsive">
+          <table className="table table-bordered">
+            <thead style={{ verticalAlign: "middle" }}>
+              <tr>
+                <th>Item Type</th>
+                <th>Item Name</th>
+                <th>Item Details</th>
+                <th>Color</th>
+                <th>Size</th>
+                <th>Position</th>
+                <th>Supplier</th>
+                <th>Unit</th>
+                <th>Consmp</th>
+                <th>Wstg %</th>
+                <th>Total</th>
+                <th>Unit Price</th>
+                <th>Price Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {materialTypes.map((materialType) => (
+                <React.Fragment key={materialType.id}>
+                  <tr>
+                    <td
+                      colSpan={13}
                       style={{
-                        padding: "0 5px",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: "5px",
-                        alignItems: "center",
-                        fontSize: "12px",
+                        background: "#ECECEC",
+                        cursor: "pointer",
+                        height: "20px",
                       }}
                     >
-                      <div>
-                        <span
-                          onClick={() => toggleMaterialType(materialType.id)}
-                          style={{ cursor: "pointer" }}
-                        >
-                          {collapsedMaterialTypes[materialType.id] ? (
-                            <ArrowRightIcon />
-                          ) : (
-                            <ArrowDownIcon />
-                          )}
-                        </span>{" "}
-                        <span
-                          onClick={() => toggleMaterialType(materialType.id)}
-                          className="me-2"
-                        >
-                          <strong>{materialType.title}</strong>
-                        </span>
-                        <span
-                          onClick={() => addRow(materialType.id)}
-                          style={{
-                            background: "#f1a655",
-                            height: "17px",
-                            width: "17px",
-                            borderRadius: "50%",
-                            textAlign: "center",
-                            lineHeight: "17px",
-                            fontSize: "11px",
-                            color: "white",
-                            display: "inline-block",
-                          }}
-                        >
-                          <i className="fa fa-plus"></i>
-                        </span>
-                      </div>
-                      <div>
-                        <strong>$ {getGroupTotalPrice(materialType.id)}</strong>
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-
-                {/* Show items only if the materialType is expanded */}
-                {!collapsedMaterialTypes[materialType.id] &&
-                  (consumptionItems[materialType.id] || []).map(
-                    (item, index) => (
-                      <tr key={`${materialType.id}-${index}`}>
-                        <td>
-                          <select
-                            required
-                            value={item.item_id}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "item_id",
-                                e.target.value
-                              )
-                            }
-                            className="form-select"
-                          >
-                            <option value="">Select Item</option>
-
-                            {items
-                              .filter(
-                                (it) => it.item_type_id === materialType.id
-                              ) // Filter items based on materialType.id
-                              .map((it) => (
-                                <option key={it.id} value={it.id}>
-                                  {it.title}
-                                </option>
-                              ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <input
-                            type="text"
-                            value={item.item_name}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "item_name",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <textarea
-                            value={item.description}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "description",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <select
-                            value={item.color}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "color",
-                                e.target.value
-                              )
-                            }
-                          >
-                            <option value="">Select</option>
-                            {colors.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <select
-                            value={item.size}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "size",
-                                e.target.value
-                              )
-                            }
-                          >
-                            <option value="">Select</option>
-                            {sizes.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "80px" }}
-                            type="text"
-                            value={item.position}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "position",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <select
-                            value={item.supplier}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "supplier",
-                                e.target.value
-                              )
-                            }
-                          >
-                            <option value="">Select Supplier</option>
-                            {suppliers.map((it) => (
-                              <option key={it.id} value={it.id}>
-                                {it.company_name}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <select
-                            className="text-lowercase"
-                            value={item.unit}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "unit",
-                                e.target.value
-                              )
-                            }
-                          >
-                            <option value="">Select</option>
-                            {units.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "70px" }}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.actual}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "actual",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "50px" }}
-                            type="number"
-                            min="0"
-                            value={item.wastage_parcentage}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "wastage_parcentage",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "70px" }}
-                            type="text"
-                            min="0"
-                            readOnly
-                            value={item.cons_total}
-                            className="me-1"
-                          />
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "50px" }}
-                            type="number"
-                            min="0"
-                            value={item.unit_price}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "unit_price",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td className="d-flex align-items-center">
-                          <input
-                            style={{ width: "70px" }}
-                            type="text"
-                            min="0"
-                            readOnly
-                            value={item.total_price}
-                            className="me-1"
-                          />
-                          <i
+                      <div
+                        className="materialType"
+                        style={{
+                          padding: "0 5px",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "5px",
+                          alignItems: "center",
+                          fontSize: "12px",
+                        }}
+                      >
+                        <div>
+                          <span
+                            onClick={() => toggleMaterialType(materialType.id)}
                             style={{ cursor: "pointer" }}
-                            onClick={() => removeRow(materialType.id, index)}
-                            className="fa fa-times text-danger me-2"
-                          ></i>
-                        </td>
-                      </tr>
-                    )
-                  )}
-              </React.Fragment>
-            ))}
+                          >
+                            {collapsedMaterialTypes[materialType.id] ? (
+                              <ArrowRightIcon />
+                            ) : (
+                              <ArrowDownIcon />
+                            )}
+                          </span>{" "}
+                          <span
+                            onClick={() => toggleMaterialType(materialType.id)}
+                            className="me-2"
+                          >
+                            <strong>{materialType.title}</strong>
+                          </span>
+                          <span
+                            onClick={() => addRow(materialType.id)}
+                            style={{
+                              background: "#f1a655",
+                              height: "17px",
+                              width: "17px",
+                              borderRadius: "50%",
+                              textAlign: "center",
+                              lineHeight: "17px",
+                              fontSize: "11px",
+                              color: "white",
+                              display: "inline-block",
+                            }}
+                          >
+                            <i className="fa fa-plus"></i>
+                          </span>
+                        </div>
+                        <div>
+                          <strong>
+                            $ {getGroupTotalPrice(materialType.id)}
+                          </strong>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
 
-            <tr>
-              <td colSpan={12}>
-                <strong>FOB</strong>
-              </td>
-              <td className="text-end">
-                <strong>$ {getGrandTotalFob()}</strong>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                  {/* Show items only if the materialType is expanded */}
+                  {!collapsedMaterialTypes[materialType.id] &&
+                    (consumptionItems[materialType.id] || []).map(
+                      (item, index) => (
+                        <tr key={`${materialType.id}-${index}`}>
+                          <td>
+                            <Select
+                              style={{ width: "100px" }}
+                              className="select_wo"
+                              placeholder="Item"
+                              options={items
+                                .filter(
+                                  (it) => it.item_type_id === materialType.id
+                                )
+                                .map(({ id, title }) => ({
+                                  value: id,
+                                  label: title,
+                                }))}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "item_id",
+                                  selectedOption?.value
+                                )
+                              }
+                              styles={customStyles}
+                              components={{ DropdownIndicator }}
+                            />
+                          </td>
+
+                          <td>
+                            <input
+                              style={{ width: "100px" }}
+                              type="text"
+                              value={item.item_name}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "item_name",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <textarea
+                              style={{ width: "100px" }}
+                              value={item.description}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "description",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <Select
+                              className="select_wo"
+                              placeholder="Color"
+                              options={colors.map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "color",
+                                  selectedOption?.value
+                                )
+                              }
+                              styles={customStyles}
+                              components={{ DropdownIndicator }}
+                            />
+                          </td>
+
+                          <td>
+                            <Select
+                              className="select_wo"
+                              placeholder="Size"
+                              options={sizes.map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "size",
+                                  selectedOption?.value
+                                )
+                              }
+                              styles={customStyles}
+                              components={{ DropdownIndicator }}
+                            />
+                          </td>
+
+                          <td>
+                            <input
+                              style={{ width: "100px" }}
+                              type="text"
+                              value={item.position}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "position",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <Select
+                              className="select_wo"
+                              placeholder="Select Supplier"
+                              options={suppliers.map(
+                                ({ id, company_name }) => ({
+                                  value: id,
+                                  label: company_name,
+                                })
+                              )}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "supplier_id",
+                                  selectedOption?.value
+                                )
+                              }
+                              styles={customStyles}
+                              components={{ DropdownIndicator }}
+                            />
+                          </td>
+
+                          <td>
+                            <Select
+                              className="select_wo"
+                              placeholder="Unit"
+                              options={units.map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "unit",
+                                  selectedOption?.value
+                                )
+                              }
+                              styles={customStyles}
+                              components={{ DropdownIndicator }}
+                            />
+                          </td>
+
+                          <td>
+                            <input
+                              style={{ width: "100px" }}
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={item.consumption}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "consumption",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <input
+                              style={{ width: "100px" }}
+                              type="number"
+                              min="0"
+                              value={item.wastage}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "wastage",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <input
+                              style={{ width: "100px" }}
+                              type="text"
+                              min="0"
+                              readOnly
+                              value={item.total}
+                              className="me-1"
+                            />
+                          </td>
+
+                          <td>
+                            <input
+                              style={{ width: "100px" }}
+                              type="number"
+                              min="0"
+                              value={item.unit_price}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "unit_price",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td className="d-flex align-items-center">
+                            <input
+                              style={{ width: "100px" }}
+                              type="text"
+                              min="0"
+                              readOnly
+                              value={item.total_price}
+                              className="me-1"
+                            />
+                            <i
+                              style={{ cursor: "pointer" }}
+                              onClick={() => removeRow(materialType.id, index)}
+                              className="fa fa-times text-danger me-2"
+                            ></i>
+                          </td>
+                        </tr>
+                      )
+                    )}
+                </React.Fragment>
+              ))}
+
+              <tr>
+                <td colSpan={12}>
+                  <strong>FOB</strong>
+                </td>
+                <td className="text-end">
+                  <strong>$ {getGrandTotalFob()}</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -266,12 +266,32 @@ export default function EditTechnicalPackage({ tpDetails }) {
     setSpinner(false);
   };
 
+  const [pos, setPos] = useState([]);
+  const getPos = async () => {
+    const response = await api.post("/public-pos");
+    if (response.status === 200 && response.data) {
+      const data = response.data.data;
+      setPos(data);
+    }
+  };
+
+  const [workOrders, setWorkOrders] = useState([]);
+  const getWorkOrders = async () => {
+    const response = await api.post("/public-workorders");
+    if (response.status === 200 && response.data) {
+      const data = response.data.data;
+      setWorkOrders(data);
+    }
+  };
+
   useEffect(() => {
     getItems();
     getSizes();
     getColors();
     getUnits();
     getMaterialTypes();
+    getPos();
+    getWorkOrders();
   }, []);
 
   const [collapsedMaterialTypes, setCollapsedMaterialTypes] = useState({}); // Track collapsed state
@@ -567,11 +587,25 @@ export default function EditTechnicalPackage({ tpDetails }) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <input
-                type="text"
+              <Select
+                className="select_wo"
+                placeholder="PO"
+                options={pos.map(({ id, po_number }) => ({
+                  value: id,
+                  label: po_number,
+                }))}
+                value={pos
+                  .map(({ id, po_number }) => ({
+                    value: id,
+                    label: po_number,
+                  }))
+                  .find((option) => option.value === formDataSet.po_id)}
+                styles={customStyles}
+                components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("po_id", selectedOption.value)
+                }
                 name="po_id"
-                value={formDataSet.po_id}
-                onChange={(e) => handleInputChange("po_id", e.target.value)}
               />
             </div>
 
@@ -579,11 +613,25 @@ export default function EditTechnicalPackage({ tpDetails }) {
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <input
+              <Select
+                className="select_wo"
+                placeholder="PO"
+                options={workOrders.map(({ id, wo_number }) => ({
+                  value: id,
+                  label: wo_number,
+                }))}
+                value={workOrders
+                  .map(({ id, wo_number }) => ({
+                    value: id,
+                    label: wo_number,
+                  }))
+                  .find((option) => option.value === formDataSet.wo_id)}
+                styles={customStyles}
+                components={{ DropdownIndicator }}
+                onChange={(selectedOption) =>
+                  handleInputChange("wo_id", selectedOption.value)
+                }
                 name="wo_id"
-                value={formDataSet.wo_id}
-                onChange={(e) => handleInputChange("wo_id", e.target.value)}
-                type="text"
               />
             </div>
           </div>
