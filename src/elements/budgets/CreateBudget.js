@@ -477,7 +477,6 @@ export default function CreateBudget(props) {
         </div>
       </div>
       <br></br>
-
       <div className="create_tp_materials_area create_tp_body">
         <div className="d-flex justify-content-between">
           <h6>Material Descriptions</h6>
