@@ -316,7 +316,7 @@ class PrivateRoutes extends Component {
           ></PrivateRoute>
           <PrivateRoute
             exact
-            path="/cost-sheets"
+            path="/cost-sheets/:id?"
             component={CostSheets}
           ></PrivateRoute>
           <PrivateRoute

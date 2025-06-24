@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import Select, { components } from "react-select";
 import { Modal, Button, Spinner } from "react-bootstrap";
-import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
 
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";

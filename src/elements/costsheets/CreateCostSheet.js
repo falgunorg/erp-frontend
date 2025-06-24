@@ -226,20 +226,20 @@ export default function CreateCostSheet(props) {
         [field]: value,
       };
 
-      // Parse values
-      const consumption = parseFloat(currentItem.consumption) || 0;
-      const wastagePercentage = parseFloat(currentItem.wastage) || 0;
-      const unitPrice = parseFloat(currentItem.unit_price) || 0;
-      // Recalculate total
-      const consTotal = consumption + (consumption * wastagePercentage) / 100;
-      currentItem.total = consTotal.toFixed(2);
+      const itemType = itemTypes.find((it) => it.id === itemTypeId);
+      const isCMType = itemType?.title === "CM";
 
-      // Recalculate total_price
-      const totalPrice = consTotal * unitPrice;
-      currentItem.total_price = totalPrice.toFixed(2);
+      if (!isCMType) {
+        const consumption = parseFloat(currentItem.consumption) || 0;
+        const wastagePercentage = parseFloat(currentItem.wastage) || 0;
+        const unitPrice = parseFloat(currentItem.unit_price) || 0;
+        const consTotal = consumption + (consumption * wastagePercentage) / 100;
+        currentItem.total = consTotal.toFixed(2);
+        const totalPrice = consTotal * unitPrice;
+        currentItem.total_price = totalPrice.toFixed(2);
+      }
 
       updatedItemTypeItems[index] = currentItem;
-
       return {
         ...prevItems,
         [itemTypeId]: updatedItemTypeItems,
@@ -268,6 +268,35 @@ export default function CreateCostSheet(props) {
       .toFixed(2);
   };
 
+  useEffect(() => {
+    const allItems = Object.values(consumptionItems).flat();
+
+    // Calculate total FOB
+    const totalFob = allItems.reduce((sum, item) => {
+      const totalPrice = parseFloat(item.total_price) || 0;
+      return sum + totalPrice;
+    }, 0);
+
+    // Get CM item_type_id(s)
+    const cmItemTypeIds = itemTypes
+      .filter((type) => type.title === "CM")
+      .map((type) => type.id);
+
+    // Filter CM items and calculate total CM
+    const totalCM = allItems
+      .filter((item) => cmItemTypeIds.includes(item.item_type_id))
+      .reduce((sum, item) => {
+        const totalPrice = parseFloat(item.total_price) || 0;
+        return sum + totalPrice;
+      }, 0);
+
+    // Set both values
+    setFormData((prev) => ({
+      ...prev,
+      fob: totalFob.toFixed(2),
+      cm: totalCM.toFixed(2),
+    }));
+  }, [consumptionItems, itemTypes]);
   const [formData, setFormData] = useState({
     po_id: "",
     wo_id: "",
@@ -283,8 +312,8 @@ export default function CreateCostSheet(props) {
     wash_details: "",
     special_operations: "",
     factory_cpm: "",
-    fob: "",
-    cm: "",
+    fob: 0,
+    cm: 0,
   });
 
   const handleFormChange = async (name, value) => {
@@ -299,7 +328,6 @@ export default function CreateCostSheet(props) {
 
           setFormData((prev) => ({
             ...prev,
-
             technical_package_id: value,
             buyer: data.buyer.name || "",
             buyer_style_name: data.buyer_style_name || "",
@@ -368,11 +396,14 @@ export default function CreateCostSheet(props) {
       formErrors.fob = "fob is required";
     }
 
+    if (!formData.cm) {
+      formErrors.cm = "CM is required";
+    }
+
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
 
-  const tp_items = Object.values(consumptionItems).flat();
   const handleSubmit = async (event) => {
     event.preventDefault();
     const tp_items = Object.values(consumptionItems).flat();
@@ -386,12 +417,11 @@ export default function CreateCostSheet(props) {
 
     if (validateForm()) {
       var data = new FormData();
-      data.append("technical_package_id", formData.po_id);
-      data.append("tp_items", JSON.stringify(tp_items));
+      data.append("technical_package_id", formData.technical_package_id);
+      data.append("costing_items", JSON.stringify(tp_items));
       data.append("cm", formData.cm);
+      data.append("factory_cpm", formData.factory_cpm);
       data.append("fob", formData.fob);
-      data.append("costing_items", formData.factory_cpm);
-
       setSpinner(true);
       var response = await api.post("/costings-create", data);
       if (response.status === 200 && response.data) {
@@ -422,7 +452,6 @@ export default function CreateCostSheet(props) {
             <div className="col-lg-2">
               <input disabled type="text" />
             </div>
-
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
@@ -450,7 +479,11 @@ export default function CreateCostSheet(props) {
             </div>
             <div className="col-lg-3">
               <Select
-                className="select_wo"
+                className={
+                  errors.technical_package_id
+                    ? "select_wo red-border"
+                    : "select_wo"
+                }
                 placeholder="Techpack"
                 options={techpacks.map(({ id, techpack_number }) => ({
                   value: id,
@@ -465,6 +498,11 @@ export default function CreateCostSheet(props) {
                 styles={customStyles}
                 components={{ DropdownIndicator }}
               />
+              {errors.technical_package_id && (
+                <small className="text-danger">
+                  {errors.technical_package_id}
+                </small>
+              )}
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer</label>
@@ -524,6 +562,7 @@ export default function CreateCostSheet(props) {
             </div>
             <div className="col-lg-3">
               <input
+                className={errors.factory_cpm ? "red-border" : ""}
                 onChange={(e) =>
                   handleFormChange("factory_cpm", e.target.value)
                 }
@@ -546,8 +585,10 @@ export default function CreateCostSheet(props) {
             </div>
             <div className="col-lg-3">
               <input
+                className={errors.fob ? "red-border" : ""}
                 onChange={(e) => handleFormChange("fob", e.target.value)}
                 type="number"
+                readOnly
                 min={0}
                 step={0.1}
                 value={formData.fob}
@@ -568,6 +609,7 @@ export default function CreateCostSheet(props) {
             </div>
             <div className="col-lg-3">
               <input
+                className={errors.cm ? "red-border" : ""}
                 onChange={(e) => handleFormChange("cm", e.target.value)}
                 type="number"
                 min={0}
@@ -608,357 +650,385 @@ export default function CreateCostSheet(props) {
               </tr>
             </thead>
             <tbody>
-              {itemTypes.map((itemType) => (
-                <React.Fragment key={itemType.id}>
-                  <tr>
-                    <td
-                      colSpan={13}
-                      style={{
-                        background: "#ECECEC",
-                        cursor: "pointer",
-                        height: "20px",
-                      }}
-                    >
-                      <div
-                        className="itemType"
+              {itemTypes.map((itemType) => {
+                const isCMType = itemType.title === "CM";
+
+                return (
+                  <React.Fragment key={itemType.id}>
+                    <tr>
+                      <td
+                        colSpan={13}
                         style={{
-                          padding: "0 5px",
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: "5px",
-                          alignItems: "center",
-                          fontSize: "12px",
+                          background: "#ECECEC",
+                          cursor: "pointer",
+                          height: "20px",
                         }}
                       >
-                        <div>
-                          <span
-                            onClick={() => toggleItemType(itemType.id)}
-                            style={{ cursor: "pointer" }}
-                          >
-                            {collapsedItemTypes[itemType.id] ? (
-                              <ArrowRightIcon />
-                            ) : (
-                              <ArrowDownIcon />
+                        <div
+                          className="itemType"
+                          style={{
+                            padding: "0 5px",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            gap: "5px",
+                            alignItems: "center",
+                            fontSize: "12px",
+                          }}
+                        >
+                          <div>
+                            <span
+                              onClick={() => toggleItemType(itemType.id)}
+                              style={{ cursor: "pointer" }}
+                            >
+                              {collapsedItemTypes[itemType.id] ? (
+                                <ArrowRightIcon />
+                              ) : (
+                                <ArrowDownIcon />
+                              )}
+                            </span>{" "}
+                            <span
+                              onClick={() => toggleItemType(itemType.id)}
+                              className="me-2"
+                            >
+                              <strong>{itemType.title}</strong>
+                            </span>
+                            {isCMType && (
+                              <span
+                                onClick={() => addRow(itemType.id)}
+                                style={{
+                                  background: "#f1a655",
+                                  height: "17px",
+                                  width: "17px",
+                                  borderRadius: "50%",
+                                  textAlign: "center",
+                                  lineHeight: "17px",
+                                  fontSize: "11px",
+                                  color: "white",
+                                  display: "inline-block",
+                                }}
+                              >
+                                <i className="fa fa-plus"></i>
+                              </span>
                             )}
-                          </span>{" "}
-                          <span
-                            onClick={() => toggleItemType(itemType.id)}
-                            className="me-2"
-                          >
-                            <strong>{itemType.title}</strong>
-                          </span>
-                          <span
-                            onClick={() => addRow(itemType.id)}
-                            style={{
-                              background: "#f1a655",
-                              height: "17px",
-                              width: "17px",
-                              borderRadius: "50%",
-                              textAlign: "center",
-                              lineHeight: "17px",
-                              fontSize: "11px",
-                              color: "white",
-                              display: "inline-block",
-                            }}
-                          >
-                            <i className="fa fa-plus"></i>
-                          </span>
+                          </div>
+                          <div>
+                            <strong>$ {getGroupTotalPrice(itemType.id)}</strong>
+                          </div>
                         </div>
-                        <div>
-                          <strong>$ {getGroupTotalPrice(itemType.id)}</strong>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
+                      </td>
+                    </tr>
 
-                  {/* Show items only if the itemType is expanded */}
-                  {!collapsedItemTypes[itemType.id] &&
-                    (consumptionItems[itemType.id] || []).map((item, index) => (
-                      <tr key={`${itemType.id}-${index}`}>
-                        <td>
-                          <Select
-                            style={{ width: "100px" }}
-                            className="select_wo"
-                            placeholder="Item"
-                            options={items
-                              .filter((it) => it.item_type_id === itemType.id)
-                              .map(({ id, title }) => ({
-                                value: id,
-                                label: title,
-                              }))}
-                            value={items
-                              .filter((it) => it.item_type_id === itemType.id)
-                              .map(({ id, title }) => ({
-                                value: id,
-                                label: title,
-                              }))
-                              .find(
-                                (option) =>
-                                  option.value ===
-                                  (consumptionItems[itemType.id]?.[index]
-                                    ?.item_id || null)
-                              )}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "item_id",
-                                selectedOption?.value
-                              )
-                            }
-                            styles={customStyles}
-                            components={{ DropdownIndicator }}
-                          />
-                        </td>
+                    {!collapsedItemTypes[itemType.id] &&
+                      (consumptionItems[itemType.id] || []).map(
+                        (item, index) => (
+                          <tr key={`${itemType.id}-${index}`}>
+                            {/* item_id (always shown) */}
+                            <td>
+                              <Select
+                                style={{ width: "100px" }}
+                                className="select_wo"
+                                placeholder="Item"
+                                options={items
+                                  .filter(
+                                    (it) => it.item_type_id === itemType.id
+                                  )
+                                  .map(({ id, title }) => ({
+                                    value: id,
+                                    label: title,
+                                  }))}
+                                value={items
+                                  .filter(
+                                    (it) => it.item_type_id === itemType.id
+                                  )
+                                  .map(({ id, title }) => ({
+                                    value: id,
+                                    label: title,
+                                  }))
+                                  .find(
+                                    (option) =>
+                                      option.value ===
+                                      (consumptionItems[itemType.id]?.[index]
+                                        ?.item_id || null)
+                                  )}
+                                onChange={(selectedOption) =>
+                                  handleItemChange(
+                                    itemType.id,
+                                    index,
+                                    "item_id",
+                                    selectedOption?.value
+                                  )
+                                }
+                                styles={customStyles}
+                                components={{ DropdownIndicator }}
+                              />
+                            </td>
 
-                        <td>
-                          <input
-                            style={{ width: "100px" }}
-                            type="text"
-                            value={item.item_name}
-                            onChange={(e) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "item_name",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
+                            {!isCMType ? (
+                              <>
+                                <td>
+                                  <input
+                                    style={{ width: "100px" }}
+                                    type="text"
+                                    value={item.item_name}
+                                    onChange={(e) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "item_name",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </td>
 
-                        <td>
-                          <textarea
-                            style={{ width: "100px" }}
-                            value={item.item_details}
-                            onChange={(e) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "item_details",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
+                                <td>
+                                  <textarea
+                                    style={{ width: "100px" }}
+                                    value={item.item_details}
+                                    onChange={(e) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "item_details",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </td>
 
-                        <td>
-                          <Select
-                            className="select_wo"
-                            placeholder="Color"
-                            options={colors.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={colors
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find(
-                                (option) =>
-                                  option.value ===
-                                  (consumptionItems[itemType.id]?.[index]
-                                    ?.color || null)
-                              )}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "color",
-                                selectedOption?.value
-                              )
-                            }
-                            styles={customStyles}
-                            components={{ DropdownIndicator }}
-                          />
-                        </td>
+                                <td>
+                                  <Select
+                                    className="select_wo"
+                                    placeholder="Color"
+                                    options={colors.map(({ title }) => ({
+                                      value: title,
+                                      label: title,
+                                    }))}
+                                    value={colors
+                                      .map(({ title }) => ({
+                                        value: title,
+                                        label: title,
+                                      }))
+                                      .find(
+                                        (option) => option.value === item.color
+                                      )}
+                                    onChange={(selectedOption) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "color",
+                                        selectedOption?.value
+                                      )
+                                    }
+                                    styles={customStyles}
+                                    components={{ DropdownIndicator }}
+                                  />
+                                </td>
 
-                        <td>
-                          <Select
-                            className="select_wo"
-                            placeholder="Size"
-                            options={sizes.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={sizes
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find(
-                                (option) =>
-                                  option.value ===
-                                  (consumptionItems[itemType.id]?.[index]
-                                    ?.size || null)
-                              )}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "size",
-                                selectedOption?.value
-                              )
-                            }
-                            styles={customStyles}
-                            components={{ DropdownIndicator }}
-                          />
-                        </td>
+                                <td>
+                                  <Select
+                                    className="select_wo"
+                                    placeholder="Size"
+                                    options={sizes.map(({ title }) => ({
+                                      value: title,
+                                      label: title,
+                                    }))}
+                                    value={sizes
+                                      .map(({ title }) => ({
+                                        value: title,
+                                        label: title,
+                                      }))
+                                      .find(
+                                        (option) => option.value === item.size
+                                      )}
+                                    onChange={(selectedOption) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "size",
+                                        selectedOption?.value
+                                      )
+                                    }
+                                    styles={customStyles}
+                                    components={{ DropdownIndicator }}
+                                  />
+                                </td>
 
-                        <td>
-                          <input
-                            style={{ width: "100px" }}
-                            type="text"
-                            value={item.position}
-                            onChange={(e) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "position",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
+                                <td>
+                                  <input
+                                    style={{ width: "100px" }}
+                                    type="text"
+                                    value={item.position}
+                                    onChange={(e) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "position",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </td>
 
-                        <td>
-                          <Select
-                            className="select_wo"
-                            placeholder="Select Supplier"
-                            options={suppliers.map(({ id, company_name }) => ({
-                              value: id,
-                              label: company_name,
-                            }))}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "supplier_id",
-                                selectedOption?.value
-                              )
-                            }
-                            styles={customStyles}
-                            components={{ DropdownIndicator }}
-                          />
-                        </td>
+                                <td>
+                                  <Select
+                                    className="select_wo"
+                                    placeholder="Select Supplier"
+                                    options={suppliers.map(
+                                      ({ id, company_name }) => ({
+                                        value: id,
+                                        label: company_name,
+                                      })
+                                    )}
+                                    value={suppliers
+                                      .map(({ id, company_name }) => ({
+                                        value: id,
+                                        label: company_name,
+                                      }))
+                                      .find(
+                                        (option) =>
+                                          option.value === item.supplier_id
+                                      )}
+                                    onChange={(selectedOption) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "supplier_id",
+                                        selectedOption?.value
+                                      )
+                                    }
+                                    styles={customStyles}
+                                    components={{ DropdownIndicator }}
+                                  />
+                                </td>
 
-                        <td>
-                          <Select
-                            className="select_wo"
-                            placeholder="Unit"
-                            options={units.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={units
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find(
-                                (option) =>
-                                  option.value ===
-                                  (consumptionItems[itemType.id]?.[index]
-                                    ?.unit || null)
-                              )}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "unit",
-                                selectedOption?.value
-                              )
-                            }
-                            styles={customStyles}
-                            components={{ DropdownIndicator }}
-                          />
-                        </td>
+                                <td>
+                                  <Select
+                                    className="select_wo"
+                                    placeholder="Unit"
+                                    options={units.map(({ title }) => ({
+                                      value: title,
+                                      label: title,
+                                    }))}
+                                    value={units
+                                      .map(({ title }) => ({
+                                        value: title,
+                                        label: title,
+                                      }))
+                                      .find(
+                                        (option) => option.value === item.unit
+                                      )}
+                                    onChange={(selectedOption) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "unit",
+                                        selectedOption?.value
+                                      )
+                                    }
+                                    styles={customStyles}
+                                    components={{ DropdownIndicator }}
+                                  />
+                                </td>
 
-                        <td>
-                          <input
-                            style={{ width: "100px" }}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.consumption}
-                            onChange={(e) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "consumption",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
+                                <td>
+                                  <input
+                                    style={{ width: "100px" }}
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={item.consumption}
+                                    onChange={(e) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "consumption",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </td>
 
-                        <td>
-                          <input
-                            style={{ width: "100px" }}
-                            type="number"
-                            min="0"
-                            value={item.wastage}
-                            onChange={(e) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "wastage",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
+                                <td>
+                                  <input
+                                    style={{ width: "100px" }}
+                                    type="number"
+                                    min="0"
+                                    value={item.wastage}
+                                    onChange={(e) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "wastage",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </td>
 
-                        <td>
-                          <input
-                            style={{ width: "100px" }}
-                            type="text"
-                            min="0"
-                            readOnly
-                            value={item.total}
-                            className="me-1"
-                          />
-                        </td>
+                                <td>
+                                  <input
+                                    style={{ width: "100px" }}
+                                    type="text"
+                                    readOnly
+                                    value={item.total}
+                                    className="me-1"
+                                  />
+                                </td>
 
-                        <td>
-                          <input
-                            style={{ width: "100px" }}
-                            type="number"
-                            min="0"
-                            required
-                            value={item.unit_price}
-                            onChange={(e) =>
-                              handleItemChange(
-                                itemType.id,
-                                index,
-                                "unit_price",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
+                                <td>
+                                  <input
+                                    style={{ width: "100px" }}
+                                    type="number"
+                                    min="0"
+                                    value={item.unit_price}
+                                    onChange={(e) =>
+                                      handleItemChange(
+                                        itemType.id,
+                                        index,
+                                        "unit_price",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </td>
+                              </>
+                            ) : (
+                              <td colSpan={11}></td>
+                            )}
 
-                        <td className="d-flex align-items-center">
-                          <input
-                            style={{ width: "100px" }}
-                            type="text"
-                            min="0"
-                            readOnly
-                            value={item.total_price}
-                            className="me-1"
-                          />
-                          <i
-                            style={{ cursor: "pointer" }}
-                            onClick={() => removeRow(itemType.id, index)}
-                            className="fa fa-times text-danger me-2"
-                          ></i>
-                        </td>
-                      </tr>
-                    ))}
-                </React.Fragment>
-              ))}
+                            {/* Total price field: editable only for CM */}
+                            <td className="d-flex align-items-center">
+                              <input
+                                style={{ width: "100px" }}
+                                type="number"
+                                min="0"
+                                readOnly={!isCMType}
+                                value={item.total_price}
+                                onChange={(e) =>
+                                  handleItemChange(
+                                    itemType.id,
+                                    index,
+                                    "total_price",
+                                    e.target.value
+                                  )
+                                }
+                                className="me-1"
+                              />
+                              <i
+                                style={{ cursor: "pointer" }}
+                                onClick={() => removeRow(itemType.id, index)}
+                                className="fa fa-times text-danger me-2"
+                              ></i>
+                            </td>
+                          </tr>
+                        )
+                      )}
+                  </React.Fragment>
+                );
+              })}
 
+              {/* Footer row for grand total */}
               <tr>
                 <td colSpan={12}>
                   <strong>FOB</strong>

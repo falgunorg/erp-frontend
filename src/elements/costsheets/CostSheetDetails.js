@@ -2,38 +2,68 @@ import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import api from "services/api";
 import html2pdf from "html2pdf.js";
-
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 
+import { useParams } from "react-router-dom";
+
 export default function CreateCostSheet(props) {
+  const params = useParams();
   const [spinner, setSpinner] = useState(false);
-  const [materialTypes, setMaterialTypes] = useState([]);
-  const getMaterialTypes = async () => {
+
+  const [costing, setCosting] = useState([]);
+  const getCosting = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    const response = await api.post("/costings-show", { id: params.id });
     if (response.status === 200 && response.data) {
-      setMaterialTypes(response.data.data);
+      const costingData = response.data.data;
+      setCosting(costingData);
+
+      // Group items by item_type_id
+      const groupedItems = {};
+      for (const item of costingData.items) {
+        if (!groupedItems[item.item_type_id]) {
+          groupedItems[item.item_type_id] = [];
+        }
+
+        groupedItems[item.item_type_id].push({
+          ...item,
+        });
+      }
+      setConsumptionItems(groupedItems);
     }
     setSpinner(false);
   };
 
   useEffect(() => {
-    getMaterialTypes();
+    getCosting();
+  }, [params.id]);
+
+  const [itemTypes, setItemTypes] = useState([]);
+  const getItemTypes = async () => {
+    setSpinner(true);
+    var response = await api.post("/item-types");
+    if (response.status === 200 && response.data) {
+      setItemTypes(response.data.data);
+    }
+    setSpinner(false);
+  };
+
+  useEffect(() => {
+    getItemTypes();
   }, []);
 
-  const [collapsedMaterialTypes, setCollapsedMaterialTypes] = useState({}); // Track collapsed state
+  const [collapsedItemTypes, setCollapsedItemTypes] = useState({}); // Track collapsed state
 
-  const toggleMaterialType = (materialTypeId) => {
-    setCollapsedMaterialTypes((prev) => ({
+  const toggleItemType = (itemTypeId) => {
+    setCollapsedItemTypes((prev) => ({
       ...prev,
-      [materialTypeId]: !prev[materialTypeId], // Toggle collapse state
+      [itemTypeId]: !prev[itemTypeId], // Toggle collapse state
     }));
   };
 
   const [consumptionItems, setConsumptionItems] = useState({});
-
-  const getGroupTotalPrice = (materialTypeId) => {
-    const items = consumptionItems[materialTypeId] || [];
+  const getGroupTotalPrice = (itemTypeId) => {
+    const items = consumptionItems[itemTypeId] || [];
     return items
       .reduce((sum, item) => {
         const totalPrice = parseFloat(item.total_price) || 0;
@@ -41,105 +71,6 @@ export default function CreateCostSheet(props) {
       }, 0)
       .toFixed(2);
   };
-
-  useEffect(() => {
-    const dummyConsumptionItems = {
-      1: [
-        {
-          item_id: "FAB001",
-          name: "Cotton Twill",
-          description: "Soft cotton twill fabric",
-          color: "Navy",
-          size: "M",
-          position: "Body",
-          supplier: "ABC Textiles",
-          unit: "Yard",
-          actual: "1.5",
-          wastage_parcentage: "5",
-          cons_total: "1.575",
-          unit_price: "2.00",
-          total_price: "3.15",
-        },
-      ],
-      2: [
-        {
-          item_id: "TRIM004",
-          name: "Button",
-          description: "Wood button",
-          color: "Black",
-          size: "L",
-          position: "Front",
-          supplier: "Button Co",
-          unit: "Dozen",
-          actual: "0.1",
-          wastage_parcentage: "2",
-          cons_total: "0.102",
-          unit_price: "0.50",
-          total_price: "0.051",
-        },
-        {
-          item_id: "TRIM001",
-          name: "Button",
-          description: "Plastic button",
-          color: "Black",
-          size: "L",
-          position: "Front",
-          supplier: "Button Co",
-          unit: "Dozen",
-          actual: "0.1",
-          wastage_parcentage: "2",
-          cons_total: "0.102",
-          unit_price: "0.50",
-          total_price: "0.051",
-        },
-      ],
-      3: [
-        // Another regular item type
-        {
-          item_id: "TRIM001",
-          name: "Button",
-          description: "Plastic button",
-          color: "Black",
-          size: "L",
-          position: "Front",
-          supplier: "Button Co",
-          unit: "Dozen",
-          actual: "0.1",
-          wastage_parcentage: "2",
-          cons_total: "0.102",
-          unit_price: "0.50",
-          total_price: "0.051",
-        },
-        {
-          item_id: "TRIM001",
-          name: "Button",
-          description: "Plastic button",
-          color: "Black",
-          size: "L",
-          position: "Front",
-          supplier: "Button Co",
-          unit: "Dozen",
-          actual: "0.1",
-          wastage_parcentage: "2",
-          cons_total: "0.102",
-          unit_price: "0.50",
-          total_price: "0.051",
-        },
-      ],
-      4: [
-        // Another regular item type
-        {
-          item_id: "CM001",
-          total_price: "1.00",
-        },
-        {
-          item_id: "CM001",
-          total_price: "8.00",
-        },
-      ],
-    };
-    setConsumptionItems(dummyConsumptionItems);
-  }, []);
 
   const costSheetRef = React.useRef();
   const handleGeneratePDF = () => {
@@ -154,10 +85,8 @@ export default function CreateCostSheet(props) {
 
     html2pdf().set(opt).from(element).save();
   };
-
   const getGrandTotalFob = () => {
-    const items = Object.values(consumptionItems).flat(); // Get all items across material types into one array
-
+    const items = Object.values(consumptionItems).flat();
     return items
       .reduce((sum, item) => {
         const totalPrice = parseFloat(item.total_price) || 0;
@@ -183,14 +112,14 @@ export default function CreateCostSheet(props) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">#PONXT5875</div>
+              <div className="form-value">{costing.po?.po_number || "N/A"}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">#WONXT5875</div>
+              <div className="form-value">{costing.po?.wo_number || "N/A"}</div>
             </div>
           </div>
         </div>
@@ -211,13 +140,17 @@ export default function CreateCostSheet(props) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">NSLBD</div>
+              <div className="form-value">
+                {costing.techpack?.buyer?.name || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack#</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">#TPNXT5875</div>
+              <div className="form-value">
+                {costing.techpack?.techpack_number || "N/A"}
+              </div>
             </div>
           </div>
           <div className="row">
@@ -225,13 +158,17 @@ export default function CreateCostSheet(props) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">NEXT</div>
+              <div className="form-value">
+                {costing.techpack?.brand || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Ps Chino Trouser</div>
+              <div className="form-value">
+                {costing.techpack?.buyer_style_name || "N/A"}
+              </div>
             </div>
           </div>
 
@@ -240,13 +177,17 @@ export default function CreateCostSheet(props) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">S-25</div>
+              <div className="form-value">
+                {costing.techpack?.season || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Chino Trouser</div>
+              <div className="form-value">
+                {costing.techpack?.item_name || "N/A"}
+              </div>
             </div>
           </div>
 
@@ -255,13 +196,17 @@ export default function CreateCostSheet(props) {
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">Mens</div>
+              <div className="form-value">
+                {costing.techpack?.department || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Bottom</div>
+              <div className="form-value">
+                {costing.techpack?.item_type || "N/A"}
+              </div>
             </div>
           </div>
 
@@ -270,7 +215,7 @@ export default function CreateCostSheet(props) {
               <label className="form-label">Factory CPM/Eft</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">58</div>
+              <div className="form-value">{costing.factory_cpm || "N/A"}</div>
             </div>
 
             <div className="col-lg-2">
@@ -278,7 +223,7 @@ export default function CreateCostSheet(props) {
             </div>
             <div className="col-lg-5">
               <div className="form-value">
-                97% Cotton 3% Elastane Ps Chino Trouser
+                {costing.techpack?.description || "N/A"}
               </div>
             </div>
           </div>
@@ -288,14 +233,16 @@ export default function CreateCostSheet(props) {
               <label className="form-label">FOB</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">$7.5</div>
+              <div className="form-value">{costing.fob || "N/A"}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Garment Wash</div>
+              <div className="form-value">
+                {costing.techpack?.wash_details || "N/A"}
+              </div>
             </div>
           </div>
 
@@ -304,13 +251,15 @@ export default function CreateCostSheet(props) {
               <label className="form-label">CM</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">$1.00</div>
+              <div className="form-value">{costing.cm || "N/A"}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Dying, Printing</div>
+              <div className="form-value">
+                {costing.techpack?.special_operation || "N/A"}
+              </div>
             </div>
           </div>
         </div>
@@ -337,8 +286,8 @@ export default function CreateCostSheet(props) {
             </tr>
           </thead>
           <tbody>
-            {materialTypes.map((materialType) => (
-              <React.Fragment key={materialType.id}>
+            {itemTypes.map((itemType) => (
+              <React.Fragment key={itemType.id}>
                 <tr>
                   <td
                     colSpan={13}
@@ -349,7 +298,7 @@ export default function CreateCostSheet(props) {
                     }}
                   >
                     <div
-                      className="materialType"
+                      className="itemType"
                       style={{
                         padding: "0 5px",
                         display: "flex",
@@ -361,59 +310,57 @@ export default function CreateCostSheet(props) {
                     >
                       <div>
                         <span
-                          onClick={() => toggleMaterialType(materialType.id)}
+                          onClick={() => toggleItemType(itemType.id)}
                           style={{ cursor: "pointer" }}
                         >
-                          {collapsedMaterialTypes[materialType.id] ? (
+                          {collapsedItemTypes[itemType.id] ? (
                             <ArrowRightIcon />
                           ) : (
                             <ArrowDownIcon />
                           )}
                         </span>{" "}
                         <span
-                          onClick={() => toggleMaterialType(materialType.id)}
+                          onClick={() => toggleItemType(itemType.id)}
                           className="me-2"
                         >
-                          <strong>{materialType.title}</strong>
+                          <strong>{itemType.title}</strong>
                         </span>
                       </div>
                       <div>
-                        <strong>$ {getGroupTotalPrice(materialType.id)}</strong>
+                        <strong>$ {getGroupTotalPrice(itemType.id)}</strong>
                       </div>
                     </div>
                   </td>
                 </tr>
 
-                {!collapsedMaterialTypes[materialType.id] &&
-                  (consumptionItems[materialType.id] || []).map(
-                    (item, index) => (
-                      <tr key={`${materialType.id}-${index}`}>
-                        <td>{item.item_id}</td>
-                        {materialType.title === "CM" ? (
-                          <>
-                            <td colSpan={8}></td>
-                            <td className="text-end">{item.total_price}</td>
-                          </>
-                        ) : (
-                          <>
-                            <td>{item.name}</td>
-                            <td>{item.description}</td>
-                            <td>{item.color}</td>
-                            <td>{item.size}</td>
-                            <td>{item.position}</td>
-                            <td>{item.supplier}</td>
-                            <td>
-                              {item.actual} + {item.wastage_parcentage} %
-                            </td>
-                            <td>
-                              $ {item.unit_price} {item.unit}
-                            </td>
-                            <td className="text-end">{item.total_price}</td>
-                          </>
-                        )}
-                      </tr>
-                    )
-                  )}
+                {!collapsedItemTypes[itemType.id] &&
+                  (consumptionItems[itemType.id] || []).map((item, index) => (
+                    <tr key={`${itemType.id}-${index}`}>
+                      <td>{item.item?.title}</td>
+                      {itemType.title === "CM" ? (
+                        <>
+                          <td colSpan={8}></td>
+                          <td className="text-end">{item.total_price}</td>
+                        </>
+                      ) : (
+                        <>
+                          <td>{item.item_name}</td>
+                          <td>{item.item_details}</td>
+                          <td>{item.color}</td>
+                          <td>{item.size}</td>
+                          <td>{item.position}</td>
+                          <td>{item.supplier?.company_name}</td>
+                          <td>
+                            {item.consumption} + {item.wastage} %
+                          </td>
+                          <td>
+                            $ {item.unit_price} {item.unit}
+                          </td>
+                          <td className="text-end">{item.total_price}</td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
               </React.Fragment>
             ))}
 
@@ -434,7 +381,7 @@ export default function CreateCostSheet(props) {
           <tbody>
             <tr>
               <td>
-                <b>Merchant:</b> Anik Das{" "}
+                <b>Merchant:</b> {costing.user?.full_name}
               </td>
               <td>
                 <b>FG ID:</b>

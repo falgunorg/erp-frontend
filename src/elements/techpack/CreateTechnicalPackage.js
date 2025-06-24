@@ -967,7 +967,7 @@ export default function CreateTechnicalPackage(props) {
         />
 
         <MultipleFileInput
-          label="Block Pattern Attachment"
+          label="Special Operation Attachment"
           inputId="special_operation"
           selectedFiles={selectedSpecialOperationFiles}
           setSelectedFiles={setSelectedSpecialOperationFiles}

@@ -122,8 +122,10 @@ export default function TechnicalPackage(props) {
   }, [selectedMonth]);
   const [viewTab, setViewTab] = useState("All");
 
-  const [markAble, setMarkAble] = useState(false);
 
+
+
+  const [markAble, setMarkAble] = useState(false);
   const toggleMarkAble = () => {
     setSelectedItems([]);
     setMarkAble(!markAble);
