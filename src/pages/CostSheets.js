@@ -238,9 +238,24 @@ export default function CostSheets(props) {
               <div className="text-muted">Nothing is selected</div>
             </div>
           )}
-          {renderArea === "add" && <CreateCostSheet />}
-          {renderArea === "details" && <CostSheetDetails />}
-          {renderArea === "update" && <EditCostSheet />}
+          {renderArea === "add" && (
+            <CreateCostSheet
+              renderArea={renderArea}
+              setRenderArea={setRenderArea}
+            />
+          )}
+          {renderArea === "details" && (
+            <CostSheetDetails
+              renderArea={renderArea}
+              setRenderArea={setRenderArea}
+            />
+          )}
+          {renderArea === "update" && (
+            <EditCostSheet
+              renderArea={renderArea}
+              setRenderArea={setRenderArea}
+            />
+          )}
         </div>
       </div>
     </div>

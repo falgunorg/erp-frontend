@@ -3,11 +3,11 @@ import Logo from "../../assets/images/logos/logo-short.png";
 import Select, { components } from "react-select";
 import api from "services/api";
 import swal from "sweetalert";
-
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
-import { Description } from "@mui/icons-material";
+import { useHistory } from "react-router-dom";
 
-export default function CreateCostSheet(props) {
+export default function CreateCostSheet({ renderArea, setRenderArea }) {
+  const history = useHistory();
   const DropdownIndicator = (props) => {
     return (
       <components.DropdownIndicator {...props}>
@@ -425,7 +425,8 @@ export default function CreateCostSheet(props) {
       setSpinner(true);
       var response = await api.post("/costings-create", data);
       if (response.status === 200 && response.data) {
-        window.location.reload();
+        history.push("/cost-sheets/" + response.data.data.id);
+        setRenderArea("details");
       } else {
         setErrors(response.data.errors);
       }
@@ -613,6 +614,7 @@ export default function CreateCostSheet(props) {
                 onChange={(e) => handleFormChange("cm", e.target.value)}
                 type="number"
                 min={0}
+                readOnly
                 step={0.1}
                 value={formData.cm}
               />

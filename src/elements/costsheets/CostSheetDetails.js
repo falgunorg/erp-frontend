@@ -3,7 +3,6 @@ import Logo from "../../assets/images/logos/logo-short.png";
 import api from "services/api";
 import html2pdf from "html2pdf.js";
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
-
 import { useParams } from "react-router-dom";
 
 export default function CreateCostSheet(props) {
