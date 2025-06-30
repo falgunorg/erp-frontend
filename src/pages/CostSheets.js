@@ -54,9 +54,19 @@ export default function CostSheets(props) {
 
   const history = useHistory();
 
+  const [selectedCostId, setSelectedCostId] = useState(null);
+
   const handleClick = (id) => {
+    setSelectedCostId(id);
     history.push("/cost-sheets/" + id);
     setRenderArea("details");
+  };
+
+  const handleDelete = async () => {
+    var response = await api.post("/costings-delete", { id: selectedCostId });
+    if (response.status === 200 && response.data) {
+      getCostings();
+    }
   };
 
   return (
@@ -73,7 +83,9 @@ export default function CostSheets(props) {
           >
             Edit
           </button>
-          <button disabled={renderArea !== "details"}>Delete</button>
+          <button onClick={handleDelete} disabled={renderArea !== "details"}>
+            Delete
+          </button>
         </div>
       </div>
 
