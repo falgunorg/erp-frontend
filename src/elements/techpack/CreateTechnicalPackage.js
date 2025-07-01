@@ -1,92 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
-import Select, { components } from "react-select";
 import { Modal, Button, Spinner } from "react-bootstrap";
 import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
 import swal from "sweetalert";
+import CustomSelect from "elements/CustomSelect";
 
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 
 export default function CreateTechnicalPackage(props) {
-  const DropdownIndicator = (props) => {
-    return (
-      <components.DropdownIndicator {...props}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="9"
-          height="7"
-          viewBox="0 0 9 7"
-        >
-          <path
-            id="Polygon_60"
-            data-name="Polygon 60"
-            d="M3.659,1.308a1,1,0,0,1,1.682,0L8.01,5.459A1,1,0,0,1,7.168,7H1.832A1,1,0,0,1,.99,5.459Z"
-            transform="translate(9 7) rotate(180)"
-            fill="#707070"
-          />
-        </svg>
-      </components.DropdownIndicator>
-    );
-  };
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      background: "none",
-      border: "none",
-      minHeight: "21px",
-      fontSize: "12px",
-      height: "21px",
-      background: "#ECECEC",
-      lineHeight: "19px",
-      boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.18)",
-      boxShadow: state.isFocused ? "" : "",
-    }),
-
-    valueContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-      padding: "0 6px",
-    }),
-
-    input: (provided, state) => ({
-      ...provided,
-      margin: "0px",
-      fontSize: "12px", // Ensure input text is also 12px
-    }),
-
-    indicatorSeparator: () => ({
-      display: "none",
-    }),
-
-    indicatorsContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-    }),
-
-    menu: (provided) => ({
-      ...provided,
-      fontSize: "12px", // Set menu font size to 12px
-      padding: "3px", // Ensure padding is a maximum of 3px
-    }),
-
-    option: (provided, state) => ({
-      ...provided,
-      fontSize: "12px", // Ensure each option has 12px font size
-      padding: "3px", // Limit option padding to 3px
-      backgroundColor: state.isSelected
-        ? "#ef9a3e"
-        : state.isFocused
-        ? "#f0f0f0"
-        : "#fff",
-      color: state.isSelected ? "#fff" : "#333",
-      cursor: "pointer",
-      "&:hover": {
-        backgroundColor: "#ef9a3e",
-        color: "#fff",
-      },
-    }),
-  };
 
   const buyers = [
     { id: 1, title: "NSLBD" },
@@ -512,15 +434,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="PO"
                 options={pos.map(({ id, po_number }) => ({
                   value: id,
                   label: po_number,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("po_id", selectedOption.value)
                 }
@@ -532,15 +452,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="WO"
                 options={workOrders.map(({ id, wo_number }) => ({
                   value: id,
                   label: wo_number,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("wo_id", selectedOption.value)
                 }
@@ -607,15 +525,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-3">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="Buyer"
                 options={buyers.map(({ id, title }) => ({
                   value: id,
                   label: title,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("buyer_id", selectedOption.value)
                 }
@@ -654,15 +570,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-3">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="Brand"
                 options={brands.map(({ id, title }) => ({
                   value: title,
                   label: title,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("brand", selectedOption.value)
                 }
@@ -697,15 +611,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-3">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="Season"
                 options={seasons.map(({ title }) => ({
                   value: title,
                   label: title,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("season", selectedOption.value)
                 }
@@ -721,15 +633,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-5">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="Type"
                 options={itemTypes.map(({ id, title }) => ({
                   value: title,
                   label: title,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("item_type", selectedOption.value)
                 }
@@ -748,15 +658,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-3">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="Department"
                 options={departments.map(({ id, title }) => ({
                   value: title,
                   label: title,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("department", selectedOption.value)
                 }
@@ -795,15 +703,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-3">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="Factory"
                 options={companies.map(({ id, title }) => ({
                   value: id,
                   label: title,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("company_id", selectedOption.value)
                 }
@@ -819,15 +725,13 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-5">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="Wash Detail"
                 options={washes.map(({ id, title }) => ({
                   value: title,
                   label: title,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleInputChange("wash_details", selectedOption.value)
                 }
@@ -846,7 +750,7 @@ export default function CreateTechnicalPackage(props) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              <Select
+              <CustomSelect
                 isMulti
                 className="select_wo"
                 placeholder="Operation"
@@ -854,8 +758,6 @@ export default function CreateTechnicalPackage(props) {
                   value: id,
                   label: title,
                 }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOptions) =>
                   handleInputChange(
                     "special_operations",

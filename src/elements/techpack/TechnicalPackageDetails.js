@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
-import Select, { components } from "react-select";
 import { Modal, Button, Spinner } from "react-bootstrap";
 import MultipleFileView from "./MultipleFileView";
 import html2pdf from "html2pdf.js";

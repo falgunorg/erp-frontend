@@ -2,92 +2,21 @@ import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import Select, { components } from "react-select";
 import api from "services/api";
+import CustomSelect from "elements/CustomSelect";
+import swal from "sweetalert";
+import { useHistory } from "react-router-dom";
 
-export default function CreateBudget(props) {
-  const DropdownIndicator = (props) => {
-    return (
-      <components.DropdownIndicator {...props}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="9"
-          height="7"
-          viewBox="0 0 9 7"
-        >
-          <path
-            id="Polygon_60"
-            data-name="Polygon 60"
-            d="M3.659,1.308a1,1,0,0,1,1.682,0L8.01,5.459A1,1,0,0,1,7.168,7H1.832A1,1,0,0,1,.99,5.459Z"
-            transform="translate(9 7) rotate(180)"
-            fill="#707070"
-          />
-        </svg>
-      </components.DropdownIndicator>
-    );
+export default function CreateBudget({ renderArea, setRenderArea }) {
+  const history = useHistory();
+  const [buyers, setBuyers] = useState([]);
+  const getBuyers = async () => {
+    setSpinner(true);
+    var response = await api.post("/buyers");
+    if (response.status === 200 && response.data) {
+      setBuyers(response.data.data);
+    }
+    setSpinner(false);
   };
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      background: "none",
-      border: "none",
-      minHeight: "21px",
-      fontSize: "12px",
-      height: "21px",
-      background: "#ECECEC",
-      lineHeight: "19px",
-      boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.18)",
-      boxShadow: state.isFocused ? "" : "",
-    }),
-
-    valueContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-      padding: "0 6px",
-    }),
-
-    input: (provided, state) => ({
-      ...provided,
-      margin: "0px",
-      fontSize: "12px", // Ensure input text is also 12px
-    }),
-
-    indicatorSeparator: () => ({
-      display: "none",
-    }),
-
-    indicatorsContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-    }),
-
-    menu: (provided) => ({
-      ...provided,
-      fontSize: "12px", // Set menu font size to 12px
-      padding: "3px", // Ensure padding is a maximum of 3px
-    }),
-
-    option: (provided, state) => ({
-      ...provided,
-      fontSize: "12px", // Ensure each option has 12px font size
-      padding: "3px", // Limit option padding to 3px
-      backgroundColor: state.isSelected
-        ? "#ef9a3e"
-        : state.isFocused
-        ? "#f0f0f0"
-        : "#fff",
-      color: state.isSelected ? "#fff" : "#333",
-      cursor: "pointer",
-      "&:hover": {
-        backgroundColor: "#ef9a3e",
-        color: "#fff",
-      },
-    }),
-  };
-
-  const buyers = [
-    { id: 1, title: "NSLBD" },
-    { id: 2, title: "WALMART" },
-    { id: 3, title: "FIVE STAR LLC" },
-  ];
 
   const brands = [
     { id: 1, title: "NEXT" },
@@ -193,12 +122,22 @@ export default function CreateBudget(props) {
   };
 
   const [suppliers, setSuppliers] = useState([]);
-
   const getSuppliers = async () => {
     setSpinner(true);
     var response = await api.post("/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
+    }
+    setSpinner(false);
+  };
+
+  const [costings, setCostings] = useState([]);
+
+  const getCostings = async () => {
+    setSpinner(true);
+    var response = await api.post("/public-costings");
+    if (response.status === 200 && response.data) {
+      setCostings(response.data.costings);
     }
     setSpinner(false);
   };
@@ -210,31 +149,34 @@ export default function CreateBudget(props) {
     getUnits();
     getMaterialTypes();
     getSuppliers();
+    getBuyers();
+    getCostings();
   }, []);
 
   const [materials, setMaterials] = useState([]);
+  console.log("items", materials);
 
   const addRow = () => {
     setMaterials((prev) => [
       ...prev,
       {
-        itemType: "",
-        itemName: "",
-        itemDetails: "",
-        supplier: "",
+        item_type_id: "",
+        item_id: "",
+        item_details: "",
         color: "",
-        position: "",
         size: "",
         unit: "",
-        sizeBreakdown: "",
-        quantity: "",
-        actualConsumption: "",
+        size_breakdown: "",
+        position: "",
+        supplier_id: "",
+        consumption: "",
         wastage: "",
-        totalConsumption: 0,
-        totalBooking: "",
-        unitPriceOpen: "",
-        actualUnitPrice: "",
-        totalPrice: 0,
+        total: 0,
+        unit_price: "",
+        actual_unit_price: 0,
+        total_booking: "",
+        total_price: 0,
+        actual_total_price: 0,
       },
     ]);
   };
@@ -247,15 +189,123 @@ export default function CreateBudget(props) {
     const updated = [...materials];
     updated[index][field] = value;
 
-    const actual = parseFloat(updated[index].actualConsumption) || 0;
+    const consumption = parseFloat(updated[index].consumption) || 0;
     const wastage = parseFloat(updated[index].wastage) || 0;
-    const booking = parseFloat(updated[index].totalBooking) || 0;
-    const unitPrice = parseFloat(updated[index].actualUnitPrice) || 0;
+    const actualUnitPrice = parseFloat(updated[index].actual_unit_price) || 0;
 
-    updated[index].totalConsumption = actual + (actual * wastage) / 100;
-    updated[index].totalPrice = booking * unitPrice;
+    const total = consumption + (consumption * wastage) / 100;
+    updated[index].total = total;
+
+    updated[index].actual_total_price = total * actualUnitPrice;
 
     setMaterials(updated);
+  };
+
+  const [formData, setFormData] = useState({
+    po_id: "",
+    wo_id: "",
+    costing_id: "",
+    buyer: "",
+    buyer_style_name: "",
+    brand: "",
+    season: "",
+    item_name: "",
+    department: "",
+    item_type: "",
+    description: "",
+    wash_details: "",
+    special_operations: "",
+    factory_cpm: "",
+    fob: 0,
+    cm: 0,
+  });
+
+  const handleFormChange = async (name, value) => {
+    if (name === "costing_id") {
+      try {
+        const response = await api.post("/costings-show", {
+          id: value,
+        });
+
+        if (response.status === 200 && response.data) {
+          const data = response.data.data;
+
+          setFormData((prev) => ({
+            ...prev,
+            costing_id: value,
+            buyer: data.techpack?.buyer.name || "",
+            buyer_style_name: data.techpack?.buyer_style_name || "",
+            brand: data.techpack?.brand || "",
+            season: data.techpack?.season || "",
+            item_name: data.techpack?.item_name || "",
+            department: data.techpack?.department || "",
+            item_type: data.techpack?.item_type || "",
+            description: data.techpack?.description || "",
+            wash_details: data.techpack?.wash_details || "",
+            special_operations: data.techpack?.special_operation || "",
+          }));
+
+          setMaterials(data.items);
+        }
+      } catch (error) {
+        console.error("Error fetching technical package data:", error);
+      }
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    let formErrors = {};
+
+    if (!formData.costing_id) {
+      formErrors.costing_id = "Costing is required";
+    }
+    if (!formData.fob) {
+      formErrors.fob = "fob is required";
+    }
+
+    if (!formData.cm) {
+      formErrors.cm = "CM is required";
+    }
+
+    setErrors(formErrors);
+    return Object.keys(formErrors).length === 0;
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    const tp_items = Object.values(materials).flat();
+    if (tp_items.length === 0) {
+      swal({
+        title: "Please Select items",
+        icon: "error",
+      });
+      return; // Prevent form submission
+    }
+
+    if (validateForm()) {
+      var data = new FormData();
+      data.append("costing_id", formData.costing_id);
+      data.append("costing_items", JSON.stringify(tp_items));
+      data.append("cm", formData.cm);
+      data.append("factory_cpm", formData.factory_cpm);
+      data.append("fob", formData.fob);
+      setSpinner(true);
+      var response = await api.post("/costings-create", data);
+      if (response.status === 200 && response.data) {
+        history.push("/cost-sheets/" + response.data.data.id);
+        setRenderArea("details");
+      } else {
+        setErrors(response.data.errors);
+      }
+      setSpinner(false);
+    }
   };
 
   return (
@@ -295,25 +345,31 @@ export default function CreateBudget(props) {
         <div className="col-lg-12">
           <div className="row">
             <div className="col-lg-2">
-              <label className="form-label">Buyer</label>
-            </div>
-            <div className="col-lg-3">
-              <Select
-                className="select_wo"
-                placeholder="Buyer"
-                options={buyers.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
-              />
-            </div>
-            <div className="col-lg-2">
               <label className="form-label">Tech Pack#</label>
             </div>
+            <div className="col-lg-3">
+              <CustomSelect
+                className={
+                  errors.costing_id ? "select_wo red-border" : "select_wo"
+                }
+                placeholder="Techpack"
+                options={costings.map(({ id, costing_ref }) => ({
+                  value: id,
+                  label: costing_ref,
+                }))}
+                onChange={(selectedOption) =>
+                  handleFormChange("costing_id", selectedOption?.value)
+                }
+              />
+              {errors.costing_id && (
+                <small className="text-danger">{errors.costing_id}</small>
+              )}
+            </div>
+            <div className="col-lg-2">
+              <label className="form-label">Buyer</label>
+            </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Tech Pack Number" />
+              <input readOnly type="text" value={formData.buyer} />
             </div>
           </div>
           <div className="row">
@@ -321,22 +377,13 @@ export default function CreateBudget(props) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-3">
-              <Select
-                className="select_wo"
-                placeholder="Brand"
-                options={brands.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
-              />
+              <input readOnly type="text" value={formData.brand} />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Buyer Style Name" />
+              <input readOnly type="text" value={formData.buyer_style_name} />
             </div>
           </div>
 
@@ -345,22 +392,13 @@ export default function CreateBudget(props) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-3">
-              <Select
-                className="select_wo"
-                placeholder="Season"
-                options={season.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
-              />
+              <input readOnly type="text" value={formData.season} />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-5">
-              <input type="text" placeholder="Chino Trouser" />
+              <input readOnly type="text" value={formData.item_name} />
             </div>
           </div>
 
@@ -369,31 +407,13 @@ export default function CreateBudget(props) {
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-3">
-              <Select
-                className="select_wo"
-                placeholder="Department"
-                options={departments.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
-              />
+              <input readOnly type="text" value={formData.department} />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-5">
-              <Select
-                className="select_wo"
-                placeholder="Type"
-                options={itemTypes.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
-              />
+              <input readOnly type="text" value={formData.item_type} />
             </div>
           </div>
 
@@ -402,15 +422,13 @@ export default function CreateBudget(props) {
               <label className="form-label">Factory CPM/Eft</label>
             </div>
             <div className="col-lg-3">
-              <Select
-                className="select_wo"
-                placeholder="Factory"
-                options={companies.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
+              <input
+                className={errors.factory_cpm ? "red-border" : ""}
+                onChange={(e) =>
+                  handleFormChange("factory_cpm", e.target.value)
+                }
+                type="text"
+                value={formData.factory_cpm}
               />
             </div>
 
@@ -418,10 +436,7 @@ export default function CreateBudget(props) {
               <label className="form-label">Description</label>
             </div>
             <div className="col-lg-5">
-              <input
-                type="text"
-                placeholder="97% Cotton 3% Elastane Ps Chino Trouser"
-              />
+              <input readOnly type="text" value={formData.description} />
             </div>
           </div>
 
@@ -430,23 +445,22 @@ export default function CreateBudget(props) {
               <label className="form-label">FOB</label>
             </div>
             <div className="col-lg-3">
-              <input type="text" placeholder="$7.05" />
+              <input
+                className={errors.fob ? "red-border" : ""}
+                onChange={(e) => handleFormChange("fob", e.target.value)}
+                type="number"
+                readOnly
+                min={0}
+                step={0.1}
+                value={formData.fob}
+              />
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-5">
-              <Select
-                className="select_wo"
-                placeholder="Wash Detail"
-                options={washes.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
-              />
+              <input readOnly type="text" value={formData.wash_details} />
             </div>
           </div>
 
@@ -455,23 +469,21 @@ export default function CreateBudget(props) {
               <label className="form-label">CM</label>
             </div>
             <div className="col-lg-3">
-              <input type="text" placeholder="$1.00" />
+              <input
+                className={errors.cm ? "red-border" : ""}
+                onChange={(e) => handleFormChange("cm", e.target.value)}
+                type="number"
+                min={0}
+                readOnly
+                step={0.1}
+                value={formData.cm}
+              />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-5">
-              <Select
-                isMulti
-                className="select_wo"
-                placeholder="Operation"
-                options={specialOperations.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
-              />
+              <input readOnly type="text" value={formData.special_operations} />
             </div>
           </div>
         </div>
@@ -528,9 +540,9 @@ export default function CreateBudget(props) {
                   <td>
                     <select
                       style={{ width: "100px" }}
-                      value={row.itemType}
+                      value={row.item_type_id}
                       onChange={(e) =>
-                        handleInputChange(index, "itemType", e.target.value)
+                        handleInputChange(index, "item_type_id", e.target.value)
                       }
                     >
                       <option>Fabric</option>
@@ -541,9 +553,9 @@ export default function CreateBudget(props) {
                     <input
                       style={{ width: "100px" }}
                       type="text"
-                      value={row.itemName}
+                      value={row.item_id}
                       onChange={(e) =>
-                        handleInputChange(index, "itemName", e.target.value)
+                        handleInputChange(index, "item_id", e.target.value)
                       }
                     />
                   </td>
@@ -551,18 +563,18 @@ export default function CreateBudget(props) {
                     <input
                       style={{ width: "100px" }}
                       type="text"
-                      value={row.itemDetails}
+                      value={row.item_details}
                       onChange={(e) =>
-                        handleInputChange(index, "itemDetails", e.target.value)
+                        handleInputChange(index, "item_details", e.target.value)
                       }
                     />
                   </td>
                   <td>
                     <select
                       style={{ width: "100px" }}
-                      value={row.supplier}
+                      value={row.supplier_id}
                       onChange={(e) =>
-                        handleInputChange(index, "supplier", e.target.value)
+                        handleInputChange(index, "supplier_id", e.target.value)
                       }
                     >
                       <option>ABC Enterprise</option>
@@ -618,11 +630,11 @@ export default function CreateBudget(props) {
                   <td>
                     <select
                       style={{ width: "100px" }}
-                      value={row.sizeBreakdown}
+                      value={row.size_breakdown}
                       onChange={(e) =>
                         handleInputChange(
                           index,
-                          "sizeBreakdown",
+                          "size_breakdown",
                           e.target.value
                         )
                       }
@@ -645,13 +657,9 @@ export default function CreateBudget(props) {
                     <input
                       style={{ width: "100px" }}
                       type="number"
-                      value={row.actualConsumption}
+                      value={row.consumption}
                       onChange={(e) =>
-                        handleInputChange(
-                          index,
-                          "actualConsumption",
-                          e.target.value
-                        )
+                        handleInputChange(index, "consumption", e.target.value)
                       }
                     />
                   </td>
@@ -670,16 +678,20 @@ export default function CreateBudget(props) {
                       style={{ width: "100px" }}
                       type="number"
                       readOnly
-                      value={row.totalConsumption.toFixed(2)}
+                      value={row.total}
                     />
                   </td>
                   <td>
                     <input
                       style={{ width: "100px" }}
                       type="number"
-                      value={row.totalBooking}
+                      value={row.total_booking}
                       onChange={(e) =>
-                        handleInputChange(index, "totalBooking", e.target.value)
+                        handleInputChange(
+                          index,
+                          "total_booking",
+                          e.target.value
+                        )
                       }
                     />
                   </td>
@@ -701,11 +713,11 @@ export default function CreateBudget(props) {
                     <input
                       style={{ width: "100px" }}
                       type="number"
-                      value={row.actualUnitPrice}
+                      value={row.actual_unit_price}
                       onChange={(e) =>
                         handleInputChange(
                           index,
-                          "actualUnitPrice",
+                          "actual_unit_price",
                           e.target.value
                         )
                       }
@@ -716,7 +728,7 @@ export default function CreateBudget(props) {
                       style={{ width: "100px" }}
                       type="number"
                       readOnly
-                      value={row.totalPrice.toFixed(2)}
+                      value={row.total_price}
                       className="me-2"
                     />
                     <i
@@ -734,12 +746,10 @@ export default function CreateBudget(props) {
                 <td className="text-end">
                   <strong>
                     $
-                    {materials
-                      .reduce(
-                        (sum, row) => sum + parseFloat(row.totalPrice || 0),
-                        0
-                      )
-                      .toFixed(2)}
+                    {materials.reduce(
+                      (sum, row) => sum + parseFloat(row.total_price || 0),
+                      0
+                    )}
                   </strong>
                 </td>
               </tr>

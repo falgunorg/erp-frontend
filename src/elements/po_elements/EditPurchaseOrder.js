@@ -1,91 +1,11 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
-import Select, { components } from "react-select";
 import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
 import swal from "sweetalert";
+import CustomSelect from "elements/CustomSelect";
 
 export default function EditPurchaseOrder({ selectedPo }) {
-  console.log("PO", selectedPo);
-  const DropdownIndicator = (props) => {
-    return (
-      <components.DropdownIndicator {...props}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="9"
-          height="7"
-          viewBox="0 0 9 7"
-        >
-          <path
-            id="Polygon_60"
-            data-name="Polygon 60"
-            d="M3.659,1.308a1,1,0,0,1,1.682,0L8.01,5.459A1,1,0,0,1,7.168,7H1.832A1,1,0,0,1,.99,5.459Z"
-            transform="translate(9 7) rotate(180)"
-            fill="#707070"
-          />
-        </svg>
-      </components.DropdownIndicator>
-    );
-  };
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      background: "none",
-      border: "none",
-      minHeight: "21px",
-      fontSize: "12px",
-      height: "21px",
-      background: "#ECECEC",
-      lineHeight: "19px",
-      boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.18)",
-      boxShadow: state.isFocused ? "" : "",
-    }),
-
-    valueContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-      padding: "0 6px",
-    }),
-
-    input: (provided, state) => ({
-      ...provided,
-      margin: "0px",
-      fontSize: "12px", // Ensure input text is also 12px
-    }),
-
-    indicatorSeparator: () => ({
-      display: "none",
-    }),
-
-    indicatorsContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-    }),
-
-    menu: (provided) => ({
-      ...provided,
-      fontSize: "12px", // Set menu font size to 12px
-      padding: "3px", // Ensure padding is a maximum of 3px
-    }),
-
-    option: (provided, state) => ({
-      ...provided,
-      fontSize: "12px", // Ensure each option has 12px font size
-      padding: "3px", // Limit option padding to 3px
-      backgroundColor: state.isSelected
-        ? "#ef9a3e"
-        : state.isFocused
-        ? "#f0f0f0"
-        : "#fff",
-      color: state.isSelected ? "#fff" : "#333",
-      cursor: "pointer",
-      "&:hover": {
-        backgroundColor: "#ef9a3e",
-        color: "#fff",
-      },
-    }),
-  };
-
   const buyers = [
     { id: 1, title: "NSLBD" },
     { id: 2, title: "WALMART" },
@@ -555,7 +475,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className="select_wo"
                 placeholder="PO"
                 options={workOrders.map(({ id, wo_number }) => ({
@@ -568,8 +488,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                     label: wo_number,
                   }))
                   .find((option) => option.value === selectedPo.wo_id)}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleChange("wo_id", selectedOption.value)
                 }
@@ -608,7 +526,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Tech Pack</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.technical_package_id
                     ? "select_wo red-border"
@@ -630,15 +548,13 @@ export default function EditPurchaseOrder({ selectedPo }) {
                   .find(
                     (option) => option.value === formData.technical_package_id
                   )}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Destination</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.destination ? "select_wo red-border" : "select_wo"
                 }
@@ -656,8 +572,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("destination", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
           </div>
@@ -711,7 +625,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">PC/LC</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.purchase_contract_id
                     ? "select_wo red-border"
@@ -733,8 +647,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("purchase_contract_id", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
             <div className="col-lg-2">
@@ -754,7 +666,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Terms of Shipping</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.shipping_terms ? "select_wo red-border" : "select_wo"
                 }
@@ -772,8 +684,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("shipping_terms", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
           </div>
@@ -783,7 +693,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.company_id ? "select_wo red-border" : "select_wo"
                 }
@@ -798,8 +708,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                     label: title,
                   }))
                   .find((option) => option.value === formData.company_id)}
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 onChange={(selectedOption) =>
                   handleChange("company_id", selectedOption.value)
                 }
@@ -810,7 +718,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.item_type ? "select_wo red-border" : "select_wo"
                 }
@@ -828,15 +736,13 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("item_type", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
             <div className="col-lg-2">
               <label className="form-label">Packing Method</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.packing_method ? "select_wo red-border" : "select_wo"
                 }
@@ -854,8 +760,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("packing_method", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
           </div>
@@ -864,7 +768,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.buyer_id ? "select_wo red-border" : "select_wo"
                 }
@@ -882,8 +786,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("buyer_id", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
 
@@ -891,7 +793,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.department ? "select_wo red-border" : "select_wo"
                 }
@@ -909,8 +811,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("department", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
 
@@ -918,7 +818,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Payment Terms</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.payment_terms ? "select_wo red-border" : "select_wo"
                 }
@@ -936,8 +836,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("payment_terms", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
           </div>
@@ -947,7 +845,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={errors.brand ? "select_wo red-border" : "select_wo"}
                 placeholder="Brand"
                 options={brands.map(({ id, title }) => ({
@@ -963,8 +861,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("brand", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
 
@@ -972,7 +868,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={
                   errors.wash_details ? "select_wo red-border" : "select_wo"
                 }
@@ -990,8 +886,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("wash_details", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
             <div className="col-lg-2">
@@ -1012,7 +906,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-2">
-              <Select
+              <CustomSelect
                 className={errors.season ? "select_wo red-border" : "select_wo"}
                 placeholder="Season"
                 options={seasons.map(({ id, title }) => ({
@@ -1028,8 +922,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                 onChange={(selectedOption) =>
                   handleChange("season", selectedOption.value)
                 }
-                styles={customStyles}
-                components={{ DropdownIndicator }}
               />
             </div>
 
@@ -1067,10 +959,8 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              <Select
+              <CustomSelect
                 isMulti
-                styles={customStyles}
-                components={{ DropdownIndicator }}
                 className={
                   errors.special_operations
                     ? "select_wo red-border"
