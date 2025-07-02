@@ -2,148 +2,33 @@ import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import api from "services/api";
 import html2pdf from "html2pdf.js";
+import { useParams } from "react-router-dom";
 
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 
 export default function BudgetDetails(props) {
+  const params = useParams();
+
   const [spinner, setSpinner] = useState(false);
-  const [materialTypes, setMaterialTypes] = useState([]);
-  const getMaterialTypes = async () => {
+
+  const [budget, setBudget] = useState([]);
+  const getBudget = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    const response = await api.post("/budgets-show", { id: params.id });
     if (response.status === 200 && response.data) {
-      setMaterialTypes(response.data.data);
+      const budgetData = response.data.data;
+      setBudget(budgetData);
     }
     setSpinner(false);
   };
 
   useEffect(() => {
-    getMaterialTypes();
-  }, []);
+    getBudget();
+  }, [params.id]);
 
-  const [collapsedMaterialTypes, setCollapsedMaterialTypes] = useState({}); // Track collapsed state
-
-  const toggleMaterialType = (materialTypeId) => {
-    setCollapsedMaterialTypes((prev) => ({
-      ...prev,
-      [materialTypeId]: !prev[materialTypeId], // Toggle collapse state
-    }));
-  };
-
-  const [consumptionItems, setConsumptionItems] = useState({});
-
-  const getGroupTotalPrice = (materialTypeId) => {
-    const items = consumptionItems[materialTypeId] || [];
-    return items
-      .reduce((sum, item) => {
-        const totalPrice = parseFloat(item.total_price) || 0;
-        return sum + totalPrice;
-      }, 0)
-      .toFixed(2);
-  };
-
-  useEffect(() => {
-    const dummyConsumptionItems = {
-      1: [
-        {
-          item_id: "FAB001",
-          name: "Cotton Twill",
-          description: "Soft cotton twill fabric",
-          color: "Navy",
-          size: "M",
-          position: "Body",
-          supplier: "ABC Textiles",
-          unit: "Yard",
-          actual: "1.5",
-          wastage_parcentage: "5",
-          cons_total: "1.575",
-          unit_price: "2.00",
-          total_price: "3.15",
-        },
-      ],
-      2: [
-        {
-          item_id: "TRIM004",
-          name: "Button",
-          description: "Wood button",
-          color: "Black",
-          size: "L",
-          position: "Front",
-          supplier: "Button Co",
-          unit: "Dozen",
-          actual: "0.1",
-          wastage_parcentage: "2",
-          cons_total: "0.102",
-          unit_price: "0.50",
-          total_price: "0.051",
-        },
-        {
-          item_id: "TRIM001",
-          name: "Button",
-          description: "Plastic button",
-          color: "Black",
-          size: "L",
-          position: "Front",
-          supplier: "Button Co",
-          unit: "Dozen",
-          actual: "0.1",
-          wastage_parcentage: "2",
-          cons_total: "0.102",
-          unit_price: "0.50",
-          total_price: "0.051",
-        },
-      ],
-      3: [
-        // Another regular item type
-        {
-          item_id: "TRIM001",
-          name: "Button",
-          description: "Plastic button",
-          color: "Black",
-          size: "L",
-          position: "Front",
-          supplier: "Button Co",
-          unit: "Dozen",
-          actual: "0.1",
-          wastage_parcentage: "2",
-          cons_total: "0.102",
-          unit_price: "0.50",
-          total_price: "0.051",
-        },
-        {
-          item_id: "TRIM001",
-          name: "Button",
-          description: "Plastic button",
-          color: "Black",
-          size: "L",
-          position: "Front",
-          supplier: "Button Co",
-          unit: "Dozen",
-          actual: "0.1",
-          wastage_parcentage: "2",
-          cons_total: "0.102",
-          unit_price: "0.50",
-          total_price: "0.051",
-        },
-      ],
-      4: [
-        // Another regular item type
-        {
-          item_id: "CM001",
-          total_price: "1.00",
-        },
-        {
-          item_id: "CM001",
-          total_price: "8.00",
-        },
-      ],
-    };
-    setConsumptionItems(dummyConsumptionItems);
-  }, []);
-
-  const costSheetRef = React.useRef();
+  const budgetRef = React.useRef();
   const handleGeneratePDF = () => {
-    const element = costSheetRef.current;
+    const element = budgetRef.current;
     const opt = {
       margin: 0.2,
       filename: "cost-sheet.pdf",
@@ -155,19 +40,8 @@ export default function BudgetDetails(props) {
     html2pdf().set(opt).from(element).save();
   };
 
-  const getGrandTotalFob = () => {
-    const items = Object.values(consumptionItems).flat(); // Get all items across material types into one array
-
-    return items
-      .reduce((sum, item) => {
-        const totalPrice = parseFloat(item.total_price) || 0;
-        return sum + totalPrice;
-      }, 0)
-      .toFixed(2);
-  };
-
   return (
-    <div className="create_technical_pack" ref={costSheetRef}>
+    <div className="create_technical_pack" ref={budgetRef}>
       <div className="row create_tp_header align-items-center">
         <div className="col-lg-10">
           <div className="row align-items-baseline">
@@ -177,20 +51,20 @@ export default function BudgetDetails(props) {
                 src={Logo}
                 alt="Logo"
               />
-              <span className="purchase_text">Budget</span>
+              <span className="purchase_text">Cost Sheet</span>
             </div>
             <div className="col-lg-2">
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">#PONXT5875</div>
+              <div className="form-value">{budget.po?.po_number || "N/A"}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">#WONXT5875</div>
+              <div className="form-value">{budget.po?.wo_number || "N/A"}</div>
             </div>
           </div>
         </div>
@@ -211,13 +85,17 @@ export default function BudgetDetails(props) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">NSLBD</div>
+              <div className="form-value">
+                {budget.techpack?.buyer?.name || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack#</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">#TPNXT5875</div>
+              <div className="form-value">
+                {budget.techpack?.techpack_number || "N/A"}
+              </div>
             </div>
           </div>
           <div className="row">
@@ -225,13 +103,17 @@ export default function BudgetDetails(props) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">NEXT</div>
+              <div className="form-value">
+                {budget.techpack?.brand || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Ps Chino Trouser</div>
+              <div className="form-value">
+                {budget.techpack?.buyer_style_name || "N/A"}
+              </div>
             </div>
           </div>
 
@@ -240,13 +122,17 @@ export default function BudgetDetails(props) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">S-25</div>
+              <div className="form-value">
+                {budget.techpack?.season || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Chino Trouser</div>
+              <div className="form-value">
+                {budget.techpack?.item_name || "N/A"}
+              </div>
             </div>
           </div>
 
@@ -255,13 +141,17 @@ export default function BudgetDetails(props) {
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">Mens</div>
+              <div className="form-value">
+                {budget.techpack?.department || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Bottom</div>
+              <div className="form-value">
+                {budget.techpack?.item_type || "N/A"}
+              </div>
             </div>
           </div>
 
@@ -270,7 +160,7 @@ export default function BudgetDetails(props) {
               <label className="form-label">Factory CPM/Eft</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">58</div>
+              <div className="form-value">{budget.factory_cpm || "N/A"}</div>
             </div>
 
             <div className="col-lg-2">
@@ -278,7 +168,7 @@ export default function BudgetDetails(props) {
             </div>
             <div className="col-lg-5">
               <div className="form-value">
-                97% Cotton 3% Elastane Ps Chino Trouser
+                {budget.techpack?.description || "N/A"}
               </div>
             </div>
           </div>
@@ -288,14 +178,16 @@ export default function BudgetDetails(props) {
               <label className="form-label">FOB</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">$7.5</div>
+              <div className="form-value">{budget.fob || "N/A"}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Garment Wash</div>
+              <div className="form-value">
+                {budget.techpack?.wash_details || "N/A"}
+              </div>
             </div>
           </div>
 
@@ -304,19 +196,20 @@ export default function BudgetDetails(props) {
               <label className="form-label">CM</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">$1.00</div>
+              <div className="form-value">{budget.cm || "N/A"}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">Dying, Printing</div>
+              <div className="form-value">
+                {budget.techpack?.special_operation || "N/A"}
+              </div>
             </div>
           </div>
         </div>
       </div>
       <br />
-
       <div className="create_tp_materials_area create_tp_body">
         <h6>Material Descriptions</h6>
         <div className="table-responsive">
@@ -337,115 +230,48 @@ export default function BudgetDetails(props) {
                 <th>Wastage</th>
                 <th>Total Consum- ption</th>
                 <th>Total Booking</th>
-                <th>Unit Price From Open Costing</th>
+                <th>Unit Price From Open Budget</th>
                 <th>Actual Unit Price</th>
                 <th>Total Price</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Fabric</td>
-                <td>Pocketing</td>
-                <td>Composition</td>
-                <td>Abc</td>
-                <td>black</td>
-                <td>body</td>
-                <td>xl</td>
-                <td>yards</td>
-                <td>xl</td>
-                <td>5</td>
-                <td>1.00</td>
-                <td>5%</td>
-                <td>1.5</td>
-                <td>5</td>
-                <td>$0.60</td>
-                <td>$0.60</td>
-                <td>$5.00</td>
-              </tr>
-              <tr>
-                <td>Fabric</td>
-                <td>Pocketing</td>
-                <td>Composition</td>
-                <td>Abc</td>
-                <td>black</td>
-                <td>body</td>
-                <td>xl</td>
-                <td>yards</td>
-                <td>xl</td>
-                <td>5</td>
-                <td>1.00</td>
-                <td>5%</td>
-                <td>1.5</td>
-                <td>5</td>
-                <td>$0.60</td>
-                <td>$0.60</td>
-                <td>$5.00</td>
-              </tr>
-              <tr>
-                <td>Fabric</td>
-                <td>Pocketing</td>
-                <td>Composition</td>
-                <td>Abc</td>
-                <td>black</td>
-                <td>body</td>
-                <td>xl</td>
-                <td>yards</td>
-                <td>xl</td>
-                <td>5</td>
-                <td>1.00</td>
-                <td>5%</td>
-                <td>1.5</td>
-                <td>5</td>
-                <td>$0.60</td>
-                <td>$0.60</td>
-                <td>$5.00</td>
-              </tr>
-              <tr>
-                <td>Fabric</td>
-                <td>Pocketing</td>
-                <td>Composition</td>
-                <td>Abc</td>
-                <td>black</td>
-                <td>body</td>
-                <td>xl</td>
-                <td>yards</td>
-                <td>xl</td>
-                <td>5</td>
-                <td>1.00</td>
-                <td>5%</td>
-                <td>1.5</td>
-                <td>5</td>
-                <td>$0.60</td>
-                <td>$0.60</td>
-                <td>$5.00</td>
-              </tr>
-
-              <tr>
-                <td>Fabric</td>
-                <td>Pocketing</td>
-                <td>Composition</td>
-                <td>Abc</td>
-                <td>black</td>
-                <td>body</td>
-                <td>xl</td>
-                <td>yards</td>
-                <td>xl</td>
-                <td>5</td>
-                <td>1.00</td>
-                <td>5%</td>
-                <td>1.5</td>
-                <td>5</td>
-                <td>$0.60</td>
-                <td>$0.60</td>
-                <td>$5.00</td>
-              </tr>
+              {budget.items?.length > 0 &&
+                budget.items?.map((item, index) => (
+                  <tr>
+                    <td>{item.item_type?.title}</td>
+                    <td>{item.item?.title}</td>
+                    <td>{item.item_details}</td>
+                    <td>{item.supplier?.company_name}</td>
+                    <td>{item.color}</td>
+                    <td>{item.position}</td>
+                    <td>{item.size}</td>
+                    <td>{item.unit}</td>
+                    <td>{item.size_breakdown}</td>
+                    <td>{item.quantity}</td>
+                    <td>{item.consumption}</td>
+                    <td>{item.wastage}</td>
+                    <td>{item.total}</td>
+                    <td>{item.total_booking}</td>
+                    <td>{item.unit_price}</td>
+                    <td>{item.actual_unit_price}</td>
+                    <td>{item.actual_total_price}</td>
+                  </tr>
+                ))}
 
               <tr>
                 <td colSpan={16}>
                   <strong>FOB</strong>
                 </td>
                 <td className="text-end">
-                  <strong>$8.00</strong>
+                  <strong>
+                    $
+                    {budget.items?.reduce(
+                      (sum, row) =>
+                        sum + parseFloat(row.actual_total_price || 0),
+                      0
+                    ).toFixed(2)}
+                  </strong>
                 </td>
               </tr>
             </tbody>

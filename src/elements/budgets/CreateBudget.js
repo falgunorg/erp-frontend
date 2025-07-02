@@ -8,74 +8,15 @@ import { useHistory } from "react-router-dom";
 
 export default function CreateBudget({ renderArea, setRenderArea }) {
   const history = useHistory();
-  const [buyers, setBuyers] = useState([]);
-  const getBuyers = async () => {
-    setSpinner(true);
-    var response = await api.post("/buyers");
-    if (response.status === 200 && response.data) {
-      setBuyers(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const brands = [
-    { id: 1, title: "NEXT" },
-    { id: 2, title: "GARAN" },
-    { id: 3, title: "MANGO" },
-  ];
-
-  const season = [
-    { id: 1, title: "FAL 24" },
-    { id: 2, title: "SUMMER 25" },
-    { id: 3, title: "SPRING 25" },
-  ];
-
-  const departments = [
-    { id: 1, title: "Mens" },
-    { id: 2, title: "Womens" },
-    { id: 3, title: "Kids" },
-  ];
-
-  const companies = [
-    { id: 1, title: "JMS" },
-    { id: 2, title: "MCL" },
-    { id: 3, title: "MBL" },
-  ];
-
-  const itemTypes = [
-    { id: 1, title: "TOP" },
-    { id: 2, title: "BOTTOM" },
-    { id: 3, title: "SWIMWEAR" },
-  ];
-
-  const washes = [
-    { id: 1, title: "Garment Wash" },
-    { id: 2, title: "Enzyme Wash" },
-    { id: 3, title: "Bleach Wash" },
-    { id: 4, title: "Stone Wash" },
-    { id: 5, title: "Acid Wash" },
-    { id: 6, title: "Rinse Wash" },
-    { id: 7, title: "Sand Wash" },
-    { id: 8, title: "Silicon Wash" },
-    { id: 9, title: "Moonshine Wash" },
-    { id: 10, title: "Distressed Wash" },
-  ];
-
-  const specialOperations = [
-    { id: 1, title: "Embroadary" },
-    { id: 2, title: "Printing" },
-    { id: 3, title: "Fusing" },
-    { id: 4, title: "Dying" },
-  ];
 
   const [spinner, setSpinner] = useState(false);
-  const [materialTypes, setMaterialTypes] = useState([]);
+  const [itemTypes, setItemTypes] = useState([]);
 
-  const getMaterialTypes = async () => {
+  const getItemTypes = async () => {
     setSpinner(true);
     var response = await api.post("/item-types");
     if (response.status === 200 && response.data) {
-      setMaterialTypes(response.data.data);
+      setItemTypes(response.data.data);
     }
     setSpinner(false);
   };
@@ -143,62 +84,64 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
   };
 
   useEffect(() => {
-    getItems();
     getSizes();
     getColors();
     getUnits();
-    getMaterialTypes();
+    getItems();
+    getItemTypes();
     getSuppliers();
-    getBuyers();
     getCostings();
   }, []);
 
   const [materials, setMaterials] = useState([]);
-  console.log("items", materials);
 
-  const addRow = () => {
-    setMaterials((prev) => [
-      ...prev,
-      {
-        item_type_id: "",
-        item_id: "",
-        item_details: "",
-        color: "",
-        size: "",
-        unit: "",
-        size_breakdown: "",
-        position: "",
-        supplier_id: "",
-        consumption: "",
-        wastage: "",
-        total: 0,
-        unit_price: "",
-        actual_unit_price: 0,
-        total_booking: "",
-        total_price: 0,
-        actual_total_price: 0,
-      },
-    ]);
-  };
+  // const addRow = () => {
+  //   setMaterials((prev) => [
+  //     ...prev,
+  //     {
+  //       item_type_id: "",
+  //       item_id: "",
+  //       item_details: "",
+  //       color: "",
+  //       size: "",
+  //       unit: "",
+  //       size_breakdown: "",
+  //       position: "",
+  //       supplier_id: "",
+  //       consumption: "",
+  //       wastage: "",
+  //       total: 0,
+  //       unit_price: "",
+  //       actual_unit_price: 0,
+  //       total_booking: "",
+  //       total_price: 0,
+  //       actual_total_price: 0,
+  //     },
+  //   ]);
+  // };
 
-  const removeRow = (index) => {
-    setMaterials((prev) => prev.filter((_, i) => i !== index));
-  };
+  // const removeRow = (index) => {
+  //   setMaterials((prev) => prev.filter((_, i) => i !== index));
+  // };
 
-  const handleInputChange = (index, field, value) => {
-    const updated = [...materials];
-    updated[index][field] = value;
+  const handleInputChange = (index, name, value) => {
+    setMaterials((prevMaterials) => {
+      const updatedMaterials = [...prevMaterials];
+      const row = { ...updatedMaterials[index], [name]: value };
 
-    const consumption = parseFloat(updated[index].consumption) || 0;
-    const wastage = parseFloat(updated[index].wastage) || 0;
-    const actualUnitPrice = parseFloat(updated[index].actual_unit_price) || 0;
+      // Convert numeric strings to numbers
+      const total = parseFloat(row.total) || 0;
+      const actualUnitPrice =
+        parseFloat(
+          name === "actual_unit_price" ? value : row.actual_unit_price
+        ) || 0;
 
-    const total = consumption + (consumption * wastage) / 100;
-    updated[index].total = total;
+      // Update actual_total_price based on new actual_unit_price or total
+      row.actual_total_price = actualUnitPrice * total;
 
-    updated[index].actual_total_price = total * actualUnitPrice;
-
-    setMaterials(updated);
+      updatedMaterials[index] = row;
+      return updatedMaterials;
+    });
   };
 
   const [formData, setFormData] = useState({
@@ -245,7 +188,30 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
             special_operations: data.techpack?.special_operation || "",
           }));
 
-          setMaterials(data.items);
+          // Update materials
+          const materials = data.items.map((item) => ({
+            item_type_id: item.item_type_id,
+            item_id: item.item_id,
+            item_name: item.item_name,
+            item_details: item.item_details,
+            color: item.color,
+            size: item.size,
+            unit: item.unit,
+            quantity: item.quantity ?? 0,
+            size_breakdown: item.size_breakdown ?? "",
+            position: item.position,
+            supplier_id: item.supplier_id,
+            consumption: item.consumption,
+            wastage: item.wastage,
+            total: item.total,
+            unit_price: item.unit_price,
+            actual_unit_price: item.actual_total_price ?? 0,
+            total_booking: item.total_booking ?? 0,
+            total_price: item.total_price,
+            actual_total_price: item.actual_total_price ?? 0,
+          }));
+
+          setMaterials(materials);
         }
       } catch (error) {
         console.error("Error fetching technical package data:", error);
@@ -257,6 +223,36 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
       }));
     }
   };
+
+  useEffect(() => {
+    const allItems = materials;
+
+    // Calculate total FOB
+    const totalFob = allItems.reduce((sum, item) => {
+      const totalPrice = parseFloat(item.actual_total_price) || 0;
+      return sum + totalPrice;
+    }, 0);
+
+    // Get CM item_type_id(s)
+    const cmItemTypeIds = itemTypes
+      .filter((type) => type.title === "CM")
+      .map((type) => type.id);
+
+    // Filter CM items and calculate total CM
+    const totalCM = allItems
+      .filter((item) => cmItemTypeIds.includes(item.item_type_id))
+      .reduce((sum, item) => {
+        const totalPrice = parseFloat(item.total_price) || 0;
+        return sum + totalPrice;
+      }, 0);
+
+    // Set both values
+    setFormData((prev) => ({
+      ...prev,
+      fob: totalFob.toFixed(2),
+      cm: totalCM.toFixed(2),
+    }));
+  }, [materials, itemTypes]);
 
   const [errors, setErrors] = useState({});
 
@@ -280,8 +276,8 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const tp_items = Object.values(materials).flat();
-    if (tp_items.length === 0) {
+    const budget_items = materials;
+    if (budget_items.length === 0) {
       swal({
         title: "Please Select items",
         icon: "error",
@@ -292,14 +288,14 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
     if (validateForm()) {
       var data = new FormData();
       data.append("costing_id", formData.costing_id);
-      data.append("costing_items", JSON.stringify(tp_items));
+      data.append("budget_items", JSON.stringify(budget_items));
       data.append("cm", formData.cm);
       data.append("factory_cpm", formData.factory_cpm);
       data.append("fob", formData.fob);
       setSpinner(true);
-      var response = await api.post("/costings-create", data);
+      var response = await api.post("/budgets-create", data);
       if (response.status === 200 && response.data) {
-        history.push("/cost-sheets/" + response.data.data.id);
+        history.push("/budget-sheets/" + response.data.data.id);
         setRenderArea("details");
       } else {
         setErrors(response.data.errors);
@@ -308,6 +304,9 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
     }
   };
 
+  console.log("Items", materials);
+
+  console.log("FORM DATA", formData);
   return (
     <div className="create_technical_pack">
       <div className="row create_tp_header align-items-center">
@@ -337,7 +336,13 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
           </div>
         </div>
         <div className="col-lg-2">
-          <button className="btn btn-default submit_button"> Submit </button>
+          <button
+            onClick={handleSubmit}
+            className="btn btn-default submit_button"
+          >
+            {" "}
+            Submit{" "}
+          </button>
         </div>
       </div>
       <br />
@@ -345,7 +350,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
         <div className="col-lg-12">
           <div className="row">
             <div className="col-lg-2">
-              <label className="form-label">Tech Pack#</label>
+              <label className="form-label">Tech Pack/Costing Ref#</label>
             </div>
             <div className="col-lg-3">
               <CustomSelect
@@ -493,7 +498,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
         <div className="d-flex justify-content-between">
           <h6>Material Descriptions</h6>
           <div
-            onClick={addRow}
+            // onClick={addRow}
             style={{
               background: "#f1a655",
               height: "17px",
@@ -538,29 +543,40 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
               {materials.map((row, index) => (
                 <tr key={index}>
                   <td>
-                    <select
-                      style={{ width: "100px" }}
-                      value={row.item_type_id}
-                      onChange={(e) =>
-                        handleInputChange(index, "item_type_id", e.target.value)
-                      }
-                    >
-                      <option>Fabric</option>
-                      <option>Thread</option>
-                    </select>
+                    <CustomSelect
+                      isDisabled
+                      placeholder="Item Type"
+                      options={itemTypes.map(({ id, title }) => ({
+                        value: id,
+                        label: title,
+                      }))}
+                      value={itemTypes
+                        .map(({ id, title }) => ({
+                          value: id,
+                          label: title,
+                        }))
+                        .find((option) => option.value === row.item_type_id)}
+                    />
                   </td>
                   <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="text"
-                      value={row.item_id}
-                      onChange={(e) =>
-                        handleInputChange(index, "item_id", e.target.value)
-                      }
+                    <CustomSelect
+                      placeholder="Item Type"
+                      isDisabled
+                      options={items.map(({ id, title }) => ({
+                        value: id,
+                        label: title,
+                      }))}
+                      value={items
+                        .map(({ id, title }) => ({
+                          value: id,
+                          label: title,
+                        }))
+                        .find((option) => option.value === row.item_id)}
                     />
                   </td>
                   <td>
                     <input
+                      readOnly
                       style={{ width: "100px" }}
                       type="text"
                       value={row.item_details}
@@ -570,31 +586,40 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                     />
                   </td>
                   <td>
-                    <select
-                      style={{ width: "100px" }}
-                      value={row.supplier_id}
-                      onChange={(e) =>
-                        handleInputChange(index, "supplier_id", e.target.value)
-                      }
-                    >
-                      <option>ABC Enterprise</option>
-                      <option>RM Interliner</option>
-                    </select>
+                    <CustomSelect
+                      isDisabled
+                      placeholder="Supplier"
+                      options={suppliers.map(({ id, company_name }) => ({
+                        value: id,
+                        label: company_name,
+                      }))}
+                      value={suppliers
+                        .map(({ id, company_name }) => ({
+                          value: id,
+                          label: company_name,
+                        }))
+                        .find((option) => option.value === row.supplier_id)}
+                    />
                   </td>
                   <td>
-                    <select
-                      style={{ width: "100px" }}
-                      value={row.color}
-                      onChange={(e) =>
-                        handleInputChange(index, "color", e.target.value)
-                      }
-                    >
-                      <option>Red</option>
-                      <option>Blue</option>
-                    </select>
+                    <CustomSelect
+                      isDisabled
+                      placeholder="Color"
+                      options={colors.map(({ title }) => ({
+                        value: title,
+                        label: title,
+                      }))}
+                      value={colors
+                        .map(({ title }) => ({
+                          value: title,
+                          label: title,
+                        }))
+                        .find((option) => option.value === row.color)}
+                    />
                   </td>
                   <td>
                     <input
+                      readOnly
                       style={{ width: "100px" }}
                       type="text"
                       value={row.position}
@@ -604,31 +629,39 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                     />
                   </td>
                   <td>
-                    <select
-                      style={{ width: "100px" }}
-                      value={row.size}
-                      onChange={(e) =>
-                        handleInputChange(index, "size", e.target.value)
-                      }
-                    >
-                      <option>xl</option>
-                      <option>M</option>
-                    </select>
+                    <CustomSelect
+                      isDisabled
+                      placeholder="Size"
+                      options={sizes.map(({ title }) => ({
+                        value: title,
+                        label: title,
+                      }))}
+                      value={sizes
+                        .map(({ title }) => ({
+                          value: title,
+                          label: title,
+                        }))
+                        .find((option) => option.value === row.size)}
+                    />
                   </td>
                   <td>
-                    <select
-                      style={{ width: "100px" }}
-                      value={row.unit}
-                      onChange={(e) =>
-                        handleInputChange(index, "unit", e.target.value)
-                      }
-                    >
-                      <option>yds</option>
-                      <option>foot</option>
-                    </select>
+                    <CustomSelect
+                      isDisabled
+                      placeholder="Unit"
+                      options={units.map(({ title }) => ({
+                        value: title,
+                        label: title,
+                      }))}
+                      value={units
+                        .map(({ title }) => ({
+                          value: title,
+                          label: title,
+                        }))
+                        .find((option) => option.value === row.unit)}
+                    />
                   </td>
                   <td>
-                    <select
+                    <input
                       style={{ width: "100px" }}
                       value={row.size_breakdown}
                       onChange={(e) =>
@@ -638,10 +671,8 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                           e.target.value
                         )
                       }
-                    >
-                      <option>xl</option>
-                      <option>M</option>
-                    </select>
+                      type="text"
+                    />
                   </td>
                   <td>
                     <input
@@ -658,9 +689,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                       style={{ width: "100px" }}
                       type="number"
                       value={row.consumption}
-                      onChange={(e) =>
-                        handleInputChange(index, "consumption", e.target.value)
-                      }
+                      readOnly
                     />
                   </td>
                   <td>
@@ -668,9 +697,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                       style={{ width: "100px" }}
                       type="number"
                       value={row.wastage}
-                      onChange={(e) =>
-                        handleInputChange(index, "wastage", e.target.value)
-                      }
+                      readOnly
                     />
                   </td>
                   <td>
@@ -699,14 +726,8 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                     <input
                       style={{ width: "100px" }}
                       type="number"
-                      value={row.unitPriceOpen}
-                      onChange={(e) =>
-                        handleInputChange(
-                          index,
-                          "unitPriceOpen",
-                          e.target.value
-                        )
-                      }
+                      readOnly
+                      value={row.unit_price}
                     />
                   </td>
                   <td>
@@ -723,19 +744,13 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                       }
                     />
                   </td>
-                  <td className="d-flex align-items-center">
+                  <td>
                     <input
                       style={{ width: "100px" }}
                       type="number"
                       readOnly
-                      value={row.total_price}
-                      className="me-2"
+                      value={row.actual_total_price}
                     />
-                    <i
-                      onClick={() => removeRow(index)}
-                      className="fa fa-times text-danger"
-                      style={{ cursor: "pointer" }}
-                    ></i>
                   </td>
                 </tr>
               ))}
@@ -747,7 +762,8 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                   <strong>
                     $
                     {materials.reduce(
-                      (sum, row) => sum + parseFloat(row.total_price || 0),
+                      (sum, row) =>
+                        sum + parseFloat(row.actual_total_price || 0),
                       0
                     )}
                   </strong>

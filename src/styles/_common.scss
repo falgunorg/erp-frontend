@@ -498,10 +498,7 @@ iframe {
 body,
 .body {
   font-family: "Helvetica Neue", sans-serif !important;
-  // --bs-font-sans-serif: "Helvetica Neue", Helvetica, sans-serif !important;
-  // --bs-body-font-family: var(--bs-font-sans-serif) !important;
-
-  // overflow: hidden;
+  overflow-x: hidden;
 
   &::-webkit-scrollbar {
     width: 5px;

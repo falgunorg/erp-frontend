@@ -321,7 +321,7 @@ class PrivateRoutes extends Component {
           ></PrivateRoute>
           <PrivateRoute
             exact
-            path="/budget-sheets"
+            path="/budget-sheets/:id?"
             component={BudgetSheets}
           ></PrivateRoute>
           {/* end v-101.1 */}

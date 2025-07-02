@@ -54,16 +54,16 @@ export default function BudgetSheets(props) {
 
   const history = useHistory();
 
-  const [selectedCostId, setSelectedCostId] = useState(null);
+  const [selectedBudgetId, setSelectedBudgetId] = useState(null);
 
   const handleClick = (id) => {
-    setSelectedCostId(id);
-    history.push("/cost-sheets/" + id);
+    setSelectedBudgetId(id);
+    history.push("/budget-sheets/" + id);
     setRenderArea("details");
   };
 
   const handleDelete = async () => {
-    var response = await api.post("/budgets-delete", { id: selectedCostId });
+    var response = await api.post("/budgets-delete", { id: selectedBudgetId });
     if (response.status === 200 && response.data) {
       getBudgets();
     }
@@ -170,7 +170,7 @@ export default function BudgetSheets(props) {
                         <ArrowRightIcon />
                       )}
                     </span>
-                    <span className="me-2">{item.costing_ref}</span>
+                    <span className="me-2">{item.ref_number}</span>
                   </div>
                   <div className="tp_text">
                     <span className="step_border"></span>
@@ -178,7 +178,7 @@ export default function BudgetSheets(props) {
                   </div>
                   <div className="tp_text">
                     <span className="step_border"></span>
-                    {item.techpack?.buyer?.name}
+                    {item.techpack?.buyer?.nickname}
                   </div>
                   <div className="tp_text">
                     <span className="step_border"></span>

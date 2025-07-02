@@ -9,16 +9,7 @@ export default function FilterSidebar(props) {
     })
   );
 
-  useEffect(async () => {
-    props.setHeaderData({
-      pageName: "Cost Sheets",
-      isNewButton: true,
-      newButtonLink: "",
-      newButtonText: "New TP",
-      isInnerSearch: true,
-      innerSearchValue: "",
-    });
-  }, []);
+
 
   const months = [
     "January",
