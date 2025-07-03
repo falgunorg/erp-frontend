@@ -42,6 +42,15 @@ export default function BudgetSheets(props) {
   }, []);
 
   useEffect(async () => {
+    if (params.id) {
+      setRenderArea("details");
+    } else {
+      setRenderArea("blank");
+    }
+    getBudgets();
+  }, [params.id]);
+
+  useEffect(async () => {
     props.setHeaderData({
       pageName: "Budgets",
       isNewButton: true,
@@ -66,6 +75,7 @@ export default function BudgetSheets(props) {
     var response = await api.post("/budgets-delete", { id: selectedBudgetId });
     if (response.status === 200 && response.data) {
       getBudgets();
+      history.push("/budget-sheets");
     }
   };
 
@@ -83,14 +93,16 @@ export default function BudgetSheets(props) {
           >
             Edit
           </button>
-          <button disabled={renderArea !== "details"}>Delete</button>
+          <button onClick={handleDelete} disabled={renderArea !== "details"}>
+            Delete
+          </button>
         </div>
       </div>
 
       <div className="technical_package_layout purchase_order_page_when_print">
         <FilterSidebar />
 
-        <div className="purchase_list">
+        <div className="purchase_list non_printing_area">
           <div className="purchase_list_header d-flex justify-content-between">
             <div className="purchase_header_left">
               <div className="title">

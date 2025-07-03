@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import { Modal, Button, Spinner } from "react-bootstrap";
 import MultipleFileView from "./MultipleFileView";
-import html2pdf from "html2pdf.js";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 export default function TechnicalPackageDetails({ tpDetails }) {
   const [fullScreenImage, setFullScreenImage] = useState(null);
   const [imageModal, setImageModal] = useState(false);
@@ -22,18 +23,39 @@ export default function TechnicalPackageDetails({ tpDetails }) {
 
   const [spinner, setSpinner] = useState(false);
 
-  const tpRef = React.useRef();
   const handleGeneratePDF = () => {
-    const element = tpRef.current;
-    const opt = {
-      margin: 0.2,
-      filename: tpDetails.techpack_number + ".pdf",
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    };
+    const element = document.getElementById("pdf-content");
+    const responsiveTables = element.querySelectorAll(".table-responsive");
 
-    html2pdf().set(opt).from(element).save();
+    // Temporarily remove overflow and set height to auto
+    responsiveTables.forEach((table) => {
+      table.dataset.originalStyle = table.getAttribute("style") || "";
+      table.style.overflow = "visible";
+      table.style.maxHeight = "unset";
+      table.style.height = "auto";
+    });
+
+    // Wait for layout to update
+    setTimeout(() => {
+      html2canvas(element, {
+        scale: 2, // High quality
+        useCORS: true,
+        scrollY: -window.scrollY, // Optional: remove scroll offset
+      }).then((canvas) => {
+        // Restore original styles
+        responsiveTables.forEach((table) => {
+          table.setAttribute("style", table.dataset.originalStyle);
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save("download.pdf");
+      });
+    }, 100); // Slight delay for DOM to reflow
   };
 
   const buyerTechpackFiles = tpDetails?.files?.filter(
@@ -55,10 +77,10 @@ export default function TechnicalPackageDetails({ tpDetails }) {
   console.log("Materials", tpDetails.materials);
 
   return (
-    <div className="create_technical_pack" ref={tpRef}>
+    <div className="create_technical_pack" id="pdf-content">
       <div className="row create_tp_header align-items-center">
         <div className="col-lg-10">
-          <div className="row align-items-baseline">
+          <div className="row align-items-center">
             <div className="col-lg-4">
               <img
                 style={{ width: "30px", marginRight: "8px" }}

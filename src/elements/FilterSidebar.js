@@ -9,8 +9,6 @@ export default function FilterSidebar(props) {
     })
   );
 
-
-
   const months = [
     "January",
     "February",
@@ -43,7 +41,7 @@ export default function FilterSidebar(props) {
   }, [selectedMonth]);
 
   return (
-    <div className="purchase_sidebar">
+    <div className="purchase_sidebar non_printing_area">
       <div className="email-section">
         <div className="folder_name">Department</div>
         <ul>

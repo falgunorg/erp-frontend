@@ -1,6 +1,11 @@
 .jodit-status-bar {
   display: none !important;
 }
+table thead tr th,
+table thead tr td,
+table tbody tr td {
+  border: 0.5px solid #707070 !important;
+}
 
 //layouts part
 .ql-editor {

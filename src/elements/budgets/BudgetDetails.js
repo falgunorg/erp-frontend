@@ -1,15 +1,27 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import api from "services/api";
-import html2pdf from "html2pdf.js";
 import { useParams } from "react-router-dom";
-
-import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
-
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 export default function BudgetDetails(props) {
   const params = useParams();
 
   const [spinner, setSpinner] = useState(false);
+
+  const [itemTypes, setItemTypes] = useState([]);
+  const getItemTypes = async () => {
+    setSpinner(true);
+    var response = await api.post("/item-types");
+    if (response.status === 200 && response.data) {
+      setItemTypes(response.data.data);
+    }
+    setSpinner(false);
+  };
+
+  useEffect(() => {
+    getItemTypes();
+  }, []);
 
   const [budget, setBudget] = useState([]);
   const getBudget = async () => {
@@ -28,20 +40,90 @@ export default function BudgetDetails(props) {
 
   const budgetRef = React.useRef();
   const handleGeneratePDF = () => {
-    const element = budgetRef.current;
-    const opt = {
-      margin: 0.2,
-      filename: "cost-sheet.pdf",
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    };
+    const element = document.getElementById("pdf-content");
+    const responsiveTables = element.querySelectorAll(".table-responsive");
 
-    html2pdf().set(opt).from(element).save();
+    // Temporarily remove overflow and set height to auto
+    responsiveTables.forEach((table) => {
+      table.dataset.originalStyle = table.getAttribute("style") || "";
+      table.style.overflow = "visible";
+      table.style.maxHeight = "unset";
+      table.style.height = "auto";
+    });
+
+    // Wait for layout to update
+    setTimeout(() => {
+      html2canvas(element, {
+        scale: 2, // High quality
+        useCORS: true,
+        scrollY: -window.scrollY, // Optional: remove scroll offset
+      }).then((canvas) => {
+        // Restore original styles
+        responsiveTables.forEach((table) => {
+          table.setAttribute("style", table.dataset.originalStyle);
+        });
+
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save("download.pdf");
+      });
+    }, 100); // Slight delay for DOM to reflow
+  };
+
+  // const handleGeneratePDF = () => {
+  //   const element = document.getElementById("pdf-content");
+  //   const responsiveTables = element.querySelectorAll(".table-responsive");
+
+  //   // Temporarily remove overflow
+  //   responsiveTables.forEach((table) => {
+  //     table.dataset.originalOverflow = table.style.overflow;
+  //     table.style.overflow = "visible";
+  //   });
+
+  //   html2canvas(element, { useCORS: true, scale: 2 }).then((canvas) => {
+  //     // Restore overflow
+  //     responsiveTables.forEach((table) => {
+  //       table.style.overflow = table.dataset.originalOverflow || "";
+  //     });
+
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const pdf = new jsPDF("p", "mm", "a4");
+
+  //     const pdfWidth = pdf.internal.pageSize.getWidth();
+  //     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+  //     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  //     pdf.save("download.pdf");
+  //   });
+  // };
+
+  // const handleGeneratePDF = () => {
+  //   const element = document.getElementById("pdf-content");
+
+  //   html2canvas(element).then((canvas) => {
+  //     const imgData = canvas.toDataURL("image/png");
+  //     const pdf = new jsPDF("p", "mm", "a4");
+
+  //     const imgProps = pdf.getImageProperties(imgData);
+  //     const pdfWidth = pdf.internal.pageSize.getWidth();
+  //     const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+  //     pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+  //     pdf.save("download.pdf");
+  //   });
+  // };
+
+  const isCMType = (item_type_id) => {
+    const type = itemTypes.find((t) => t.id === item_type_id);
+    return type?.title === "CM";
   };
 
   return (
-    <div className="create_technical_pack" ref={budgetRef}>
+    <div className="create_technical_pack" id="pdf-content" ref={budgetRef}>
       <div className="row create_tp_header align-items-center">
         <div className="col-lg-10">
           <div className="row align-items-baseline">
@@ -51,7 +133,7 @@ export default function BudgetDetails(props) {
                 src={Logo}
                 alt="Logo"
               />
-              <span className="purchase_text">Cost Sheet</span>
+              <span className="purchase_text">Budget</span>
             </div>
             <div className="col-lg-2">
               <label className="form-label">PO Number</label>
@@ -70,7 +152,7 @@ export default function BudgetDetails(props) {
         </div>
         <div className="col-lg-2">
           <button
-            className="btn btn-default submit_button"
+            className="btn btn-default submit_button non_printing_area"
             onClick={handleGeneratePDF}
           >
             PDF
@@ -224,9 +306,9 @@ export default function BudgetDetails(props) {
                 <th>Position</th>
                 <th>Size</th>
                 <th>Unit</th>
-                <th>Size Breakdown From PO</th>
+                <th>Size From PO</th>
                 <th>Quantity</th>
-                <th>Actual Consumption</th>
+                <th>Actual Cons</th>
                 <th>Wastage</th>
                 <th>Total Consum- ption</th>
                 <th>Total Booking</th>
@@ -237,27 +319,41 @@ export default function BudgetDetails(props) {
             </thead>
             <tbody>
               {budget.items?.length > 0 &&
-                budget.items?.map((item, index) => (
-                  <tr>
-                    <td>{item.item_type?.title}</td>
-                    <td>{item.item?.title}</td>
-                    <td>{item.item_details}</td>
-                    <td>{item.supplier?.company_name}</td>
-                    <td>{item.color}</td>
-                    <td>{item.position}</td>
-                    <td>{item.size}</td>
-                    <td>{item.unit}</td>
-                    <td>{item.size_breakdown}</td>
-                    <td>{item.quantity}</td>
-                    <td>{item.consumption}</td>
-                    <td>{item.wastage}</td>
-                    <td>{item.total}</td>
-                    <td>{item.total_booking}</td>
-                    <td>{item.unit_price}</td>
-                    <td>{item.actual_unit_price}</td>
-                    <td>{item.actual_total_price}</td>
-                  </tr>
-                ))}
+                budget.items.map((item, index) => {
+                  const isCM = isCMType(item.item_type_id);
+
+                  return (
+                    <tr key={index}>
+                      <td>{item.item_type?.title}</td>
+                      <td>{item.item?.title}</td>
+
+                      {isCM ? (
+                        <>
+                          <td colSpan={14}></td>
+                          <td>{item.actual_total_price}</td>
+                        </>
+                      ) : (
+                        <>
+                          <td>{item.item_details}</td>
+                          <td>{item.supplier?.company_name}</td>
+                          <td>{item.color}</td>
+                          <td>{item.position}</td>
+                          <td>{item.size}</td>
+                          <td>{item.unit}</td>
+                          <td>{item.size_breakdown}</td>
+                          <td>{item.quantity}</td>
+                          <td>{item.consumption}</td>
+                          <td>{item.wastage}</td>
+                          <td>{item.total}</td>
+                          <td>{item.total_booking}</td>
+                          <td>{item.unit_price}</td>
+                          <td>{item.actual_unit_price}</td>
+                          <td>{item.actual_total_price}</td>
+                        </>
+                      )}
+                    </tr>
+                  );
+                })}
 
               <tr>
                 <td colSpan={16}>
@@ -266,11 +362,13 @@ export default function BudgetDetails(props) {
                 <td className="text-end">
                   <strong>
                     $
-                    {budget.items?.reduce(
-                      (sum, row) =>
-                        sum + parseFloat(row.actual_total_price || 0),
-                      0
-                    ).toFixed(2)}
+                    {budget.items
+                      ?.reduce(
+                        (sum, row) =>
+                          sum + parseFloat(row.actual_total_price || 0),
+                        0
+                      )
+                      .toFixed(2)}
                   </strong>
                 </td>
               </tr>

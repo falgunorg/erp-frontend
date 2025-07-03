@@ -1,4 +1,8 @@
 @media print {
+  .table-responsive {
+    overflow: visible !important;
+  }
+  
   .purchase_order_page_when_print {
     width: 100% !important;
     display: block;
@@ -9,7 +13,6 @@
     padding: 0 10px !important;
   }
 
-  
   body {
     margin: 0 !important;
     padding: 0 !important;

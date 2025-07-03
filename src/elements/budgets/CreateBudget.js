@@ -124,26 +124,54 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
   //   setMaterials((prev) => prev.filter((_, i) => i !== index));
   // };
 
+  // const handleInputChange = (index, name, value) => {
+  //   setMaterials((prevMaterials) => {
+  //     const updatedMaterials = [...prevMaterials];
+  //     const row = { ...updatedMaterials[index], [name]: value };
+
+  //     // Convert numeric strings to numbers
+  //     const total = parseFloat(row.total) || 0;
+  //     const actualUnitPrice =
+  //       parseFloat(
+  //         name === "actual_unit_price" ? value : row.actual_unit_price
+  //       ) || 0;
+
+  //     // Update actual_total_price based on new actual_unit_price or total
+  //     row.actual_total_price = actualUnitPrice * total;
+
+  //     updatedMaterials[index] = row;
+  //     return updatedMaterials;
+  //   });
+  // };
+
   const handleInputChange = (index, name, value) => {
     setMaterials((prevMaterials) => {
       const updatedMaterials = [...prevMaterials];
       const row = { ...updatedMaterials[index], [name]: value };
 
-      // Convert numeric strings to numbers
-      const total = parseFloat(row.total) || 0;
-      const actualUnitPrice =
-        parseFloat(
-          name === "actual_unit_price" ? value : row.actual_unit_price
-        ) || 0;
+      const itemType = itemTypes.find((type) => type.id === row.item_type_id);
+      const isCM = itemType?.title === "CM";
 
-      // Update actual_total_price based on new actual_unit_price or total
-      row.actual_total_price = actualUnitPrice * total;
+      // If not CM, recalculate actual_total_price based on actual_unit_price * total
+      if (!isCM) {
+        const total = parseFloat(row.total) || 0;
+        const actualUnitPrice =
+          parseFloat(
+            name === "actual_unit_price" ? value : row.actual_unit_price
+          ) || 0;
+
+        row.actual_total_price = (actualUnitPrice * total).toFixed(2);
+      } else {
+        // If it's CM and user is directly updating actual_total_price, allow it
+        if (name === "actual_total_price") {
+          row.actual_total_price = parseFloat(value) || 0;
+        }
+      }
 
       updatedMaterials[index] = row;
       return updatedMaterials;
     });
   };
-
   const [formData, setFormData] = useState({
     po_id: "",
     wo_id: "",
@@ -166,13 +194,14 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
   const handleFormChange = async (name, value) => {
     if (name === "costing_id") {
       try {
-        const response = await api.post("/costings-show", {
-          id: value,
-        });
+        setSpinner(true);
+
+        const response = await api.post("/costings-show", { id: value });
 
         if (response.status === 200 && response.data) {
           const data = response.data.data;
 
+          // Set main form data from the costing/techpack
           setFormData((prev) => ({
             ...prev,
             costing_id: value,
@@ -188,35 +217,50 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
             special_operations: data.techpack?.special_operation || "",
           }));
 
-          // Update materials
-          const materials = data.items.map((item) => ({
-            item_type_id: item.item_type_id,
-            item_id: item.item_id,
-            item_name: item.item_name,
-            item_details: item.item_details,
-            color: item.color,
-            size: item.size,
-            unit: item.unit,
-            quantity: item.quantity ?? 0,
-            size_breakdown: item.size_breakdown ?? "",
-            position: item.position,
-            supplier_id: item.supplier_id,
-            consumption: item.consumption,
-            wastage: item.wastage,
-            total: item.total,
-            unit_price: item.unit_price,
-            actual_unit_price: item.actual_total_price ?? 0,
-            total_booking: item.total_booking ?? 0,
-            total_price: item.total_price,
-            actual_total_price: item.actual_total_price ?? 0,
-          }));
+          // Get CM item type IDs
+          const cmItemTypeIds = itemTypes
+            .filter((type) => type.title === "CM")
+            .map((type) => type.id);
+
+          // Map each item into your materials state
+          const materials = data.items.map((item) => {
+            const isCM = cmItemTypeIds.includes(item.item_type_id);
+            return {
+              item_type_id: item.item_type_id,
+              item_id: item.item_id,
+              item_name: item.item_name,
+              item_details: item.item_details,
+              color: item.color,
+              size: item.size,
+              unit: item.unit,
+              quantity: item.quantity ?? 0,
+              size_breakdown: item.size_breakdown ?? "",
+              position: item.position,
+              supplier_id: item.supplier_id,
+              consumption: item.consumption,
+              wastage: item.wastage,
+              total: item.total,
+              unit_price: item.unit_price,
+              total_price: item.total_price,
+              total_booking: item.total_booking ?? 0,
+
+              // Set actual prices
+              actual_unit_price: isCM ? 0 : item.actual_unit_price ?? 0,
+              actual_total_price: isCM
+                ? item.total_price ?? 0 // Use total_price as default
+                : item.actual_total_price ?? 0,
+            };
+          });
 
           setMaterials(materials);
         }
       } catch (error) {
-        console.error("Error fetching technical package data:", error);
+        console.error("Error fetching costing data:", error);
+      } finally {
+        setSpinner(false);
       }
     } else {
+      // Other form inputs
       setFormData((prev) => ({
         ...prev,
         [name]: value,
@@ -224,11 +268,13 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
     }
   };
 
+  const [totalFob, setTotalFob] = useState(0);
+  const [totalCM, setTotalCM] = useState(0);
   useEffect(() => {
     const allItems = materials;
 
     // Calculate total FOB
-    const totalFob = allItems.reduce((sum, item) => {
+    const totalFobValue = allItems.reduce((sum, item) => {
       const totalPrice = parseFloat(item.actual_total_price) || 0;
       return sum + totalPrice;
     }, 0);
@@ -239,18 +285,21 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
       .map((type) => type.id);
 
     // Filter CM items and calculate total CM
-    const totalCM = allItems
+    const totalCMValue = allItems
       .filter((item) => cmItemTypeIds.includes(item.item_type_id))
       .reduce((sum, item) => {
-        const totalPrice = parseFloat(item.total_price) || 0;
+        const totalPrice = parseFloat(item.actual_total_price) || 0;
         return sum + totalPrice;
       }, 0);
+
+    setTotalCM(totalCMValue.toFixed(2));
+    setTotalFob(totalFobValue.toFixed(2));
 
     // Set both values
     setFormData((prev) => ({
       ...prev,
-      fob: totalFob.toFixed(2),
-      cm: totalCM.toFixed(2),
+      fob: totalFob,
+      cm: totalCM,
     }));
   }, [materials, itemTypes]);
 
@@ -304,9 +353,11 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
     }
   };
 
-  console.log("Items", materials);
+  const isCMType = (item_type_id) => {
+    const type = itemTypes.find((t) => t.id === item_type_id);
+    return type?.title === "CM";
+  };
 
-  console.log("FORM DATA", formData);
   return (
     <div className="create_technical_pack">
       <div className="row create_tp_header align-items-center">
@@ -540,233 +591,272 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
               </tr>
             </thead>
             <tbody>
-              {materials.map((row, index) => (
-                <tr key={index}>
-                  <td>
-                    <CustomSelect
-                      isDisabled
-                      placeholder="Item Type"
-                      options={itemTypes.map(({ id, title }) => ({
-                        value: id,
-                        label: title,
-                      }))}
-                      value={itemTypes
-                        .map(({ id, title }) => ({
+              {materials.map((row, index) => {
+                const isCM = isCMType(row.item_type_id);
+
+                return (
+                  <tr key={index}>
+                    {/* Common Fields for All */}
+                    <td>
+                      <CustomSelect
+                        isDisabled
+                        placeholder="Item Type"
+                        options={itemTypes.map(({ id, title }) => ({
                           value: id,
                           label: title,
-                        }))
-                        .find((option) => option.value === row.item_type_id)}
-                    />
-                  </td>
-                  <td>
-                    <CustomSelect
-                      placeholder="Item Type"
-                      isDisabled
-                      options={items.map(({ id, title }) => ({
-                        value: id,
-                        label: title,
-                      }))}
-                      value={items
-                        .map(({ id, title }) => ({
+                        }))}
+                        value={itemTypes
+                          .map(({ id, title }) => ({
+                            value: id,
+                            label: title,
+                          }))
+                          .find((option) => option.value === row.item_type_id)}
+                      />
+                    </td>
+
+                    <td>
+                      <CustomSelect
+                        isDisabled
+                        placeholder="Item"
+                        options={items.map(({ id, title }) => ({
                           value: id,
                           label: title,
-                        }))
-                        .find((option) => option.value === row.item_id)}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      readOnly
-                      style={{ width: "100px" }}
-                      type="text"
-                      value={row.item_details}
-                      onChange={(e) =>
-                        handleInputChange(index, "item_details", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <CustomSelect
-                      isDisabled
-                      placeholder="Supplier"
-                      options={suppliers.map(({ id, company_name }) => ({
-                        value: id,
-                        label: company_name,
-                      }))}
-                      value={suppliers
-                        .map(({ id, company_name }) => ({
-                          value: id,
-                          label: company_name,
-                        }))
-                        .find((option) => option.value === row.supplier_id)}
-                    />
-                  </td>
-                  <td>
-                    <CustomSelect
-                      isDisabled
-                      placeholder="Color"
-                      options={colors.map(({ title }) => ({
-                        value: title,
-                        label: title,
-                      }))}
-                      value={colors
-                        .map(({ title }) => ({
-                          value: title,
-                          label: title,
-                        }))
-                        .find((option) => option.value === row.color)}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      readOnly
-                      style={{ width: "100px" }}
-                      type="text"
-                      value={row.position}
-                      onChange={(e) =>
-                        handleInputChange(index, "position", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <CustomSelect
-                      isDisabled
-                      placeholder="Size"
-                      options={sizes.map(({ title }) => ({
-                        value: title,
-                        label: title,
-                      }))}
-                      value={sizes
-                        .map(({ title }) => ({
-                          value: title,
-                          label: title,
-                        }))
-                        .find((option) => option.value === row.size)}
-                    />
-                  </td>
-                  <td>
-                    <CustomSelect
-                      isDisabled
-                      placeholder="Unit"
-                      options={units.map(({ title }) => ({
-                        value: title,
-                        label: title,
-                      }))}
-                      value={units
-                        .map(({ title }) => ({
-                          value: title,
-                          label: title,
-                        }))
-                        .find((option) => option.value === row.unit)}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      value={row.size_breakdown}
-                      onChange={(e) =>
-                        handleInputChange(
-                          index,
-                          "size_breakdown",
-                          e.target.value
-                        )
-                      }
-                      type="text"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="number"
-                      value={row.quantity}
-                      onChange={(e) =>
-                        handleInputChange(index, "quantity", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="number"
-                      value={row.consumption}
-                      readOnly
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="number"
-                      value={row.wastage}
-                      readOnly
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="number"
-                      readOnly
-                      value={row.total}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="number"
-                      value={row.total_booking}
-                      onChange={(e) =>
-                        handleInputChange(
-                          index,
-                          "total_booking",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="number"
-                      readOnly
-                      value={row.unit_price}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="number"
-                      value={row.actual_unit_price}
-                      onChange={(e) =>
-                        handleInputChange(
-                          index,
-                          "actual_unit_price",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </td>
-                  <td>
-                    <input
-                      style={{ width: "100px" }}
-                      type="number"
-                      readOnly
-                      value={row.actual_total_price}
-                    />
-                  </td>
-                </tr>
-              ))}
+                        }))}
+                        value={items
+                          .map(({ id, title }) => ({
+                            value: id,
+                            label: title,
+                          }))
+                          .find((option) => option.value === row.item_id)}
+                      />
+                    </td>
+
+                    {isCM ? (
+                      <>
+                        <td colSpan={14}></td>
+
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            value={row.actual_total_price}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "actual_total_price",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                      </>
+                    ) : (
+                      // Show all fields for non-CM
+                      <>
+                        <td>
+                          <input
+                            readOnly
+                            style={{ width: "100px" }}
+                            type="text"
+                            value={row.item_details}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "item_details",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <CustomSelect
+                            isDisabled
+                            placeholder="Supplier"
+                            options={suppliers.map(({ id, company_name }) => ({
+                              value: id,
+                              label: company_name,
+                            }))}
+                            value={suppliers
+                              .map(({ id, company_name }) => ({
+                                value: id,
+                                label: company_name,
+                              }))
+                              .find(
+                                (option) => option.value === row.supplier_id
+                              )}
+                          />
+                        </td>
+                        <td>
+                          <CustomSelect
+                            isDisabled
+                            placeholder="Color"
+                            options={colors.map(({ title }) => ({
+                              value: title,
+                              label: title,
+                            }))}
+                            value={colors
+                              .map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))
+                              .find((option) => option.value === row.title)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            readOnly
+                            style={{ width: "100px" }}
+                            type="text"
+                            value={row.position}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "position",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <CustomSelect
+                            isDisabled
+                            placeholder="Size"
+                            options={sizes.map(({ title }) => ({
+                              value: title,
+                              label: title,
+                            }))}
+                            value={sizes
+                              .map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))
+                              .find((option) => option.value === row.size)}
+                          />
+                        </td>
+                        <td>
+                          <CustomSelect
+                            isDisabled
+                            placeholder="Unit"
+                            options={units.map(({ title }) => ({
+                              value: title,
+                              label: title,
+                            }))}
+                            value={units
+                              .map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))
+                              .find((option) => option.value === row.unit)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            value={row.size_breakdown}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "size_breakdown",
+                                e.target.value
+                              )
+                            }
+                            type="text"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            value={row.quantity}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "quantity",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            value={row.consumption}
+                            readOnly
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            value={row.wastage}
+                            readOnly
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            readOnly
+                            value={row.total}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            value={row.total_booking}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "total_booking",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            readOnly
+                            value={row.unit_price}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            value={row.actual_unit_price}
+                            onChange={(e) =>
+                              handleInputChange(
+                                index,
+                                "actual_unit_price",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td>
+                          <input
+                            style={{ width: "100px" }}
+                            type="number"
+                            readOnly
+                            value={row.actual_total_price}
+                          />
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                );
+              })}
+
               <tr>
                 <td colSpan={16}>
                   <strong>FOB</strong>
                 </td>
                 <td className="text-end">
-                  <strong>
-                    $
-                    {materials.reduce(
-                      (sum, row) =>
-                        sum + parseFloat(row.actual_total_price || 0),
-                      0
-                    )}
-                  </strong>
+                  <strong>${totalFob}</strong>
                 </td>
               </tr>
             </tbody>
