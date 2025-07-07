@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import Select, { components } from "react-select";
 import Dropdown from "react-bootstrap/Dropdown";
 import CreateTechnicalPackage from "../elements/techpack/CreateTechnicalPackage";
 import TechnicalPackageDetails from "../elements/techpack/TechnicalPackageDetails";
 import api from "services/api";
 import swal from "sweetalert";
-
+import FilterSidebar from "elements/FilterSidebar";
+import { useHistory, useParams } from "react-router-dom";
 import {
   FilterIcon,
   ArrowRightIcon,
@@ -15,69 +15,16 @@ import {
 } from "../elements/SvgIcons";
 import EditTechnicalPackage from "elements/techpack/EditTechnicalPackage";
 
-export default function TechnicalPackage(props) {
+export default function TechnicalPackages(props) {
   const [renderArea, setRenderArea] = useState("blank");
+  const history = useHistory();
+  const params = useParams();
 
-  const DropdownIndicator = (props) => {
-    return (
-      <components.DropdownIndicator {...props}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="9"
-          height="7"
-          viewBox="0 0 9 7"
-        >
-          <path
-            id="Polygon_60"
-            data-name="Polygon 60"
-            d="M3.659,1.308a1,1,0,0,1,1.682,0L8.01,5.459A1,1,0,0,1,7.168,7H1.832A1,1,0,0,1,.99,5.459Z"
-            transform="translate(9 7) rotate(180)"
-            fill="#707070"
-          />
-        </svg>
-      </components.DropdownIndicator>
-    );
-  };
-
-  const customStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      background: "none",
-      border: "none",
-      minHeight: "21px",
-      fontSize: "15px",
-      height: "21px",
-      background: "#ECECEC",
-      lineHeight: "100%",
-      boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.18)",
-      boxShadow: state.isFocused ? "" : "",
-    }),
-
-    valueContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-      padding: "0 6px",
-    }),
-
-    input: (provided, state) => ({
-      ...provided,
-      margin: "0px",
-    }),
-    indicatorSeparator: (state) => ({
-      display: "none",
-    }),
-    indicatorsContainer: (provided, state) => ({
-      ...provided,
-      height: "21px",
-    }),
-  };
-
-  const [workOrders, setWorkOrders] = useState(
-    Array.from({ length: 50 }, (_, index) => {
-      const serial = String(index + 1).padStart(2, "0");
-      return { value: `WONXF1JM${serial}`, label: `WONXF1JM${serial}` };
-    })
-  );
+  useEffect(() => {
+    if (params.id) {
+      setRenderArea("details");
+    }
+  }, [params.id]);
 
   useEffect(async () => {
     props.setHeaderData({
@@ -89,42 +36,7 @@ export default function TechnicalPackage(props) {
       innerSearchValue: "",
     });
   }, []);
-
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-
-  const getDaysInMonth = (monthIndex, year) => {
-    const days = new Date(year, monthIndex + 1, 0).getDate(); // Get total days in month
-    return Array.from(
-      { length: days },
-      (_, i) => `${monthIndex + 1}/${i + 1}/${year % 100}`
-    ); // Format as MM/DD/YY
-  };
-
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
-  const [days, setDays] = useState([]);
-
-  useEffect(() => {
-    const currentYear = new Date().getFullYear();
-    setDays(getDaysInMonth(selectedMonth, currentYear));
-  }, [selectedMonth]);
   const [viewTab, setViewTab] = useState("All");
-
-
-
-
   const [markAble, setMarkAble] = useState(false);
   const toggleMarkAble = () => {
     setSelectedItems([]);
@@ -148,36 +60,19 @@ export default function TechnicalPackage(props) {
       setExpandedGroups(initialExpandedState);
     }
   };
-
   const toggleGroup = (groupName) => {
     setExpandedGroups((prev) => ({
       ...prev,
       [groupName]: !prev[groupName],
     }));
   };
-
-  const expandAll = () => {
-    const allExpanded = {};
-    Object.keys(technicalPackages).forEach((group) => {
-      allExpanded[group] = true;
-    });
-    setExpandedGroups(allExpanded);
-  };
-
-  const collapseAll = () => {
-    const allCollapsed = {};
-    Object.keys(technicalPackages).forEach((group) => {
-      allCollapsed[group] = false;
-    });
-    setExpandedGroups(allCollapsed);
-  };
-
   useEffect(async () => {
     getTechnicalPackages();
   }, []);
 
   const [selectedTp, setSelectedTp] = useState();
   const handleTpDetails = (pkg) => {
+    history.push("/technical-packages/" + pkg.id);
     setRenderArea("details");
     setSelectedTp(pkg);
   };
@@ -281,7 +176,13 @@ export default function TechnicalPackage(props) {
     <div className="purchase_order_page">
       <div className="purchase_action_header non_printing_area">
         <div className="actions_left">
-          <button onClick={() => setRenderArea("add")} className="active">
+          <button
+            onClick={() => {
+              history.push("/technical-packages");
+              setRenderArea("add");
+            }}
+            className="active"
+          >
             New TP
           </button>
 
@@ -295,7 +196,7 @@ export default function TechnicalPackage(props) {
           {selectedItems.length > 1 ? (
             <button
               onClick={handleDeleteMultiple}
-              disabled={renderArea !== "details"}
+              // disabled={renderArea !== "details"}
             >
               Delete All
             </button>
@@ -311,95 +212,7 @@ export default function TechnicalPackage(props) {
       </div>
 
       <div className="technical_package_layout purchase_order_page_when_print">
-        <div className="purchase_sidebar">
-          <div className="email-section">
-            <div className="folder_name">Department</div>
-            <ul>
-              <li>
-                <button className="active">
-                  Men <span>63</span>
-                </button>
-              </li>
-              <li>
-                <button className="">
-                  Women <span>63</span>
-                </button>
-              </li>
-              <li>
-                <button className="">
-                  School Wear <span>63</span>
-                </button>
-              </li>
-              <li>
-                <button className="">
-                  Kids <span>63</span>
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div className="email-section">
-            <div className="folder_name">Purchase Contract</div>
-            <ul>
-              <li>
-                <button className="active">
-                  SS25 <span>63</span>
-                </button>
-              </li>
-              <li>
-                <button className="">
-                  AW25 <span>63</span>
-                </button>
-              </li>
-              <li>
-                <button className="">
-                  School Wear <span>63</span>
-                </button>
-              </li>
-              <li>
-                <button className="">
-                  Kids <span>63</span>
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div className="email-section">
-            <div className="folder_name">Styles</div>
-            <Select
-              className="select_wo"
-              placeholder="Search Or Select"
-              options={workOrders}
-              styles={customStyles}
-              components={{ DropdownIndicator }}
-            />
-          </div>
-
-          <div className="email-section">
-            <div className="folder_name">Ext. Factory Date</div>
-
-            <Select
-              className="select_wo"
-              placeholder="Search Or Select"
-              options={months.map((month, index) => ({
-                label: month,
-                value: index,
-              }))}
-              components={{ DropdownIndicator }}
-              styles={customStyles}
-              onChange={(selected) => setSelectedMonth(selected.value)}
-            />
-
-            <br />
-            <ul>
-              {days.map((day, index) => (
-                <li key={index}>
-                  <button>
-                    {day} <span>3</span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        <FilterSidebar />
 
         <div className="purchase_list">
           <div className="purchase_list_header d-flex justify-content-between">
@@ -519,15 +332,15 @@ export default function TechnicalPackage(props) {
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          {pkg.po?.po_number}
+                          {pkg.po?.po_number ?? "N/A"}
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          {pkg.wo_id}
+                          {pkg.wo?.wo_number ?? "N/A"}
                         </div>
                         <div className="tp_text">
                           <span className="step_border"></span>
-                          1000 PCS
+                          {pkg.buyer?.name}
                         </div>
                         <div className="tp_text d-flex justify-content-between align-items-center">
                           <div>
@@ -593,11 +406,9 @@ export default function TechnicalPackage(props) {
             </div>
           )}
           {renderArea === "add" && <CreateTechnicalPackage />}
-          {renderArea === "details" && (
-            <TechnicalPackageDetails tpDetails={selectedTp} />
-          )}
+          {renderArea === "details" && <TechnicalPackageDetails />}
           {renderArea === "update" && (
-            <EditTechnicalPackage tpDetails={selectedTp} />
+            <EditTechnicalPackage setRenderArea={setRenderArea} />
           )}
         </div>
       </div>

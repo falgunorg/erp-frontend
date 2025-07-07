@@ -1,6 +1,6 @@
-// var configEnv = "development";
+var configEnv = "development";
 // var configEnv = "staging";
-var configEnv = "production";
+// var configEnv = "production";
 
 var config = {
   //######### Staging config ##########
@@ -10,6 +10,8 @@ var config = {
     staticUrl: "https://erpapi.falgun-garmenting.com/api",
     debug: true,
   },
+
+  //######### Production Config ###########//
   production: {
     appUrl: "https://test.falgun-garmenting.com",
     apiUrl: "https://testapi.falgun-garmenting.com/api",

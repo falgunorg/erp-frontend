@@ -9,7 +9,6 @@ import CustomSelect from "elements/CustomSelect";
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 
 export default function CreateTechnicalPackage(props) {
-
   const buyers = [
     { id: 1, title: "NSLBD" },
     { id: 2, title: "WALMART" },
@@ -949,38 +948,48 @@ export default function CreateTechnicalPackage(props) {
                     </div>
                   </td>
                 </tr>
-
                 {/* Show items only if the materialType is expanded */}
                 {!collapsedMaterialTypes[materialType.id] &&
                   (consumptionItems[materialType.id] || []).map(
                     (item, index) => (
                       <tr key={`${materialType.id}-${index}`}>
                         <td>
-                          <select
-                            required
-                            value={item.item_id}
-                            onChange={(e) =>
+                          <CustomSelect
+                            style={{ width: "100%" }}
+                            className="select_wo"
+                            placeholder="Select Item"
+                            options={items
+                              .filter(
+                                (it) => it.item_type_id === materialType.id
+                              )
+                              .map(({ id, title }) => ({
+                                value: id,
+                                label: title,
+                              }))}
+                            value={(() => {
+                              const selectedId = item.item_id;
+                              return (
+                                items
+                                  .filter(
+                                    (it) => it.item_type_id === materialType.id
+                                  )
+                                  .map(({ id, title }) => ({
+                                    value: id,
+                                    label: title,
+                                  }))
+                                  .find((opt) => opt.value === selectedId) ||
+                                null
+                              );
+                            })()}
+                            onChange={(selectedOption) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
                                 "item_id",
-                                e.target.value
+                                selectedOption?.value
                               )
                             }
-                            className="form-select"
-                          >
-                            <option value="">Select Item</option>
-
-                            {items
-                              .filter(
-                                (it) => it.item_type_id === materialType.id
-                              ) // Filter items based on materialType.id
-                              .map((it) => (
-                                <option key={it.id} value={it.id}>
-                                  {it.title}
-                                </option>
-                              ))}
-                          </select>
+                          />
                         </td>
 
                         <td>
@@ -1013,45 +1022,53 @@ export default function CreateTechnicalPackage(props) {
                         </td>
 
                         <td>
-                          <select
-                            value={item.color}
-                            onChange={(e) =>
+                          <CustomSelect
+                            className="select_wo"
+                            placeholder="Color"
+                            options={colors.map(({ title }) => ({
+                              value: title,
+                              label: title,
+                            }))}
+                            value={colors
+                              .map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))
+                              .find((option) => option.value === item.color)}
+                            onChange={(selectedOption) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
                                 "color",
-                                e.target.value
+                                selectedOption?.value
                               )
                             }
-                          >
-                            <option value="">Select</option>
-                            {colors.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
+                          />
                         </td>
 
                         <td>
-                          <select
-                            value={item.size}
-                            onChange={(e) =>
+                          <CustomSelect
+                            className="select_wo"
+                            placeholder="Size"
+                            options={sizes.map(({ title }) => ({
+                              value: title,
+                              label: title,
+                            }))}
+                            value={sizes
+                              .map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))
+                              .find((option) => option.value === item.size)}
+                            onChange={(selectedOption) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
                                 "size",
-                                e.target.value
+                                selectedOption?.value
                               )
                             }
-                          >
-                            <option value="">Select</option>
-                            {sizes.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
+                          />
                         </td>
 
                         <td>
@@ -1071,25 +1088,28 @@ export default function CreateTechnicalPackage(props) {
                         </td>
 
                         <td>
-                          <select
-                            className="text-lowercase"
-                            value={item.unit}
-                            onChange={(e) =>
+                          <CustomSelect
+                            className="select_wo"
+                            placeholder="Unit"
+                            options={units.map(({ title }) => ({
+                              value: title,
+                              label: title,
+                            }))}
+                            value={units
+                              .map(({ title }) => ({
+                                value: title,
+                                label: title,
+                              }))
+                              .find((option) => option.value === item.unit)}
+                            onChange={(selectedOption) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
                                 "unit",
-                                e.target.value
+                                selectedOption?.value
                               )
                             }
-                          >
-                            <option value="">Select</option>
-                            {units.map((it) => (
-                              <option key={it.id} value={it.title}>
-                                {it.title}
-                              </option>
-                            ))}
-                          </select>
+                          />
                         </td>
 
                         <td>

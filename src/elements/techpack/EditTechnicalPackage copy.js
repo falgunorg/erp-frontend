@@ -7,29 +7,8 @@ import api from "services/api";
 import swal from "sweetalert";
 import CustomSelect from "elements/CustomSelect";
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
-import { useHistory, useParams } from "react-router-dom";
 
-export default function EditTechnicalPackage({renderArea,setRenderArea}) {
-  const history = useHistory();
-  const params = useParams();
-
-  const [techpack, setTechpack] = useState({});
-
-  const getTechpack = async () => {
-    setSpinner(true);
-    const response = await api.post("/technical-package-show", {
-      id: params.id,
-    });
-    if (response.status === 200 && response.data) {
-      const techpackData = response.data;
-      setTechpack(techpackData);
-    }
-    setSpinner(false);
-  };
-  useEffect(() => {
-    getTechpack();
-  }, [params.id]);
-
+export default function EditTechnicalPackage({ tpDetails }) {
   const buyers = [
     { id: 1, title: "NSLBD" },
     { id: 2, title: "WALMART" },
@@ -381,7 +360,7 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
 
     if (validateForm()) {
       var data = new FormData();
-      data.append("id", techpack.id);
+      data.append("id", tpDetails.id);
       data.append("po_id", formDataSet.po_id);
       data.append("wo_id", formDataSet.wo_id);
       data.append("received_date", formDataSet.received_date);
@@ -408,8 +387,7 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
       setSpinner(true);
       var response = await api.post("/technical-package-update", data);
       if (response.status === 200 && response.data) {
-        history.push("/technical-packages/" + response.data.data.id);
-        setRenderArea("details");
+        window.location.reload();
       } else {
         setErrors(response.data.errors);
       }
@@ -418,7 +396,7 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
   };
 
   useEffect(() => {
-    if (techpack) {
+    if (tpDetails) {
       const {
         po_id,
         wo_id,
@@ -436,7 +414,7 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
         wash_details,
         special_operation,
         materials,
-      } = techpack;
+      } = tpDetails;
 
       setFormDataSet({
         po_id,
@@ -456,17 +434,17 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
         special_operations: special_operation?.split(",") || [],
       });
     }
-  }, [techpack]);
+  }, [tpDetails]);
 
   useEffect(() => {
-    if (Array.isArray(techpack?.materials) && techpack.materials.length > 0) {
+    if (tpDetails?.materials.length) {
       const groupedByType = {};
 
-      techpack.materials.forEach((mat) => {
+      tpDetails.materials.forEach((mat) => {
         const item = {
           item_type_id: mat.item_type_id,
           item_id: mat.item_id,
-          item_name: mat.item_name || "",
+          item_name: mat.item_name || "", // in case you want to allow user to change the name
           item_details: mat.item_details || "",
           color: mat.color || "",
           size: mat.size || "",
@@ -486,7 +464,7 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
 
       setConsumptionItems(groupedByType);
     }
-  }, [techpack?.materials]);
+  }, [tpDetails?.materials]);
 
   useEffect(() => {
     const expanded = {};
@@ -496,21 +474,19 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
     setCollapsedMaterialTypes(expanded);
   }, [materialTypes]);
 
-  const techpackFiles = Array.isArray(techpack?.files) ? techpack.files : [];
-
-  const existingTechpackFiles = techpackFiles.filter(
+  const existingTechpackFiles = tpDetails?.files?.filter(
     (file) => file.file_type === "technical_package"
   );
 
-  const existingSpecSheetFiles = techpackFiles.filter(
+  const existingSpecSheetFiles = tpDetails?.files?.filter(
     (file) => file.file_type === "spec_sheet"
   );
 
-  const existingBlockPatternFiles = techpackFiles.filter(
+  const existingBlockPatternFiles = tpDetails?.files?.filter(
     (file) => file.file_type === "block_pattern"
   );
 
-  const existingSpecialOperationFiles = techpackFiles.filter(
+  const existingSpecialOperationFiles = tpDetails?.files?.filter(
     (file) => file.file_type === "special_operation"
   );
 
@@ -941,8 +917,11 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
               <label htmlFor="front_image">
                 {frontImagePreviewUrl ? (
                   <img src={frontImagePreviewUrl} alt="Frontside Preview" />
-                ) : techpack?.front_photo_url ? (
-                  <img src={techpack.front_photo_url} alt="Frontside Preview" />
+                ) : tpDetails?.front_photo_url ? (
+                  <img
+                    src={tpDetails.front_photo_url}
+                    alt="Frontside Preview"
+                  />
                 ) : (
                   <p>Garment Frontside Image</p>
                 )}
@@ -976,8 +955,8 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
               <label htmlFor="back_image">
                 {backImagePreviewUrl ? (
                   <img src={backImagePreviewUrl} alt="Backside Preview" />
-                ) : techpack?.back_photo_url ? (
-                  <img src={techpack.back_photo_url} alt="Backside Preview" />
+                ) : tpDetails?.back_photo_url ? (
+                  <img src={tpDetails.back_photo_url} alt="Backside Preview" />
                 ) : (
                   <p>Garment Backside Image</p>
                 )}
@@ -1149,41 +1128,31 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
                     (item, index) => (
                       <tr key={`${materialType.id}-${index}`}>
                         <td>
-                          <CustomSelect
-                            style={{ width: "100px" }}
-                            className="select_wo"
-                            placeholder="Item"
-                            options={items
-                              .filter(
-                                (it) => it.item_type_id === materialType.id
-                              )
-                              .map(({ id, title }) => ({
-                                value: id,
-                                label: title,
-                              }))}
-                            value={items
-                              .filter(
-                                (it) => it.item_type_id === materialType.id
-                              )
-                              .map(({ id, title }) => ({
-                                value: id,
-                                label: title,
-                              }))
-                              .find(
-                                (option) =>
-                                  option.value ===
-                                  (consumptionItems[materialType.id]?.[index]
-                                    ?.item_id || null)
-                              )}
-                            onChange={(selectedOption) =>
+                          <select
+                            required
+                            value={item.item_id}
+                            onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
                                 "item_id",
-                                selectedOption?.value
+                                e.target.value
                               )
                             }
-                          />
+                            className="form-select"
+                          >
+                            <option value="">Select Item</option>
+
+                            {items
+                              .filter(
+                                (it) => it.item_type_id === materialType.id
+                              ) // Filter items based on materialType.id
+                              .map((it) => (
+                                <option key={it.id} value={it.id}>
+                                  {it.title}
+                                </option>
+                              ))}
+                          </select>
                         </td>
 
                         <td>
@@ -1216,53 +1185,45 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
                         </td>
 
                         <td>
-                          <CustomSelect
-                            className="select_wo"
-                            placeholder="Color"
-                            options={colors.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={colors
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find((option) => option.value === item.color)}
-                            onChange={(selectedOption) =>
+                          <select
+                            value={item.color}
+                            onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
                                 "color",
-                                selectedOption?.value
+                                e.target.value
                               )
                             }
-                          />
+                          >
+                            <option value="">Select</option>
+                            {colors.map((it) => (
+                              <option key={it.id} value={it.title}>
+                                {it.title}
+                              </option>
+                            ))}
+                          </select>
                         </td>
 
                         <td>
-                          <CustomSelect
-                            className="select_wo"
-                            placeholder="Size"
-                            options={sizes.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={sizes
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find((option) => option.value === item.size)}
-                            onChange={(selectedOption) =>
+                          <select
+                            value={item.size}
+                            onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
                                 "size",
-                                selectedOption?.value
+                                e.target.value
                               )
                             }
-                          />
+                          >
+                            <option value="">Select</option>
+                            {sizes.map((it) => (
+                              <option key={it.id} value={it.title}>
+                                {it.title}
+                              </option>
+                            ))}
+                          </select>
                         </td>
 
                         <td>
@@ -1282,28 +1243,25 @@ export default function EditTechnicalPackage({renderArea,setRenderArea}) {
                         </td>
 
                         <td>
-                          <CustomSelect
-                            className="select_wo"
-                            placeholder="Unit"
-                            options={units.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={units
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find((option) => option.value === item.unit)}
-                            onChange={(selectedOption) =>
+                          <select
+                            className="text-lowercase"
+                            value={item.unit}
+                            onChange={(e) =>
                               handleItemChange(
                                 materialType.id,
                                 index,
                                 "unit",
-                                selectedOption?.value
+                                e.target.value
                               )
                             }
-                          />
+                          >
+                            <option value="">Select</option>
+                            {units.map((it) => (
+                              <option key={it.id} value={it.title}>
+                                {it.title}
+                              </option>
+                            ))}
+                          </select>
                         </td>
 
                         <td>

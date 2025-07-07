@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Select, { components } from "react-select";
 import Dropdown from "react-bootstrap/Dropdown";
 import {
   FilterIcon,

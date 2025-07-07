@@ -251,7 +251,7 @@ import PurchaseContractsList from "../pages/PurchaseContractsList";
 import Tasks from "../pages/Tasks";
 import BookingManager from "../pages/BookingManager";
 import TimeAndActions from "../pages/TimeAndActions";
-import TechnicalPackage from "../pages/TechnicalPackage";
+import TechnicalPackages from "../pages/TechnicalPackages";
 import CostSheets from "pages/CostSheets";
 import BudgetSheets from "pages/BudgetSheets";
 
@@ -283,36 +283,11 @@ class PrivateRoutes extends Component {
             component={Mailbox}
           ></PrivateRoute>
           {/* v-1.1.0 */}
-          <PrivateRoute
-            exact
-            path="/purchase-orders/:id?"
-            component={PurchaseOrders}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/work-orders/:id?"
-            component={WorkOrders}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/purchase-contracts/:id?"
-            component={PurchaseContractsList}
-          ></PrivateRoute>
           <PrivateRoute exact path="/tasks" component={Tasks}></PrivateRoute>
           <PrivateRoute
             exact
-            path="/booking-manager"
-            component={BookingManager}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/time-and-actions"
-            component={TimeAndActions}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/technical-package"
-            component={TechnicalPackage}
+            path="/technical-packages/:id?"
+            component={TechnicalPackages}
           ></PrivateRoute>
           <PrivateRoute
             exact
@@ -323,6 +298,31 @@ class PrivateRoutes extends Component {
             exact
             path="/budget-sheets/:id?"
             component={BudgetSheets}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/work-orders/:id?"
+            component={WorkOrders}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/purchase-orders/:id?"
+            component={PurchaseOrders}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/purchase-contracts/:id?"
+            component={PurchaseContractsList}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/time-and-actions"
+            component={TimeAndActions}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/booking-manager"
+            component={BookingManager}
           ></PrivateRoute>
           {/* end v-101.1 */}
           <PrivateRoute

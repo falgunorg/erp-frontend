@@ -194,11 +194,11 @@ export default function Sidebar(props) {
                   <li>
                     <Link
                       className={
-                        location.pathname === "/technical-package"
+                        location.pathname === "/technical-packages"
                           ? "active"
                           : ""
                       }
-                      to="/technical-package"
+                      to="/technical-packages"
                     >
                       TP
                     </Link>
@@ -301,11 +301,11 @@ export default function Sidebar(props) {
                   <li>
                     <Link
                       className={
-                        location.pathname === "/technical-package"
+                        location.pathname === "/technical-packages"
                           ? "active"
                           : ""
                       }
-                      to="/technical-package"
+                      to="/technical-packages"
                     >
                       TP
                     </Link>
@@ -384,11 +384,11 @@ export default function Sidebar(props) {
                   <li>
                     <Link
                       className={
-                        location.pathname === "/technical-package"
+                        location.pathname === "/technical-packages"
                           ? "active"
                           : ""
                       }
-                      to="/technical-package"
+                      to="/technical-packages"
                     >
                       TP
                     </Link>
@@ -467,11 +467,11 @@ export default function Sidebar(props) {
                   <li>
                     <Link
                       className={
-                        location.pathname === "/technical-package"
+                        location.pathname === "/technical-packages"
                           ? "active"
                           : ""
                       }
-                      to="/technical-package"
+                      to="/technical-packages"
                     >
                       TP
                     </Link>

@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
 import { Modal, Button, Spinner } from "react-bootstrap";
 import MultipleFileView from "./MultipleFileView";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-export default function TechnicalPackageDetails({ tpDetails }) {
+import { useParams, useHistory } from "react-router-dom";
+import api from "services/api";
+export default function TechnicalPackageDetails() {
+  const params = useParams();
+  const history = useHistory();
+
   const [fullScreenImage, setFullScreenImage] = useState(null);
   const [imageModal, setImageModal] = useState(false);
   // Open Image Modal
@@ -19,10 +24,8 @@ export default function TechnicalPackageDetails({ tpDetails }) {
     setImageModal(false);
   };
 
-  ///added
-
+  //added
   const [spinner, setSpinner] = useState(false);
-
   const handleGeneratePDF = () => {
     const element = document.getElementById("pdf-content");
     const responsiveTables = element.querySelectorAll(".table-responsive");
@@ -58,23 +61,39 @@ export default function TechnicalPackageDetails({ tpDetails }) {
     }, 100); // Slight delay for DOM to reflow
   };
 
-  const buyerTechpackFiles = tpDetails?.files?.filter(
-    (file) => file.file_type === "technical_package"
-  );
+  const [techpack, setTechpack] = useState({});
 
-  const selectedSpecSheetFiles = tpDetails?.files?.filter(
-    (file) => file.file_type === "spec_sheet"
-  );
+  const getTechpack = async () => {
+    setSpinner(true);
+    const response = await api.post("/technical-package-show", {
+      id: params.id,
+    });
+    if (response.status === 200 && response.data) {
+      const techpackData = response.data;
+      setTechpack(techpackData);
+    }
+    setSpinner(false);
+  };
 
-  const selectedBlockPatternFiles = tpDetails?.files?.filter(
-    (file) => file.file_type === "block_pattern"
-  );
+  const buyerTechpackFiles = Array.isArray(techpack?.files)
+    ? techpack.files.filter((file) => file.file_type === "technical_package")
+    : [];
 
-  const selectedSpecialOperationFiles = tpDetails?.files?.filter(
-    (file) => file.file_type === "special_operation"
-  );
+  const selectedSpecSheetFiles = Array.isArray(techpack?.files)
+    ? techpack.files.filter((file) => file.file_type === "spec_sheet")
+    : [];
 
-  console.log("Materials", tpDetails.materials);
+  const selectedBlockPatternFiles = Array.isArray(techpack?.files)
+    ? techpack.files.filter((file) => file.file_type === "block_pattern")
+    : [];
+
+  const selectedSpecialOperationFiles = Array.isArray(techpack?.files)
+    ? techpack.files.filter((file) => file.file_type === "special_operation")
+    : [];
+
+  useEffect(() => {
+    getTechpack();
+  }, [params.id]);
 
   return (
     <div className="create_technical_pack" id="pdf-content">
@@ -93,14 +112,18 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{tpDetails.po?.po_number}</div>
+              <div className="form-value">
+                {techpack.po ? techpack.po.po_number : "N/A"}
+              </div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{tpDetails.wo_id}</div>
+              <div className="form-value">
+                {techpack.wo ? techpack.wo.wo_number : "N/A"}
+              </div>
             </div>
           </div>
         </div>
@@ -122,13 +145,13 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Received Date</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">{tpDetails.received_date}</div>
+              <div className="form-value">{techpack.received_date}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">{tpDetails.techpack_number}</div>
+              <div className="form-value">{techpack.techpack_number}</div>
             </div>
           </div>
 
@@ -137,13 +160,13 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">{tpDetails.buyer?.name}</div>
+              <div className="form-value">{techpack.buyer?.name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">{tpDetails.buyer_style_name}</div>
+              <div className="form-value">{techpack.buyer_style_name}</div>
             </div>
           </div>
 
@@ -152,13 +175,13 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">{tpDetails.brand}</div>
+              <div className="form-value">{techpack.brand}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">{tpDetails.item_name}</div>
+              <div className="form-value">{techpack.item_name}</div>
             </div>
           </div>
 
@@ -167,13 +190,13 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">{tpDetails.season}</div>
+              <div className="form-value">{techpack.season}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">{tpDetails.item_type}</div>
+              <div className="form-value">{techpack.item_type}</div>
             </div>
           </div>
 
@@ -182,13 +205,13 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">{tpDetails.department}</div>
+              <div className="form-value">{techpack.department}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Description</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">{tpDetails.description}</div>
+              <div className="form-value">{techpack.description}</div>
             </div>
           </div>
 
@@ -197,13 +220,13 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value">{tpDetails.company?.title}</div>
+              <div className="form-value">{techpack.company?.title}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-5">
-              <div className="form-value">{tpDetails.wash_details}</div>
+              <div className="form-value">{techpack.wash_details}</div>
             </div>
           </div>
 
@@ -212,7 +235,7 @@ export default function TechnicalPackageDetails({ tpDetails }) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              <div className="form-value">{tpDetails.special_operation}</div>
+              <div className="form-value">{techpack.special_operation}</div>
             </div>
           </div>
         </div>
@@ -220,10 +243,10 @@ export default function TechnicalPackageDetails({ tpDetails }) {
           <div className="photo_upload_area">
             <div className="photo">
               <label htmlFor="front_image">
-                {tpDetails.front_photo_url ? (
+                {techpack.front_photo_url ? (
                   <img
-                    onClick={() => openImageModal(tpDetails.front_photo_url)}
-                    src={tpDetails.front_photo_url}
+                    onClick={() => openImageModal(techpack.front_photo_url)}
+                    src={techpack.front_photo_url}
                     alt="Frontside Preview"
                   />
                 ) : (
@@ -233,10 +256,10 @@ export default function TechnicalPackageDetails({ tpDetails }) {
             </div>
             <div className="photo">
               <label htmlFor="back_image">
-                {tpDetails.back_photo_url ? (
+                {techpack.back_photo_url ? (
                   <img
-                    onClick={() => openImageModal(tpDetails.back_photo_url)}
-                    src={tpDetails.back_photo_url}
+                    onClick={() => openImageModal(techpack.back_photo_url)}
+                    src={techpack.back_photo_url}
                     alt="Backside Preview"
                   />
                 ) : (
@@ -290,9 +313,10 @@ export default function TechnicalPackageDetails({ tpDetails }) {
             </tr>
           </thead>
           <tbody>
-            {tpDetails?.materials.length > 0 &&
-              tpDetails?.materials.map((material) => (
-                <tr>
+            {Array.isArray(techpack?.materials) &&
+              techpack.materials.length > 0 &&
+              techpack.materials.map((material, index) => (
+                <tr key={index}>
                   <td>{material.item_type?.title}</td>
                   <td>{material.item_name}</td>
                   <td>{material.item_details}</td>
