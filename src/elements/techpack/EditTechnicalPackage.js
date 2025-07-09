@@ -9,12 +9,10 @@ import CustomSelect from "elements/CustomSelect";
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 import { useHistory, useParams } from "react-router-dom";
 
-export default function EditTechnicalPackage({renderArea,setRenderArea}) {
+export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
   const history = useHistory();
   const params = useParams();
-
   const [techpack, setTechpack] = useState({});
-
   const getTechpack = async () => {
     setSpinner(true);
     const response = await api.post("/technical-package-show", {

@@ -45,7 +45,7 @@ export default function PurchaseOrderDetails({ selectedPo }) {
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{selectedPo.wo_id}</div>
+              <div className="form-value">{selectedPo.wo?.wo_number}</div>
             </div>
           </div>
         </div>

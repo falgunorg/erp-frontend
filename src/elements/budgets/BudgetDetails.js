@@ -38,7 +38,7 @@ export default function BudgetDetails(props) {
     getBudget();
   }, [params.id]);
 
-  const budgetRef = React.useRef();
+  
   const handleGeneratePDF = () => {
     const element = document.getElementById("pdf-content");
     const responsiveTables = element.querySelectorAll(".table-responsive");
@@ -123,7 +123,7 @@ export default function BudgetDetails(props) {
   };
 
   return (
-    <div className="create_technical_pack" id="pdf-content" ref={budgetRef}>
+    <div className="create_technical_pack" id="pdf-content">
       <div className="row create_tp_header align-items-center">
         <div className="col-lg-10">
           <div className="row align-items-baseline">

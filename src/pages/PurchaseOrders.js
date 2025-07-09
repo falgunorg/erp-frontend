@@ -406,8 +406,8 @@ export default function PurchaseOrders(props) {
                         onClick={() => handlePoDetails(po)}
                         className={
                           po.id === selectedPo?.id
-                            ? "single_tp_item active"
-                            : "single_tp_item"
+                            ? "single_tp_item active on_po"
+                            : "single_tp_item on_po"
                         }
                       >
                         <div className="tp_text d-flex align-items-center">

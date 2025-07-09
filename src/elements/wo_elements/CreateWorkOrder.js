@@ -4,77 +4,47 @@ import CustomSelect from "elements/CustomSelect";
 import api from "services/api";
 import swal from "sweetalert";
 export default function CreateWorkOrder({ renderArea, setRenderArea }) {
-  const buyers = [
-    { id: 1, title: "NSLBD" },
-    { id: 2, title: "CHAPS/O5" },
-    { id: 3, title: "BASS PRO" },
-    { id: 4, title: "GARAN" },
-    { id: 5, title: "LC WAIKIKI" },
-    { id: 6, title: "CENTRIC" },
-    { id: 7, title: "HOT SOURCE" },
-  ];
-
-  const seasons = [
-    { id: 1, title: "FAL" },
-    { id: 2, title: "SUMMER" },
-    { id: 3, title: "SPRING" },
-  ];
-
-  const years = [
-    { id: 1, title: "2025" },
-    { id: 2, title: "2024" },
-    { id: 3, title: "2023" },
-    { id: 4, title: "2022" },
-  ];
-  const companies = [
-    { id: 1, title: "JMS" },
-    { id: 2, title: "MCL" },
-    { id: 3, title: "MBL" },
-  ];
-
-  const [contracts, setContracts] = useState([]);
   const [spinner, setSpinner] = useState(false);
-  const getContracts = async () => {
-    setSpinner(true);
-    var response = await api.post("/public-purchase-contracts");
-    if (response.status === 200 && response.data) {
-      setContracts(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  useEffect(() => {
-    getContracts();
-  }, []);
 
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
-    purchase_contract_id: "",
-    company_id: "",
-    buyer_id: "",
-    season: "",
-    year: "",
-    description: "",
+    technical_package_id: "",
+    issued_date: "",
+    delivery_date: "",
+    wo_ref: "",
+    sewing_sam: "",
+    po_list: [],
   });
 
+  // -- Only modified/critical sections are shown --
+
   const handleChange = async (name, value) => {
-    if (name === "purchase_contract_id") {
+    if (name === "technical_package_id") {
       try {
-        const response = await api.post("/purchase-contracts-show", {
+        const response = await api.post("/technical-package-show", {
           id: value,
         });
 
         if (response.status === 200 && response.data) {
-          const data = response.data.data;
+          const data = response.data;
 
+          // Reset po_list when techpack changes
           setFormData((prev) => ({
             ...prev,
-            purchase_contract_id: value,
+            technical_package_id: value,
             company_id: data.company_id || "",
-            buyer_id: data.buyer_id || "",
+            buyer: data.buyer.name || "",
+            brand: data.brand || "",
             season: data.season || "",
-            year: data.year || "",
             description: data.description || "",
+            buyer_style_name: data.buyer_style_name || "",
+            item_name: data.item_name || "",
+            item_type: data.item_type || "",
+            department: data.department || "",
+            wash_details: data.wash_details || "",
+            special_operations:
+              data.special_operation?.split(",").filter(Boolean) || [],
+            po_list: [], // Reset po_list
           }));
         }
       } catch (error) {
@@ -90,17 +60,20 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
 
   const validateForm = () => {
     const requiredFields = {
-      purchase_contract_id: "Please select a purchase contract.",
-      company_id: "Company is required.",
-      buyer_id: "Buyer is required.",
-      season: "Season is required.",
-      year: "Year is required",
+      technical_package_id: "Please select a Tech Pack.",
+      issued_date: "Issued Date is required.",
+      delivery_date: "Delivery Date is required.",
+      sewing_sam: "Sewing SAM is required.",
+      po_list: "Please select at least one PO.",
     };
 
     const formErrors = {};
 
     for (const field in requiredFields) {
-      if (!formData[field]) {
+      if (
+        !formData[field] ||
+        (Array.isArray(formData[field]) && formData[field].length === 0)
+      ) {
         formErrors[field] = requiredFields[field];
       }
     }
@@ -116,10 +89,12 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
 
     try {
       const data = new FormData();
-      // Append form fields
+
       Object.entries(formData).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          data.append(key, JSON.stringify(value));
+        if (key === "po_list" && Array.isArray(value)) {
+          value.forEach((poId) => {
+            data.append("po_list[]", poId);
+          });
         } else {
           data.append(key, value);
         }
@@ -143,7 +118,38 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
     }
   };
 
-  console.log("FORMDATA", formData);
+  const [techpacks, setTechpacks] = useState([]);
+
+  const getTechpacks = async () => {
+    const response = await api.post("/technical-packages-all-desc", {
+      mode: "self",
+    });
+
+    if (response.status === 200 && response.data) {
+      setTechpacks(response.data.data);
+    }
+  };
+
+  const [pos, setPos] = useState([]);
+  const getPos = async () => {
+    const response = await api.post("/public-pos", {
+      technical_package_id: formData.technical_package_id,
+    });
+    if (response.status === 200 && response.data) {
+      const data = response.data.data;
+      setPos(data);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.technical_package_id) {
+      getPos();
+    }
+  }, [formData.technical_package_id]);
+
+  useEffect(() => {
+    getTechpacks();
+  }, []);
 
   return (
     <div className="create_technical_pack">
@@ -176,139 +182,186 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
       </div>
       <br />
       <div className="row create_tp_body">
-        <div className="row">
-          <div className="col-lg-2">
-            <label className="form-label">PC/LC</label>
-          </div>
-          <div className="col-lg-4">
-            <CustomSelect
-              className={
-                errors.purchase_contract_id
-                  ? "select_wo red-border"
-                  : "select_wo"
-              }
-              placeholder="PC/LC"
-              options={contracts.map(({ id, title }) => ({
-                value: id,
-                label: title,
-              }))}
-              onChange={(selectedOption) =>
-                handleChange("purchase_contract_id", selectedOption.value)
-              }
-            />
-          </div>
-
-          <div className="col-lg-2">
-            <label className="form-label">Factory</label>
-          </div>
-          <div className="col-lg-4">
-            <CustomSelect
-              isDisabled
-              className={
-                errors.company_id ? "select_wo red-border" : "select_wo"
-              }
-              placeholder="Factory"
-              options={companies.map(({ id, title }) => ({
-                value: id,
-                label: title,
-              }))}
-              value={companies
-                .map(({ id, title }) => ({
+        <div className="col-lg-12">
+          <div className="row">
+            <div className="col-lg-2">
+              <label className="form-label">Tech Pack#</label>
+            </div>
+            <div className="col-lg-3">
+              <CustomSelect
+                className={
+                  errors.technical_package_id
+                    ? "select_wo red-border"
+                    : "select_wo"
+                }
+                placeholder="Techpack"
+                options={techpacks.map(({ id, techpack_number }) => ({
                   value: id,
-                  label: title,
-                }))
-                .find((option) => option.value === formData.company_id)}
-              onChange={(selectedOption) =>
-                handleChange("company_id", selectedOption.value)
-              }
-              name="company_id"
-            />
+                  label: techpack_number,
+                }))}
+                onChange={(selectedOption) =>
+                  handleChange("technical_package_id", selectedOption?.value)
+                }
+              />
+              {errors.technical_package_id && (
+                <small className="text-danger">
+                  {errors.technical_package_id}
+                </small>
+              )}
+            </div>
+            <div className="col-lg-2">
+              <label className="form-label">Buyer</label>
+            </div>
+            <div className="col-lg-5">
+              <input readOnly type="text" value={formData.buyer} />
+            </div>
           </div>
-          <div className="col-lg-2">
-            <label className="form-label">Buyer</label>
+          <div className="row">
+            <div className="col-lg-2">
+              <label className="form-label">Brand</label>
+            </div>
+            <div className="col-lg-3">
+              <input readOnly type="text" value={formData.brand} />
+            </div>
+            <div className="col-lg-2">
+              <label className="form-label">Buyer Style Name</label>
+            </div>
+            <div className="col-lg-5">
+              <input readOnly type="text" value={formData.buyer_style_name} />
+            </div>
           </div>
-          <div className="col-lg-4">
-            <CustomSelect
-              isDisabled
-              className={errors.buyer_id ? "select_wo red-border" : "select_wo"}
-              placeholder="Buyer"
-              options={buyers.map(({ id, title }) => ({
-                value: id,
-                label: title,
-              }))}
-              value={buyers
-                .map(({ id, title }) => ({
+
+          <div className="row">
+            <div className="col-lg-2">
+              <label className="form-label">Season</label>
+            </div>
+            <div className="col-lg-3">
+              <input readOnly type="text" value={formData.season} />
+            </div>
+            <div className="col-lg-2">
+              <label className="form-label">Item Name</label>
+            </div>
+            <div className="col-lg-5">
+              <input readOnly type="text" value={formData.item_name} />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-lg-2">
+              <label className="form-label">Department</label>
+            </div>
+            <div className="col-lg-3">
+              <input readOnly type="text" value={formData.department} />
+            </div>
+            <div className="col-lg-2">
+              <label className="form-label">Item Type</label>
+            </div>
+            <div className="col-lg-5">
+              <input readOnly type="text" value={formData.item_type} />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-lg-2">
+              <label className="form-label">Issued Date</label>
+            </div>
+            <div className="col-lg-3">
+              <input
+                className={errors.issued_date ? "red-border" : ""}
+                onChange={(e) => handleChange("issued_date", e.target.value)}
+                type="date"
+                value={formData.issued_date}
+              />
+            </div>
+
+            <div className="col-lg-2">
+              <label className="form-label">Description</label>
+            </div>
+            <div className="col-lg-5">
+              <input readOnly type="text" value={formData.description} />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-lg-2">
+              <label className="form-label">Delivery Date</label>
+            </div>
+            <div className="col-lg-3">
+              <input
+                className={errors.delivery_date ? "red-border" : ""}
+                onChange={(e) => handleChange("delivery_date", e.target.value)}
+                type="date"
+                value={formData.delivery_date}
+              />
+            </div>
+
+            <div className="col-lg-2">
+              <label className="form-label">Wash Detail</label>
+            </div>
+            <div className="col-lg-5">
+              <input readOnly type="text" value={formData.wash_details} />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-lg-2">
+              <label className="form-label">Sewing SAM</label>
+            </div>
+            <div className="col-lg-3">
+              <input
+                className={errors.sewing_sam ? "red-border" : ""}
+                onChange={(e) => handleChange("sewing_sam", e.target.value)}
+                type="number"
+                min={0}
+                step={0.1}
+                value={formData.sewing_sam}
+              />
+            </div>
+            <div className="col-lg-2">
+              <label className="form-label">Special Operation</label>
+            </div>
+            <div className="col-lg-5">
+              <input readOnly type="text" value={formData.special_operations} />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-lg-2">
+              <label className="form-label">PO'S</label>
+            </div>
+            <div className="col-lg-10">
+              <CustomSelect
+                isMulti
+                className={
+                  errors.po_list ? "select_wo red-border" : "select_wo"
+                }
+                placeholder="Select PO(s)"
+                options={pos.map(({ id, po_number }) => ({
                   value: id,
-                  label: title,
-                }))
-                .find((option) => option.value === formData.buyer_id)}
-              onChange={(selectedOption) =>
-                handleChange("buyer_id", selectedOption.value)
-              }
-            />
-          </div>
-          <div className="col-lg-2">
-            <label className="form-label">Season</label>
-          </div>
-          <div className="col-lg-4">
-            <CustomSelect
-              isDisabled
-              className={errors.season ? "select_wo red-border" : "select_wo"}
-              placeholder="Season"
-              options={seasons.map(({ id, title }) => ({
-                value: title,
-                label: title,
-              }))}
-              value={seasons
-                .map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))
-                .find((option) => option.value === formData.season)}
-              onChange={(selectedOption) =>
-                handleChange("season", selectedOption.value)
-              }
-            />
-          </div>
-        </div>
+                  label: po_number,
+                }))}
+                value={pos
+                  .filter((po) => formData.po_list.includes(String(po.id)))
+                  .map(({ id, po_number }) => ({
+                    value: id,
+                    label: po_number,
+                  }))}
+                onChange={(selectedOptions) =>
+                  handleChange(
+                    "po_list",
+                    selectedOptions
+                      ? selectedOptions.map((option) => String(option.value))
+                      : []
+                  )
+                }
+              />
 
-        <div className="row">
-          <div className="col-lg-2">
-            <label className="form-label">Year</label>
-          </div>
-          <div className="col-lg-2">
-            <CustomSelect
-              isDisabled
-              className={errors.year ? "select_wo red-border" : "select_wo"}
-              placeholder="Year"
-              options={years.map(({ id, title }) => ({
-                value: title,
-                label: title,
-              }))}
-              value={years
-                .map(({ title }) => ({
-                  value: title,
-                  label: title,
-                }))
-                .find((option) => option.value === formData.year)}
-              onChange={(selectedOption) =>
-                handleChange("year", selectedOption.value)
-              }
-            />
-          </div>
-
-          <div className="col-lg-2">
-            <label className="form-label">Description</label>
-          </div>
-
-          <div className="col-lg-6">
-            <input
-              value={formData.description}
-              name="description"
-              onChange={(e) => handleChange("description", e.target.value)}
-              type="text"
-              placeholder="97% Cotton 3% Elastane Ps Chino Trouser"
-            />
+              {errors.po_list && (
+                <small className="form-label text-danger">
+                  {errors.po_list}
+                </small>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -377,7 +377,10 @@
         }
 
         &.on_wo{
-           grid-template-columns: 30% 10% 10% 20% 10% 20%;
+           grid-template-columns: 25% 10% 10% 20% 15% 20%;
+        }
+        &.on_po{
+           grid-template-columns: 19% 21% 12% 13% 15% 20%;
         }
       }
 
