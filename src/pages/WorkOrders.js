@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Select, { components } from "react-select";
+
 import Dropdown from "react-bootstrap/Dropdown";
 import Logo from "../assets/images/logos/logo-short.png";
 import CreateWorkOrder from "elements/wo_elements/CreateWorkOrder";
@@ -63,6 +63,7 @@ export default function WorkOrders(props) {
     var response = await api.post("/workorders-delete", { id: id });
     if (response.status === 200 && response.data) {
       window.location.reload();
+      history.push("/work-orders");
     }
   };
 
@@ -72,7 +73,6 @@ export default function WorkOrders(props) {
     } else {
       setRenderArea("blank");
     }
-    getWorkOrders();
   }, [params.id]);
 
   return (

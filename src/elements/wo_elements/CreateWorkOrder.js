@@ -3,13 +3,15 @@ import Logo from "../../assets/images/logos/logo-short.png";
 import CustomSelect from "elements/CustomSelect";
 import api from "services/api";
 import swal from "sweetalert";
+import { useParams, useHistory } from "react-router-dom";
 export default function CreateWorkOrder({ renderArea, setRenderArea }) {
+  const history = useHistory();
   const [spinner, setSpinner] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     technical_package_id: "",
-    issued_date: "",
+    create_date: "",
     delivery_date: "",
     wo_ref: "",
     sewing_sam: "",
@@ -61,7 +63,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
   const validateForm = () => {
     const requiredFields = {
       technical_package_id: "Please select a Tech Pack.",
-      issued_date: "Issued Date is required.",
+      create_date: "Issued Date is required.",
       delivery_date: "Delivery Date is required.",
       sewing_sam: "Sewing SAM is required.",
       po_list: "Please select at least one PO.",
@@ -102,7 +104,8 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
 
       const response = await api.post("/workorders-create", data);
       if (response.status === 200 && response.data) {
-        window.location.reload();
+        history.push("/work-orders/" + response.data.workorder.id);
+        setRenderArea("details");
       } else {
         setErrors(response.data.errors || {});
       }
@@ -123,6 +126,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
   const getTechpacks = async () => {
     const response = await api.post("/technical-packages-all-desc", {
       mode: "self",
+      group: "costing_done",
     });
 
     if (response.status === 200 && response.data) {
@@ -267,10 +271,10 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
             </div>
             <div className="col-lg-3">
               <input
-                className={errors.issued_date ? "red-border" : ""}
-                onChange={(e) => handleChange("issued_date", e.target.value)}
+                className={errors.create_date ? "red-border" : ""}
+                onChange={(e) => handleChange("create_date", e.target.value)}
                 type="date"
-                value={formData.issued_date}
+                value={formData.create_date}
               />
             </div>
 

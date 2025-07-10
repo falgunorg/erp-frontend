@@ -304,7 +304,7 @@ export default function TechnicalPackages(props) {
                       <div
                         onClick={() => handleTpDetails(pkg)}
                         className={
-                          pkg.id === selectedTp?.id
+                          pkg.id == params.id
                             ? "single_tp_item active"
                             : "single_tp_item"
                         }

@@ -35,7 +35,7 @@ const MultipleFileView = ({ label, selectedFiles, filled }) => {
   };
 
   return (
-    <div className="row create_tp_body">
+    <div className="row create_tp_body align-items-center">
       <div className="col-lg-3">
         <label
           className={filled ? "form-label fill bg-falgun" : "form-label fill "}

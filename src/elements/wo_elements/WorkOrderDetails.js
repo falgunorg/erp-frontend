@@ -4,6 +4,7 @@ import Logo from "../../assets/images/logos/logo-short.png";
 import api from "services/api";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import moment from "moment";
 
 import { useParams, useHistory, Link } from "react-router-dom";
 
@@ -11,7 +12,7 @@ export default function WorkOrderDetails() {
   const params = useParams();
   const history = useHistory();
 
-  const [workorder, setWorkorder] = useState([]);
+  const [workorder, setWorkorder] = useState({});
   const getWorkorder = async () => {
     const response = await api.post("/workorders-show", { id: params.id });
     if (response.status === 200 && response.data) {
@@ -60,6 +61,18 @@ export default function WorkOrderDetails() {
     }, 100); // Slight delay for DOM to reflow
   };
 
+  const [grandTotalOrderQty, setGrandTotalOrderQty] = useState(0);
+
+  useEffect(() => {
+    if (workorder?.pos) {
+      const total = workorder.pos.reduce((poSum, po) => {
+        const itemQtySum = po.items?.reduce((sum, item) => sum + item.qty, 0);
+        return poSum + itemQtySum;
+      }, 0);
+      setGrandTotalOrderQty(total);
+    }
+  }, [workorder]);
+
   return (
     <div className="create_technical_pack" id="pdf-content">
       <div className="row create_tp_header align-items-center">
@@ -73,14 +86,12 @@ export default function WorkOrderDetails() {
               />
               <span className="purchase_text">WO</span>
             </div>
-            <div className="col-lg-2"></div>
-            <div className="col-lg-2"></div>
 
             <div className="col-lg-2">
-              <label className="form-label"></label>
+              <label className="form-label">WO Number</label>
             </div>
-            <div className="col-lg-2">
-              {/* <div className="form-value"></div> */}
+            <div className="col-lg-6">
+              <div className="form-value">{workorder.wo_number}</div>
             </div>
           </div>
         </div>
@@ -111,7 +122,9 @@ export default function WorkOrderDetails() {
             </div>
             <div className="col-lg-5">
               <div className="form-value">
-                {workorder.techpack?.techpack_number || "N/A"}
+                <Link to={"/technical-packages/" + workorder.techpack?.id}>
+                  {workorder.techpack?.techpack_number || "N/A"}
+                </Link>
               </div>
             </div>
           </div>
@@ -251,67 +264,232 @@ export default function WorkOrderDetails() {
         className="create_tp_materials_area create_tp_body"
       >
         <div className="d-flex justify-content-between">
-          <h6>PO's</h6>
+          <h6>PO's Wise Size Breakdown</h6>
         </div>
 
         {workorder.pos?.length > 0 ? (
-          <table className="table table-bordered">
-            <thead>
-              <tr>
-                <th>Brand</th>
-                <th>Department</th>
-                <th>Techpack</th>
-                <th>Item name</th>
-                <th>Quantity</th>
-                <th>Total Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              {workorder.pos?.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.brand}</td>
-                  <td>{item.department}</td>
-                  <td>{item.technical_package?.techpack_number}</td>
-                  <td>{item.item_name}</td>
-                  <td>{item.total_qty}</td>
-                  <td>${item.total_value}</td>
-                </tr>
-              ))}
-              <br />
-              <tr>
-                <td>
-                  <strong>Grand Total</strong>
-                </td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>
-                  <strong>
-                    {workorder.pos?.reduce(
-                      (sum, item) => sum + (Number(item.total_qty) || 0),
-                      0
-                    )}{" "}
-                    PCS
-                  </strong>
-                </td>
-                <td>
-                  $
-                  <strong>
-                    {workorder.pos
-                      ?.reduce(
-                        (sum, item) => sum + (Number(item.total_value) || 0),
-                        0
-                      )
-                      .toFixed(2)}
-                  </strong>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          (() => {
+            // Step 1: Collect all sizes that have at least one qty > 0
+            const sizeSetWithQty = new Set();
+            workorder.pos.forEach((po) => {
+              po.items.forEach((item) => {
+                if (item.qty > 0) {
+                  sizeSetWithQty.add(item.size);
+                }
+              });
+            });
+            const displaySizes = Array.from(sizeSetWithQty);
+
+            // Step 2: Initialize grand totals
+            let grandTotalQty = 0;
+            const grandSizeTotals = {};
+            displaySizes.forEach((size) => {
+              grandSizeTotals[size] = 0;
+            });
+
+            return (
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>SL</th>
+                    <th>Color</th>
+                    <th>Total</th>
+                    {displaySizes.map((size) => (
+                      <th key={size}>{size}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {workorder.pos.map((po, poIndex) => {
+                    const colorMap = {};
+
+                    po.items.forEach(({ color, size, qty }) => {
+                      if (!colorMap[color]) {
+                        colorMap[color] = {
+                          total: 0,
+                          sizes: {},
+                        };
+                      }
+                      colorMap[color].total += qty;
+                      colorMap[color].sizes[size] =
+                        (colorMap[color].sizes[size] || 0) + qty;
+                    });
+
+                    const colorEntries = Object.entries(colorMap);
+
+                    return (
+                      <React.Fragment key={`po-${poIndex}`}>
+                        <tr>
+                          <td
+                            className="form-value"
+                            colSpan={3 + displaySizes.length}
+                          >
+                            <strong>
+                              <Link to={`/purchase-orders/${po.id}`}>
+                                {po.po_number}
+                              </Link>{" "}
+                            </strong>{" "}
+                            |
+                            <small>
+                              {" "}
+                              {moment(po.delivery_date).format("MMMM Do YYYY")}
+                            </small>{" "}
+                            | <small> {po.user?.full_name}</small>
+                          </td>
+                        </tr>
+
+                        {colorEntries.map(([color, details], colorIndex) => {
+                          // Update grand totals
+                          grandTotalQty += details.total;
+                          displaySizes.forEach((size) => {
+                            if (details.sizes[size]) {
+                              grandSizeTotals[size] += details.sizes[size];
+                            }
+                          });
+
+                          return (
+                            <tr key={`color-${poIndex}-${colorIndex}`}>
+                              <td>{colorIndex + 1}</td>
+                              <td>{color}</td>
+                              <td>{details.total}</td>
+                              {displaySizes.map((size) => {
+                                const qty = details.sizes[size];
+                                return qty > 0 ? (
+                                  <td key={size}>{qty}</td>
+                                ) : (
+                                  <td key={size}></td>
+                                );
+                              })}
+                            </tr>
+                          );
+                        })}
+                      </React.Fragment>
+                    );
+                  })}
+
+                  {/* ✅ Grand Total Row */}
+                  <tr className="bg-light">
+                    <td colSpan={2}>
+                      <strong>Grand Total</strong>
+                    </td>
+                    <td>
+                      <strong>{grandTotalQty}</strong>
+                    </td>
+                    {displaySizes.map((size) => (
+                      <td key={`grand-${size}`}>
+                        {grandSizeTotals[size] > 0 ? (
+                          <strong>{grandSizeTotals[size]}</strong>
+                        ) : (
+                          ""
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
+            );
+          })()
         ) : (
-          <p>No Po is associated to this WorkOrder</p>
+          <p>No PO is associated to this WorkOrder</p>
         )}
       </div>
+      <div
+        style={{ padding: "0 15px" }}
+        className="create_tp_materials_area create_tp_body"
+      >
+        <h6>Material Descriptions</h6>
+
+        {Array.isArray(workorder.costing?.items) &&
+        workorder.costing.items.length > 0 ? (
+          (() => {
+            const grouped = {};
+
+            workorder.costing.items
+              .filter((material) => material.item_type?.title !== "CM")
+              .forEach((material) => {
+                const type = material.item_type?.title || "Others";
+                if (!grouped[type]) {
+                  grouped[type] = [];
+                }
+                grouped[type].push(material);
+              });
+
+            const itemTypeList = Object.entries(grouped);
+
+            return (
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Item Name</th>
+                    <th>Item Details</th>
+                    <th>Color</th>
+                    <th>Size</th>
+                    <th>Position</th>
+                    <th>Unit</th>
+                    <th>Consmp + Wstg</th>
+                    <th>
+                      WO Required Qty.
+                      <br /> (allow included)
+                    </th>
+                    <th>Supplier</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {itemTypeList.map(([typeTitle, items], groupIndex) => (
+                    <React.Fragment key={`group-${groupIndex}`}>
+                      <tr className="bg-light">
+                        <td className="form-value" colSpan={11}>
+                          <strong>{typeTitle}</strong>
+                        </td>
+                      </tr>
+                      {items.map((material, index) => (
+                        <tr key={`material-${groupIndex}-${index}`}>
+                          <td>{index + 1}</td>
+                          <td>{material.item?.title}</td>
+                          <td>{material.item_details}</td>
+                          <td>{material.color}</td>
+                          <td>{material.size}</td>
+                          <td>{material.position}</td>
+                          <td className="text-lowercase">{material.unit}</td>
+                          <td>{material.total}</td>
+                          <td>
+                            {" "}
+                            {(
+                              grandTotalOrderQty *
+                              parseFloat(material.total || 0)
+                            ).toFixed(2)}
+                          </td>
+                          <td>{material.supplier?.company_name}</td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            );
+          })()
+        ) : (
+          <p>There is no Costing Added for this Techpack</p>
+        )}
+      </div>
+      <br />
+
+      <table className="table table-bordered">
+        <tbody>
+          <tr>
+            <td>
+              <b>PREPARED BY:</b> {workorder.user?.full_name}
+            </td>
+            <td>
+              <b>CHECKED BY:</b>
+            </td>
+            <td>
+              <b>APPROVED BY:</b>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }

@@ -51,7 +51,7 @@ const MultipleFileInput = ({
   }, [openMenuIndex]);
 
   return (
-    <div className="row create_tp_body">
+    <div className="row align-items-center create_tp_body">
       <div className="col-lg-3">
         <label className="form-label fill">{label}</label>
       </div>

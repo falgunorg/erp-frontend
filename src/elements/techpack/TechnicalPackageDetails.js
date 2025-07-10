@@ -294,44 +294,97 @@ export default function TechnicalPackageDetails() {
           selectedFiles={selectedSpecialOperationFiles}
         />
       </div>
+      <br />
 
-      <div className="create_tp_materials_area create_tp_body">
+      <div
+        style={{ padding: "0 15px" }}
+        className="create_tp_materials_area create_tp_body"
+      >
         <h6>Material Descriptions</h6>
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>Item Type</th>
-              <th>Item Name</th>
-              <th>Item Details</th>
-              <th>Color</th>
-              <th>Size</th>
-              <th>Position</th>
-              <th>Unit</th>
-              <th>Consmp</th>
-              <th>Wstg %</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.isArray(techpack?.materials) &&
-              techpack.materials.length > 0 &&
-              techpack.materials.map((material, index) => (
-                <tr key={index}>
-                  <td>{material.item_type?.title}</td>
-                  <td>{material.item_name}</td>
-                  <td>{material.item_details}</td>
-                  <td>{material.color}</td>
-                  <td>{material.size}</td>
-                  <td>{material.position}</td>
-                  <td>{material.unit}</td>
-                  <td>{material.consumption}</td>
-                  <td>{material.wastage}</td>
-                  <td>{material.total}</td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+
+        {Array.isArray(techpack.materials) && techpack.materials.length > 0 ? (
+          (() => {
+            const grouped = {};
+
+            techpack.materials.forEach((material) => {
+              const type = material.item_type?.title || "Others";
+              if (!grouped[type]) {
+                grouped[type] = [];
+              }
+              grouped[type].push(material);
+            });
+
+            const itemTypeList = Object.entries(grouped);
+
+            return (
+              <table className="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Item Name</th>
+                    <th>Item Details</th>
+                    <th>Color</th>
+                    <th>Size</th>
+                    <th>Position</th>
+                    <th>Unit</th>
+                    <th>Consmp</th>
+                    <th>Wstg %</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {itemTypeList.map(([typeTitle, items], groupIndex) => (
+                    <React.Fragment key={`group-${groupIndex}`}>
+                      <tr className="bg-light">
+                        <td className="form-value" colSpan={11}>
+                          <strong>{typeTitle}</strong>
+                        </td>
+                      </tr>
+                      {items.map((material, index) => (
+                        <tr key={`material-${groupIndex}-${index}`}>
+                          <td>{index + 1}</td>
+
+                          <td>{material.item?.title}</td>
+                          <td>{material.item_details}</td>
+                          <td>{material.color}</td>
+                          <td>{material.size}</td>
+                          <td>{material.position}</td>
+                          <td>{material.unit}</td>
+                          <td>{material.consumption}</td>
+                          <td>{material.wastage}</td>
+                          <td>{material.total}</td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            );
+          })()
+        ) : (
+          <p>There is no Costing Added for this Techpack</p>
+        )}
       </div>
+      <br />
+
+      <table className="table table-bordered">
+        <tbody>
+          <tr>
+            <td>
+              <b>Merchant:</b> {techpack.user?.full_name}
+            </td>
+            <td>
+              <b>FG ID:</b>
+            </td>
+            <td>
+              <b>FG Pass:</b>
+            </td>
+            <td>
+              <b>Buyer Confirmation Mail:</b>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       <Modal show={imageModal} onHide={closeImageModal}>
         <Modal.Header closeButton>
