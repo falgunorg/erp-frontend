@@ -279,7 +279,14 @@ export default function CreateCostSheet(props) {
             </div>
             <div className="col-lg-5">
               <div className="form-value">
-                {costing.techpack?.special_operation || "N/A"}
+                {(() => {
+                  try {
+                    const ops = JSON.parse(costing.techpack?.special_operation);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
               </div>
             </div>
           </div>

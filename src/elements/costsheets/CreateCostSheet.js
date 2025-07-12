@@ -542,7 +542,16 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-5">
-              <input readOnly type="text" value={formData.special_operations} />
+              <div className="form-value">
+                {(() => {
+                  try {
+                    const ops = JSON.parse(formData?.special_operations);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
+              </div>
             </div>
           </div>
         </div>

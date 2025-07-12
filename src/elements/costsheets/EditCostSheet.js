@@ -478,11 +478,16 @@ export default function EditCostSheet({ renderArea, setRenderArea }) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-5">
-              <input
-                readOnly
-                type="text"
-                value={costing.techpack?.special_operation}
-              />
+              <div className="form-value">
+                {(() => {
+                  try {
+                    const ops = JSON.parse(costing.techpack?.special_operation);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
+              </div>
             </div>
           </div>
         </div>

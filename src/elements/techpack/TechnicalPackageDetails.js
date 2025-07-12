@@ -281,27 +281,36 @@ export default function TechnicalPackageDetails() {
       </div>
 
       <div className="create_tp_attatchment">
-        <MultipleFileView
-          label="Buyer Tech Pack Attachment"
-          inputId="buyer_techpacks"
-          selectedFiles={buyerTechpackFiles}
-        />
-        <MultipleFileView
-          label="Spec Sheet Attachment"
-          inputId="specsheet"
-          selectedFiles={selectedSpecSheetFiles}
-        />
-        <MultipleFileView
-          label="Block Pattern Attachment"
-          inputId="block_pattern"
-          selectedFiles={selectedBlockPatternFiles}
-        />
+        {buyerTechpackFiles?.length > 0 && (
+          <MultipleFileView
+            label="Buyer Tech Pack Attachment"
+            inputId="buyer_techpacks"
+            selectedFiles={buyerTechpackFiles}
+          />
+        )}
 
-        <MultipleFileView
-          label="Block Pattern Attachment"
-          inputId="special_operation"
-          selectedFiles={selectedSpecialOperationFiles}
-        />
+        {selectedSpecSheetFiles?.length > 0 && (
+          <MultipleFileView
+            label="Spec Sheet Attachment"
+            inputId="specsheet"
+            selectedFiles={selectedSpecSheetFiles}
+          />
+        )}
+
+        {selectedBlockPatternFiles?.length > 0 && (
+          <MultipleFileView
+            label="Block Pattern Attachment"
+            inputId="block_pattern"
+            selectedFiles={selectedBlockPatternFiles}
+          />
+        )}
+        {selectedSpecialOperationFiles?.length > 0 && (
+          <MultipleFileView
+            label="Special Operation Attachment"
+            inputId="special_operation"
+            selectedFiles={selectedSpecialOperationFiles}
+          />
+        )}
       </div>
       <br />
 

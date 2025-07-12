@@ -138,6 +138,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
   const getPos = async () => {
     const response = await api.post("/public-pos", {
       technical_package_id: formData.technical_package_id,
+      not_included_on_wo: true,
     });
     if (response.status === 200 && response.data) {
       const data = response.data.data;
@@ -325,7 +326,16 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-5">
-              <input readOnly type="text" value={formData.special_operations} />
+              <div className="form-value">
+                {(() => {
+                  try {
+                    const ops = JSON.parse(formData?.special_operations);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
+              </div>
             </div>
           </div>
 

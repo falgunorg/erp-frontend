@@ -4,7 +4,7 @@ import Logo from "../../assets/images/logos/logo-short.png";
 import api from "services/api";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-import moment from "moment";
+import swal from "sweetalert";
 
 import { useParams, useHistory, Link } from "react-router-dom";
 
@@ -72,6 +72,47 @@ export default function WorkOrderDetails() {
       setGrandTotalOrderQty(total);
     }
   }, [workorder]);
+
+  const openPopUp = () => {
+    swal({
+      icon: "success",
+    });
+  };
+
+  
+
+  const allItems = workorder.pos.flatMap((po) => po.items || []);
+
+  // Step 2: Collect sizes with qty > 0
+  const sizeSet = new Set();
+  allItems.forEach((item) => {
+    if (item.qty > 0) {
+      sizeSet.add(item.size);
+    }
+  });
+  const displaySizes = Array.from(sizeSet);
+
+  // Step 3: Group by color and accumulate size-wise quantities
+  const colorMap = {}; // { color: { total, sizes: { size: qty } } }
+  allItems.forEach(({ color, size, qty }) => {
+    if (qty <= 0) return;
+    if (!colorMap[color]) {
+      colorMap[color] = { total: 0, sizes: {} };
+    }
+    colorMap[color].total += qty;
+    colorMap[color].sizes[size] = (colorMap[color].sizes[size] || 0) + qty;
+  });
+
+  // Step 4: Calculate grand totals
+  let grandTotalQty = 0;
+  const grandSizeTotals = {};
+  displaySizes.forEach((size) => {
+    grandSizeTotals[size] = 0;
+  });
+
+  const colorEntries = Object.entries(colorMap);
+console.log("SIZE-COLOR", JSON.stringify(colorEntries));
+
 
   return (
     <div className="create_technical_pack" id="pdf-content">
@@ -259,33 +300,52 @@ export default function WorkOrderDetails() {
       </div>
 
       <br />
+
       <div
         style={{ padding: "0 15px" }}
         className="create_tp_materials_area create_tp_body"
       >
         <div className="d-flex justify-content-between">
-          <h6>PO's Wise Size Breakdown</h6>
+          <h6>Color Wise Size Breakdown</h6>
+          <button onClick={openPopUp} className="btn btn-sm btn-warning">
+            <i className="fa fa-plus"></i>
+          </button>
         </div>
 
         {workorder.pos?.length > 0 ? (
           (() => {
-            // Step 1: Collect all sizes that have at least one qty > 0
-            const sizeSetWithQty = new Set();
-            workorder.pos.forEach((po) => {
-              po.items.forEach((item) => {
-                if (item.qty > 0) {
-                  sizeSetWithQty.add(item.size);
-                }
-              });
-            });
-            const displaySizes = Array.from(sizeSetWithQty);
+            // Step 1: Collect items from all POs
+            const allItems = workorder.pos.flatMap((po) => po.items || []);
 
-            // Step 2: Initialize grand totals
+            // Step 2: Collect sizes with qty > 0
+            const sizeSet = new Set();
+            allItems.forEach((item) => {
+              if (item.qty > 0) {
+                sizeSet.add(item.size);
+              }
+            });
+            const displaySizes = Array.from(sizeSet);
+
+            // Step 3: Group by color and accumulate size-wise quantities
+            const colorMap = {}; // { color: { total, sizes: { size: qty } } }
+            allItems.forEach(({ color, size, qty }) => {
+              if (qty <= 0) return;
+              if (!colorMap[color]) {
+                colorMap[color] = { total: 0, sizes: {} };
+              }
+              colorMap[color].total += qty;
+              colorMap[color].sizes[size] =
+                (colorMap[color].sizes[size] || 0) + qty;
+            });
+
+            // Step 4: Calculate grand totals
             let grandTotalQty = 0;
             const grandSizeTotals = {};
             displaySizes.forEach((size) => {
               grandSizeTotals[size] = 0;
             });
+
+            const colorEntries = Object.entries(colorMap);
 
             return (
               <table className="table table-bordered">
@@ -300,74 +360,25 @@ export default function WorkOrderDetails() {
                   </tr>
                 </thead>
                 <tbody>
-                  {workorder.pos.map((po, poIndex) => {
-                    const colorMap = {};
-
-                    po.items.forEach(({ color, size, qty }) => {
-                      if (!colorMap[color]) {
-                        colorMap[color] = {
-                          total: 0,
-                          sizes: {},
-                        };
-                      }
-                      colorMap[color].total += qty;
-                      colorMap[color].sizes[size] =
-                        (colorMap[color].sizes[size] || 0) + qty;
+                  {colorEntries.map(([color, details], index) => {
+                    grandTotalQty += details.total;
+                    displaySizes.forEach((size) => {
+                      grandSizeTotals[size] += details.sizes[size] || 0;
                     });
 
-                    const colorEntries = Object.entries(colorMap);
-
                     return (
-                      <React.Fragment key={`po-${poIndex}`}>
-                        <tr>
-                          <td
-                            className="form-value"
-                            colSpan={3 + displaySizes.length}
-                          >
-                            <strong>
-                              <Link to={`/purchase-orders/${po.id}`}>
-                                {po.po_number}
-                              </Link>{" "}
-                            </strong>{" "}
-                            |
-                            <small>
-                              {" "}
-                              {moment(po.delivery_date).format("MMMM Do YYYY")}
-                            </small>{" "}
-                            | <small> {po.user?.full_name}</small>
-                          </td>
-                        </tr>
-
-                        {colorEntries.map(([color, details], colorIndex) => {
-                          // Update grand totals
-                          grandTotalQty += details.total;
-                          displaySizes.forEach((size) => {
-                            if (details.sizes[size]) {
-                              grandSizeTotals[size] += details.sizes[size];
-                            }
-                          });
-
-                          return (
-                            <tr key={`color-${poIndex}-${colorIndex}`}>
-                              <td>{colorIndex + 1}</td>
-                              <td>{color}</td>
-                              <td>{details.total}</td>
-                              {displaySizes.map((size) => {
-                                const qty = details.sizes[size];
-                                return qty > 0 ? (
-                                  <td key={size}>{qty}</td>
-                                ) : (
-                                  <td key={size}></td>
-                                );
-                              })}
-                            </tr>
-                          );
-                        })}
-                      </React.Fragment>
+                      <tr key={color}>
+                        <td>{index + 1}</td>
+                        <td>{color}</td>
+                        <td>{details.total}</td>
+                        {displaySizes.map((size) => (
+                          <td key={size}>{details.sizes[size] || ""}</td>
+                        ))}
+                      </tr>
                     );
                   })}
 
-                  {/* ✅ Grand Total Row */}
+                  {/* Grand Total Row */}
                   <tr className="bg-light">
                     <td colSpan={2}>
                       <strong>Grand Total</strong>
@@ -393,6 +404,7 @@ export default function WorkOrderDetails() {
           <p>No PO is associated to this WorkOrder</p>
         )}
       </div>
+
       <div
         style={{ padding: "0 15px" }}
         className="create_tp_materials_area create_tp_body"

@@ -1052,12 +1052,15 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
       </div>
 
       <div className="create_tp_attatchment">
-        <MultipleFileView
-          filled={true}
-          label="Existing Tech Pack Files"
-          inputId="buyer_techpacks"
-          selectedFiles={existingTechpackFiles}
-        />
+        {existingTechpackFiles?.length > 0 && (
+          <MultipleFileView
+            filled={true}
+            label="Existing Tech Pack Files"
+            inputId="buyer_techpacks"
+            selectedFiles={existingTechpackFiles}
+          />
+        )}
+
         <MultipleFileInput
           label="Buyer Tech Pack Attachment"
           inputId="technical_package"
@@ -1065,13 +1068,14 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
           setSelectedFiles={setSelectedTechpackFiles}
         />
         <hr />
-
-        <MultipleFileView
-          filled={true}
-          label="Existing Spec Sheet Files"
-          inputId="spec_sheet"
-          selectedFiles={existingSpecSheetFiles}
-        />
+        {existingSpecSheetFiles?.length > 0 && (
+          <MultipleFileView
+            filled={true}
+            label="Existing Spec Sheet Files"
+            inputId="spec_sheet"
+            selectedFiles={existingSpecSheetFiles}
+          />
+        )}
 
         <MultipleFileInput
           label="Spec Sheet Attachment"
@@ -1080,13 +1084,14 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
           setSelectedFiles={setSelectedSpecSheetFiles}
         />
         <hr />
-
-        <MultipleFileView
-          filled={true}
-          label="Existing Block Pattern Files"
-          inputId="block_pattern"
-          selectedFiles={existingBlockPatternFiles}
-        />
+        {existingBlockPatternFiles?.length > 0 && (
+          <MultipleFileView
+            filled={true}
+            label="Existing Block Pattern Files"
+            inputId="block_pattern"
+            selectedFiles={existingBlockPatternFiles}
+          />
+        )}
         <MultipleFileInput
           label="Block Pattern Attachment"
           inputId="block_pattern"
@@ -1094,12 +1099,14 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
           setSelectedFiles={setSelectedBlockPatternFiles}
         />
         <hr />
-        <MultipleFileView
-          filled={true}
-          label="Existing Special Operation Files"
-          inputId="special_operation"
-          selectedFiles={existingSpecialOperationFiles}
-        />
+        {existingSpecialOperationFiles?.length > 0 && (
+          <MultipleFileView
+            filled={true}
+            label="Existing Special Operation Files"
+            inputId="special_operation"
+            selectedFiles={existingSpecialOperationFiles}
+          />
+        )}
         <MultipleFileInput
           label="Special Operation Attachment"
           inputId="special_operation"
