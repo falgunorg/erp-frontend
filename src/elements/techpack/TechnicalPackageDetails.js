@@ -235,7 +235,16 @@ export default function TechnicalPackageDetails() {
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              <div className="form-value">{techpack.special_operation}</div>
+              <div className="form-value">
+                {(() => {
+                  try {
+                    const ops = JSON.parse(techpack.special_operation);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
+              </div>
             </div>
           </div>
         </div>

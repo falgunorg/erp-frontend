@@ -8,7 +8,10 @@ import CustomSelect from "elements/CustomSelect";
 
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 
-export default function CreateTechnicalPackage(props) {
+import { useHistory } from "react-router-dom";
+
+export default function CreateTechnicalPackage({ setRenderArea }) {
+  const history = useHistory();
   const buyers = [
     { id: 1, title: "NSLBD" },
     { id: 2, title: "WALMART" },
@@ -297,7 +300,6 @@ export default function CreateTechnicalPackage(props) {
     special_operations: [],
   });
 
-  console.log("FORM DATA", formDataSet);
   const handleInputChange = (name, value) => {
     setFormDataSet((prevDataSet) => ({
       ...prevDataSet,
@@ -347,20 +349,19 @@ export default function CreateTechnicalPackage(props) {
     return Object.keys(formErrors).length === 0;
   };
 
-  console.log("ALL FILES", allFiles);
-  const tp_items = Object.values(consumptionItems).flat();
-
-  console.log("TP ITEMS", JSON.stringify(tp_items));
+ 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     const tp_items = Object.values(consumptionItems).flat();
+
     if (tp_items.length === 0) {
       swal({
         title: "Please Select Materials",
         icon: "error",
       });
-      return; // Prevent form submission
+      return;
     }
 
     if (frontImageFile === null) {
@@ -368,7 +369,7 @@ export default function CreateTechnicalPackage(props) {
         title: "Please Select Front Part Image",
         icon: "error",
       });
-      return; // Prevent form submission
+      return;
     }
 
     if (backImageFile === null) {
@@ -376,43 +377,69 @@ export default function CreateTechnicalPackage(props) {
         title: "Please Select Back Part Image",
         icon: "error",
       });
-      return; // Prevent form submission
+      return;
     }
 
     if (validateForm()) {
-      var data = new FormData();
-      data.append("po_id", formDataSet.po_id);
-      data.append("wo_id", formDataSet.wo_id);
-      data.append("received_date", formDataSet.received_date);
-      data.append("techpack_number", formDataSet.techpack_number);
-      data.append("buyer_id", formDataSet.buyer_id);
-      data.append("buyer_style_name", formDataSet.buyer_style_name);
-      data.append("brand", formDataSet.brand);
-      data.append("item_name", formDataSet.item_name);
-      data.append("season", formDataSet.season);
-      data.append("item_type", formDataSet.item_type);
-      data.append("department", formDataSet.department);
-      data.append("description", formDataSet.description);
-      data.append("company_id", formDataSet.company_id);
-      data.append("wash_details", formDataSet.wash_details);
-      data.append("special_operation", formDataSet.special_operations);
+      const data = new FormData();
+
+      // Helper to safely append values
+      const appendIfValid = (key, value) => {
+        if (value !== null && value !== undefined && value !== "") {
+          data.append(key, value);
+        } else {
+          data.append(key, ""); // Laravel will treat empty string as null if handled
+        }
+      };
+
+      // Append form data safely
+      appendIfValid("po_id", formDataSet.po_id);
+      appendIfValid("wo_id", formDataSet.wo_id);
+      appendIfValid("received_date", formDataSet.received_date);
+      appendIfValid("techpack_number", formDataSet.techpack_number);
+      appendIfValid("buyer_id", formDataSet.buyer_id);
+      appendIfValid("buyer_style_name", formDataSet.buyer_style_name);
+      appendIfValid("brand", formDataSet.brand);
+      appendIfValid("item_name", formDataSet.item_name);
+      appendIfValid("season", formDataSet.season);
+      appendIfValid("item_type", formDataSet.item_type);
+      appendIfValid("department", formDataSet.department);
+      appendIfValid("description", formDataSet.description);
+      appendIfValid("company_id", formDataSet.company_id);
+      appendIfValid("wash_details", formDataSet.wash_details);
+
+      // Special operations can be an array, stringify before appending
+      data.append(
+        "special_operation",
+        JSON.stringify(formDataSet.special_operations)
+      );
+
+      // Techpack item list
       data.append("tp_items", JSON.stringify(tp_items));
 
-      data.append("front_photo", frontImageFile);
-      data.append("back_photo", backImageFile);
+      // File uploads
+      if (frontImageFile) {
+        data.append("front_photo", frontImageFile);
+      }
+      if (backImageFile) {
+        data.append("back_photo", backImageFile);
+      }
+
+      // Attachments
       allFiles.forEach((file) => {
-        data.append("attatchments[]", file); // real file
+        data.append("attatchments[]", file); // actual file
         data.append("file_types[]", file.file_type); // custom property
       });
 
       setSpinner(true);
-      var response = await api.post("/technical-package-create", data);
+      const response = await api.post("/technical-package-create", data);
+
       if (response.status === 200 && response.data) {
-        window.location.reload();
+        history.push("/technical-packages/" + response.data.techpack.id);
+        setRenderArea("details");
       } else {
         setErrors(response.data.errors);
       }
-      setSpinner(false);
     }
   };
 

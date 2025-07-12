@@ -121,6 +121,7 @@ export default function TechnicalPackages(props) {
             "The technical package has been deleted.",
             "success"
           ).then(() => {
+            history.push("/technical-packages");
             window.location.reload();
           });
         }
@@ -405,7 +406,9 @@ export default function TechnicalPackages(props) {
               <div className="text-muted">Nothing is selected</div>
             </div>
           )}
-          {renderArea === "add" && <CreateTechnicalPackage />}
+          {renderArea === "add" && (
+            <CreateTechnicalPackage setRenderArea={setRenderArea} />
+          )}
           {renderArea === "details" && <TechnicalPackageDetails />}
           {renderArea === "update" && (
             <EditTechnicalPackage setRenderArea={setRenderArea} />
