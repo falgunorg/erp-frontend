@@ -4,64 +4,16 @@ import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
 import swal from "sweetalert";
 import CustomSelect from "elements/CustomSelect";
+import { useParams, useHistory } from "react-router-dom";
 
 export default function EditPurchaseOrder({ selectedPo }) {
-  const buyers = [
-    { id: 1, title: "NSLBD" },
-    { id: 2, title: "WALMART" },
-    { id: 3, title: "FIVE STAR LLC" },
-  ];
+  const history = useHistory();
+  const params = useParams();
+  const [spinner, setSpinner] = useState(false);
 
-  const brands = [
-    { id: 1, title: "NEXT" },
-    { id: 2, title: "GARAN" },
-    { id: 3, title: "MANGO" },
-  ];
-
-  const seasons = [
-    { id: 1, title: "FAL 24" },
-    { id: 2, title: "SUMMER 25" },
-    { id: 3, title: "SPRING 25" },
-  ];
-
-  const departments = [
-    { id: 1, title: "Mens" },
-    { id: 2, title: "Womens" },
-    { id: 3, title: "Kids" },
-    { id: 4, title: "School Wear" },
-  ];
-
-  const companies = [
-    { id: 1, title: "JMS" },
-    { id: 2, title: "MCL" },
-    { id: 3, title: "MBL" },
-  ];
-
-  const itemTypes = [
-    { id: 1, title: "TOP" },
-    { id: 2, title: "BOTTOM" },
-    { id: 3, title: "SWIMWEAR" },
-  ];
-
-  const washes = [
-    { id: 1, title: "Garment Wash" },
-    { id: 2, title: "Enzyme Wash" },
-    { id: 3, title: "Bleach Wash" },
-    { id: 4, title: "Stone Wash" },
-    { id: 5, title: "Acid Wash" },
-    { id: 6, title: "Rinse Wash" },
-    { id: 7, title: "Sand Wash" },
-    { id: 8, title: "Silicon Wash" },
-    { id: 9, title: "Moonshine Wash" },
-    { id: 10, title: "Distressed Wash" },
-  ];
-
-  const specialOperations = [
-    { id: 1, title: "Embroadary" },
-    { id: 2, title: "Printing" },
-    { id: 3, title: "Fusing" },
-    { id: 4, title: "Dying" },
-  ];
+  const [errors, setErrors] = useState({});
+  const [selectedPoFiles, setSelectedPoFiles] = useState([]);
+  const [poItems, setPoItems] = useState([]);
 
   const destinations = [
     { id: 1, title: "UK" },
@@ -70,27 +22,26 @@ export default function EditPurchaseOrder({ selectedPo }) {
     { id: 4, title: "UAE" },
   ];
 
-  const contracts = [
-    { id: 1, title: "PCNXTMCLX001" },
-    { id: 2, title: "PCNXTMCLX002" },
-    { id: 3, title: "PCNXTMCLX003" },
-    { id: 4, title: "PCNXTMCLX004" },
-    { id: 5, title: "PCNXTMCLX005" },
-    { id: 6, title: "PCNXTMCLX006" },
-    { id: 7, title: "PCNXTMCLX007" },
-    { id: 8, title: "PCNXTMCLX008" },
-  ];
+  const [contracts, setContracts] = useState([]);
 
-  const terms = [
-    { id: 1, title: "FALTR001" },
-    { id: 2, title: "FALTR002" },
-    { id: 3, title: "FALTR003" },
-    { id: 4, title: "FALTR004" },
-    { id: 5, title: "FALTR005" },
-    { id: 6, title: "FALTR006" },
-    { id: 7, title: "FALTR007" },
-    { id: 8, title: "FALTR008" },
-  ];
+  const getContracts = async () => {
+    setSpinner(true);
+    var response = await api.post("/public-purchase-contracts");
+    if (response.status === 200 && response.data) {
+      setContracts(response.data.data);
+    }
+    setSpinner(false);
+  };
+
+  const [terms, setTerms] = useState([]);
+  const getTerms = async () => {
+    setSpinner(true);
+    var response = await api.post("/terms");
+    if (response.status === 200 && response.data) {
+      setTerms(response.data.data);
+    }
+    setSpinner(false);
+  };
 
   const packings = [
     { id: 1, title: "Dozen in Box" },
@@ -101,55 +52,17 @@ export default function EditPurchaseOrder({ selectedPo }) {
     { id: 6, title: "Other" },
   ];
 
-  const [selectedTechpackFiles, setSelectedTechpackFiles] = useState([]);
-
-  const [spinner, setSpinner] = useState(false);
-
   const [sizes, setSizes] = useState([]);
-  const getSizes = async () => {
-    setSpinner(true);
-    var response = await api.post("/sizes");
-    if (response.status === 200 && response.data) {
-      setSizes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
   const [colors, setColors] = useState([]);
-  const getColors = async () => {
-    setSpinner(true);
-    var response = await api.post("/colors");
-    if (response.status === 200 && response.data) {
-      setColors(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [workOrders, setWorkOrders] = useState([]);
-  const getWorkOrders = async () => {
-    const response = await api.post("/public-workorders");
-    if (response.status === 200 && response.data) {
-      const data = response.data.data;
-      setWorkOrders(data);
-    }
-  };
-
-  useEffect(() => {
-    getSizes();
-    getColors();
-    getWorkOrders();
-  }, []);
-
-  const [errors, setErrors] = useState({});
+  const [techpacks, setTechpacks] = useState([]);
 
   const [formData, setFormData] = useState({
+    id: "",
     po_number: "",
     wo_id: "",
     issued_date: "",
     delivery_date: "",
     purchase_contract_id: "",
-    company_id: "",
-    buyer_id: "",
     brand: "",
     season: "",
     description: "",
@@ -167,7 +80,92 @@ export default function EditPurchaseOrder({ selectedPo }) {
     total_qty: "",
     total_value: "",
     special_operations: [],
+    company_id: "",
+    buyer_id: "",
   });
+
+  const getSizes = async () => {
+    setSpinner(true);
+    const response = await api.post("/sizes");
+    if (response.status === 200) setSizes(response.data.data);
+    setSpinner(false);
+  };
+
+  const getColors = async () => {
+    setSpinner(true);
+    const response = await api.post("/colors");
+    if (response.status === 200) setColors(response.data.data);
+    setSpinner(false);
+  };
+
+  const getTechpacks = async () => {
+    const response = await api.post("/technical-packages-all-desc", {
+      mode: "self",
+    });
+    if (response.status === 200) setTechpacks(response.data.data);
+  };
+
+  useEffect(() => {
+    getSizes();
+    getColors();
+    getTechpacks();
+    getContracts();
+    getTerms();
+  }, []);
+
+  const getPo = async () => {
+    setSpinner(true);
+    const response = await api.post("/pos-show", { id: params.id });
+    if (response.status === 200 && response.data) {
+      const po = response.data.po;
+
+      setFormData((prev) => ({
+        ...prev,
+        id: po.id,
+        technical_package_id: po.technical_package_id,
+        po_number: po.po_number,
+        destination: po.destination,
+        ship_mode: po.ship_mode,
+        shipping_terms: po.shipping_terms,
+        packing_method: po.packing_method,
+        payment_terms: po.payment_terms,
+        purchase_contract_id: po.purchase_contract_id,
+        issued_date: po.issued_date,
+        delivery_date: po.delivery_date,
+        company: po.techpack?.company || "",
+        buyer: po.techpack?.buyer || "",
+        brand: po.techpack?.brand || "",
+        season: po.techpack?.season || "",
+        description: po.techpack?.description || "",
+        buyer_style_name: po.techpack?.buyer_style_name || "",
+        item_name: po.techpack?.item_name || "",
+        item_type: po.techpack?.item_type || "",
+        department: po.techpack?.department || "",
+        wash_details: po.techpack?.wash_details || "",
+        special_operations:
+          po.techpack?.special_operation?.split(",").filter(Boolean) || [],
+      }));
+
+      const items =
+        po.items?.map((item) => ({
+          color: item.color,
+          size: item.size,
+          inseam: item.inseam || "",
+          qty: parseInt(item.qty) || 0,
+          fob: parseFloat(item.fob) || 0,
+          total: parseFloat(item.total) || 0,
+        })) || [];
+
+      setPoItems(items);
+    }
+    setSpinner(false);
+  };
+
+  useEffect(() => {
+    getPo();
+  }, [params.id]);
+
+  console.log("FORMDATA", formData);
 
   const handleChange = async (name, value) => {
     if (name === "technical_package_id") {
@@ -175,15 +173,13 @@ export default function EditPurchaseOrder({ selectedPo }) {
         const response = await api.post("/technical-package-show", {
           id: value,
         });
-
         if (response.status === 200 && response.data) {
           const data = response.data;
-
           setFormData((prev) => ({
             ...prev,
             technical_package_id: value,
-            company_id: data.company_id || "",
-            buyer_id: data.buyer_id || "",
+            company: data.company || "",
+            buyer: data.buyer || "",
             brand: data.brand || "",
             season: data.season || "",
             description: data.description || "",
@@ -196,52 +192,32 @@ export default function EditPurchaseOrder({ selectedPo }) {
               data.special_operation?.split(",").filter(Boolean) || [],
           }));
         }
-      } catch (error) {
-        console.error("Error fetching technical package data:", error);
+      } catch (err) {
+        console.error("Error fetching technical package:", err);
       }
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  const handleOperationChange = (selectedOptions) => {
-    const selectedOpTitles = selectedOptions.map((option) => option.value);
-    setFormData((prevData) => ({
-      ...prevData,
-      special_operations: selectedOpTitles,
-    }));
   };
 
   const validateForm = () => {
     const requiredFields = {
       po_number: "Please insert a PO number.",
       issued_date: "Please insert the issue date.",
+      delivery_date: "Delivery date is required.",
       technical_package_id: "Please select a technical package.",
       destination: "Please select a destination.",
-      delivery_date: "Delivery date is required.",
-      buyer_style_name: "Buyer style name is required.",
       ship_mode: "Please select a shipping mode.",
       purchase_contract_id: "Please select a purchase contract.",
-      item_name: "Item name is required.",
       shipping_terms: "Please select shipping terms.",
-      company_id: "Company is required.",
-      item_type: "Item type is required.",
       packing_method: "Please select a packing method.",
-      buyer_id: "Buyer is required.",
-      department: "Department is required.",
       payment_terms: "Please select payment terms.",
-      brand: "Brand is required.",
-      season: "Season is required.",
     };
 
     const formErrors = {};
-
-    for (const field in requiredFields) {
-      if (!formData[field]) {
-        formErrors[field] = requiredFields[field];
+    for (const key in requiredFields) {
+      if (!formData[key]) {
+        formErrors[key] = requiredFields[key];
       }
     }
 
@@ -253,10 +229,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
     event.preventDefault();
 
     if (poItems.length === 0) {
-      swal({
-        title: "Please select items.",
-        icon: "error",
-      });
+      swal({ title: "Please select items.", icon: "error" });
       return;
     }
 
@@ -264,37 +237,29 @@ export default function EditPurchaseOrder({ selectedPo }) {
 
     try {
       const data = new FormData();
-
-      // Append form fields
       Object.entries(formData).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          data.append(key, JSON.stringify(value));
-        } else {
-          data.append(key, value);
-        }
+        data.append(key, Array.isArray(value) ? JSON.stringify(value) : value);
       });
 
-      // Set calculated values
-      const precessedOperations = formData.special_operations.join(",");
-      data.set("special_operations", precessedOperations);
       data.set("total_qty", totalQuantity);
       data.set("total_value", grandTotalFob);
       data.append("po_items", JSON.stringify(poItems));
-      data.append("id", selectedPo.id);
+      data.append("id", formData.id);
 
-      for (let i = 0; i < selectedTechpackFiles.length; i++) {
-        data.append("attatchments[]", selectedTechpackFiles[i]);
+      for (let i = 0; i < selectedPoFiles.length; i++) {
+        data.append("attatchments[]", selectedPoFiles[i]);
       }
+
       setSpinner(true);
       const response = await api.post("/pos-update", data);
-
       if (response.status === 200 && response.data) {
+        history.push("/purchase-orders/" + formData.id);
         window.location.reload();
       } else {
         setErrors(response.data.errors || {});
       }
     } catch (error) {
-      console.error("Form submission failed:", error);
+      console.error("Submit failed:", error);
       swal({
         title: "Submission Failed",
         text: "Something went wrong while submitting the form.",
@@ -305,19 +270,10 @@ export default function EditPurchaseOrder({ selectedPo }) {
     }
   };
 
-  const [poItems, setPoItems] = useState([]);
-
   const handleAddItem = () => {
     setPoItems([
       ...poItems,
-      {
-        color: "",
-        size: "",
-        inseam: "",
-        qty: "",
-        fob: "",
-        total: 0,
-      },
+      { color: "", size: "", inseam: "", qty: "", fob: "", total: 0 },
     ]);
   };
 
@@ -325,7 +281,27 @@ export default function EditPurchaseOrder({ selectedPo }) {
     const updatedItems = [...poItems];
     updatedItems[index][field] = value;
 
-    // Calculate total if qty or fob changes
+    const currentColor = field === "color" ? value : updatedItems[index].color;
+    const currentSize = field === "size" ? value : updatedItems[index].size;
+
+    const isDuplicate = updatedItems.some(
+      (item, idx) =>
+        idx !== index &&
+        item.color === currentColor &&
+        item.size === currentSize &&
+        currentColor &&
+        currentSize
+    );
+
+    if (isDuplicate) {
+      swal({
+        title: "Duplicate Entry",
+        text: "Same color and size combination already exists.",
+        icon: "error",
+      });
+      return;
+    }
+
     if (field === "qty" || field === "fob") {
       const qty = parseFloat(updatedItems[index].qty) || 0;
       const fob = parseFloat(updatedItems[index].fob) || 0;
@@ -345,105 +321,11 @@ export default function EditPurchaseOrder({ selectedPo }) {
     (sum, item) => sum + Number(item.qty || 0),
     0
   );
+
   const grandTotalFob = poItems.reduce(
     (sum, item) => sum + Number(item.total || 0),
     0
   );
-
-  //fetch techpacks
-  const [techpacks, setTechpacks] = useState([]);
-
-  const getTechpacks = async () => {
-    const response = await api.post("/technical-packages-all-desc", {
-      mode: "self",
-    });
-
-    if (response.status === 200 && response.data) {
-      setTechpacks(response.data.data);
-    }
-  };
-
-  useEffect(() => {
-    getTechpacks();
-  }, []);
-
-  useEffect(() => {
-    if (selectedPo) {
-      const {
-        po_number,
-        wo_id,
-        issued_date,
-        delivery_date,
-        purchase_contract_id,
-        company_id,
-        buyer_id,
-        brand,
-        season,
-        description,
-        technical_package_id,
-        buyer_style_name,
-        item_name,
-        item_type,
-        department,
-        wash_details,
-        destination,
-        ship_mode,
-        shipping_terms,
-        packing_method,
-        payment_terms,
-        total_qty,
-        total_value,
-        special_operations,
-      } = selectedPo;
-
-      setFormData({
-        po_number,
-        wo_id,
-        issued_date,
-        delivery_date,
-        purchase_contract_id,
-        company_id,
-        buyer_id,
-        brand,
-        season,
-        description,
-        technical_package_id,
-        buyer_style_name,
-        item_type,
-        item_name,
-        department,
-        wash_details,
-        destination,
-        ship_mode,
-        shipping_terms,
-        packing_method,
-        payment_terms,
-        total_qty,
-        total_value,
-        special_operations: special_operations?.split(",") || [],
-      });
-    }
-  }, [selectedPo]);
-
-  useEffect(() => {
-    if (selectedPo?.items.length) {
-      selectedPo.items.forEach((mat) => {
-        const item = {
-          color: mat.color,
-          size: mat.size,
-          inseam: mat.inseam || "", // in case you want to allow user to change the name
-
-          qty: parseInt(mat.qty) || 0,
-          fob: parseFloat(mat.fob) || 0,
-          total: parseFloat(mat.total) || 0,
-        };
-
-        poItems.push(item);
-      });
-
-      setPoItems(poItems);
-    }
-  }, [selectedPo?.items]);
 
   return (
     <div className="create_technical_pack">
@@ -475,24 +357,9 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className="select_wo"
-                placeholder="PO"
-                options={workOrders.map(({ id, wo_number }) => ({
-                  value: id,
-                  label: wo_number,
-                }))}
-                value={workOrders
-                  .map(({ id, wo_number }) => ({
-                    value: id,
-                    label: wo_number,
-                  }))
-                  .find((option) => option.value === selectedPo.wo_id)}
-                onChange={(selectedOption) =>
-                  handleChange("wo_id", selectedOption.value)
-                }
-                name="wo_id"
-              />
+              <div className="form-value">
+                {formData.wo?.wo_number || "N/A"}
+              </div>
             </div>
           </div>
         </div>
@@ -502,7 +369,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
             className="btn btn-default submit_button"
           >
             {" "}
-            Submit{" "}
+            Update{" "}
           </button>
         </div>
       </div>
@@ -537,9 +404,6 @@ export default function EditPurchaseOrder({ selectedPo }) {
                   value: id,
                   label: techpack_number,
                 }))}
-                onChange={(selectedOption) =>
-                  handleChange("technical_package_id", selectedOption.value)
-                }
                 value={techpacks
                   .map(({ id, techpack_number }) => ({
                     value: id,
@@ -548,6 +412,9 @@ export default function EditPurchaseOrder({ selectedPo }) {
                   .find(
                     (option) => option.value === formData.technical_package_id
                   )}
+                onChange={(selectedOption) =>
+                  handleChange("technical_package_id", selectedOption.value)
+                }
               />
             </div>
             <div className="col-lg-2">
@@ -559,7 +426,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
                   errors.destination ? "select_wo red-border" : "select_wo"
                 }
                 placeholder="Destination"
-                options={destinations.map(({ id, title }) => ({
+                options={destinations.map(({ title }) => ({
                   value: title,
                   label: title,
                 }))}
@@ -593,23 +460,14 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-2">
-              <input
-                name="buyer_style_name"
-                className={errors.buyer_style_name ? "red-border" : ""}
-                value={formData.buyer_style_name}
-                onChange={(e) =>
-                  handleChange("buyer_style_name", e.target.value)
-                }
-                type="text"
-                placeholder="Buyer Style Name"
-              />
+              <div className="form-value">{formData.buyer_style_name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Ship Mode</label>
             </div>
             <div className="col-lg-2">
               <select
-                className={errors.buyer_style_name ? "red-border" : ""}
+                className={errors.ship_mode ? "red-border" : ""}
                 name="ship_mode"
                 value={formData.ship_mode}
                 onChange={(e) => handleChange("ship_mode", e.target.value)}
@@ -653,14 +511,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-2">
-              <input
-                name="item_name"
-                value={formData.item_name}
-                onChange={(e) => handleChange("item_name", e.target.value)}
-                type="text"
-                placeholder="Buyer Style Name"
-                className={errors.item_name ? "red-border" : ""}
-              />
+              <div className="form-value">{formData.item_name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Terms of Shipping</label>
@@ -693,50 +544,13 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.company_id ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Factory"
-                options={companies.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                value={companies
-                  .map(({ id, title }) => ({
-                    value: id,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.company_id)}
-                onChange={(selectedOption) =>
-                  handleChange("company_id", selectedOption.value)
-                }
-                name="company_id"
-              />
+              <div className="form-value">{formData.company?.title}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.item_type ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Type"
-                options={itemTypes.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                value={itemTypes
-                  .map(({ title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.item_type)}
-                onChange={(selectedOption) =>
-                  handleChange("item_type", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.item_type}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Packing Method</label>
@@ -768,50 +582,14 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.buyer_id ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Buyer"
-                options={buyers.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                value={buyers
-                  .map(({ id, title }) => ({
-                    value: id,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.buyer_id)}
-                onChange={(selectedOption) =>
-                  handleChange("buyer_id", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.buyer?.name}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.department ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Department"
-                options={departments.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                value={departments
-                  .map(({ id, title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.department)}
-                onChange={(selectedOption) =>
-                  handleChange("department", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.department}</div>
             </div>
 
             <div className="col-lg-2">
@@ -845,48 +623,14 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={errors.brand ? "select_wo red-border" : "select_wo"}
-                placeholder="Brand"
-                options={brands.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                value={brands
-                  .map(({ id, title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.brand)}
-                onChange={(selectedOption) =>
-                  handleChange("brand", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.brand}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.wash_details ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Wash Detail"
-                value={washes
-                  .map(({ id, title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.wash_details)}
-                options={washes.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                onChange={(selectedOption) =>
-                  handleChange("wash_details", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.wash_details}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Total Quantity</label>
@@ -906,23 +650,7 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={errors.season ? "select_wo red-border" : "select_wo"}
-                placeholder="Season"
-                options={seasons.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                value={seasons
-                  .map(({ id, title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.season)}
-                onChange={(selectedOption) =>
-                  handleChange("season", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.season}</div>
             </div>
 
             <div className="col-lg-2"></div>
@@ -946,43 +674,23 @@ export default function EditPurchaseOrder({ selectedPo }) {
               <label className="form-label">Description</label>
             </div>
             <div className="col-lg-10">
-              <input
-                value={formData.description}
-                name="description"
-                onChange={(e) => handleChange("description", e.target.value)}
-                type="text"
-                placeholder="97% Cotton 3% Elastane Ps Chino Trouser"
-              />
+              <div className="form-value">{formData.description}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              <CustomSelect
-                isMulti
-                className={
-                  errors.special_operations
-                    ? "select_wo red-border"
-                    : "select_wo"
-                }
-                placeholder="Select or Search"
-                name="special_operations"
-                value={formData.special_operations.map((title) => {
-                  const selectedOperation = specialOperations.find(
-                    (op) => op.title === title
-                  );
-                  return {
-                    value: title,
-                    label: selectedOperation ? selectedOperation.title : title,
-                  };
-                })}
-                onChange={handleOperationChange}
-                options={specialOperations.map((op) => ({
-                  value: op.title,
-                  label: op.title,
-                }))}
-              />
+              <div className="form-value">
+                {(() => {
+                  try {
+                    const ops = JSON.parse(formData?.special_operations);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
+              </div>
             </div>
           </div>
         </div>
@@ -991,9 +699,9 @@ export default function EditPurchaseOrder({ selectedPo }) {
       <div style={{ padding: "0 15px" }} className="create_tp_attatchment">
         <MultipleFileInput
           label="PO Attachments"
-          inputId="buyer_techpacks"
-          selectedFiles={selectedTechpackFiles}
-          setSelectedFiles={setSelectedTechpackFiles}
+          inputId="po_attatchment"
+          selectedFiles={selectedPoFiles}
+          setSelectedFiles={setSelectedPoFiles}
         />
       </div>
 

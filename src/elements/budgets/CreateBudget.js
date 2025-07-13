@@ -95,54 +95,6 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
 
   const [materials, setMaterials] = useState([]);
 
-  // const addRow = () => {
-  //   setMaterials((prev) => [
-  //     ...prev,
-  //     {
-  //       item_type_id: "",
-  //       item_id: "",
-  //       item_details: "",
-  //       color: "",
-  //       size: "",
-  //       unit: "",
-  //       size_breakdown: "",
-  //       position: "",
-  //       supplier_id: "",
-  //       consumption: "",
-  //       wastage: "",
-  //       total: 0,
-  //       unit_price: "",
-  //       actual_unit_price: 0,
-  //       total_booking: "",
-  //       total_price: 0,
-  //       actual_total_price: 0,
-  //     },
-  //   ]);
-  // };
-
-  // const removeRow = (index) => {
-  //   setMaterials((prev) => prev.filter((_, i) => i !== index));
-  // };
-
-  // const handleInputChange = (index, name, value) => {
-  //   setMaterials((prevMaterials) => {
-  //     const updatedMaterials = [...prevMaterials];
-  //     const row = { ...updatedMaterials[index], [name]: value };
-
-  //     // Convert numeric strings to numbers
-  //     const total = parseFloat(row.total) || 0;
-  //     const actualUnitPrice =
-  //       parseFloat(
-  //         name === "actual_unit_price" ? value : row.actual_unit_price
-  //       ) || 0;
-
-  //     // Update actual_total_price based on new actual_unit_price or total
-  //     row.actual_total_price = actualUnitPrice * total;
-
-  //     updatedMaterials[index] = row;
-  //     return updatedMaterials;
-  //   });
-  // };
 
   const handleInputChange = (index, name, value) => {
     setMaterials((prevMaterials) => {

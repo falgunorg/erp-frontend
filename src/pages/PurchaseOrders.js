@@ -5,7 +5,7 @@ import EditPurchaseOrder from "elements/po_elements/EditPurchaseOrder";
 import api from "services/api";
 import { useParams, useHistory } from "react-router-dom";
 import Dropdown from "react-bootstrap/Dropdown";
-
+import swal from "sweetalert";
 import FilterSidebar from "elements/FilterSidebar";
 
 import {
@@ -75,9 +75,30 @@ export default function PurchaseOrders(props) {
   };
 
   const handleDelete = async (id) => {
-    var response = await api.post("/pos-delete", { id: id });
-    if (response.status === 200 && response.data) {
-      window.location.reload();
+    const confirmed = await swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this purchase order!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    });
+
+    if (confirmed) {
+      try {
+        var response = await api.post("/pos-delete", { id: id });
+        if (response.status === 200 && response.data) {
+          swal(
+            "Deleted!",
+            "The purchase order has been deleted.",
+            "success"
+          ).then(() => {
+            history.push("/purchase-orders");
+            window.location.reload();
+          });
+        }
+      } catch (error) {
+        swal("Error", "Something went wrong while deleting.", "error");
+      }
     }
   };
 

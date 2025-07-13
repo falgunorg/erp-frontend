@@ -3,64 +3,11 @@ import Logo from "../../assets/images/logos/logo-short.png";
 import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
 import swal from "sweetalert";
+import { useHistory } from "react-router-dom";
 import CustomSelect from "elements/CustomSelect";
 export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
-  const buyers = [
-    { id: 1, title: "NSLBD" },
-    { id: 2, title: "WALMART" },
-    { id: 3, title: "FIVE STAR LLC" },
-  ];
-
-  const brands = [
-    { id: 1, title: "NEXT" },
-    { id: 2, title: "GARAN" },
-    { id: 3, title: "MANGO" },
-  ];
-
-  const seasons = [
-    { id: 1, title: "FAL 24" },
-    { id: 2, title: "SUMMER 25" },
-    { id: 3, title: "SPRING 25" },
-  ];
-
-  const departments = [
-    { id: 1, title: "Mens" },
-    { id: 2, title: "Womens" },
-    { id: 3, title: "Kids" },
-    { id: 4, title: "School Wear" },
-  ];
-
-  const companies = [
-    { id: 1, title: "JMS" },
-    { id: 2, title: "MCL" },
-    { id: 3, title: "MBL" },
-  ];
-
-  const itemTypes = [
-    { id: 1, title: "TOP" },
-    { id: 2, title: "BOTTOM" },
-    { id: 3, title: "SWIMWEAR" },
-  ];
-
-  const washes = [
-    { id: 1, title: "Garment Wash" },
-    { id: 2, title: "Enzyme Wash" },
-    { id: 3, title: "Bleach Wash" },
-    { id: 4, title: "Stone Wash" },
-    { id: 5, title: "Acid Wash" },
-    { id: 6, title: "Rinse Wash" },
-    { id: 7, title: "Sand Wash" },
-    { id: 8, title: "Silicon Wash" },
-    { id: 9, title: "Moonshine Wash" },
-    { id: 10, title: "Distressed Wash" },
-  ];
-
-  const specialOperations = [
-    { id: 1, title: "Embroadary" },
-    { id: 2, title: "Printing" },
-    { id: 3, title: "Fusing" },
-    { id: 4, title: "Dying" },
-  ];
+  const history = useHistory();
+  const [spinner, setSpinner] = useState(false);
 
   const destinations = [
     { id: 1, title: "UK" },
@@ -69,27 +16,26 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
     { id: 4, title: "UAE" },
   ];
 
-  const contracts = [
-    { id: 1, title: "PCNXTMCLX001" },
-    { id: 2, title: "PCNXTMCLX002" },
-    { id: 3, title: "PCNXTMCLX003" },
-    { id: 4, title: "PCNXTMCLX004" },
-    { id: 5, title: "PCNXTMCLX005" },
-    { id: 6, title: "PCNXTMCLX006" },
-    { id: 7, title: "PCNXTMCLX007" },
-    { id: 8, title: "PCNXTMCLX008" },
-  ];
+  const [contracts, setContracts] = useState([]);
 
-  const terms = [
-    { id: 1, title: "FALTR001" },
-    { id: 2, title: "FALTR002" },
-    { id: 3, title: "FALTR003" },
-    { id: 4, title: "FALTR004" },
-    { id: 5, title: "FALTR005" },
-    { id: 6, title: "FALTR006" },
-    { id: 7, title: "FALTR007" },
-    { id: 8, title: "FALTR008" },
-  ];
+  const getContracts = async () => {
+    setSpinner(true);
+    var response = await api.post("/public-purchase-contracts");
+    if (response.status === 200 && response.data) {
+      setContracts(response.data.data);
+    }
+    setSpinner(false);
+  };
+
+  const [terms, setTerms] = useState([]);
+  const getTerms = async () => {
+    setSpinner(true);
+    var response = await api.post("/terms");
+    if (response.status === 200 && response.data) {
+      setTerms(response.data.data);
+    }
+    setSpinner(false);
+  };
 
   const packings = [
     { id: 1, title: "Dozen in Box" },
@@ -100,9 +46,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
     { id: 6, title: "Other" },
   ];
 
-  const [selectedTechpackFiles, setSelectedTechpackFiles] = useState([]);
-
-  const [spinner, setSpinner] = useState(false);
+  const [selectedPoFiles, setSelectedPoFiles] = useState([]);
 
   const [sizes, setSizes] = useState([]);
   const getSizes = async () => {
@@ -124,19 +68,11 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
     setSpinner(false);
   };
 
-  const [workOrders, setWorkOrders] = useState([]);
-  const getWorkOrders = async () => {
-    const response = await api.post("/public-workorders");
-    if (response.status === 200 && response.data) {
-      const data = response.data.data;
-      setWorkOrders(data);
-    }
-  };
-
   useEffect(() => {
     getSizes();
     getColors();
-    getWorkOrders();
+    getContracts();
+    getTerms();
   }, []);
 
   const [errors, setErrors] = useState({});
@@ -147,8 +83,6 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
     issued_date: "",
     delivery_date: "",
     purchase_contract_id: "",
-    company_id: "",
-    buyer_id: "",
     brand: "",
     season: "",
     description: "",
@@ -191,6 +125,8 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
             item_type: data.item_type || "",
             department: data.department || "",
             wash_details: data.wash_details || "",
+            buyer: data.buyer,
+            company: data.company,
             special_operations:
               data.special_operation?.split(",").filter(Boolean) || [],
           }));
@@ -206,38 +142,18 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
     }
   };
 
-  console.log("SPECIAL OPERATIONS", formData);
-
-  const handleOperationChange = (selectedOptions) => {
-    const selectedOpTitles = selectedOptions.map((option) => option.value);
-    setFormData((prevData) => ({
-      ...prevData,
-      special_operations: selectedOpTitles,
-    }));
-  };
-
-  console.log("OPERATIONS", formData.special_operations);
-
   const validateForm = () => {
     const requiredFields = {
       po_number: "Please insert a PO number.",
       issued_date: "Please insert the issue date.",
+      delivery_date: "Delivery date is required.",
       technical_package_id: "Please select a technical package.",
       destination: "Please select a destination.",
-      delivery_date: "Delivery date is required.",
-      buyer_style_name: "Buyer style name is required.",
       ship_mode: "Please select a shipping mode.",
       purchase_contract_id: "Please select a purchase contract.",
-      item_name: "Item name is required.",
       shipping_terms: "Please select shipping terms.",
-      company_id: "Company is required.",
-      item_type: "Item type is required.",
       packing_method: "Please select a packing method.",
-      buyer_id: "Buyer is required.",
-      department: "Department is required.",
       payment_terms: "Please select payment terms.",
-      brand: "Brand is required.",
-      season: "Season is required.",
     };
 
     const formErrors = {};
@@ -275,18 +191,16 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
           data.append(key, value);
         }
       });
-      //Set calculated values
-      const precessedOperations = formData.special_operations.join(",");
-      data.set("special_operations", precessedOperations);
       data.set("total_qty", totalQuantity);
       data.set("total_value", grandTotalFob);
       data.append("po_items", JSON.stringify(poItems));
-      for (let i = 0; i < selectedTechpackFiles.length; i++) {
-        data.append("attatchments[]", selectedTechpackFiles[i]);
+      for (let i = 0; i < selectedPoFiles.length; i++) {
+        data.append("attatchments[]", selectedPoFiles[i]);
       }
       setSpinner(true);
       const response = await api.post("/pos-create", data);
       if (response.status === 200 && response.data) {
+        history.push("/purchase-orders/" + response.data.po.id);
         window.location.reload();
       } else {
         setErrors(response.data.errors || {});
@@ -322,6 +236,24 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
   const handleItemChange = (index, field, value) => {
     const updatedItems = [...poItems];
     updatedItems[index][field] = value;
+
+    const currentColor = field === "color" ? value : updatedItems[index].color;
+    const currentSize = field === "size" ? value : updatedItems[index].size;
+
+    const isDuplicate = updatedItems.some((item, idx) => {
+      return (
+        idx !== index &&
+        item.color === currentColor &&
+        item.size === currentSize &&
+        currentColor !== "" &&
+        currentSize !== ""
+      );
+    });
+
+    if (isDuplicate) {
+      alert("Duplicate entry: Same Color and Size combination already exists.");
+      return;
+    }
 
     // Calculate total if qty or fob changes
     if (field === "qty" || field === "fob") {
@@ -395,18 +327,9 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className="select_wo"
-                placeholder="WO"
-                options={workOrders.map(({ id, wo_number }) => ({
-                  value: id,
-                  label: wo_number,
-                }))}
-                onChange={(selectedOption) =>
-                  handleChange("wo_id", selectedOption.value)
-                }
-                name="wo_id"
-              />
+              <div className="form-value">
+                {formData.wo?.wo_number || "N/A"}
+              </div>
             </div>
           </div>
         </div>
@@ -493,23 +416,14 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-2">
-              <input
-                name="buyer_style_name"
-                className={errors.buyer_style_name ? "red-border" : ""}
-                value={formData.buyer_style_name}
-                onChange={(e) =>
-                  handleChange("buyer_style_name", e.target.value)
-                }
-                type="text"
-                placeholder="Buyer Style Name"
-              />
+              <div className="form-value">{formData.buyer_style_name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Ship Mode</label>
             </div>
             <div className="col-lg-2">
               <select
-                className={errors.buyer_style_name ? "red-border" : ""}
+                className={errors.ship_mode ? "red-border" : ""}
                 name="ship_mode"
                 value={formData.ship_mode}
                 onChange={(e) => handleChange("ship_mode", e.target.value)}
@@ -545,14 +459,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-2">
-              <input
-                name="item_name"
-                value={formData.item_name}
-                onChange={(e) => handleChange("item_name", e.target.value)}
-                type="text"
-                placeholder="Buyer Style Name"
-                className={errors.item_name ? "red-border" : ""}
-              />
+              <div className="form-value">{formData.item_name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Terms of Shipping</label>
@@ -579,50 +486,13 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.company_id ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Factory"
-                options={companies.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                value={companies
-                  .map(({ id, title }) => ({
-                    value: id,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.company_id)}
-                onChange={(selectedOption) =>
-                  handleChange("company_id", selectedOption.value)
-                }
-                name="company_id"
-              />
+              <div className="form-value">{formData.company?.title}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.item_type ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Type"
-                options={itemTypes.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                value={itemTypes
-                  .map(({ title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.item_type)}
-                onChange={(selectedOption) =>
-                  handleChange("item_type", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.item_type}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Packing Method</label>
@@ -648,50 +518,14 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.buyer_id ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Buyer"
-                options={buyers.map(({ id, title }) => ({
-                  value: id,
-                  label: title,
-                }))}
-                value={buyers
-                  .map(({ id, title }) => ({
-                    value: id,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.buyer_id)}
-                onChange={(selectedOption) =>
-                  handleChange("buyer_id", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.buyer?.name}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.department ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Department"
-                options={departments.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                value={departments
-                  .map(({ id, title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.department)}
-                onChange={(selectedOption) =>
-                  handleChange("department", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.department}</div>
             </div>
 
             <div className="col-lg-2">
@@ -719,48 +553,14 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={errors.brand ? "select_wo red-border" : "select_wo"}
-                placeholder="Brand"
-                options={brands.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                value={brands
-                  .map(({ id, title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.brand)}
-                onChange={(selectedOption) =>
-                  handleChange("brand", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.brand}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={
-                  errors.wash_details ? "select_wo red-border" : "select_wo"
-                }
-                placeholder="Wash Detail"
-                value={washes
-                  .map(({ id, title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.wash_details)}
-                options={washes.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                onChange={(selectedOption) =>
-                  handleChange("wash_details", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.wash_details}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Total Quantity</label>
@@ -780,23 +580,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-2">
-              <CustomSelect
-                className={errors.season ? "select_wo red-border" : "select_wo"}
-                placeholder="Season"
-                options={seasons.map(({ id, title }) => ({
-                  value: title,
-                  label: title,
-                }))}
-                value={seasons
-                  .map(({ id, title }) => ({
-                    value: title,
-                    label: title,
-                  }))
-                  .find((option) => option.value === formData.season)}
-                onChange={(selectedOption) =>
-                  handleChange("season", selectedOption.value)
-                }
-              />
+              <div className="form-value">{formData.season}</div>
             </div>
 
             <div className="col-lg-2"></div>
@@ -820,43 +604,23 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               <label className="form-label">Description</label>
             </div>
             <div className="col-lg-10">
-              <input
-                value={formData.description}
-                name="description"
-                onChange={(e) => handleChange("description", e.target.value)}
-                type="text"
-                placeholder="97% Cotton 3% Elastane Ps Chino Trouser"
-              />
+              <div className="form-value">{formData.description}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-10">
-              <CustomSelect
-                isMulti
-                className={
-                  errors.special_operations
-                    ? "select_wo red-border"
-                    : "select_wo"
-                }
-                placeholder="Select or Search"
-                name="special_operations"
-                value={formData.special_operations.map((title) => {
-                  const selectedOperation = specialOperations.find(
-                    (op) => op.title === title
-                  );
-                  return {
-                    value: title,
-                    label: selectedOperation ? selectedOperation.title : title,
-                  };
-                })}
-                onChange={handleOperationChange}
-                options={specialOperations.map((op) => ({
-                  value: op.title,
-                  label: op.title,
-                }))}
-              />
+              <div className="form-value">
+                {(() => {
+                  try {
+                    const ops = JSON.parse(formData?.special_operations);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
+              </div>
             </div>
           </div>
         </div>
@@ -865,9 +629,9 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
       <div style={{ padding: "0 15px" }} className="create_tp_attatchment">
         <MultipleFileInput
           label="PO Attachments"
-          inputId="buyer_techpacks"
-          selectedFiles={selectedTechpackFiles}
-          setSelectedFiles={setSelectedTechpackFiles}
+          inputId="po_attatchments"
+          selectedFiles={selectedPoFiles}
+          setSelectedFiles={setSelectedPoFiles}
         />
       </div>
 
@@ -985,21 +749,24 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
               </tr>
             ))}
 
-            {/* GRAND TOTAL */}
-            <tr>
-              <td>
-                <strong>Grand Total</strong>
-              </td>
-              <td></td>
-              <td></td>
-              <td>
-                <strong>{totalQuantity}</strong>
-              </td>
-              <td></td>
-              <td>
-                <strong>{grandTotalFob.toFixed(2)}</strong>
-              </td>
-            </tr>
+            {poItems.length > 0 ? (
+              <tr>
+                <td>
+                  <strong>Grand Total</strong>
+                </td>
+                <td></td>
+                <td></td>
+                <td>
+                  <strong>{totalQuantity}</strong>
+                </td>
+                <td></td>
+                <td>
+                  <strong>{grandTotalFob.toFixed(2)}</strong>
+                </td>
+              </tr>
+            ) : (
+              ""
+            )}
           </tbody>
         </table>
       </div>

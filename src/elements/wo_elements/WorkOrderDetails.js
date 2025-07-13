@@ -79,9 +79,10 @@ export default function WorkOrderDetails() {
     });
   };
 
-  
-
-  const allItems = workorder.pos.flatMap((po) => po.items || []);
+  let allItems = [];
+  if (workorder && Array.isArray(workorder.pos)) {
+    allItems = workorder.pos.flatMap((po) => po.items || []);
+  }
 
   // Step 2: Collect sizes with qty > 0
   const sizeSet = new Set();
@@ -111,8 +112,7 @@ export default function WorkOrderDetails() {
   });
 
   const colorEntries = Object.entries(colorMap);
-console.log("SIZE-COLOR", JSON.stringify(colorEntries));
-
+  console.log("SIZE-COLOR", JSON.stringify(colorEntries));
 
   return (
     <div className="create_technical_pack" id="pdf-content">

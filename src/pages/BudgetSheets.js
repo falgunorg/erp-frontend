@@ -13,6 +13,7 @@ import EditBudget from "elements/budgets/EditBudget";
 import moment from "moment";
 import api from "services/api";
 import { useParams, useHistory } from "react-router-dom";
+import swal from "sweetalert";
 
 export default function BudgetSheets(props) {
   const params = useParams();
@@ -70,11 +71,29 @@ export default function BudgetSheets(props) {
     setRenderArea("details");
   };
 
-  const handleDelete = async () => {
-    var response = await api.post("/budgets-delete", { id: selectedBudgetId });
-    if (response.status === 200 && response.data) {
-      getBudgets();
-      history.push("/budget-sheets");
+  const handleDelete = async (id) => {
+    const confirmed = await swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this budget!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    });
+
+    if (confirmed) {
+      try {
+        var response = await api.post("/budgets-delete", { id: id });
+        if (response.status === 200 && response.data) {
+          swal("Deleted!", "The budget has been deleted.", "success").then(
+            () => {
+              history.push("/budget-sheets");
+              window.location.reload();
+            }
+          );
+        }
+      } catch (error) {
+        swal("Error", "Something went wrong while deleting.", "error");
+      }
     }
   };
 
@@ -92,7 +111,10 @@ export default function BudgetSheets(props) {
           >
             Edit
           </button>
-          <button onClick={handleDelete} disabled={renderArea !== "details"}>
+          <button
+            onClick={() => handleDelete(selectedBudgetId)}
+            disabled={renderArea !== "details"}
+          >
             Delete
           </button>
         </div>

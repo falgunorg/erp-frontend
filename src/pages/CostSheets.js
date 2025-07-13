@@ -14,6 +14,7 @@ import CostSheetDetails from "elements/costsheets/CostSheetDetails";
 import EditCostSheet from "elements/costsheets/EditCostSheet";
 import api from "services/api";
 import { useParams } from "react-router-dom";
+import swal from "sweetalert";
 
 export default function CostSheets(props) {
   const params = useParams();
@@ -62,10 +63,33 @@ export default function CostSheets(props) {
     setRenderArea("details");
   };
 
-  const handleDelete = async () => {
-    var response = await api.post("/costings-delete", { id: selectedCostId });
-    if (response.status === 200 && response.data) {
-      getCostings();
+  const handleDelete = async (id) => {
+    const confirmed = await swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this costing!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    });
+
+    if (confirmed) {
+      try {
+        var response = await api.post("/costings-delete", {
+          id: id,
+        });
+        if (response.status === 200 && response.data) {
+          swal(
+            "Deleted!",
+            "The costing has been deleted.",
+            "success"
+          ).then(() => {
+            history.push("/cost-sheets");
+            window.location.reload();
+          });
+        }
+      } catch (error) {
+        swal("Error", "Something went wrong while deleting.", "error");
+      }
     }
   };
 
@@ -83,7 +107,10 @@ export default function CostSheets(props) {
           >
             Edit
           </button>
-          <button onClick={handleDelete} disabled={renderArea !== "details"}>
+          <button
+            onClick={() => handleDelete(selectedCostId)}
+            disabled={renderArea !== "details"}
+          >
             Delete
           </button>
         </div>

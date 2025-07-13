@@ -11,6 +11,28 @@ export default function PurchaseOrderDetails() {
   const history = useHistory();
   const [spinner, setSpinner] = useState(false);
 
+  const contracts = [
+    { id: 1, title: "PCNXTMCLX001" },
+    { id: 2, title: "PCNXTMCLX002" },
+    { id: 3, title: "PCNXTMCLX003" },
+    { id: 4, title: "PCNXTMCLX004" },
+    { id: 5, title: "PCNXTMCLX005" },
+    { id: 6, title: "PCNXTMCLX006" },
+    { id: 7, title: "PCNXTMCLX007" },
+    { id: 8, title: "PCNXTMCLX008" },
+  ];
+
+  const terms = [
+    { id: 1, title: "FALTR001" },
+    { id: 2, title: "FALTR002" },
+    { id: 3, title: "FALTR003" },
+    { id: 4, title: "FALTR004" },
+    { id: 5, title: "FALTR005" },
+    { id: 6, title: "FALTR006" },
+    { id: 7, title: "FALTR007" },
+    { id: 8, title: "FALTR008" },
+  ];
+
   const [po, setPo] = useState({});
   const getPo = async () => {
     setSpinner(true);
@@ -114,9 +136,7 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Tech Pack</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">
-                {po.technical_package?.techpack_number}
-              </div>
+              <div className="form-value">{po.techpack?.techpack_number}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Destination</label>
@@ -137,7 +157,7 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.buyer_style_name}</div>
+              <div className="form-value">{po.techpack?.buyer_style_name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Ship Mode</label>
@@ -152,21 +172,19 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PC/LC</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">
-                {po.purchase_contract?.title || po.purchase_contract_id}
-              </div>
+              <div className="form-value">{po.contract?.title || "N/A"}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.item_name}</div>
+              <div className="form-value">{po.techpack?.item_name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Terms of Shipping</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.shipping_terms}</div>
+              <div className="form-value">{po.shipping_term?.title}</div>
             </div>
           </div>
 
@@ -175,13 +193,13 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.company?.title}</div>
+              <div className="form-value">{po.techpack?.company?.title}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.item_type}</div>
+              <div className="form-value">{po.techpack?.item_type}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Packing Method</label>
@@ -195,21 +213,21 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.buyer?.name}</div>
+              <div className="form-value">{po.techpack?.buyer?.name}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.department}</div>
+              <div className="form-value">{po.techpack?.department}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Payment Terms</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.payment_terms}</div>
+              <div className="form-value">{po.payment_term?.title}</div>
             </div>
           </div>
 
@@ -218,14 +236,14 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.brand}</div>
+              <div className="form-value">{po.techpack?.brand}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.wash_details}</div>
+              <div className="form-value">{po.techpack?.wash_details}</div>
             </div>
 
             <div className="col-lg-2">
@@ -241,7 +259,7 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.season}</div>
+              <div className="form-value">{po.techpack?.season}</div>
             </div>
 
             <div className="col-lg-2"></div>
@@ -254,20 +272,28 @@ export default function PurchaseOrderDetails() {
               <div className="form-value">{po.total_value}</div>
             </div>
           </div>
-
           <div className="row">
             <div className="col-lg-2">
               <label className="form-label">Description</label>
             </div>
             <div className="col-lg-4">
-              <div className="form-value">{po.description}</div>
+              <div className="form-value">{po.techpack?.description}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-4">
-              <div className="form-value">{po.special_operations}</div>
+              <div className="form-value">
+                {(() => {
+                  try {
+                    const ops = JSON.parse(po?.special_operations);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
+              </div>
             </div>
           </div>
         </div>

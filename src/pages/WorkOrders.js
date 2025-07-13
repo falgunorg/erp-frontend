@@ -9,6 +9,8 @@ import moment from "moment";
 import api from "services/api";
 import FilterSidebar from "elements/FilterSidebar";
 import { useHistory, useParams } from "react-router-dom";
+import swal from "sweetalert";
+
 
 import {
   FilterIcon,
@@ -60,10 +62,30 @@ export default function WorkOrders(props) {
   };
 
   const handleDelete = async (id) => {
-    var response = await api.post("/workorders-delete", { id: id });
-    if (response.status === 200 && response.data) {
-      window.location.reload();
-      history.push("/work-orders");
+    const confirmed = await swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this work order!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    });
+
+    if (confirmed) {
+      try {
+        var response = await api.post("/workorders-delete", { id: id });
+        if (response.status === 200 && response.data) {
+          swal(
+            "Deleted!",
+            "The work order has been deleted.",
+            "success"
+          ).then(() => {
+            history.push("/work-orders");
+            window.location.reload();
+          });
+        }
+      } catch (error) {
+        swal("Error", "Something went wrong while deleting.", "error");
+      }
     }
   };
 
