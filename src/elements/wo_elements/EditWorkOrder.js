@@ -125,6 +125,7 @@ export default function EditWorkOrder({ renderArea, setRenderArea }) {
       if (response.status === 200 && response.data) {
         history.push("/work-orders/" + response.data.workorder.id);
         setRenderArea("details");
+        window.location.reload();
       } else {
         setErrors(response.data.errors || {});
       }

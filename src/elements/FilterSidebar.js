@@ -1,13 +1,43 @@
 import React, { useState, useEffect } from "react";
 import CustomSelect from "./CustomSelect";
-
+import api from "services/api";
 export default function FilterSidebar(props) {
-  const [workOrders, setWorkOrders] = useState(
-    Array.from({ length: 50 }, (_, index) => {
-      const serial = String(index + 1).padStart(2, "0");
-      return { value: `WONXF1JM${serial}`, label: `WONXF1JM${serial}` };
-    })
-  );
+
+
+  const departments = [
+    { id: 1, title: "Mens" },
+    { id: 2, title: "Womens" },
+    { id: 3, title: "Kids" },
+    { id: 4, title: "School Wear" },
+  ];
+
+  const [contracts, setContracts] = useState([]);
+
+  const getContracts = async () => {
+    var response = await api.post("/public-purchase-contracts");
+    if (response.status === 200 && response.data) {
+      setContracts(response.data.data);
+    }
+  };
+
+  const [techpacks, setTechpacks] = useState([]);
+
+  const getTechpacks = async () => {
+    var response = await api.post("/technical-packages-all-desc");
+    if (response.status === 200 && response.data) {
+      setTechpacks(response.data.data);
+    }
+  };
+ 
+
+  const handleFormChange = async (name, value) => {
+    props.setSidebarFilter((prev) => ({
+      ...props.sidebarFilter,
+      [name]: value,
+    }));
+  };
+
+
 
   const months = [
     "January",
@@ -40,64 +70,65 @@ export default function FilterSidebar(props) {
     setDays(getDaysInMonth(selectedMonth, currentYear));
   }, [selectedMonth]);
 
+  useEffect(() => {
+    getContracts();
+    getTechpacks();
+  }, []);
+
+
+
   return (
     <div className="purchase_sidebar non_printing_area">
       <div className="email-section">
         <div className="folder_name">Department</div>
         <ul>
-          <li>
-            <button className="active">
-              Men <span>63</span>
-            </button>
-          </li>
-          <li>
-            <button className="">
-              Women <span>63</span>
-            </button>
-          </li>
-          <li>
-            <button className="">
-              School Wear <span>63</span>
-            </button>
-          </li>
-          <li>
-            <button className="">
-              Kids <span>63</span>
-            </button>
-          </li>
+          {departments.map((department, index) => (
+            <li key={index}>
+              <button
+                onClick={() => handleFormChange("department", department.title)}
+                className={
+                  props.sidebarFilter.department === department.title ? "active" : ""
+                }
+              >
+                {department.title} <span>63</span>
+              </button>
+            </li>
+          ))}
         </ul>
       </div>
       <div className="email-section">
         <div className="folder_name">Purchase Contract</div>
         <ul>
-          <li>
-            <button className="active">
-              SS25 <span>63</span>
-            </button>
-          </li>
-          <li>
-            <button className="">
-              AW25 <span>63</span>
-            </button>
-          </li>
-          <li>
-            <button className="">
-              School Wear <span>63</span>
-            </button>
-          </li>
-          <li>
-            <button className="">
-              Kids <span>63</span>
-            </button>
-          </li>
+          {contracts.map((contract, index) => (
+            <li key={index}>
+              <button
+                onClick={() =>
+                  handleFormChange("purchase_contract_id", contract.id)
+                }
+                className={
+                  props.sidebarFilter.purchase_contract_id === contract.id
+                    ? "active"
+                    : ""
+                }
+              >
+                {contract.title} <span>63</span>
+              </button>
+            </li>
+          ))}
         </ul>
       </div>
       <div className="email-section">
         <div className="folder_name">Styles</div>
         <CustomSelect
           className="select_wo"
-          placeholder="Search Or Select"
-          options={workOrders}
+          placeholder="Style"
+          options={techpacks.map(({ id, techpack_number }) => ({
+            value: id,
+            label: techpack_number,
+          }))}
+          onChange={(selectedOption) =>
+            handleFormChange("technical_package_id", selectedOption?.value)
+          }
         />
       </div>
 
@@ -118,7 +149,10 @@ export default function FilterSidebar(props) {
         <ul>
           {days.map((day, index) => (
             <li key={index}>
-              <button>
+              <button
+                className={props.sidebarFilter.date === day ? "active" : ""}
+                onClick={() => handleFormChange("date", day)}
+              >
                 {day} <span>3</span>
               </button>
             </li>

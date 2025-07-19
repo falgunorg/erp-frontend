@@ -257,6 +257,7 @@ export default function EditCostSheet({ renderArea, setRenderArea }) {
       if (response.status === 200 && response.data) {
         history.push("/cost-sheets/" + response.data.data.id);
         setRenderArea("details");
+         window.location.reload();
       } else {
         setErrors(response.data.errors);
       }

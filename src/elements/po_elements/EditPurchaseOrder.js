@@ -6,7 +6,7 @@ import swal from "sweetalert";
 import CustomSelect from "elements/CustomSelect";
 import { useParams, useHistory } from "react-router-dom";
 
-export default function EditPurchaseOrder({ selectedPo }) {
+export default function EditPurchaseOrder() {
   const history = useHistory();
   const params = useParams();
   const [spinner, setSpinner] = useState(false);

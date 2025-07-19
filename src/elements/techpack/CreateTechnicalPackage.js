@@ -437,6 +437,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
       if (response.status === 200 && response.data) {
         history.push("/technical-packages/" + response.data.techpack.id);
         setRenderArea("details");
+        window.location.reload();
       } else {
         setErrors(response.data.errors);
       }

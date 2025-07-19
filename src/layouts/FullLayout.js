@@ -37,26 +37,26 @@ const FullLayout = ({ children, ...rest }) => {
     }
   };
 
-  useEffect(() => {
-    if (auth.isAuthenticated()) {
-      // Initial fetch of notifications when user logs in
-      getNotifications();
+  // useEffect(() => {
+  //   if (auth.isAuthenticated()) {
+  //     // Initial fetch of notifications when user logs in
+  //     getNotifications();
 
-      // Fetch notifications every 5 minutes
-      const interval = setInterval(() => {
-        getNotifications();
-      }, 180000); // 5 minutes in milliseconds
+  //     // Fetch notifications every 5 minutes
+  //     const interval = setInterval(() => {
+  //       getNotifications();
+  //     }, 180000); // 5 minutes in milliseconds
 
-      // Clean up interval on unmount or when auth state changes
-      return () => clearInterval(interval);
-    }
-  }, [auth.isAuthenticated()]);
+  //     // Clean up interval on unmount or when auth state changes
+  //     return () => clearInterval(interval);
+  //   }
+  // }, [auth.isAuthenticated()]);
 
-  useEffect(() => {
-    if (auth.isAuthenticated()) {
-      getNotifications();
-    }
-  }, [callNotifications]);
+  // useEffect(() => {
+  //   if (auth.isAuthenticated()) {
+  //     getNotifications();
+  //   }
+  // }, [callNotifications]);
 
   const [spinner, setSpinner] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(auth.isAuthenticated);
@@ -91,6 +91,13 @@ const FullLayout = ({ children, ...rest }) => {
     isDropdown: false,
     DropdownMenu: [],
     isBackBtn: false,
+  });
+
+  const [sidebarFilter, setSidebarFilter] = useState({
+    department: "",
+    purchase_contract_id: "",
+    technical_package_id: "",
+    date: "",
   });
 
   //MAIL COMPOSER AREA
@@ -154,6 +161,9 @@ const FullLayout = ({ children, ...rest }) => {
     // sidebar
     sidebar,
     setSideBar,
+    sidebarFilter,
+    setSidebarFilter,
+
     // section
     section,
     setSection,
