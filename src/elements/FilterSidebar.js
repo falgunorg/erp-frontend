@@ -87,7 +87,7 @@ export default function FilterSidebar(props) {
               <button
                 onClick={() => handleFormChange("department", department.title)}
                 className={
-                  props.sidebarFilter.department === department.title ? "active" : ""
+                  props.sidebarFilter?.department === department.title ? "active" : ""
                 }
               >
                 {department.title} <span>63</span>
@@ -106,7 +106,7 @@ export default function FilterSidebar(props) {
                   handleFormChange("purchase_contract_id", contract.id)
                 }
                 className={
-                  props.sidebarFilter.purchase_contract_id === contract.id
+                  props.sidebarFilter?.purchase_contract_id === contract.id
                     ? "active"
                     : ""
                 }
@@ -150,7 +150,7 @@ export default function FilterSidebar(props) {
           {days.map((day, index) => (
             <li key={index}>
               <button
-                className={props.sidebarFilter.date === day ? "active" : ""}
+                className={props.sidebarFilter?.date === day ? "active" : ""}
                 onClick={() => handleFormChange("date", day)}
               >
                 {day} <span>3</span>

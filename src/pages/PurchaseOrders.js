@@ -42,7 +42,12 @@ export default function PurchaseOrders(props) {
   const [expandedGroups, setExpandedGroups] = useState({});
 
   const getPos = async () => {
-    const response = await api.post("/pos");
+    const response = await api.post("/pos", {
+      department: props.sidebarFilter.department,
+      purchase_contract_id: props.sidebarFilter.purchase_contract_id,
+      technical_package_id: props.sidebarFilter.technical_package_id,
+      date: props.sidebarFilter.date,
+    });
     if (response.status === 200 && response.data) {
       const data = response.data.pos.data;
       setPos(data);
@@ -65,7 +70,7 @@ export default function PurchaseOrders(props) {
 
   useEffect(async () => {
     getPos();
-  }, []);
+  }, [props.sidebarFilter]);
 
   const [selectedPo, setSelectedPo] = useState();
   const handlePoDetails = (po) => {
@@ -134,7 +139,7 @@ export default function PurchaseOrders(props) {
       </div>
 
       <div className="technical_package_layout purchase_order_page_when_print">
-        <FilterSidebar />
+        <FilterSidebar {...props} />
 
         <div className="purchase_list">
           <div className="purchase_list_header d-flex justify-content-between">

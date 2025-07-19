@@ -262,6 +262,7 @@ export default function WorkOrderDetails() {
                 {workorder.delivery_date || "N/A"}
               </div>
             </div>
+
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
@@ -284,16 +285,7 @@ export default function WorkOrderDetails() {
             </div>
             <div className="col-lg-5">
               <div className="form-value">
-                {(() => {
-                  try {
-                    const ops = JSON.parse(
-                      workorder.techpack?.special_operation
-                    );
-                    return Array.isArray(ops) ? ops.join(", ") : "";
-                  } catch {
-                    return "";
-                  }
-                })()}
+                {workorder.techpack?.special_operation || "N/A"}
               </div>
             </div>
           </div>

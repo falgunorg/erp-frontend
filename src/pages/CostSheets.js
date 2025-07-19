@@ -31,7 +31,12 @@ export default function CostSheets(props) {
   const [costings, setCostings] = useState({});
 
   const getCostings = async () => {
-    const response = await api.post("/costings");
+    const response = await api.post("/costings", {
+      department: props.sidebarFilter.department,
+      purchase_contract_id: props.sidebarFilter.purchase_contract_id,
+      technical_package_id: props.sidebarFilter.technical_package_id,
+      date: props.sidebarFilter.date,
+    });
     if (response.status === 200 && response.data) {
       const data = response.data.costings.data;
       setCostings(data);
@@ -40,7 +45,7 @@ export default function CostSheets(props) {
 
   useEffect(async () => {
     getCostings();
-  }, []);
+  }, [props.sidebarFilter]);
 
   useEffect(async () => {
     props.setHeaderData({
@@ -78,14 +83,12 @@ export default function CostSheets(props) {
           id: id,
         });
         if (response.status === 200 && response.data) {
-          swal(
-            "Deleted!",
-            "The costing has been deleted.",
-            "success"
-          ).then(() => {
-            history.push("/cost-sheets");
-            window.location.reload();
-          });
+          swal("Deleted!", "The costing has been deleted.", "success").then(
+            () => {
+              history.push("/cost-sheets");
+              window.location.reload();
+            }
+          );
         }
       } catch (error) {
         swal("Error", "Something went wrong while deleting.", "error");
@@ -117,7 +120,7 @@ export default function CostSheets(props) {
       </div>
 
       <div className="technical_package_layout purchase_order_page_when_print">
-        <FilterSidebar />
+        <FilterSidebar {...props} />
 
         <div className="purchase_list">
           <div className="purchase_list_header d-flex justify-content-between">

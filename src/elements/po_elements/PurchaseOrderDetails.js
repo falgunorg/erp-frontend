@@ -10,29 +10,6 @@ export default function PurchaseOrderDetails() {
   const params = useParams();
   const history = useHistory();
   const [spinner, setSpinner] = useState(false);
-
-  const contracts = [
-    { id: 1, title: "PCNXTMCLX001" },
-    { id: 2, title: "PCNXTMCLX002" },
-    { id: 3, title: "PCNXTMCLX003" },
-    { id: 4, title: "PCNXTMCLX004" },
-    { id: 5, title: "PCNXTMCLX005" },
-    { id: 6, title: "PCNXTMCLX006" },
-    { id: 7, title: "PCNXTMCLX007" },
-    { id: 8, title: "PCNXTMCLX008" },
-  ];
-
-  const terms = [
-    { id: 1, title: "FALTR001" },
-    { id: 2, title: "FALTR002" },
-    { id: 3, title: "FALTR003" },
-    { id: 4, title: "FALTR004" },
-    { id: 5, title: "FALTR005" },
-    { id: 6, title: "FALTR006" },
-    { id: 7, title: "FALTR007" },
-    { id: 8, title: "FALTR008" },
-  ];
-
   const [po, setPo] = useState({});
   const getPo = async () => {
     setSpinner(true);
@@ -51,7 +28,6 @@ export default function PurchaseOrderDetails() {
   const handleGeneratePDF = () => {
     const element = document.getElementById("pdf-content");
     const responsiveTables = element.querySelectorAll(".table-responsive");
-
     // Temporarily remove overflow and set height to auto
     responsiveTables.forEach((table) => {
       table.dataset.originalStyle = table.getAttribute("style") || "";
@@ -89,7 +65,7 @@ export default function PurchaseOrderDetails() {
       <div className="row create_tp_header align-items-center">
         <div className="col-lg-10">
           <div className="row align-items-baseline">
-            <div className="col-lg-4">
+            <div className="col-lg-3">
               <img
                 style={{ width: "30px", marginRight: "8px" }}
                 src={Logo}
@@ -101,14 +77,14 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.po_number}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.po_number}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
-            <div className="col-lg-2">
-              <div className="form-value">{po.wo?.wo_number}</div>
+            <div className="col-lg-3">
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.wo?.wo_number}</div>
             </div>
           </div>
         </div>
@@ -130,19 +106,19 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PO Issue</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.issued_date}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.issued_date}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.techpack_number}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.techpack_number}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Destination</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.destination}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.destination}</div>
             </div>
           </div>
 
@@ -151,19 +127,19 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PO Delivery</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.delivery_date}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.delivery_date}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.buyer_style_name}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.buyer_style_name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Ship Mode</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.ship_mode}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.ship_mode}</div>
             </div>
           </div>
 
@@ -172,19 +148,19 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PC/LC</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.contract?.title || "N/A"}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.contract?.title || "N/A"}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.item_name}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.item_name}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Terms of Shipping</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.shipping_term?.title}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.shipping_term?.title}</div>
             </div>
           </div>
 
@@ -193,19 +169,19 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.company?.title}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.company?.title}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.item_type}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.item_type}</div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Packing Method</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.packing_method}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.packing_method}</div>
             </div>
           </div>
           <div className="row">
@@ -213,21 +189,21 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.buyer?.name}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.buyer?.name}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.department}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.department}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Payment Terms</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.payment_term?.title}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.payment_term?.title}</div>
             </div>
           </div>
 
@@ -236,21 +212,21 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.brand}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.brand}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.wash_details}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.wash_details}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Total Quantity</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.total_qty}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.total_qty}</div>
             </div>
           </div>
 
@@ -259,7 +235,7 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.techpack?.season}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.season}</div>
             </div>
 
             <div className="col-lg-2"></div>
@@ -269,7 +245,7 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Total Value</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value">{po.total_value}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.total_value}</div>
             </div>
           </div>
           <div className="row">
@@ -277,14 +253,14 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Description</label>
             </div>
             <div className="col-lg-4">
-              <div className="form-value">{po.techpack?.description}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.description}</div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Special Operation</label>
             </div>
             <div className="col-lg-4">
-              <div className="form-value">
+              <div className="form-value" style={{ fontSize: "10px" }}>
                 {(() => {
                   try {
                     const ops = JSON.parse(po?.special_operations);

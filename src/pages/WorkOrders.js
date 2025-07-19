@@ -11,7 +11,6 @@ import FilterSidebar from "elements/FilterSidebar";
 import { useHistory, useParams } from "react-router-dom";
 import swal from "sweetalert";
 
-
 import {
   FilterIcon,
   ToggleCheckboxIcon,
@@ -43,7 +42,12 @@ export default function WorkOrders(props) {
 
   const [workorders, setWorkorders] = useState([]);
   const getWorkOrders = async () => {
-    const response = await api.post("/workorders");
+    const response = await api.post("/workorders", {
+      department: props.sidebarFilter.department,
+      purchase_contract_id: props.sidebarFilter.purchase_contract_id,
+      technical_package_id: props.sidebarFilter.technical_package_id,
+      date: props.sidebarFilter.date,
+    });
     if (response.status === 200 && response.data) {
       const data = response.data.workorders.data;
       setWorkorders(data);
@@ -52,7 +56,7 @@ export default function WorkOrders(props) {
 
   useEffect(async () => {
     getWorkOrders();
-  }, []);
+  }, [props.sidebarFilter]);
 
   const [selectedWo, setSelectedWo] = useState();
   const handlePoDetails = (wo) => {
@@ -74,14 +78,12 @@ export default function WorkOrders(props) {
       try {
         var response = await api.post("/workorders-delete", { id: id });
         if (response.status === 200 && response.data) {
-          swal(
-            "Deleted!",
-            "The work order has been deleted.",
-            "success"
-          ).then(() => {
-            history.push("/work-orders");
-            window.location.reload();
-          });
+          swal("Deleted!", "The work order has been deleted.", "success").then(
+            () => {
+              history.push("/work-orders");
+              window.location.reload();
+            }
+          );
         }
       } catch (error) {
         swal("Error", "Something went wrong while deleting.", "error");
@@ -121,7 +123,7 @@ export default function WorkOrders(props) {
       </div>
 
       <div className="technical_package_layout purchase_order_page_when_print">
-        <FilterSidebar />
+        <FilterSidebar {...props} />
 
         <div className="purchase_list">
           <div className="purchase_list_header d-flex justify-content-between">

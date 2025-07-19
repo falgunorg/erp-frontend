@@ -30,7 +30,12 @@ export default function BudgetSheets(props) {
   const [budgets, setBudgets] = useState([]);
 
   const getBudgets = async () => {
-    const response = await api.post("/budgets");
+    const response = await api.post("/budgets", {
+      department: props.sidebarFilter.department,
+      purchase_contract_id: props.sidebarFilter.purchase_contract_id,
+      technical_package_id: props.sidebarFilter.technical_package_id,
+      date: props.sidebarFilter.date,
+    });
     if (response.status === 200 && response.data) {
       const data = response.data.budgets.data;
       setBudgets(data);
@@ -39,7 +44,7 @@ export default function BudgetSheets(props) {
 
   useEffect(async () => {
     getBudgets();
-  }, []);
+  }, [props.sidebarFilter]);
 
   useEffect(async () => {
     if (params.id) {
@@ -121,7 +126,7 @@ export default function BudgetSheets(props) {
       </div>
 
       <div className="technical_package_layout purchase_order_page_when_print">
-        <FilterSidebar />
+        <FilterSidebar {...props} />
 
         <div className="purchase_list non_printing_area">
           <div className="purchase_list_header d-flex justify-content-between">
