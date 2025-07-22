@@ -1,9 +1,18 @@
 // var configEnv = "development";
 // var configEnv = "staging";
-var configEnv = "production";
+// var configEnv = "production";
+var configEnv = "debian";
 
 var config = {
   //######### Staging config ##########
+
+  debian: {
+    appUrl: "http://180.210.184.117",
+    apiUrl: "http://180.210.184.117/backend/api",
+    staticUrl: "http://180.210.184.117/backend/api",
+    debug: true,
+  },
+
   staging: {
     appUrl: "https://erp.falgun-garmenting.com",
     apiUrl: "https://erpapi.falgun-garmenting.com/api",
