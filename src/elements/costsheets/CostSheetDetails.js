@@ -102,7 +102,9 @@ export default function CreateCostSheet(props) {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-        pdf.save("download.pdf");
+
+        const fileName = costing.costing_ref;
+        pdf.save(`${fileName}.pdf`);
       });
     }, 100); // Slight delay for DOM to reflow
   };

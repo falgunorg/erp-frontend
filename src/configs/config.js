@@ -7,9 +7,9 @@ var config = {
   //######### Staging config ##########
 
   debian: {
-    appUrl: "http://180.210.184.117",
-    apiUrl: "http://180.210.184.117/backend/api",
-    staticUrl: "http://180.210.184.117/backend/api",
+    appUrl: "https://erp.falgun.org",
+    apiUrl: "https://erpapi.falgun.org/api",
+    staticUrl: "https://erpapi.falgun.org/api",
     debug: true,
   },
 

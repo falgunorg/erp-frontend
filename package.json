@@ -4,6 +4,7 @@
   "private": true,
   "description": "A comprehensive ERP solution for managing various business processes.",
   "author": "FALGUN",
+  "proxy": "http://erp.falgun.org",
   "dependencies": {
     "@azure/msal-browser": "^2.31.0",
     "@azure/msal-react": "^1.5.5",

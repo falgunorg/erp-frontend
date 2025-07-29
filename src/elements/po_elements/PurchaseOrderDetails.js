@@ -77,14 +77,18 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.po_number}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.po_number}
+              </div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">WO Number</label>
             </div>
             <div className="col-lg-3">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.wo?.wo_number}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.wo?.wo_number}
+              </div>
             </div>
           </div>
         </div>
@@ -106,19 +110,25 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PO Issue</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.issued_date}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.issued_date}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Tech Pack</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.techpack_number}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.techpack_number}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Destination</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.destination}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.destination}
+              </div>
             </div>
           </div>
 
@@ -127,19 +137,25 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PO Delivery</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.delivery_date}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.delivery_date}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Buyer Style Name</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.buyer_style_name}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.buyer_style_name}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Ship Mode</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.ship_mode}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.ship_mode}
+              </div>
             </div>
           </div>
 
@@ -148,19 +164,25 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">PC/LC</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.contract?.title || "N/A"}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.contract?.title || "N/A"}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Name</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.item_name}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.item_name}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Terms of Shipping</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.shipping_term?.title}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.shipping_term?.title}
+              </div>
             </div>
           </div>
 
@@ -169,19 +191,25 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Factory</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.company?.title}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.company?.title}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Item Type</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.item_type}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.item_type}
+              </div>
             </div>
             <div className="col-lg-2">
               <label className="form-label">Packing Method</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.packing_method}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.packing_method}
+              </div>
             </div>
           </div>
           <div className="row">
@@ -189,21 +217,27 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Buyer</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.buyer?.name}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.buyer?.name}
+              </div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Department</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.department}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.department}
+              </div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Payment Terms</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.payment_term?.title}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.payment_term?.title}
+              </div>
             </div>
           </div>
 
@@ -212,21 +246,27 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Brand</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.brand}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.brand}
+              </div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Wash Detail</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.wash_details}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.wash_details}
+              </div>
             </div>
 
             <div className="col-lg-2">
               <label className="form-label">Total Quantity</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.total_qty}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.total_qty}
+              </div>
             </div>
           </div>
 
@@ -235,7 +275,9 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Season</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.season}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.season}
+              </div>
             </div>
 
             <div className="col-lg-2"></div>
@@ -245,7 +287,9 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Total Value</label>
             </div>
             <div className="col-lg-2">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.total_value}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.total_value}
+              </div>
             </div>
           </div>
           <div className="row">
@@ -253,7 +297,9 @@ export default function PurchaseOrderDetails() {
               <label className="form-label">Description</label>
             </div>
             <div className="col-lg-4">
-              <div className="form-value" style={{ fontSize: "10px" }}>{po.techpack?.description}</div>
+              <div className="form-value" style={{ fontSize: "10px" }}>
+                {po.techpack?.description}
+              </div>
             </div>
 
             <div className="col-lg-2">
@@ -263,7 +309,7 @@ export default function PurchaseOrderDetails() {
               <div className="form-value" style={{ fontSize: "10px" }}>
                 {(() => {
                   try {
-                    const ops = JSON.parse(po?.special_operations);
+                    const ops = JSON.parse(po.techpack?.special_operation);
                     return Array.isArray(ops) ? ops.join(", ") : "";
                   } catch {
                     return "";

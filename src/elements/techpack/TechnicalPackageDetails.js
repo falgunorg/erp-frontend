@@ -56,7 +56,8 @@ export default function TechnicalPackageDetails() {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-        pdf.save("download.pdf");
+        const fileName = techpack.techpack_number;
+        pdf.save(`${fileName}.pdf`);
       });
     }, 100); // Slight delay for DOM to reflow
   };

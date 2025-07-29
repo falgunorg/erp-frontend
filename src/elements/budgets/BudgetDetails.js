@@ -38,7 +38,6 @@ export default function BudgetDetails(props) {
     getBudget();
   }, [params.id]);
 
-  
   const handleGeneratePDF = () => {
     const element = document.getElementById("pdf-content");
     const responsiveTables = element.querySelectorAll(".table-responsive");
@@ -69,7 +68,8 @@ export default function BudgetDetails(props) {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-        pdf.save("download.pdf");
+        const fileName = budget.ref_number;
+        pdf.save(`${fileName}.pdf`);
       });
     }, 100); // Slight delay for DOM to reflow
   };
@@ -285,7 +285,14 @@ export default function BudgetDetails(props) {
             </div>
             <div className="col-lg-5">
               <div className="form-value">
-                {budget.techpack?.special_operation || "N/A"}
+                {(() => {
+                  try {
+                    const ops = JSON.parse(budget.techpack.special_operation);
+                    return Array.isArray(ops) ? ops.join(", ") : "";
+                  } catch {
+                    return "";
+                  }
+                })()}
               </div>
             </div>
           </div>
