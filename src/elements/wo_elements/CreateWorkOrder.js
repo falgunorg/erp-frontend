@@ -126,7 +126,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
 
   const getTechpacks = async () => {
     const response = await api.post("/technical-packages-all-desc", {
-      mode: "self",
+      // mode: "self",
       group: "costing_done",
     });
 

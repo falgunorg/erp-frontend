@@ -144,7 +144,7 @@ export default function EditWorkOrder({ renderArea, setRenderArea }) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     const response = await api.post("/technical-packages-all-desc", {
-      mode: "self",
+      // mode: "self",
     });
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.data);

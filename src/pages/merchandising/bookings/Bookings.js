@@ -1,352 +1,426 @@
-import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import Dropdown from "react-bootstrap/Dropdown";
 import api from "services/api";
-import Spinner from "../../../elements/Spinner";
-import moment from "moment/moment";
 import swal from "sweetalert";
 
+import { useHistory, useParams } from "react-router-dom";
+import {
+  FilterIcon,
+  ArrowRightIcon,
+  ArrowDownIcon,
+  ToggleCheckboxIcon,
+  ToggleCheckboxActiveIcon,
+} from "elements/SvgIcons";
+import CreateBooking from "../../merchandising/bookings/parts/CreateBooking";
+import EditBooking from "../../merchandising/bookings/parts/EditBooking";
+import BookingDetails from "../../merchandising/bookings/parts/BookingDetails";
+import FilterSidebar from "elements/FilterSidebar";
+
 export default function Bookings(props) {
+  const [renderArea, setRenderArea] = useState("blank");
   const history = useHistory();
-  const userInfo = props.userData;
-  const [spinner, setSpinner] = useState(false);
-
-  const [searchValue, setSearchValue] = useState("");
-
-  const [filterData, setFilterData] = useState({
-    from_date: "",
-    to_date: "",
-    num_of_row: 20,
-    status: "",
-    supplier_id: "",
-    view: userInfo.designation_title === "Assistant Manager" ? "team" : "self",
-  });
-  const filterChange = (event) => {
-    setFilterData({ ...filterData, [event.target.name]: event.target.value });
-  };
-
-  const clearFields = () => {
-    setFilterData({
-      from_date: "",
-      to_date: "",
-      num_of_row: 20,
-      status: "",
-      supplier_id: "",
-      view:
-        userInfo.designation_title === "Assistant Manager" ? "team" : "self",
-    });
-  };
-
-  // get all bookings
-
-  const [bookings, setBookings] = useState([]);
-
-  const getBookings = async () => {
-    setSpinner(true);
-    var response = await api.post("/bookings", {
-      status: filterData.status,
-      supplier_id: filterData.supplier_id,
-      from_date: filterData.from_date,
-      to_date: filterData.to_date,
-      num_of_row: filterData.num_of_row,
-      department: userInfo.department_title,
-      designation: userInfo.designation_title,
-      view: filterData.view,
-    });
-
-    if (response.status === 200 && response.data) {
-      setBookings(response.data.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
-  const [suppliers, setSuppliers] = useState([]);
-  const getSuppliers = async () => {
-    setSpinner(true);
-    var response = await api.post("/suppliers");
-    if (response.status === 200 && response.data) {
-      setSuppliers(response.data.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
-  useEffect(async () => {
-    getSuppliers();
-  }, []);
-
-  useEffect(async () => {
-    getBookings();
-  }, [filterData]);
-
-  useEffect(async () => {
-    props.setSection("merchandising");
-  }, []);
+  const params = useParams();
 
   useEffect(() => {
-    const checkAccess = async () => {
-      const allowedDepartments = [
-        "Merchandising",
-        "Sample",
-        "Planing",
-        "Management",
-        "Commercial",
-        "Accounts & Finance",
-        "IT",
-      ];
-      if (!allowedDepartments.includes(props.userData?.department_title)) {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-        history.push("/dashboard");
+    if (params.id) {
+      setRenderArea("details");
+    }
+  }, [params.id]);
+
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "Tech Packs",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New TP",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+  const [viewTab, setViewTab] = useState("All");
+  const [markAble, setMarkAble] = useState(false);
+  const toggleMarkAble = () => {
+    setSelectedItems([]);
+    setMarkAble(!markAble);
+  };
+
+  const [technicalPackages, setTechnicalPackages] = useState({});
+  const [expandedGroups, setExpandedGroups] = useState({});
+
+  const getTechnicalPackages = async () => {
+    const response = await api.post("/technical-packages", {
+      department: props.sidebarFilter.department,
+      purchase_contract_id: props.sidebarFilter.purchase_contract_id,
+      technical_package_id: props.sidebarFilter.technical_package_id,
+      date: props.sidebarFilter.date,
+    });
+    if (response.status === 200 && response.data) {
+      const data = response.data.techpacks.data;
+      setTechnicalPackages(data);
+
+      // Initialize all groups as expanded (true)
+      const initialExpandedState = {};
+      Object.keys(data).forEach((group) => {
+        initialExpandedState[group] = true;
+      });
+      setExpandedGroups(initialExpandedState);
+    }
+  };
+  const toggleGroup = (groupName) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [groupName]: !prev[groupName],
+    }));
+  };
+  useEffect(async () => {
+    getTechnicalPackages();
+  }, [props.sidebarFilter]);
+
+  const [selectedTp, setSelectedTp] = useState();
+  const handleTpDetails = (pkg) => {
+    history.push("/merchandising/bookings/" + pkg.id);
+    setRenderArea("details");
+    setSelectedTp(pkg);
+  };
+
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  // Flatten all item IDs
+  const allItemsIds = useMemo(() => {
+    return Object.values(technicalPackages)
+      .flat()
+      .map((item) => item.id);
+  }, [technicalPackages]);
+
+  const toggleSelectAll = useCallback(() => {
+    if (selectedItems.length === allItemsIds.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(allItemsIds);
+    }
+  }, [selectedItems, allItemsIds]);
+
+  const toggleSelectChange = useCallback(
+    (id) => {
+      setSelectedItems((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+    },
+    [setSelectedItems]
+  );
+
+  const handleDelete = async (id) => {
+    const confirmed = await swal({
+      title: "Are you sure?",
+      text: "Once deleted, you will not be able to recover this technical package!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    });
+
+    if (confirmed) {
+      try {
+        const response = await api.post("/technical-package-delete", { id });
+        if (response.status === 200 && response.data) {
+          swal(
+            "Deleted!",
+            "The technical package has been deleted.",
+            "success"
+          ).then(() => {
+            history.push("/merchandising/bookings");
+            window.location.reload();
+          });
+        }
+      } catch (error) {
+        swal("Error", "Something went wrong while deleting.", "error");
       }
-    };
-    checkAccess();
-  }, [props.userData?.department_title, history]);
+    }
+  };
+
+  const handleDeleteMultiple = async () => {
+    if (selectedItems.length === 0) {
+      swal(
+        "No items selected",
+        "Please select at least one item to delete.",
+        "info"
+      );
+      return;
+    }
+
+    const confirmed = await swal({
+      title: "Are you sure?",
+      text: "This will permanently delete all selected technical packages!",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    });
+
+    if (confirmed) {
+      try {
+        const response = await api.post("/technical-package-delete-multiple", {
+          ids: selectedItems,
+        });
+        if (response.status === 200 && response.data) {
+          swal(
+            "Deleted!",
+            "Selected technical packages have been deleted.",
+            "success"
+          ).then(() => {
+            window.location.reload();
+          });
+        }
+      } catch (error) {
+        swal(
+          "Error",
+          "Something went wrong while deleting multiple items.",
+          "error"
+        );
+      }
+    }
+  };
 
   return (
-    <div className="create_edit_page">
-      {spinner && <Spinner />}
-      <div className="create_page_heading">
-        <div className="page_name">Bookings</div>
-        <div className="actions">
-          <input
-            type="search"
-            onChange={(e) => setSearchValue(e.target.value)}
-            // type="text"
-            value={searchValue}
-            className="form-control"
-            placeholder="Search"
-          />
+    <div className="purchase_order_page">
+      <div className="purchase_action_header non_printing_area">
+        <div className="actions_left">
+          <button
+            onClick={() => {
+              history.push("/merchandising/bookings");
+              setRenderArea("add");
+            }}
+            className="active"
+          >
+            New BK
+          </button>
 
-          {userInfo.department_title === "Merchandising" &&
-          userInfo.designation_title !== "Deputy General Manager" ? (
-            <Link
-              to="/merchandising/bookings-create"
-              className="btn btn-warning bg-falgun rounded-circle"
+          <button
+            disabled={renderArea !== "details"}
+            onClick={() => setRenderArea("update")}
+          >
+            Edit
+          </button>
+
+          {selectedItems.length > 1 ? (
+            <button
+              onClick={handleDeleteMultiple}
+              // disabled={renderArea !== "details"}
             >
-              <i className="fal fa-plus"></i>
-            </Link>
+              Delete All
+            </button>
           ) : (
-            ""
+            <button
+              onClick={() => handleDelete(selectedTp.id)}
+              disabled={renderArea !== "details"}
+            >
+              Delete
+            </button>
           )}
         </div>
       </div>
-      <div className="employee_lists">
-        <div className="datrange_filter">
-          <div className="row">
-            {userInfo.department_title === "Merchandising" && (
-              <div className="col-lg-2">
-                <div className="form-group">
-                  <label>View Mode</label>
-                  <select
-                    onChange={filterChange}
-                    value={filterData.view}
-                    name="view"
-                    className="form-select"
-                  >
-                    <option value="self">Self</option>
-                    <option value="team">Team</option>
-                  </select>
-                </div>
-              </div>
-            )}
 
-            <div className="col-lg-2">
-              <div className="form-group">
-                <label>From Date</label>
-                <input
-                  value={filterData.from_date}
-                  onChange={filterChange}
-                  name="from_date"
-                  className="form-control"
-                  type="date"
-                />
-              </div>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-group">
-                <label>To Date</label>
-                <input
-                  onChange={filterChange}
-                  value={filterData.to_date}
-                  name="to_date"
-                  className="form-control"
-                  type="date"
-                />
-              </div>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-group">
-                <label>Supplier</label>
-                <select
-                  onChange={filterChange}
-                  value={filterData.supplier_id}
-                  name="supplier_id"
-                  className="form-select"
-                >
-                  <option value="">Select supplier</option>
-                  {suppliers.map((item, index) => (
-                    <option key={index} value={item.id}>
-                      {item.company_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="col-lg-2">
-              <div className="form-group">
-                <label>Status</label>
-                <select
-                  onChange={filterChange}
-                  name="status"
-                  value={filterData.status}
-                  className="form-select"
-                >
-                  <option value="">Select Status</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-              </div>
-            </div>
+      <div className="technical_package_layout purchase_order_page_when_print">
+        <FilterSidebar {...props} />
 
-            <div className="col-lg-2">
-              <div className="form-group">
-                <label>NUM Of Rows</label>
-                <div className="d-flex gap_10">
-                  <select
-                    onChange={filterChange}
-                    value={filterData.num_of_row}
-                    name="num_of_row"
-                    className="form-select margin_bottom_0"
-                  >
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="75">75</option>
-                    <option value="100">100</option>
-                  </select>
-                  <Link to="#" className="btn btn-warning" onClick={clearFields}>
-                    <i className="fas fa-retweet"></i>
-                  </Link>
-                </div>
+        <div className="purchase_list">
+          <div className="purchase_list_header d-flex justify-content-between">
+            <div className="purchase_header_left">
+              <div className="title">
+                {markAble && (
+                  <>
+                    <input
+                      onChange={toggleSelectAll}
+                      checked={selectedItems.length === allItemsIds.length}
+                      type="checkbox"
+                      style={{ marginTop: "3px" }}
+                    />{" "}
+                  </>
+                )}
+                BK View
               </div>
+
+              <div className="buttons_group">
+                <button
+                  className={viewTab === "All" ? "active" : ""}
+                  onClick={() => setViewTab("All")}
+                >
+                  All
+                </button>
+                <button
+                  className={viewTab === "Urgent" ? "active" : ""}
+                  onClick={() => setViewTab("Urgent")}
+                >
+                  Urgent
+                </button>
+                <button
+                  className={viewTab === "Unassigned WO" ? "active" : ""}
+                  onClick={() => setViewTab("Unassigned WO")}
+                >
+                  Unassigned WO
+                </button>
+              </div>
+            </div>
+            <div className="purchase_header_left">
+              <span
+                onClick={toggleMarkAble}
+                className="toggleSelect"
+                style={{ cursor: "pointer" }}
+              >
+                {markAble ? (
+                  <ToggleCheckboxActiveIcon />
+                ) : (
+                  <ToggleCheckboxIcon />
+                )}
+              </span>
+
+              <Dropdown className="purchase_filter_dropdown">
+                <Dropdown.Toggle
+                  id="dropdown-button-dark-example1"
+                  variant="secondary"
+                >
+                  <FilterIcon />
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item>Buyer</Dropdown.Item>
+                  <Dropdown.Item>PC</Dropdown.Item>
+                  <Dropdown.Item>WO</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
             </div>
           </div>
-        </div>
-        <div className="table-responsive">
-          <table className="table text-start align-middle table-bordered table-hover mb-0">
-            <thead className="bg-dark text-white">
-              <tr>
-                <th>#</th>
-                <th>Booking Number</th>
-                <th>Supplier</th>
-                <th>Booking Date</th>
-                <th>Delivery Date</th>
-                <th>Total Amount</th>
-                <th>Status</th>
-                <th>Booking By</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {searchValue ? (
-                <>
-                  {bookings
-                    .filter((item) => {
-                      if (!searchValue) return false;
-                      const lowerCaseSearchValue = searchValue.toLowerCase();
-                      return (
-                        item.booking_number
-                          .toLowerCase()
-                          .includes(lowerCaseSearchValue) ||
-                        item.supplier
-                          .toLowerCase()
-                          .includes(lowerCaseSearchValue) ||
-                        item.currency
-                          .toLowerCase()
-                          .includes(lowerCaseSearchValue)
-                      );
-                    })
-                    .map((item, index) => (
-                      <tr key={index} className={item.status}>
-                        <td>{index + 1}</td>
-                        <td>{item.booking_number}</td>
-                        <td>{item.supplier}</td>
 
-                        <td> {moment(item.booking_date).format("ll")}</td>
-                        <td>{moment(item.delivery_date).format("ll")}</td>
-                        <td>
-                          {item.total_amount} {item.currency}
-                        </td>
-                        <td>{item.status}</td>
-                        <td>{item.user}</td>
-                        <td>
-                          <div className="d-flex gap_10">
-                            <Link
-                              to={"/merchandising/bookings-details/" + item.id}
-                            >
-                              <i className="fas fa-eye text-info"></i>
-                            </Link>
-                            {userInfo.userId === item.user_id &&
-                            item.status === "Pending" ? (
-                              <Link
-                                to={"/merchandising/bookings-edit/" + item.id}
-                              >
-                                <i className="fa fa-pen text-warning"></i>
-                              </Link>
-                            ) : null}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                </>
-              ) : (
-                <>
-                  {bookings.map((item, index) => (
-                    <tr key={index} className={item.status}>
-                      <td>{index + 1}</td>
-                      <td>{item.booking_number}</td>
-                      <td>{item.supplier}</td>
+          <div className="tp_list">
+            {Object.entries(technicalPackages).map(([groupName, packages]) => (
+              <div key={groupName} className="group">
+                <div
+                  onClick={() => toggleGroup(groupName)}
+                  className="group-header"
+                >
+                  <span className="me-2">
+                    {expandedGroups[groupName] ? (
+                      <ArrowDownIcon />
+                    ) : (
+                      <ArrowRightIcon />
+                    )}
+                  </span>
+                  {groupName}
+                </div>
 
-                      <td> {moment(item.booking_date).format("ll")}</td>
-                      <td>{moment(item.delivery_date).format("ll")}</td>
-                      <td>
-                        {item.total_amount} {item.currency}
-                      </td>
-                      <td>{item.status}</td>
-                      <td>{item.user}</td>
-                      <td>
-                        <div className="d-flex gap_10">
-                          <Link
-                            to={"/merchandising/bookings-details/" + item.id}
+                {expandedGroups[groupName] && (
+                  <div className="group-tps">
+                    {packages.map((pkg) => (
+                      <div
+                        onClick={() => handleTpDetails(pkg)}
+                        className={
+                          pkg.id == params.id
+                            ? "single_tp_item active"
+                            : "single_tp_item"
+                        }
+                      >
+                        <div className="tp_text d-flex align-items-center">
+                          <span
+                            className="marker"
+                            style={{ width: "20px", display: "inline-block" }}
                           >
-                            <i className="fas fa-eye text-info"></i>
-                          </Link>
-                          {userInfo.userId === item.user_id &&
-                          item.status === "Pending" ? (
-                            <Link
-                              to={"/merchandising/bookings-edit/" + item.id}
-                            >
-                              <i className="fa fa-pen text-warning"></i>
-                            </Link>
-                          ) : null}
+                            {markAble ? (
+                              <input
+                                onChange={() => toggleSelectChange(pkg.id)}
+                                type="checkbox"
+                                checked={selectedItems.includes(pkg.id)}
+                              />
+                            ) : (
+                              ""
+                            )}
+                          </span>
+                          <span className="me-2">{pkg.techpack_number}</span>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </>
-              )}
-            </tbody>
-          </table>
+                        <div className="tp_text">
+                          <span className="step_border"></span>
+                          {pkg.item_name}
+                        </div>
+                        <div className="tp_text">
+                          <span className="step_border"></span>
+                          {pkg.po?.po_number ?? "N/A"}
+                        </div>
+                        <div className="tp_text">
+                          <span className="step_border"></span>
+                          {pkg.wo?.wo_number ?? "N/A"}
+                        </div>
+                        <div className="tp_text">
+                          <span className="step_border"></span>
+                          {pkg.buyer?.name}
+                        </div>
+                        <div className="tp_text d-flex justify-content-between align-items-center">
+                          <div>
+                            <span className="step_border"></span>
+                            <span className="date area me-2">
+                              {pkg.received_date}
+                            </span>
+                          </div>
+
+                          <div className="icon_area">
+                            <svg
+                              className="me-2"
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="12"
+                              height="13"
+                              viewBox="0 0 12 13"
+                            >
+                              <path
+                                id="Polygon_170"
+                                data-name="Polygon 170"
+                                d="M5.548,2.965a1,1,0,0,1,1.9,0L8.587,6.5a1,1,0,0,0,.178.328l2.44,2.981a1,1,0,0,1-.979,1.612L6.7,10.683a1,1,0,0,0-.41,0l-3.522.737a1,1,0,0,1-.979-1.612l2.44-2.981A1,1,0,0,0,4.413,6.5Z"
+                                transform="translate(12) rotate(90)"
+                                fill="#ff4a4a"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="11"
+                              height="11"
+                              viewBox="0 0 11 11"
+                            >
+                              <rect
+                                id="Rectangle_184"
+                                data-name="Rectangle 184"
+                                width="11"
+                                height="11"
+                                rx="1"
+                                fill="#91cfff"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div
+          className={
+            renderArea === "details"
+              ? "tp_details_area"
+              : "tp_details_area non_printing_area"
+          }
+        >
+          {renderArea === "blank" && (
+            <div style={{ textAlign: "center", paddingTop: "250px" }}>
+              <b>Select an Item For Details</b>
+              <div className="text-muted">Nothing is selected</div>
+            </div>
+          )}
+          {renderArea === "add" && (
+            <CreateBooking setRenderArea={setRenderArea} />
+          )}
+          {renderArea === "details" && <BookingDetails />}
+          {renderArea === "update" && (
+            <EditBooking setRenderArea={setRenderArea} />
+          )}
         </div>
       </div>
-      <br />
-      <br />
     </div>
   );
 }

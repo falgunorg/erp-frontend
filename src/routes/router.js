@@ -55,12 +55,6 @@ import Purchases from "../pages/merchandising/purchases/Purchases";
 import EditPurchase from "../pages/merchandising/purchases/EditPurchase";
 import PurchaseDetails from "../pages/merchandising/purchases/PurchaseDetails";
 // BOOKINGS
-import CreateBooking from "../pages/merchandising/bookings/CreateBooking";
-import CreateBookingAuto from "../pages/merchandising/bookings/CreateBookingAuto";
-import Bookings from "../pages/merchandising/bookings/Bookings";
-import EditBooking from "../pages/merchandising/bookings/EditBooking";
-import BookingDetails from "../pages/merchandising/bookings/BookingDetails";
-import BookingsOverview from "../pages/merchandising/bookings/BookingsOverview";
 
 // SAMPLE ORDER REQUEST
 import Sors from "../pages/merchandising/sor/Sors";
@@ -245,15 +239,18 @@ import PowerPurchaseContracts from "../pages/power/merchandising/purchase_contra
 import PowerPurchaseContractDetails from "../pages/power/merchandising/purchase_contracts/PowerPurchaseContractDetails";
 
 //v1.1.0
-import PurchaseOrders from "../pages/PurchaseOrders";
-import WorkOrders from "../pages/WorkOrders";
-import PurchaseContractsList from "../pages/PurchaseContractsList";
-import Tasks from "../pages/Tasks";
-import BookingManager from "../pages/BookingManager";
-import TimeAndActions from "../pages/TimeAndActions";
 import TechnicalPackages from "../pages/TechnicalPackages";
 import CostSheets from "pages/CostSheets";
 import BudgetSheets from "pages/BudgetSheets";
+import PurchaseOrders from "../pages/PurchaseOrders";
+import WorkOrders from "../pages/WorkOrders";
+import Bookings from "../pages/merchandising/bookings/Bookings";
+import BookingsOverview from "../pages/merchandising/bookings/BookingsOverview";
+import BookingManager from "../pages/BookingManager";
+import PurchaseContractsList from "../pages/PurchaseContractsList";
+import Tasks from "../pages/Tasks";
+
+import TimeAndActions from "../pages/TimeAndActions";
 
 function OpenRoutes() {
   return (
@@ -308,6 +305,16 @@ class PrivateRoutes extends Component {
             exact
             path="/purchase-orders/:id?"
             component={PurchaseOrders}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/merchandising/bookings/:id?"
+            component={Bookings}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/merchandising/bookings-overview"
+            component={BookingsOverview}
           ></PrivateRoute>
           <PrivateRoute
             exact
@@ -447,36 +454,6 @@ class PrivateRoutes extends Component {
             exact
             path="/merchandising/purchases-details/:id?"
             component={PurchaseDetails}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/bookings"
-            component={Bookings}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/bookings-create"
-            component={CreateBooking}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/auto-bookings-create/:supplier_id?/:budget_id?"
-            component={CreateBookingAuto}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/bookings-edit/:id?"
-            component={EditBooking}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/bookings-details/:id?"
-            component={BookingDetails}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/bookings-overview"
-            component={BookingsOverview}
           ></PrivateRoute>
           <PrivateRoute
             exact

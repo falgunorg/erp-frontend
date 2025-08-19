@@ -1,17 +1,32 @@
 import React, { useState, useEffect } from "react";
-import Logo from "../../assets/images/logos/logo-short.png";
+import Logo from "assets/images/logos/logo-short.png";
 import { Modal, Button, Spinner } from "react-bootstrap";
-import MultipleFileInput from "./MultipleFileInput";
+
 import api from "services/api";
 import swal from "sweetalert";
 import CustomSelect from "elements/CustomSelect";
+import { ArrowRightIcon, ArrowDownIcon } from "elements/SvgIcons";
+import { useHistory, useParams } from "react-router-dom";
 
-import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
-
-import { useHistory } from "react-router-dom";
-
-export default function CreateTechnicalPackage({ setRenderArea }) {
+export default function EditBooking({ renderArea, setRenderArea }) {
   const history = useHistory();
+  const params = useParams();
+  const [techpack, setTechpack] = useState({});
+  const getTechpack = async () => {
+    setSpinner(true);
+    const response = await api.post("/technical-package-show", {
+      id: params.id,
+    });
+    if (response.status === 200 && response.data) {
+      const techpackData = response.data;
+      setTechpack(techpackData);
+    }
+    setSpinner(false);
+  };
+  useEffect(() => {
+    getTechpack();
+  }, [params.id]);
+
   const buyers = [
     { id: 1, title: "NSLBD" },
     { id: 2, title: "WALMART" },
@@ -34,7 +49,6 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
     { id: 1, title: "Mens" },
     { id: 2, title: "Womens" },
     { id: 3, title: "Kids" },
-    { id: 4, title: "School Wear" },
   ];
 
   const companies = [
@@ -218,7 +232,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
     getWorkOrders();
   }, []);
 
-  const [collapsedMaterialTypes, setCollapsedMaterialTypes] = useState({});
+  const [collapsedMaterialTypes, setCollapsedMaterialTypes] = useState({}); // Track collapsed state
 
   const toggleMaterialType = (materialTypeId) => {
     setCollapsedMaterialTypes((prev) => ({
@@ -349,6 +363,8 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
     return Object.keys(formErrors).length === 0;
   };
 
+  console.log("TP_ITEMS", Object.values(consumptionItems).flat());
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -362,22 +378,6 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
       return;
     }
 
-    if (frontImageFile === null) {
-      swal({
-        title: "Please Select Front Part Image",
-        icon: "error",
-      });
-      return;
-    }
-
-    if (backImageFile === null) {
-      swal({
-        title: "Please Select Back Part Image",
-        icon: "error",
-      });
-      return;
-    }
-
     if (validateForm()) {
       const data = new FormData();
 
@@ -386,9 +386,12 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
         if (value !== null && value !== undefined && value !== "") {
           data.append(key, value);
         } else {
-          data.append(key, ""); // Laravel will treat empty string as null if handled
+          data.append(key, ""); // Laravel handles empty string as null
         }
       };
+
+      // ID for update
+      appendIfValid("id", techpack.id);
 
       // Append form data safely
       appendIfValid("po_id", formDataSet.po_id);
@@ -406,7 +409,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
       appendIfValid("company_id", formDataSet.company_id);
       appendIfValid("wash_details", formDataSet.wash_details);
 
-      // Special operations can be an array, stringify before appending
+      // Special operations - stringify if array
       data.append(
         "special_operation",
         JSON.stringify(formDataSet.special_operations)
@@ -415,7 +418,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
       // Techpack item list
       data.append("tp_items", JSON.stringify(tp_items));
 
-      // File uploads
+      // Optional file uploads
       if (frontImageFile) {
         data.append("front_photo", frontImageFile);
       }
@@ -430,7 +433,8 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
       });
 
       setSpinner(true);
-      const response = await api.post("/technical-package-create", data);
+
+      const response = await api.post("/technical-package-update", data);
 
       if (response.status === 200 && response.data) {
         history.push("/technical-packages/" + response.data.techpack.id);
@@ -439,9 +443,117 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
       } else {
         setErrors(response.data.errors);
       }
+
+      setSpinner(false);
     }
   };
 
+  useEffect(() => {
+    if (techpack) {
+      const {
+        po_id,
+        wo_id,
+        received_date,
+        techpack_number,
+        buyer_id,
+        buyer_style_name,
+        brand,
+        item_name,
+        season,
+        item_type,
+        department,
+        description,
+        company_id,
+        wash_details,
+        special_operation,
+        materials,
+      } = techpack;
+
+      let specialOps = [];
+      try {
+        specialOps = JSON.parse(special_operation || "[]"); // ✅ correct way
+      } catch (err) {
+        console.error("Failed to parse special_operation:", err);
+        specialOps = [];
+      }
+
+      setFormDataSet({
+        po_id,
+        wo_id,
+        received_date,
+        techpack_number,
+        buyer_id,
+        buyer_style_name,
+        brand,
+        item_name,
+        season,
+        item_type,
+        department,
+        description,
+        company_id,
+        wash_details,
+        special_operations: specialOps, // ✅ now clean array like ["Printing", "Dying"]
+      });
+    }
+  }, [techpack]);
+
+  useEffect(() => {
+    if (Array.isArray(techpack?.materials) && techpack.materials.length > 0) {
+      const groupedByType = {};
+
+      techpack.materials.forEach((mat) => {
+        const item = {
+          item_type_id: mat.item_type_id,
+          item_id: mat.item_id,
+          item_name: mat.item_name || "",
+          item_details: mat.item_details || "",
+          color: mat.color || "",
+          size: mat.size || "",
+          position: mat.position || "",
+          unit: mat.unit || "",
+          consumption: parseFloat(mat.consumption) || 0,
+          wastage: parseFloat(mat.wastage) || 0,
+          total: parseFloat(mat.total) || 0,
+        };
+
+        if (!groupedByType[mat.item_type_id]) {
+          groupedByType[mat.item_type_id] = [];
+        }
+
+        groupedByType[mat.item_type_id].push(item);
+      });
+
+      setConsumptionItems(groupedByType);
+    }
+  }, [techpack?.materials]);
+
+  useEffect(() => {
+    const expanded = {};
+    materialTypes.forEach((type) => {
+      expanded[type.id] = false;
+    });
+    setCollapsedMaterialTypes(expanded);
+  }, [materialTypes]);
+
+  const techpackFiles = Array.isArray(techpack?.files) ? techpack.files : [];
+
+  const existingTechpackFiles = techpackFiles.filter(
+    (file) => file.file_type === "technical_package"
+  );
+
+  const existingSpecSheetFiles = techpackFiles.filter(
+    (file) => file.file_type === "spec_sheet"
+  );
+
+  const existingBlockPatternFiles = techpackFiles.filter(
+    (file) => file.file_type === "block_pattern"
+  );
+
+  const existingSpecialOperationFiles = techpackFiles.filter(
+    (file) => file.file_type === "special_operation"
+  );
+
+  console.log("FORM DATA", formDataSet);
   return (
     <div className="create_technical_pack">
       <div className="row create_tp_header align-items-center">
@@ -453,20 +565,25 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                 src={Logo}
                 alt="Logo"
               />
-              <span className="purchase_text">Tech Pack</span>
+              <span className="purchase_text">Edit Tech Pack</span>
             </div>
             <div className="col-lg-2">
               <label className="form-label">PO Number</label>
             </div>
             <div className="col-lg-2">
               <CustomSelect
-                isDisabled
                 className="select_wo"
                 placeholder="PO"
                 options={pos.map(({ id, po_number }) => ({
                   value: id,
                   label: po_number,
                 }))}
+                value={pos
+                  .map(({ id, po_number }) => ({
+                    value: id,
+                    label: po_number,
+                  }))
+                  .find((option) => option.value === formDataSet.po_id)}
                 onChange={(selectedOption) =>
                   handleInputChange("po_id", selectedOption.value)
                 }
@@ -479,13 +596,18 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
             </div>
             <div className="col-lg-2">
               <CustomSelect
-                isDisabled
                 className="select_wo"
-                placeholder="WO"
+                placeholder="PO"
                 options={workOrders.map(({ id, wo_number }) => ({
                   value: id,
                   label: wo_number,
                 }))}
+                value={workOrders
+                  .map(({ id, wo_number }) => ({
+                    value: id,
+                    label: wo_number,
+                  }))
+                  .find((option) => option.value === formDataSet.wo_id)}
                 onChange={(selectedOption) =>
                   handleInputChange("wo_id", selectedOption.value)
                 }
@@ -500,7 +622,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
             className="btn btn-default submit_button"
           >
             {" "}
-            Submit{" "}
+            Update{" "}
           </button>
         </div>
       </div>
@@ -559,11 +681,18 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                   value: id,
                   label: title,
                 }))}
+                value={buyers
+                  .map(({ id, title }) => ({
+                    value: id,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.buyer_id)}
                 onChange={(selectedOption) =>
                   handleInputChange("buyer_id", selectedOption.value)
                 }
                 name="buyer_id"
               />
+
               {errors.buyer_id && (
                 <small className="form-label text-danger">
                   {errors.buyer_id}
@@ -604,6 +733,12 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                   value: title,
                   label: title,
                 }))}
+                value={brands
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.brand)}
                 onChange={(selectedOption) =>
                   handleInputChange("brand", selectedOption.value)
                 }
@@ -641,10 +776,16 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
               <CustomSelect
                 className="select_wo"
                 placeholder="Season"
-                options={seasons.map(({ title }) => ({
+                options={seasons.map(({ id, title }) => ({
                   value: title,
                   label: title,
                 }))}
+                value={seasons
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.season)}
                 onChange={(selectedOption) =>
                   handleInputChange("season", selectedOption.value)
                 }
@@ -667,6 +808,12 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                   value: title,
                   label: title,
                 }))}
+                value={itemTypes
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.item_type)}
                 onChange={(selectedOption) =>
                   handleInputChange("item_type", selectedOption.value)
                 }
@@ -692,6 +839,12 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                   value: title,
                   label: title,
                 }))}
+                value={departments
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.department)}
                 onChange={(selectedOption) =>
                   handleInputChange("department", selectedOption.value)
                 }
@@ -737,6 +890,12 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                   value: id,
                   label: title,
                 }))}
+                value={companies
+                  .map(({ id, title }) => ({
+                    value: id,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.company_id)}
                 onChange={(selectedOption) =>
                   handleInputChange("company_id", selectedOption.value)
                 }
@@ -759,6 +918,12 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                   value: title,
                   label: title,
                 }))}
+                value={washes
+                  .map(({ id, title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === formDataSet.wash_details)}
                 onChange={(selectedOption) =>
                   handleInputChange("wash_details", selectedOption.value)
                 }
@@ -785,6 +950,13 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                   value: id,
                   label: title,
                 }))}
+                value={
+                  formDataSet.special_operations?.map((op) =>
+                    specialOperations
+                      .map(({ id, title }) => ({ value: id, label: title }))
+                      .find((option) => option.label === op)
+                  ) || []
+                }
                 onChange={(selectedOptions) =>
                   handleInputChange(
                     "special_operations",
@@ -809,6 +981,8 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
               <label htmlFor="front_image">
                 {frontImagePreviewUrl ? (
                   <img src={frontImagePreviewUrl} alt="Frontside Preview" />
+                ) : techpack?.front_photo_url ? (
+                  <img src={techpack.front_photo_url} alt="Frontside Preview" />
                 ) : (
                   <p>Garment Frontside Image</p>
                 )}
@@ -842,6 +1016,8 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
               <label htmlFor="back_image">
                 {backImagePreviewUrl ? (
                   <img src={backImagePreviewUrl} alt="Backside Preview" />
+                ) : techpack?.back_photo_url ? (
+                  <img src={techpack.back_photo_url} alt="Backside Preview" />
                 ) : (
                   <p>Garment Backside Image</p>
                 )}
@@ -873,34 +1049,6 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="create_tp_attatchment">
-        <MultipleFileInput
-          label="Buyer Tech Pack Attachment"
-          inputId="technical_package"
-          selectedFiles={selectedTechpackFiles}
-          setSelectedFiles={setSelectedTechpackFiles}
-        />
-        <MultipleFileInput
-          label="Spec Sheet Attachment"
-          inputId="spec_sheet"
-          selectedFiles={selectedSpecSheetFiles}
-          setSelectedFiles={setSelectedSpecSheetFiles}
-        />
-        <MultipleFileInput
-          label="Block Pattern Attachment"
-          inputId="block_pattern"
-          selectedFiles={selectedBlockPatternFiles}
-          setSelectedFiles={setSelectedBlockPatternFiles}
-        />
-
-        <MultipleFileInput
-          label="Special Operation Attachment"
-          inputId="special_operation"
-          selectedFiles={selectedSpecialOperationFiles}
-          setSelectedFiles={setSelectedSpecialOperationFiles}
-        />
       </div>
 
       <div className="create_tp_materials_area create_tp_body">
@@ -976,6 +1124,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                     </div>
                   </td>
                 </tr>
+
                 {/* Show items only if the materialType is expanded */}
                 {!collapsedMaterialTypes[materialType.id] &&
                   (consumptionItems[materialType.id] || []).map(
@@ -983,9 +1132,9 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                       <tr key={`${materialType.id}-${index}`}>
                         <td>
                           <CustomSelect
-                            style={{ width: "100%" }}
+                            style={{ width: "100px" }}
                             className="select_wo"
-                            placeholder="Select Item"
+                            placeholder="Item"
                             options={items
                               .filter(
                                 (it) => it.item_type_id === materialType.id
@@ -994,21 +1143,20 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                                 value: id,
                                 label: title,
                               }))}
-                            value={(() => {
-                              const selectedId = item.item_id;
-                              return (
-                                items
-                                  .filter(
-                                    (it) => it.item_type_id === materialType.id
-                                  )
-                                  .map(({ id, title }) => ({
-                                    value: id,
-                                    label: title,
-                                  }))
-                                  .find((opt) => opt.value === selectedId) ||
-                                null
-                              );
-                            })()}
+                            value={items
+                              .filter(
+                                (it) => it.item_type_id === materialType.id
+                              )
+                              .map(({ id, title }) => ({
+                                value: id,
+                                label: title,
+                              }))
+                              .find(
+                                (option) =>
+                                  option.value ===
+                                  (consumptionItems[materialType.id]?.[index]
+                                    ?.item_id || null)
+                              )}
                             onChange={(selectedOption) =>
                               handleItemChange(
                                 materialType.id,

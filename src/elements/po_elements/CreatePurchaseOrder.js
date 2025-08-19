@@ -285,7 +285,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
 
   const getTechpacks = async () => {
     const response = await api.post("/technical-packages-all-desc", {
-      mode: "self",
+      // mode: "self",
     });
 
     if (response.status === 200 && response.data) {

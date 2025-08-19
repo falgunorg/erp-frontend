@@ -233,11 +233,9 @@ export default function EditBudget({ renderArea, setRenderArea }) {
       setSpinner(true);
       var response = await api.post("/budgets-update", data);
       if (response.status === 200 && response.data) {
-       
         history.push("/budget-sheets/" + response.data.data.id);
         setRenderArea("details");
-         window.location.reload();
-
+        window.location.reload();
       } else {
         setErrors(response.data.errors);
       }
