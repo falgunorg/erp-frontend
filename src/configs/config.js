@@ -6,9 +6,9 @@ var configEnv = "development";
 var config = {
   //######### Staging config ##########
   debian: {
-    appUrl: "https://erp.falgun.com.bd",
-    apiUrl: "https://erpapi.falgun.com.bd/public/api",
-    staticUrl: "https://erpapi.falgun.com.bd/public/api",
+    appUrl: "https://erp.falgun.org",
+    apiUrl: "https://erpapi.falgun.org/api",
+    staticUrl: "https://erpapi.falgun.org/api",
     debug: true,
   },
 
