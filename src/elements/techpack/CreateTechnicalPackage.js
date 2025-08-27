@@ -905,298 +905,301 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
 
       <div className="create_tp_materials_area create_tp_body">
         <h6>Material Descriptions</h6>
-        <table className="table table-bordered">
-          <thead>
-            <tr>
-              <th>Item Type</th>
-              <th>Item Name</th>
-              <th>Item Details</th>
-              <th>Color</th>
-              <th>Size</th>
-              <th>Position</th>
-              <th>Unit</th>
-              <th>Consmp</th>
-              <th>Wstg %</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {materialTypes.map((materialType) => (
-              <React.Fragment key={materialType.id}>
-                <tr>
-                  <td
-                    colSpan={10}
-                    style={{
-                      background: "#ECECEC",
-                      cursor: "pointer",
-                      height: "20px",
-                    }}
-                  >
-                    <div
-                      className="materialType"
+        <div className="table-responsive">
+          <table className="table table-bordered">
+            <thead>
+              <tr>
+                <th>Item Type</th>
+                <th>Item Name</th>
+                <th>Item Details</th>
+                <th>Color</th>
+                <th>Size</th>
+                <th>Position</th>
+                <th>Unit</th>
+                <th>Consmp</th>
+                <th>Wstg %</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {materialTypes.map((materialType) => (
+                <React.Fragment key={materialType.id}>
+                  <tr>
+                    <td
+                      colSpan={10}
                       style={{
-                        padding: "0 5px",
-                        display: "flex",
-                        gap: "5px",
-                        alignItems: "center",
-                        fontSize: "12px",
+                        background: "#ECECEC",
+                        cursor: "pointer",
+                        height: "20px",
                       }}
                     >
-                      <span
-                        onClick={() => toggleMaterialType(materialType.id)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        {collapsedMaterialTypes[materialType.id] ? (
-                          <ArrowRightIcon />
-                        ) : (
-                          <ArrowDownIcon />
-                        )}
-                      </span>
-                      <span
-                        onClick={() => toggleMaterialType(materialType.id)}
-                        className="me-2"
-                      >
-                        {materialType.title}
-                      </span>
-                      <span
-                        onClick={() => addRow(materialType.id)}
+                      <div
+                        className="materialType"
                         style={{
-                          background: "#f1a655",
-                          height: "17px",
-                          width: "17px",
-                          borderRadius: "50%",
-                          textAlign: "center",
-                          lineHeight: "17px",
-                          fontSize: "11px",
-                          color: "white",
+                          padding: "0 5px",
+                          display: "flex",
+                          gap: "5px",
+                          alignItems: "center",
+                          fontSize: "12px",
                         }}
                       >
-                        <i className="fa fa-plus"></i>
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-                {/* Show items only if the materialType is expanded */}
-                {!collapsedMaterialTypes[materialType.id] &&
-                  (consumptionItems[materialType.id] || []).map(
-                    (item, index) => (
-                      <tr key={`${materialType.id}-${index}`}>
-                        <td>
-                          <CustomSelect
-                            style={{ width: "100%" }}
-                            className="select_wo"
-                            placeholder="Select Item"
-                            options={items
-                              .filter(
-                                (it) => it.item_type_id === materialType.id
-                              )
-                              .map(({ id, title }) => ({
-                                value: id,
+                        <span
+                          onClick={() => toggleMaterialType(materialType.id)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          {collapsedMaterialTypes[materialType.id] ? (
+                            <ArrowRightIcon />
+                          ) : (
+                            <ArrowDownIcon />
+                          )}
+                        </span>
+                        <span
+                          onClick={() => toggleMaterialType(materialType.id)}
+                          className="me-2"
+                        >
+                          {materialType.title}
+                        </span>
+                        <span
+                          onClick={() => addRow(materialType.id)}
+                          style={{
+                            background: "#f1a655",
+                            height: "17px",
+                            width: "17px",
+                            borderRadius: "50%",
+                            textAlign: "center",
+                            lineHeight: "17px",
+                            fontSize: "11px",
+                            color: "white",
+                          }}
+                        >
+                          <i className="fa fa-plus"></i>
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                  {/* Show items only if the materialType is expanded */}
+                  {!collapsedMaterialTypes[materialType.id] &&
+                    (consumptionItems[materialType.id] || []).map(
+                      (item, index) => (
+                        <tr key={`${materialType.id}-${index}`}>
+                          <td>
+                            <CustomSelect
+                              style={{ width: "100%" }}
+                              className="select_wo"
+                              placeholder="Select Item"
+                              options={items
+                                .filter(
+                                  (it) => it.item_type_id === materialType.id
+                                )
+                                .map(({ id, title }) => ({
+                                  value: id,
+                                  label: title,
+                                }))}
+                              value={(() => {
+                                const selectedId = item.item_id;
+                                return (
+                                  items
+                                    .filter(
+                                      (it) =>
+                                        it.item_type_id === materialType.id
+                                    )
+                                    .map(({ id, title }) => ({
+                                      value: id,
+                                      label: title,
+                                    }))
+                                    .find((opt) => opt.value === selectedId) ||
+                                  null
+                                );
+                              })()}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "item_id",
+                                  selectedOption?.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <input
+                              type="text"
+                              value={item.item_name}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "item_name",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <textarea
+                              value={item.item_details}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "item_details",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <CustomSelect
+                              className="select_wo"
+                              placeholder="Color"
+                              options={colors.map(({ title }) => ({
+                                value: title,
                                 label: title,
                               }))}
-                            value={(() => {
-                              const selectedId = item.item_id;
-                              return (
-                                items
-                                  .filter(
-                                    (it) => it.item_type_id === materialType.id
-                                  )
-                                  .map(({ id, title }) => ({
-                                    value: id,
-                                    label: title,
-                                  }))
-                                  .find((opt) => opt.value === selectedId) ||
-                                null
-                              );
-                            })()}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "item_id",
-                                selectedOption?.value
-                              )
-                            }
-                          />
-                        </td>
+                              value={colors
+                                .map(({ title }) => ({
+                                  value: title,
+                                  label: title,
+                                }))
+                                .find((option) => option.value === item.color)}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "color",
+                                  selectedOption?.value
+                                )
+                              }
+                            />
+                          </td>
 
-                        <td>
-                          <input
-                            type="text"
-                            value={item.item_name}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "item_name",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <textarea
-                            value={item.item_details}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "item_details",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <CustomSelect
-                            className="select_wo"
-                            placeholder="Color"
-                            options={colors.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={colors
-                              .map(({ title }) => ({
+                          <td>
+                            <CustomSelect
+                              className="select_wo"
+                              placeholder="Size"
+                              options={sizes.map(({ title }) => ({
                                 value: title,
                                 label: title,
-                              }))
-                              .find((option) => option.value === item.color)}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "color",
-                                selectedOption?.value
-                              )
-                            }
-                          />
-                        </td>
+                              }))}
+                              value={sizes
+                                .map(({ title }) => ({
+                                  value: title,
+                                  label: title,
+                                }))
+                                .find((option) => option.value === item.size)}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "size",
+                                  selectedOption?.value
+                                )
+                              }
+                            />
+                          </td>
 
-                        <td>
-                          <CustomSelect
-                            className="select_wo"
-                            placeholder="Size"
-                            options={sizes.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={sizes
-                              .map(({ title }) => ({
+                          <td>
+                            <input
+                              style={{ width: "80px" }}
+                              type="text"
+                              value={item.position}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "position",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td>
+                            <CustomSelect
+                              className="select_wo"
+                              placeholder="Unit"
+                              options={units.map(({ title }) => ({
                                 value: title,
                                 label: title,
-                              }))
-                              .find((option) => option.value === item.size)}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "size",
-                                selectedOption?.value
-                              )
-                            }
-                          />
-                        </td>
+                              }))}
+                              value={units
+                                .map(({ title }) => ({
+                                  value: title,
+                                  label: title,
+                                }))
+                                .find((option) => option.value === item.unit)}
+                              onChange={(selectedOption) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "unit",
+                                  selectedOption?.value
+                                )
+                              }
+                            />
+                          </td>
 
-                        <td>
-                          <input
-                            style={{ width: "80px" }}
-                            type="text"
-                            value={item.position}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "position",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
+                          <td>
+                            <input
+                              style={{ width: "70px" }}
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={item.consumption}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "consumption",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
 
-                        <td>
-                          <CustomSelect
-                            className="select_wo"
-                            placeholder="Unit"
-                            options={units.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={units
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find((option) => option.value === item.unit)}
-                            onChange={(selectedOption) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "unit",
-                                selectedOption?.value
-                              )
-                            }
-                          />
-                        </td>
+                          <td>
+                            <input
+                              style={{ width: "50px" }}
+                              type="number"
+                              min="0"
+                              value={item.wastage}
+                              onChange={(e) =>
+                                handleItemChange(
+                                  materialType.id,
+                                  index,
+                                  "wastage",
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </td>
 
-                        <td>
-                          <input
-                            style={{ width: "70px" }}
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={item.consumption}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "consumption",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td>
-                          <input
-                            style={{ width: "50px" }}
-                            type="number"
-                            min="0"
-                            value={item.wastage}
-                            onChange={(e) =>
-                              handleItemChange(
-                                materialType.id,
-                                index,
-                                "wastage",
-                                e.target.value
-                              )
-                            }
-                          />
-                        </td>
-
-                        <td className="d-flex align-items-center">
-                          <input
-                            style={{ width: "70px" }}
-                            type="text"
-                            min="0"
-                            readOnly
-                            value={item.total}
-                            className="me-1"
-                          />
-                          <i
-                            style={{ cursor: "pointer" }}
-                            onClick={() => removeRow(materialType.id, index)}
-                            className="fa fa-times text-danger me-2"
-                          ></i>
-                        </td>
-                      </tr>
-                    )
-                  )}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
+                          <td className="d-flex align-items-center">
+                            <input
+                              style={{ width: "70px" }}
+                              type="text"
+                              min="0"
+                              readOnly
+                              value={item.total}
+                              className="me-1"
+                            />
+                            <i
+                              style={{ cursor: "pointer" }}
+                              onClick={() => removeRow(materialType.id, index)}
+                              className="fa fa-times text-danger me-2"
+                            ></i>
+                          </td>
+                        </tr>
+                      )
+                    )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <Modal show={imageModal} onHide={closeImageModal}>

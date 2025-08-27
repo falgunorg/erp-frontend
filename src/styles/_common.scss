@@ -634,3 +634,218 @@ a,
 .margin_10 {
   margin: 10px 0 10px !important;
 }
+
+
+
+  .create_technical_pack {
+    padding: 15px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.16);
+    margin: 1px;
+    border-radius: 8px;
+    .create_tp_header {
+      .purchase_text {
+        font-size: 20px;
+      }
+      .submit_button {
+        width: 100%;
+        // border-radius: 3px;
+        color: $white;
+        font-size: 16px;
+        height: 36px;
+        background: #f1a655;
+        border: none;
+      }
+
+      input,
+      .form-value {
+        width: 100%;
+        background: #ececec;
+        border-radius: 4px;
+        height: 21px;
+        line-height: 21px;
+        font-size: 12px;
+        border: none;
+        color: $black;
+        padding: 0 5px;
+
+        &:focus {
+          outline: none;
+          box-shadow: none;
+          border: none;
+        }
+      }
+      .form-label {
+        font-size: 11px;
+        color: $black;
+        width: 100%;
+        &.fill {
+          background: #ececec;
+          border-radius: 4px;
+          padding: 0 6px;
+          height: 21px;
+          line-height: 20px;
+        }
+      }
+    }
+
+    .create_tp_body {
+      input,
+      select,
+      .form-value,
+      textarea {
+        width: 100%;
+        background: #ececec;
+        border-radius: 4px;
+        height: 21px;
+        line-height: 21px;
+        font-size: 12px;
+        border: none;
+        color: $black;
+        padding: 0 5px;
+        margin-bottom: 0 !important;
+
+        &:focus {
+          outline: none;
+          box-shadow: none;
+          border: none;
+        }
+      }
+      .form-label {
+        font-size: 11px;
+        color: $black;
+        width: 100%;
+        &.fill {
+          background: #ececec;
+          border-radius: 4px;
+          padding: 0 6px;
+          height: 21px;
+          line-height: 20px;
+        }
+      }
+
+      .photo_upload_area {
+        .photo {
+          margin-bottom: 10px;
+          position: relative;
+          height: 100px;
+          width: 100%;
+          label {
+            height: 100%;
+            width: 100%;
+            border-radius: 18px;
+            text-align: center;
+            border: 2px solid #707070;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 12px;
+            color: $black;
+            overflow: hidden;
+
+            p {
+              padding: 28px;
+            }
+            img {
+              height: 98px;
+              width: 100%;
+              object-fit: cover;
+              overflow: hidden;
+            }
+          }
+          .action_buttons {
+            display: flex;
+            gap: 10px;
+            font-size: 12px;
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+          }
+        }
+      }
+    }
+
+    .create_tp_attatchment {
+      .show_attatchment_area {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 0.5rem;
+
+        .add_button {
+          label {
+            cursor: pointer;
+            height: 21px;
+            width: 21px;
+            background: #f1a655;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 20px;
+            svg {
+              path {
+                fill: $white;
+              }
+            }
+          }
+        }
+        .attatchments_displaying_area {
+          background: #ececec;
+          border-radius: 4px;
+          width: 100%;
+
+          // height: 21px;
+          .item {
+            float: left;
+            position: relative;
+            height: 21px;
+            line-height: 20px;
+            .item_label {
+              display: flex;
+              gap: 5px;
+              color: $black;
+              align-items: center;
+              border-radius: 4px;
+              padding: 0 7px;
+              cursor: pointer;
+              .item_title {
+                font-size: 11px;
+                max-width: 95px;
+                min-width: 50px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+              &.active {
+                background: $theme_color_v1;
+              }
+              &:hover {
+                background: $theme_color_v1;
+              }
+            }
+            .item_menu {
+              position: absolute;
+              padding: 10px;
+              background: $white;
+              right: 0;
+              top: 100%;
+              border-radius: 4px;
+              z-index: 9999;
+              box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.16);
+              ul {
+                padding: 0;
+                margin: 0;
+                li {
+                  font-size: 11px;
+                  margin-bottom: 5px;
+                  color: $black;
+                  padding: 0 5px;
+                  border-radius: 4px;
+                  cursor: pointer;
+                  &:hover {
+                    background: #ececec;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }

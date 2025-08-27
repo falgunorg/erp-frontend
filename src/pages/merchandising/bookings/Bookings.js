@@ -179,6 +179,19 @@ export default function Bookings(props) {
     }
   };
 
+
+
+  useEffect(async () => {
+      props.setHeaderData({
+        pageName: "Booking",
+        isNewButton: true,
+        newButtonLink: "",
+        newButtonText: "New BK",
+        isInnerSearch: true,
+        innerSearchValue: "",
+      });
+    }, []);
+
   return (
     <div className="purchase_order_page">
       <div className="purchase_action_header non_printing_area">

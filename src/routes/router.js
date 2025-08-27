@@ -252,6 +252,12 @@ import Tasks from "../pages/Tasks";
 
 import TimeAndActions from "../pages/TimeAndActions";
 
+//testing for fabric bookins
+
+import FabricBooking from "pages/merchandising/bookings/parts/templates/FabricBooking";
+import EditFabricBooking from "pages/merchandising/bookings/parts/templates/EditFabricBooking";
+import FabricBookingDetails from "pages/merchandising/bookings/parts/templates/FabricBookingDetails";
+
 function OpenRoutes() {
   return (
     <BrowserRouter>
@@ -331,6 +337,24 @@ class PrivateRoutes extends Component {
             path="/booking-manager"
             component={BookingManager}
           ></PrivateRoute>
+          {/* create fabric booking */}
+          <PrivateRoute
+            exact
+            path="/merchandising/fabric-booking/:wo_id?/:costing_item_id?"
+            component={FabricBooking}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/merchandising/edit-fabric-booking/:id?"
+            component={EditFabricBooking}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/merchandising/fabric-booking-details/:id?"
+            component={FabricBookingDetails}
+          ></PrivateRoute>
+
+          
           {/* end v-101.1 */}
           <PrivateRoute
             exact

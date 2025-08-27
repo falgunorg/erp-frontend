@@ -122,6 +122,10 @@ export default function WorkOrderDetails() {
   const colorEntries = Object.entries(colorMap);
   console.log("SIZE-COLOR", JSON.stringify(colorEntries));
 
+  const ratherModal = async (wo_id, material_id) => {
+    console.log("wo_id", wo_id);
+  };
+
   return (
     <div className="create_technical_pack" id="pdf-content">
       <div className="row create_tp_header align-items-center">
@@ -462,6 +466,7 @@ export default function WorkOrderDetails() {
                       <br /> (allow included)
                     </th>
                     <th>Supplier</th>
+                    <th>Booking Info</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -490,6 +495,19 @@ export default function WorkOrderDetails() {
                             ).toFixed(2)}
                           </td>
                           <td>{material.supplier?.company_name}</td>
+                          <td>
+                            <Link
+                              to={
+                                "/merchandising/fabric-booking/" +
+                                workorder.id +
+                                "/" +
+                                material.id
+                              }
+                              className="btn btn-success btn-sm"
+                            >
+                              Book Now
+                            </Link>
+                          </td>
                         </tr>
                       ))}
                     </React.Fragment>
