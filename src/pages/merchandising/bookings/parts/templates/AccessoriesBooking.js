@@ -5,7 +5,7 @@ import Logo from "../../../../../assets/images/logos/logo-short.png"; // Adjust 
 import CustomSelect from "elements/CustomSelect";
 import QuailEditor from "elements/QuailEditor";
 
-export default function FabricBooking(props) {
+export default function AccessoriesBooking(props) {
   const params = useParams();
   const history = useHistory();
 
@@ -37,6 +37,13 @@ export default function FabricBooking(props) {
     { id: 11, title: "TT, 30 Days" },
     { id: 12, title: "TT, 60 Days" },
   ]);
+  const [units, setUnits] = useState([]);
+  const getUnits = async () => {
+    var response = await api.post("/units");
+    if (response.status === 200 && response.data) {
+      setUnits(response.data.data);
+    }
+  };
 
   const getWorkOrder = async () => {
     const response = await api.post("/workorder-details-for-booking", {
@@ -107,6 +114,7 @@ export default function FabricBooking(props) {
 
   useEffect(() => {
     getWorkOrder();
+    getUnits();
   }, [params]);
 
   const handleFormDataChange = (name, value) => {
@@ -161,11 +169,18 @@ export default function FabricBooking(props) {
         ...formData,
         items: displayRows.map((item) => ({
           size_range: item.sizeRange,
+
           garment_color: item.garment_color,
           garment_qty: item.garment_qty,
-          fabric_code: item.fabric_code,
-          fabric_details: item.fabric_details,
-          width: item.width,
+
+          item_type: item.item_type,
+          item_description: item.item_description,
+          position: item.position,
+          item_size: item.item_size,
+          item_color: item.item_color,
+          item_brand: item.item_brand,
+
+          
           consumption: parseFloat(item.consumption),
           wastage: parseFloat(item.wastage),
           actual_total: parseFloat(item.actual_total),
@@ -277,46 +292,6 @@ export default function FabricBooking(props) {
     });
   };
 
-  // const makingRows = useMemo(() => {
-  //   const rows = [];
-  //   Object.entries(groups).forEach(([color, colorGroups]) => {
-  //     colorGroups.forEach((sizeGroup, i) => {
-  //       const qty = expandedVariations
-  //         .filter((v) => v.color === color && sizeGroup.includes(v.size))
-  //         .reduce((sum, v) => sum + v.qty, 0);
-
-  //       const consumption = parseFloat(formData?.consumption || 0);
-  //       const item_details = formData.item_details || "";
-  //       const allow = parseFloat(formData?.wastage || 0);
-  //       const total = qty * consumption;
-  //       const actualTotal = total + (total * allow) / 100;
-
-  //       rows.push({
-  //         garment_color: color,
-  //         color,
-  //         sizes: uniq(sizeGroup),
-  //         sizeRange: uniq(sizeGroup).join(", "),
-  //         garment_qty: qty,
-  //         fabric_code: "",
-  //         fabric_details: item_details,
-  //         width: "",
-  //         consumption: consumption,
-  //         total: total,
-  //         wastage: allow,
-  //         actual_total: actualTotal,
-  //         final_qty: actualTotal, // Initially same
-  //         booking_qty: actualTotal,
-  //         range: "",
-  //         sample_requirement: 0,
-  //         comment: "",
-  //         groupIndex: i,
-  //       });
-  //     });
-  //   });
-
-  //   setDisplayRows(rows);
-  // }, [expandedVariations, groups, formData]);
-
   useEffect(() => {
     const rows = [];
     Object.entries(groups).forEach(([color, colorGroups]) => {
@@ -342,9 +317,17 @@ export default function FabricBooking(props) {
           sizes: uniq(sizeGroup),
           sizeRange: uniq(sizeGroup).join(", "),
           garment_qty: qty,
-          fabric_code: existingRow?.fabric_code || "",
-          fabric_details: existingRow?.fabric_details || item_details,
-          width: existingRow?.width || "",
+          item_type: existingRow?.item_type || "",
+          item_description: existingRow?.item_description || item_details,
+
+          //new items
+
+          position: "",
+          item_size: "",
+          item_color: "",
+          item_material: "",
+          item_brand: "",
+
           consumption: existingRow?.consumption ?? consumption,
           total: qty * (existingRow?.consumption ?? consumption),
           wastage: existingRow?.wastage ?? allow,
@@ -458,16 +441,23 @@ export default function FabricBooking(props) {
             <label className="form-label">Unit</label>
           </div>
           <div className="col-lg-2">
-            <select
-              value={formData.unit}
-              name="unit"
-              onChange={(e) => handleFormDataChange("unit", e.target.value)}
-            >
-              <option value="YDS">YDS</option>
-              <option value="MTR">MTR</option>
-              <option value="KG">KG</option>
-              <option value="LBS">LBS</option>
-            </select>
+            <CustomSelect
+              className="select_wo"
+              placeholder="Unit"
+              options={units.map(({ title }) => ({
+                value: title,
+                label: title,
+              }))}
+              value={units
+                .map(({ title }) => ({
+                  value: title,
+                  label: title,
+                }))
+                .find((option) => option.value === formData.unit)}
+              onChange={(selectedOption) =>
+                handleFormDataChange("unit", selectedOption?.value)
+              }
+            />
           </div>
         </div>
 
@@ -599,12 +589,16 @@ export default function FabricBooking(props) {
               <tr>
                 <th>Garment Color</th>
                 <th>Size Ranges</th>
-                <th>Fabric Code/Color</th>
-                <th>Fabric Details</th>
-                <th>Width</th>
+                <th>Material Type</th>
+                <th>Position</th>
+                <th>Size / Dimension</th>
+                <th>Description / Specification/Composition</th>
+                <th>Color / Pantone</th>
+                <th>Item Material</th>
+                <th>Brand / Logo</th>
                 <th>Garment QTY</th>
                 <th>Consumption</th>
-                <th>Fabric</th>
+                <th>Total</th>
                 <th>Allow %</th>
                 <th>Final</th>
                 <th>Booking QTY</th>
@@ -642,37 +636,91 @@ export default function FabricBooking(props) {
                     <td style={{ width: "150px" }}>
                       <input
                         className="form-value"
-                        value={row.fabric_code}
+                        value={row.item_type}
                         onChange={(e) =>
                           handleVariationInputChange(
                             index,
-                            "fabric_code",
+                            "item_type",
                             e.target.value
                           )
                         }
                       />
                     </td>
+                    <td style={{ width: "150px" }}>
+                      <input
+                        className="form-value"
+                        value={row.position}
+                        onChange={(e) =>
+                          handleVariationInputChange(
+                            index,
+                            "position",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+
+                    <td style={{ width: "150px" }}>
+                      <input
+                        className="form-value"
+                        value={row.item_size}
+                        onChange={(e) =>
+                          handleVariationInputChange(
+                            index,
+                            "item_size",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+
                     <td style={{ minWidth: "200px" }}>
                       <textarea
                         onChange={(e) =>
                           handleVariationInputChange(
                             index,
-                            "fabric_details",
+                            "item_description",
                             e.target.value
                           )
                         }
                         className="form-value"
-                        value={row.fabric_details || ""}
+                        value={row.item_description || ""}
                       />
                     </td>
                     <td style={{ width: "70px" }}>
                       <input
                         className="form-value"
-                        value={row.width}
+                        value={row.item_color}
                         onChange={(e) =>
                           handleVariationInputChange(
                             index,
-                            "width",
+                            "item_color",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+                    <td style={{ width: "70px" }}>
+                      <input
+                        className="form-value"
+                        value={row.item_material}
+                        onChange={(e) =>
+                          handleVariationInputChange(
+                            index,
+                            "item_material",
+                            e.target.value
+                          )
+                        }
+                      />
+                    </td>
+                    <td style={{ width: "70px" }}>
+                      <input
+                        className="form-value"
+                        value={row.item_brand}
+                        onChange={(e) =>
+                          handleVariationInputChange(
+                            index,
+                            "item_brand",
                             e.target.value
                           )
                         }
@@ -761,7 +809,7 @@ export default function FabricBooking(props) {
                 );
               })}
               <tr>
-                <td colSpan="5" style={{ textAlign: "right" }}>
+                <td colSpan="9" style={{ textAlign: "right" }}>
                   <strong> Total:</strong>
                 </td>
                 <td>

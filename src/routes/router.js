@@ -257,6 +257,7 @@ import TimeAndActions from "../pages/TimeAndActions";
 import FabricBooking from "pages/merchandising/bookings/parts/templates/FabricBooking";
 import EditFabricBooking from "pages/merchandising/bookings/parts/templates/EditFabricBooking";
 import FabricBookingDetails from "pages/merchandising/bookings/parts/templates/FabricBookingDetails";
+import AccessoriesBooking from "pages/merchandising/bookings/parts/templates/AccessoriesBooking";
 
 function OpenRoutes() {
   return (
@@ -353,8 +354,11 @@ class PrivateRoutes extends Component {
             path="/merchandising/fabric-booking-details/:id?"
             component={FabricBookingDetails}
           ></PrivateRoute>
-
-          
+          <PrivateRoute
+            exact
+            path="/merchandising/accessories-booking/:wo_id?/:costing_item_id?"
+            component={AccessoriesBooking}
+          ></PrivateRoute>
           {/* end v-101.1 */}
           <PrivateRoute
             exact

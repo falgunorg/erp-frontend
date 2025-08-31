@@ -356,10 +356,10 @@ export default function PurchaseOrderDetails() {
                 <td>{item.inseam}</td>
                 <td>{item.qty}</td>
                 <td>{item.fob}</td>
-                <td>{item.total}</td>
+                <td>{Number(item.total).toFixed(2)}</td>{" "}
+                {/* format each total */}
               </tr>
             ))}
-            <br />
 
             {/* GRAND TOTAL */}
             <tr>
@@ -369,11 +369,21 @@ export default function PurchaseOrderDetails() {
               <td></td>
               <td></td>
               <td>
-                <strong>{po.total_qty}</strong>
+                <strong>
+                  {po.items?.reduce(
+                    (sum, item) => sum + Number(item.qty || 0),
+                    0
+                  )}
+                </strong>
               </td>
               <td></td>
               <td>
-                $ <strong>{po.total_value}</strong>
+                ${" "}
+                <strong>
+                  {po.items
+                    ?.reduce((sum, item) => sum + Number(item.total || 0), 0)
+                    .toFixed(2)}
+                </strong>
               </td>
             </tr>
           </tbody>

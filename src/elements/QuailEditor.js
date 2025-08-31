@@ -1,22 +1,15 @@
 import React from "react";
-import "quill/dist/quill.snow.css";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import "quill-better-table/dist/quill-better-table.css";
-import Quill from "quill";
 
-const QuailEditor = ({ content, onContentChange }) => {
-  var modules = {
+const QuillEditor = ({ content, onContentChange }) => {
+  const modules = {
     toolbar: [
-      // [{ size: ["small", false, "large", "huge"] }],
       ["bold", "italic", "underline", "strike", "blockquote"],
       [{ list: "ordered" }, { list: "bullet" }],
       ["link", "image"],
-      [
-        { list: "ordered" },
-        { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" },
-        { align: [] },
-      ],
+      [{ indent: "-1" }, { indent: "+1" }, { align: [] }],
       [
         {
           color: [
@@ -61,18 +54,17 @@ const QuailEditor = ({ content, onContentChange }) => {
     ],
   };
 
-  var formats = [
+  const formats = [
     "header",
-    "height",
     "bold",
     "italic",
     "underline",
     "strike",
     "blockquote",
     "list",
-    "color",
     "bullet",
     "indent",
+    "color",
     "link",
     "image",
     "align",
@@ -80,16 +72,16 @@ const QuailEditor = ({ content, onContentChange }) => {
   ];
 
   return (
-    <Quill
+    <ReactQuill
       className="editor"
       theme="snow"
       modules={modules}
       formats={formats}
-      placeholder="write your content ...."
-      onChange={onContentChange}
+      placeholder="Write your content..."
+      onChange={(value) => onContentChange(value)}
       value={content}
     />
   );
 };
 
-export default QuailEditor;
+export default QuillEditor;

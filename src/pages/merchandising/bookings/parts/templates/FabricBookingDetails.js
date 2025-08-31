@@ -34,18 +34,31 @@ export default function FabricBookingDetails(props) {
     (sum, row) => sum + (Number(row.garment_qty) || 0),
     0
   );
-  const totalFabric = variationItems.reduce(
-    (sum, row) => sum + (Number(row.garment_qty * row.consumption) || 0),
-    0
-  );
+
   const totalFinalQty = variationItems.reduce(
     (sum, row) => sum + (Number(row.final_qty) || 0),
     0
   );
+
+  const totalFabric = variationItems.reduce(
+    (sum, row) => sum + (Number(row.garment_qty * row.consumption) || 0),
+    0
+  );
+
   const totalBookingQty = variationItems.reduce(
     (sum, row) => sum + (Number(row.booking_qty) || 0),
     0
   );
+
+  const totalSampleRequiredQty = variationItems.reduce(
+    (sum, row) => sum + (Number(row.sample_requirement) || 0),
+    0
+  );
+
+  const totalActualAllow =
+    totalFabric > 0
+      ? (((totalBookingQty - totalFabric) / totalFabric) * 100).toFixed(2)
+      : "0.00";
 
   return (
     <div className="create_technical_pack">
@@ -66,7 +79,12 @@ export default function FabricBookingDetails(props) {
         </div>
 
         <div className="col-lg-2 text-end">
-          <Link className="btn btn-primary">Edit</Link>
+          <Link
+            to={"/merchandising/edit-fabric-booking/" + booking.id}
+            className="btn btn-primary"
+          >
+            Edit
+          </Link>
         </div>
       </div>
       <br />
@@ -124,16 +142,10 @@ export default function FabricBookingDetails(props) {
 
         <div className="row">
           <div className="col-lg-2">
-            <label className="form-label">Actual %</label>
+            <label className="form-label">Actual Allow %</label>
           </div>
           <div className="col-lg-2">
-            <div className="form-value">5%</div>
-          </div>
-          <div className="col-lg-2">
-            <label className="form-label">PP Sample Requirement </label>
-          </div>
-          <div className="col-lg-2">
-            <div className="form-value">{booking.pp_sample_requirement}</div>
+            <div className="form-value">{totalActualAllow}%</div>
           </div>
           <div className="col-lg-2">
             <label className="form-label">Unit</label>
@@ -223,6 +235,7 @@ export default function FabricBookingDetails(props) {
             <thead>
               <tr>
                 <th>Garment Color</th>
+                <th>Size Range</th>
                 <th>Fabric Code</th>
                 <th>Fabric Details</th>
                 <th>Width</th>
@@ -232,12 +245,15 @@ export default function FabricBookingDetails(props) {
                 <th>Allow %</th>
                 <th>Final</th>
                 <th>Booking QTY</th>
+                <th>Sample Requirement</th>
+                <th>Comment/Remarks</th>
               </tr>
             </thead>
             <tbody>
               {variationItems.map((item, index) => (
                 <tr key={index}>
                   <td>{item.garment_color}</td>
+                  <td>{item.size_range}</td>
                   <td>{item.fabric_code}</td>
                   <td>{item.fabric_details}</td>
                   <td>{item.width}</td>
@@ -247,23 +263,44 @@ export default function FabricBookingDetails(props) {
                   <td>{item.wastage}</td>
                   <td>{item.final_qty}</td>
                   <td>{item.booking_qty}</td>
+                  <td>{item.sample_requirement}</td>
+                  <td>{item.comment}</td>
                 </tr>
               ))}
               <tr>
-                <td colSpan="4" className="text-end fw-bold">
-                  Total:
+                <td colSpan="5" className="text-end">
+                  <strong>Total:</strong>
                 </td>
-                <td>{totalGarmentQty}</td>
+                <td>
+                  <strong>{totalGarmentQty}</strong>
+                </td>
                 <td></td>
-                <td>{totalFabric.toFixed(2)}</td>
+                <td>
+                  <strong>{totalFabric.toFixed(2)}</strong>
+                </td>
                 <td></td>
-                <td>{totalFinalQty.toFixed(2)}</td>
-                <td>{totalBookingQty.toFixed(2)}</td>
+                <td>
+                  <strong>{totalFinalQty.toFixed(2)}</strong>
+                </td>
+                <td>
+                  <strong>{totalBookingQty.toFixed(2)}</strong>
+                </td>
+                <td>
+                  <strong>{totalSampleRequiredQty.toFixed(2)}</strong>
+                </td>
+                <td></td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
+      <br />
+      <hr />
+
+      <div
+        className="preview"
+        dangerouslySetInnerHTML={{ __html: booking.description }}
+      ></div>
     </div>
   );
 }
