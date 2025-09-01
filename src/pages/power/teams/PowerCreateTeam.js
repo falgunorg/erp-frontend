@@ -26,7 +26,7 @@ export default function PowerCreateTeam(props) {
   const [departments, setDepartments] = useState([]);
   const getDepartments = async () => {
     setSpinner(true);
-    var response = await api.post("/departments");
+    var response = await api.post("/common/departments");
     console.log(response.data);
     if (response.status === 200 && response.data) {
       setDepartments(response.data.data);
@@ -39,7 +39,7 @@ export default function PowerCreateTeam(props) {
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
     setSpinner(true);
-    var response = await api.post("/companies", { type: "Own" });
+    var response = await api.post("/common/companies", { type: "Own" });
     console.log(response.data);
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);

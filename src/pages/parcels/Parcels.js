@@ -39,7 +39,7 @@ export default function Parcels(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/parcels", {
+    var response = await api.post("/common/parcels", {
       search: props.headerData.innerSearchValue,
       page: currentPage,
     });
@@ -124,7 +124,7 @@ export default function Parcels(props) {
         // Create an async function inside the then block to handle the async operation
         (async () => {
           try {
-            var response = await api.post("/parcels-delete", {
+            var response = await api.post("/common/parcels-delete", {
               id: id,
             });
 

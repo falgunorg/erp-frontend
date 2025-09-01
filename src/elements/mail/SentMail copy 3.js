@@ -187,7 +187,7 @@ export default function SentMail(props) {
   const [schedules, setSchedules] = useState([]);
   const getSchedules = async () => {
     try {
-      const response = await api.post("/schedules");
+      const response = await api.post("/common/schedules");
       if (response.status === 200 && response.data) {
         setSchedules(response.data.data);
       }

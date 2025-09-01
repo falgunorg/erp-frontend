@@ -66,7 +66,7 @@ export default function PowerSubstore(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/companies", {
+    var response = await api.post("/common/companies", {
       type: "Own",
     });
 

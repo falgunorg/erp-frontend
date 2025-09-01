@@ -77,7 +77,7 @@ export default function PowerParts(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/companies", {
+    var response = await api.post("/common/companies", {
       type: "Own",
     });
 
@@ -181,7 +181,7 @@ export default function PowerParts(props) {
 
   const [units, setUnits] = useState([]);
   const getUnits = async () => {
-    var response = await api.post("/units");
+    var response = await api.post("/common/units");
     if (response.status === 200 && response.data) {
       setUnits(response.data.data);
     } else {

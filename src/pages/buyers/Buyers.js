@@ -45,7 +45,7 @@ export default function Buyers(props) {
   const [buyers, setBuyers] = useState([]);
   const getBuyers = async () => {
     setSpinner(true);
-    var response = await api.post("/buyers", {
+    var response = await api.post("/common/buyers", {
       page: page,
       perPage: 50,
       country: filterData.country,
@@ -63,7 +63,7 @@ export default function Buyers(props) {
 
   const [countries, setCountries] = useState([]);
   const getCountries = async () => {
-    var response = await api.get("/countries");
+    var response = await api.get("/common/countries");
     if (response.status === 200 && response.data) {
       setCountries(response.data);
     }
@@ -108,7 +108,7 @@ export default function Buyers(props) {
 
   const openEditModal = async (id) => {
     setSpinner(true);
-    var response = await api.post("/buyers-show", { id: id });
+    var response = await api.post("/common/buyers-show", { id: id });
     if (response.status === 200 && response.data) {
       setEditModal(true);
       setEditForm(response.data.data);
@@ -126,7 +126,7 @@ export default function Buyers(props) {
       data.append("status", editForm.status);
       data.append("id", editForm.id);
       setSpinner(true);
-      var response = await api.post("/buyers-update", data);
+      var response = await api.post("/common/buyers-update", data);
       if (response.status === 200 && response.data) {
         setEditModal(false);
         getBuyers();

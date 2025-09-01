@@ -14,7 +14,7 @@ export default function ColorModal(props) {
     if (!colorTitle) {
       setColorError("Title is required");
     } else {
-      var response = await api.post("/colors-create", { title: colorTitle });
+      var response = await api.post("/common/colors-create", { title: colorTitle });
       if (response.status === 200 && response.data) {
         // getColors();
         setColorError("");

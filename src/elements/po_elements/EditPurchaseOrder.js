@@ -86,14 +86,14 @@ export default function EditPurchaseOrder() {
 
   const getSizes = async () => {
     setSpinner(true);
-    const response = await api.post("/sizes");
+    const response = await api.post("/common/sizes");
     if (response.status === 200) setSizes(response.data.data);
     setSpinner(false);
   };
 
   const getColors = async () => {
     setSpinner(true);
-    const response = await api.post("/colors");
+    const response = await api.post("/common/colors");
     if (response.status === 200) setColors(response.data.data);
     setSpinner(false);
   };

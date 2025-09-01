@@ -98,7 +98,7 @@ const ScheduleView = () => {
 
   const getSchedules = async () => {
     try {
-      const response = await api.post("/schedules");
+      const response = await api.post("/common/schedules");
       if (response.status === 200 && response.data) {
         setData(response.data.data);
       }
@@ -110,7 +110,7 @@ const ScheduleView = () => {
   const commitChanges = async ({ added, changed, deleted }) => {
     if (added) {
       try {
-        const response = await api.post("/schedules-create", added);
+        const response = await api.post("/common/schedules-create", added);
         if (response.status === 200 && response.data) {
           await getSchedules();
         }
@@ -141,7 +141,7 @@ const ScheduleView = () => {
 
     if (deleted !== undefined) {
       try {
-        const response = await api.post("/schedules-delete", { id: deleted });
+        const response = await api.post("/common/schedules-delete", { id: deleted });
         if (response.status === 200 && response.data) {
           await getSchedules();
         }

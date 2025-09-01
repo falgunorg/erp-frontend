@@ -69,7 +69,7 @@ export default function CreateProforma(props) {
   const [units, setUnits] = useState([]);
   const getUnits = async () => {
     setSpinner(true);
-    var response = await api.post("/units");
+    var response = await api.post("/common/units");
     if (response.status === 200 && response.data) {
       setUnits(response.data.data);
     }
@@ -375,14 +375,14 @@ export default function CreateProforma(props) {
 
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
-    var response = await api.post("/companies", { type: "Own" });
+    var response = await api.post("/common/companies", { type: "Own" });
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);
     }
   };
   const [currencies, setCurrencies] = useState([]);
   const getCurrencies = async () => {
-    var response = await api.get("/currencies");
+    var response = await api.get("/common/currencies");
     if (response.status === 200 && response.data) {
       setCurrencies(response.data);
     }

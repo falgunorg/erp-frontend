@@ -177,7 +177,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
   const [units, setUnits] = useState([]);
   const getUnits = async () => {
     setSpinner(true);
-    var response = await api.post("/units");
+    var response = await api.post("/common/units");
     if (response.status === 200 && response.data) {
       setUnits(response.data.data);
     }
@@ -187,7 +187,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
   const [sizes, setSizes] = useState([]);
   const getSizes = async () => {
     setSpinner(true);
-    var response = await api.post("/sizes");
+    var response = await api.post("/common/sizes");
     if (response.status === 200 && response.data) {
       setSizes(response.data.data);
     }
@@ -197,7 +197,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
   const [colors, setColors] = useState([]);
   const getColors = async () => {
     setSpinner(true);
-    var response = await api.post("/colors");
+    var response = await api.post("/common/colors");
     if (response.status === 200 && response.data) {
       setColors(response.data.data);
     }

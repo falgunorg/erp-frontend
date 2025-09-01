@@ -99,7 +99,7 @@ export default function PowerEditEmployee(props) {
   const submitDepartment = async () => {
     if (validateDepartmentForm()) {
       try {
-        const response = await api.post("/departments-create", departmentForm);
+        const response = await api.post("/common/departments-create", departmentForm);
         if (response.status === 200 && response.data) {
           getDepartments();
           setDepartmentModal(false);
@@ -193,7 +193,7 @@ export default function PowerEditEmployee(props) {
   const submitCompany = async () => {
     if (validateCompanyForm()) {
       try {
-        const response = await api.post("/companies-create", companyForm);
+        const response = await api.post("/common/companies-create", companyForm);
         if (response.status === 200 && response.data) {
           getCompanies();
           setCompanyModal(false);
@@ -211,7 +211,7 @@ export default function PowerEditEmployee(props) {
 
   const [departments, setDepartments] = useState([]);
   const getDepartments = async () => {
-    var response = await api.post("/departments");
+    var response = await api.post("/common/departments");
     if (response.status === 200 && response.data) {
       setDepartments(response.data.data);
     }
@@ -219,7 +219,7 @@ export default function PowerEditEmployee(props) {
 
   const [designations, setDesignations] = useState([]);
   const getDesignations = async () => {
-    var response = await api.post("/designations");
+    var response = await api.post("/common/designations");
     if (response.status === 200 && response.data) {
       setDesignations(response.data.data);
     }
@@ -227,7 +227,7 @@ export default function PowerEditEmployee(props) {
 
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
-    var response = await api.post("/companies", { type: "Own" });
+    var response = await api.post("/common/companies", { type: "Own" });
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);
     }

@@ -14,7 +14,7 @@ export default function SizeModal(props) {
     if (!sizeTitle) {
       setSizeError("Title is required");
     } else {
-      var response = await api.post("/sizes-create", { title: sizeTitle });
+      var response = await api.post("/common/sizes-create", { title: sizeTitle });
       if (response.status === 200 && response.data) {
         setSizeError("");
         setSizeTitle("");

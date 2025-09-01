@@ -28,7 +28,7 @@ export default function EditLc(props) {
   const [banks, setBanks] = useState([]);
   const getBanks = async () => {
     setSpinner(true);
-    var response = await api.get("/banks");
+    var response = await api.get("/common/banks");
     if (response.status === 200 && response.data) {
       setBanks(response.data);
     } else {
@@ -40,7 +40,7 @@ export default function EditLc(props) {
   // currencys
   const [currencies, setCurrencies] = useState([]);
   const getCurrencies = async () => {
-    var response = await api.get("/currencies");
+    var response = await api.get("/common/currencies");
     if (response.status === 200 && response.data) {
       setCurrencies(response.data);
     }

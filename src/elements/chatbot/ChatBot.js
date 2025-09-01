@@ -66,7 +66,7 @@ export default function ChatBot() {
   );
 
   const fetchConversations = async () => {
-    var response = await api.post("/conversations", {
+    var response = await api.post("/common/conversations", {
       recipient_id: recipientId,
     });
     if (response.status === 200 && response.data) {
@@ -118,7 +118,7 @@ export default function ChatBot() {
   }, [echo, activeConversation]);
 
   const fetchMessages = async (conversationId) => {
-    var response = await api.post("/conversations-details", {
+    var response = await api.post("/common/conversations-details", {
       conversation_id: conversationId,
     });
     if (response.status === 200 && response.data) {
@@ -186,7 +186,7 @@ export default function ChatBot() {
     if (!recipientId) {
       setSubmitError("Please Select Recipient");
     } else {
-      var response = await api.post("/conversations-create", {
+      var response = await api.post("/common/conversations-create", {
         recipient_id: recipientId,
       });
       if (response.status === 200 && response.data) {

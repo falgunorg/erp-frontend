@@ -17,7 +17,7 @@ export default function CreateRequisition(props) {
   const [units, setUnits] = useState([]);
   const getUnits = async () => {
     setSpinner(true);
-    var response = await api.post("/units");
+    var response = await api.post("/common/units");
     if (response.status === 200 && response.data) {
       setUnits(response.data.data);
     }

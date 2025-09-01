@@ -24,7 +24,7 @@ export default function OpenSubstore(props) {
 
   const getCompanies = async () => {
     setSpinner(true);
-    var response = await api.post("/companies");
+    var response = await api.post("/common/companies");
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);
     }

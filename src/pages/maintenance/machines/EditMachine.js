@@ -18,7 +18,7 @@ export default function EditMachine(props) {
 
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
-    var response = await api.post("/companies", { type: "Own" });
+    var response = await api.post("/common/companies", { type: "Own" });
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);
     }

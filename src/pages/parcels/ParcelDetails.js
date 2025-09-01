@@ -19,7 +19,7 @@ const ParcelDetails = (props) => {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/parcels-show", {
+    var response = await api.post("/common/parcels-show", {
       tracking_number: params.tracking_number,
     });
 
@@ -51,7 +51,7 @@ const ParcelDetails = (props) => {
         // Create an async function inside the then block to handle the async operation
         (async () => {
           try {
-            var response = await api.post("/parcels-receive", {
+            var response = await api.post("/common/parcels-receive", {
               id: id,
             });
 

@@ -85,7 +85,7 @@ export default function AdminStore(props) {
   const [buyers, setBuyers] = useState([]);
   const getBuyers = async () => {
     setSpinner(true);
-    var response = await api.post("/buyers");
+    var response = await api.post("/common/buyers");
     if (response.status === 200 && response.data) {
       setBuyers(response.data.data);
     } else {
@@ -110,7 +110,7 @@ export default function AdminStore(props) {
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
     setSpinner(true);
-    var response = await api.post("/companies", { type: "Own" });
+    var response = await api.post("/common/companies", { type: "Own" });
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);
     } else {

@@ -6,7 +6,7 @@ export default function StyleModal(props) {
   // get all buyers
   const [buyers, setBuyers] = useState([]);
   const getBuyers = async () => {
-    var response = await api.post("/buyers");
+    var response = await api.post("/common/buyers");
     if (response.status === 200 && response.data) {
       setBuyers(response.data.data);
     } else {

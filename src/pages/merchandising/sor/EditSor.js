@@ -57,7 +57,7 @@ export default function EditSor(props) {
   const [colors, setColors] = useState([]);
   const getColors = async () => {
     setSpinner(true);
-    var response = await api.post("/colors");
+    var response = await api.post("/common/colors");
     if (response.status === 200 && response.data) {
       setColors(response.data.data);
     }
@@ -67,7 +67,7 @@ export default function EditSor(props) {
   const [sizes, setSizes] = useState([]);
   const getSizes = async () => {
     setSpinner(true);
-    var response = await api.post("/sizes");
+    var response = await api.post("/common/sizes");
     if (response.status === 200 && response.data) {
       setSizes(response.data.data);
     }

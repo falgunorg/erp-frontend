@@ -10,7 +10,7 @@ export default function Profile(props) {
   // retrive data
   const [departments, setDepartments] = useState([]);
   const getDepartments = async () => {
-    var response = await api.post("/departments");
+    var response = await api.post("/common/departments");
     if (response.status === 200 && response.data) {
       setDepartments(response.data.data);
     }
@@ -18,7 +18,7 @@ export default function Profile(props) {
 
   const [designations, setDesignations] = useState([]);
   const getDesignations = async () => {
-    var response = await api.post("/designations");
+    var response = await api.post("/common/departments");
     if (response.status === 200 && response.data) {
       setDesignations(response.data.data);
     }
@@ -26,7 +26,7 @@ export default function Profile(props) {
 
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
-    var response = await api.post("/companies", { type: "Own" });
+    var response = await api.post("/common/companies", { type: "Own" });
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);
     }

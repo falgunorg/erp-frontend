@@ -38,7 +38,7 @@ const CreateParcel = () => {
   const [buyers, setBuyers] = useState([]);
   const getBuyers = async () => {
     setSpinner(true);
-    var response = await api.post("/buyers");
+    var response = await api.post("/common/buyers");
     if (response.status === 200 && response.data) {
       setBuyers(response.data.data);
     } else {
@@ -50,7 +50,7 @@ const CreateParcel = () => {
   const [companies, setCompanies] = useState([]);
   const getCompanies = async () => {
     setSpinner(true);
-    var response = await api.post("/companies", { type: "Own" });
+    var response = await api.post("/common/companies", { type: "Own" });
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);
     } else {
@@ -200,7 +200,7 @@ const CreateParcel = () => {
       data.append("description", message);
       data.append("photo", imageFile ? imageFile : capturedPhoto);
       setSpinner(true);
-      var response = await api.post("/parcels-create", data);
+      var response = await api.post("/common/parcels-create", data);
       if (response.status === 200 && response.data) {
         setNewParcel({
           title: "",

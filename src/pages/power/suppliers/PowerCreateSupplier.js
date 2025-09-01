@@ -10,7 +10,7 @@ export default function PowerCreateSupplier(props) {
 
   const [countries, setCountries] = useState([]);
   const getCountries = async () => {
-    var response = await api.get("/countries");
+    var response = await api.get("/common/countries");
     if (response.status === 200 && response.data) {
       setCountries(response.data);
     }

@@ -63,7 +63,7 @@ export default function ReturnByMe(props) {
   const [buyers, setBuyers] = useState([]);
   const getBuyers = async () => {
     setSpinner(true);
-    var response = await api.post("/buyers");
+    var response = await api.post("/common/buyers");
     if (response.status === 200 && response.data) {
       setBuyers(response.data.data);
     } else {

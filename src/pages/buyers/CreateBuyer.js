@@ -12,7 +12,7 @@ export default function CreateBuyer(props) {
 
   const [countries, setCountries] = useState([]);
   const getCountries = async () => {
-    var response = await api.get("/countries");
+    var response = await api.get("/common/countries");
     if (response.status === 200 && response.data) {
       setCountries(response.data);
     }
@@ -113,7 +113,7 @@ export default function CreateBuyer(props) {
       data.append("company", formDataSet.company);
       data.append("status", formDataSet.status);
       setSpinner(true);
-      var response = await api.post("/buyers-create", data);
+      var response = await api.post("/common/buyers-create", data);
       if (response.status === 200 && response.data) {
         history.push("/buyers");
       } else {

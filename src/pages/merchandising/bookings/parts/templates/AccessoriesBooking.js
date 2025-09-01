@@ -39,7 +39,7 @@ export default function AccessoriesBooking(props) {
   ]);
   const [units, setUnits] = useState([]);
   const getUnits = async () => {
-    var response = await api.post("/units");
+    var response = await api.post("/common/units");
     if (response.status === 200 && response.data) {
       setUnits(response.data.data);
     }
@@ -169,18 +169,14 @@ export default function AccessoriesBooking(props) {
         ...formData,
         items: displayRows.map((item) => ({
           size_range: item.sizeRange,
-
           garment_color: item.garment_color,
           garment_qty: item.garment_qty,
-
           item_type: item.item_type,
           item_description: item.item_description,
           position: item.position,
           item_size: item.item_size,
           item_color: item.item_color,
           item_brand: item.item_brand,
-
-          
           consumption: parseFloat(item.consumption),
           wastage: parseFloat(item.wastage),
           actual_total: parseFloat(item.actual_total),

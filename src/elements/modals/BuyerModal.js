@@ -5,7 +5,7 @@ import api from "../../services/api";
 export default function BuyerModal(props) {
   const [countries, setCountries] = useState([]);
   const getCountries = async () => {
-    var response = await api.get("/countries");
+    var response = await api.get("/common/countries");
     if (response.status === 200 && response.data) {
       setCountries(response.data);
     }
@@ -49,7 +49,7 @@ export default function BuyerModal(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
-      var response = await api.post("/buyers-create", formDataSet);
+      var response = await api.post("/common/buyers-create", formDataSet);
       if (response.status === 200 && response.data) {
         setFormDataSet({
           name: "",

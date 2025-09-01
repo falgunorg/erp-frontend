@@ -17,7 +17,7 @@ export default function UnitModal(props) {
     if (!unitTitle) {
       setUnitError("Title is required");
     } else {
-      var response = await api.post("/units-create", { title: unitTitle });
+      var response = await api.post("/common/units-create", { title: unitTitle });
       if (response.status === 200 && response.data) {
         // getUnits();
         setUnitError("");
