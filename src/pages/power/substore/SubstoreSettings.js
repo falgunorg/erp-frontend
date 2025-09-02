@@ -45,7 +45,7 @@ export default function SubstoreSettings(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substores");
+    var response = await api.post("/substore/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.all_data);
     } else {
@@ -71,7 +71,7 @@ export default function SubstoreSettings(props) {
     event.preventDefault();
     setSpinner(true);
     try {
-      const response = await api.post("/substores-revise", reviseForm);
+      const response = await api.post("/substore/substores-revise", reviseForm);
       if (response.status === 200 && response.data) {
         setReviseForm({
           part_id: "",
@@ -91,7 +91,7 @@ export default function SubstoreSettings(props) {
   const getAccesses = async () => {
     setSpinner(true);
     try {
-      const response = await api.post("/power/substores/access");
+      const response = await api.post("/admin/substores/access");
       if (response.status === 200 && response.data) {
         setAccesses(response.data.data);
       } else {
@@ -155,7 +155,7 @@ export default function SubstoreSettings(props) {
   const getEmployees = async () => {
     setSpinner(true);
     try {
-      const response = await api.post("/employees");
+      const response = await api.post("/admin/employees");
       if (response.status === 200 && response.data) {
         setEmployees(response.data.data);
       } else {
@@ -259,7 +259,7 @@ export default function SubstoreSettings(props) {
 
   const handleUpdateClick = async () => {
     try {
-      const response = await api.post("/power/substores/access-update", {
+      const response = await api.post("/admin/substores/access-update", {
         ...editedItem,
         area: editedItem.area.join(","), // Convert the array back to a comma-separated string
       });

@@ -26,7 +26,7 @@ export default function CreateProforma(props) {
   const [contracts, setContracts] = useState([]);
   const getContracts = async () => {
     setSpinner(true);
-    var response = await api.post("/purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts");
     if (response.status === 200 && response.data) {
       setContracts(response.data.data);
     } else {
@@ -38,7 +38,7 @@ export default function CreateProforma(props) {
   const [bookings, setBookings] = useState([]);
   const getBookings = async (supplier_id) => {
     setSpinner(true);
-    var response = await api.post("/bookings", {
+    var response = await api.post("/merchandising/bookings", {
       supplier_id: supplier_id,
       booking_user: props.userData.userId,
       status: "Confirmed",
@@ -80,7 +80,7 @@ export default function CreateProforma(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -214,7 +214,7 @@ export default function CreateProforma(props) {
     if (field === "booking_id") {
       setSpinner(true);
       try {
-        const response = await api.post("/bookings-show", { id: value });
+        const response = await api.post("/merchandising/bookings-show", { id: value });
         if (response.status === 200 && response.data) {
           updatedItems[index].bookingItems = response.data.data.booking_items;
         } else {
@@ -363,7 +363,7 @@ export default function CreateProforma(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/proformas-create", data);
+      var response = await api.post("/merchandising/proformas-create", data);
       if (response.status === 200 && response.data) {
         history.push("/merchandising/proformas");
       } else {

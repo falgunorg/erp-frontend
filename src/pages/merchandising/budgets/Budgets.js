@@ -36,7 +36,7 @@ export default function Budgets(props) {
   const [budgets, setBudgets] = useState([]);
   const getBudgets = async () => {
     setSpinner(true);
-    var response = await api.post("/budgets", {
+    var response = await api.post("/merchandising/budgets", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       status: filterData.status,

@@ -11,7 +11,7 @@ export default function EditBuyer(props) {
 
   const getEmployee = async () => {
     setSpinner(true);
-    var response = await api.post("/employees-show", { id: params.id });
+    var response = await api.post("/admin/employees-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
     }
@@ -185,7 +185,7 @@ export default function EditBuyer(props) {
 
   const [roles, setRoles] = useState([]);
   const getRoles = async () => {
-    var response = await api.get("/roles");
+    var response = await api.get("/admin/roles");
     if (response.status === 200 && response.data) {
       setRoles(response.data);
     }
@@ -287,7 +287,7 @@ export default function EditBuyer(props) {
       data.append("status", formDataSet.status);
       data.append("id", formDataSet.id);
       setSpinner(true);
-      var response = await api.post("/employees-update", data);
+      var response = await api.post("/admin/employees-update", data);
       if (response.status === 200 && response.data) {
         history.push("/employees");
       } else {

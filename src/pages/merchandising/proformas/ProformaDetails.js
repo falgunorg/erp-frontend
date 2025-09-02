@@ -56,7 +56,7 @@ export default function ProformaDetails(props) {
   const [proformaItems, setProformaItems] = useState([]);
   const getProforma = async () => {
     setSpinner(true);
-    var response = await api.post("/proformas-show", { id: params.id });
+    var response = await api.post("/merchandising/proformas-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setProforma(response.data.data);
       setProformaItems(response.data.data.proforma_items);
@@ -66,7 +66,7 @@ export default function ProformaDetails(props) {
 
   const toggleStatus = async (status) => {
     setSpinner(true);
-    var response = await api.post("/proformas-toggle-status", {
+    var response = await api.post("/merchandising/proformas-toggle-status", {
       id: proforma.id,
       status: status,
     });

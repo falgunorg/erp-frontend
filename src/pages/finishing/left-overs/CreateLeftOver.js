@@ -25,7 +25,7 @@ export default function CreateLeftOver(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async (buyer_id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks", { buyer_id: buyer_id });
+    var response = await api.post("/merchandising/techpacks", { buyer_id: buyer_id });
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.data);
     } else {
@@ -116,7 +116,7 @@ export default function CreateLeftOver(props) {
       dataSet.append("reference", formDataSet.reference);
       dataSet.append("remarks", formDataSet.remarks);
       dataSet.append("photo", imageFile ? imageFile : capturedPhoto);
-      var response = await api.post("/left-overs-create", dataSet);
+      var response = await api.post("/store/left-overs-create", dataSet);
       if (response.status === 200 && response.data) {
         swal({
           title: "Record Created Success",

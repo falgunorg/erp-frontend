@@ -31,7 +31,7 @@ export default function CostSheets(props) {
   const [costings, setCostings] = useState({});
 
   const getCostings = async () => {
-    const response = await api.post("/costings", {
+    const response = await api.post("/merchandising/costings", {
       department: props.sidebarFilter.department,
       purchase_contract_id: props.sidebarFilter.purchase_contract_id,
       technical_package_id: props.sidebarFilter.technical_package_id,
@@ -79,7 +79,7 @@ export default function CostSheets(props) {
 
     if (confirmed) {
       try {
-        var response = await api.post("/costings-delete", {
+        var response = await api.post("/merchandising/costings-delete", {
           id: id,
         });
         if (response.status === 200 && response.data) {

@@ -93,7 +93,7 @@ export default function ReviseRequisition(props) {
     data.append("requisition_items", JSON.stringify(requisitionItems));
     data.append("id", formDataSet.id);
     setSpinner(true);
-    var response = await api.post("/requisitions-revise", data);
+    var response = await api.post("/substore/requisitions-revise", data);
     if (response.status === 200 && response.data) {
       history.push("/requisitions-details/" + formDataSet.id);
     } else {
@@ -104,7 +104,7 @@ export default function ReviseRequisition(props) {
 
   const getRequisition = async () => {
     setSpinner(true);
-    var response = await api.post("/requisitions-show", { id: params.id });
+    var response = await api.post("/substore/requisitions-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
       setRequisitionItems(response.data.data.requisition_items);

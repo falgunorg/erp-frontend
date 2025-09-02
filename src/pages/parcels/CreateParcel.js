@@ -62,7 +62,7 @@ const CreateParcel = () => {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async (company_id) => {
     setSpinner(true);
-    var response = await api.post("/employees", {
+    var response = await api.post("/admin/employees", {
       company_id: company_id,
       without_me: true,
     });

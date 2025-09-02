@@ -23,7 +23,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
   const handleChange = async (name, value) => {
     if (name === "technical_package_id") {
       try {
-        const response = await api.post("/technical-package-show", {
+        const response = await api.post("/merchandising/technical-packages-show", {
           id: value,
         });
 
@@ -102,7 +102,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
         }
       });
 
-      const response = await api.post("/workorders-create", data);
+      const response = await api.post("/merchandising/workorders-create", data);
       if (response.status === 200 && response.data) {
         history.push("/work-orders/" + response.data.workorder.id);
         setRenderArea("details");
@@ -125,7 +125,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
   const [techpacks, setTechpacks] = useState([]);
 
   const getTechpacks = async () => {
-    const response = await api.post("/technical-packages-all-desc", {
+    const response = await api.post("/merchandising/technical-packages-all-desc", {
       // mode: "self",
       group: "costing_done",
     });
@@ -137,7 +137,7 @@ export default function CreateWorkOrder({ renderArea, setRenderArea }) {
 
   const [pos, setPos] = useState([]);
   const getPos = async () => {
-    const response = await api.post("/public-pos", {
+    const response = await api.post("/merchandising/pos-public", {
       technical_package_id: formData.technical_package_id,
       not_included_on_wo: true,
     });

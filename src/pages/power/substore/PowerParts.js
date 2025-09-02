@@ -63,7 +63,7 @@ export default function PowerParts(props) {
   const getEmployees = async () => {
     setSpinner(true);
     // Send the correct page parameter to the API request
-    var response = await api.post("/employees");
+    var response = await api.post("/admin/employees");
     if (response.status === 200 && response.data) {
       setEmployees(response.data.data);
     } else {
@@ -95,7 +95,7 @@ export default function PowerParts(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/power/substores/parts", {
+    var response = await api.post("/admin/substores/parts", {
       search: searchValue,
       page: currentPage,
       type: filterData.type,
@@ -200,7 +200,7 @@ export default function PowerParts(props) {
     data.append("photo", file);
     data.append("id", item.id);
     try {
-      const response = await api.post("/parts-upload-photo", data);
+      const response = await api.post("/substore/parts-upload-photo", data);
       if (response.status === 200 && response.data) {
         swal({
           title: "Update Success",
@@ -236,7 +236,7 @@ export default function PowerParts(props) {
     }));
   };
   const handleSaveClick = async () => {
-    var response = await api.post("/parts-update", editedItem);
+    var response = await api.post("/substore/parts-update", editedItem);
     if (response.status === 200 && response.data) {
       setEditIndex(null);
       getParts();

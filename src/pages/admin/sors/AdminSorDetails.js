@@ -61,7 +61,7 @@ export default function AdminSorDetails(props) {
 
   const submitSample = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/sors-togglestatus", {
+    var response = await api.post("/merchandising/sors-togglestatus", {
       id: item_id,
       status: "Confirmed",
     });
@@ -75,7 +75,7 @@ export default function AdminSorDetails(props) {
   };
   const deleteSor = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/sors-delete", {
+    var response = await api.post("/merchandising/sors-delete", {
       id: item_id,
     });
     if (response.status === 200 && response.data) {

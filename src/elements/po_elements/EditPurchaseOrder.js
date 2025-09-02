@@ -26,7 +26,7 @@ export default function EditPurchaseOrder() {
 
   const getContracts = async () => {
     setSpinner(true);
-    var response = await api.post("/public-purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts-public");
     if (response.status === 200 && response.data) {
       setContracts(response.data.data);
     }
@@ -36,7 +36,7 @@ export default function EditPurchaseOrder() {
   const [terms, setTerms] = useState([]);
   const getTerms = async () => {
     setSpinner(true);
-    var response = await api.post("/terms");
+    var response = await api.post("/admin/terms");
     if (response.status === 200 && response.data) {
       setTerms(response.data.data);
     }
@@ -99,7 +99,7 @@ export default function EditPurchaseOrder() {
   };
 
   const getTechpacks = async () => {
-    const response = await api.post("/technical-packages-all-desc", {
+    const response = await api.post("/merchandising/technical-packages-all-desc", {
       // mode: "self",
     });
     if (response.status === 200) setTechpacks(response.data.data);
@@ -115,7 +115,7 @@ export default function EditPurchaseOrder() {
 
   const getPo = async () => {
     setSpinner(true);
-    const response = await api.post("/pos-show", { id: params.id });
+    const response = await api.post("/merchandising/pos-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const po = response.data.po;
 
@@ -170,7 +170,7 @@ export default function EditPurchaseOrder() {
   const handleChange = async (name, value) => {
     if (name === "technical_package_id") {
       try {
-        const response = await api.post("/technical-package-show", {
+        const response = await api.post("/merchandising/technical-packages-show", {
           id: value,
         });
         if (response.status === 200 && response.data) {
@@ -251,7 +251,7 @@ export default function EditPurchaseOrder() {
       }
 
       setSpinner(true);
-      const response = await api.post("/pos-update", data);
+      const response = await api.post("/merchandising/pos-update", data);
       if (response.status === 200 && response.data) {
         history.push("/purchase-orders/" + formData.id);
         window.location.reload();

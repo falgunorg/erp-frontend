@@ -39,7 +39,7 @@ export default function PowerPurchaseContractDetails(props) {
   const [proformas, setProformas] = useState([]);
   const getContract = async () => {
     setSpinner(true);
-    var response = await api.post("/purchase-contracts-show", {
+    var response = await api.post("/merchandising/purchase-contracts-show", {
       id: params.id,
     });
     if (response.status === 200 && response.data) {

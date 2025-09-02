@@ -34,7 +34,7 @@ export default function CreateLeftOverStore(props) {
   const [overs, setOvers] = useState([]);
   const getOvers = async () => {
     setSpinner(true);
-    var response = await api.post("/left-overs", {
+    var response = await api.post("/store/left-overs", {
       status: "Pending",
       buyer_id: filterData.buyer_id,
       from_date: filterData.from_date,
@@ -72,7 +72,7 @@ export default function CreateLeftOverStore(props) {
     if (result) {
       setSpinner(true);
       try {
-        var response = await api.post("/left-overs-receive", { id: item_id });
+        var response = await api.post("/store/left-overs-receive", { id: item_id });
         if (response.status === 200 && response.data) {
           getOvers();
         } else {

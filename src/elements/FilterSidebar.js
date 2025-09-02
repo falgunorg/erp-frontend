@@ -14,7 +14,7 @@ export default function FilterSidebar(props) {
   const [contracts, setContracts] = useState([]);
 
   const getContracts = async () => {
-    var response = await api.post("/public-purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts-public");
     if (response.status === 200 && response.data) {
       setContracts(response.data.data);
     }
@@ -23,7 +23,7 @@ export default function FilterSidebar(props) {
   const [techpacks, setTechpacks] = useState([]);
 
   const getTechpacks = async () => {
-    var response = await api.post("/technical-packages-all-desc");
+    var response = await api.post("/merchandising/technical-packages-all-desc");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.data);
     }

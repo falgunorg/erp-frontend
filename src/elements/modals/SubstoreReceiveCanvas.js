@@ -138,7 +138,7 @@ export default function SubstoreReceiveCanvas(props) {
       formData.append("mrr_no", formDataSet.mrr_no);
       formData.append("challan_copy", formDataSet.challan_copy);
       try {
-        const response = await api.post("/substores-receive", formData);
+        const response = await api.post("/substore/substores-receive", formData);
         if (response.status === 200 && response.data) {
           swal({ title: "Successfully Receive Item", icon: "success" });
           setErrors({});
@@ -165,7 +165,7 @@ export default function SubstoreReceiveCanvas(props) {
   const getRequisitionItem = async () => {
     try {
       setSpinner(true);
-      const response = await api.post("/requisitions-single-item", {
+      const response = await api.post("/substore/requisitions-single-item", {
         id: props.requisitionItemId,
       });
 
@@ -200,7 +200,7 @@ export default function SubstoreReceiveCanvas(props) {
   const getSuppliers = async () => {
     try {
       setSpinner(true);
-      const response = await api.post("/suppliers");
+      const response = await api.post("/admin/suppliers");
 
       if (response.status === 200 && response.data && response.data.data) {
         setSuppliers(response.data.data);

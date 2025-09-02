@@ -36,7 +36,7 @@ export default function SubstoreIssueCanvas(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substores");
+    var response = await api.post("/substore/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.company_wise);
     } else {
@@ -48,7 +48,7 @@ export default function SubstoreIssueCanvas(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async (issue_type) => {
     setSpinner(true);
-    var response = await api.post("/employees", {
+    var response = await api.post("/admin/employees", {
       issue_type: issue_type,
     });
     if (response.status === 200 && response.data) {
@@ -69,7 +69,7 @@ export default function SubstoreIssueCanvas(props) {
   const fetchSubstoreData = async (id) => {
     setSpinner(true);
     try {
-      const response = await api.post("/substores-show", { id });
+      const response = await api.post("/substore/substores-show", { id });
       if (response.status === 200 && response.data) {
         const subStore = response.data.data;
         setFormDataSet((prevState) => ({
@@ -216,7 +216,7 @@ export default function SubstoreIssueCanvas(props) {
       formData.append("issue_date", formDataSet.issue_date);
       setSpinner(true);
       try {
-        const response = await api.post("/substores-issue", formData);
+        const response = await api.post("/substore/substores-issue", formData);
         if (response.status === 200 && response.data) {
           swal({ title: "Successfully Issued Item", icon: "success" });
           setErrors({});

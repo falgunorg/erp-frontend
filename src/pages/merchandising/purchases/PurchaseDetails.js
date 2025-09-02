@@ -49,7 +49,7 @@ export default function PurchaseDetails(props) {
 
   const getPurchase = async () => {
     setSpinner(true);
-    var response = await api.post("/purchases-show", { id: params.id });
+    var response = await api.post("/merchandising/purchases-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setPurchase(response.data.data);
       setPurchaseItems(response.data.data.purchase_items);

@@ -97,7 +97,7 @@ export default function EditPurchase(props) {
 
   const getPurchase = async () => {
     setSpinner(true);
-    var response = await api.post("/purchases-show", { id: params.id });
+    var response = await api.post("/merchandising/purchases-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const purchase = response.data.data;
       setFormDataSet({
@@ -260,7 +260,7 @@ export default function EditPurchase(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/purchases-update", data);
+      var response = await api.post("/merchandising/purchases-update", data);
       if (response.status === 200 && response.data) {
         history.push(
           "/merchandising/purchases-details/" + response.data.data.id
@@ -274,7 +274,7 @@ export default function EditPurchase(props) {
 
   const [purchaseContracts, setPurchaseContracts] = useState([]);
   const getPurchaseContracts = async () => {
-    var response = await api.post("/purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts");
     if (response.status === 200 && response.data) {
       setPurchaseContracts(response.data.data);
     }
@@ -304,7 +304,7 @@ export default function EditPurchase(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async (contract_id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks", {
+    var response = await api.post("/merchandising/techpacks", {
       status: "Costing Done",
       view: "team",
       department: userInfo.department_title,

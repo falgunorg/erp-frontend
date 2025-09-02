@@ -47,7 +47,7 @@ export default function LeftOvers(props) {
 
   const getOvers = async () => {
     setSpinner(true);
-    var response = await api.post("/left-overs", {
+    var response = await api.post("/store/left-overs", {
       status: filterData.status,
       buyer_id: filterData.buyer_id,
       from_date: filterData.from_date,

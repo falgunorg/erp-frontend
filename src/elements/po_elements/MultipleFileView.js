@@ -28,7 +28,7 @@ const MultipleFileView = ({ label, selectedFiles, filled }) => {
   }, [openMenuIndex]);
 
   const deleteFile = async (id) => {
-    var response = await api.post("/pos-file-delete", { id: id });
+    var response = await api.post("/merchandising/pos-file-delete", { id: id });
     if (response.status === 200 && response.data) {
       alert("Successfully Deleted");
     }

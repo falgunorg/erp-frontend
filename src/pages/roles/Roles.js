@@ -9,7 +9,7 @@ export default function Roles(props) {
 
   const getRoles = async () => {
     setSpinner(true);
-    var response = await api.get("/roles");
+    var response = await api.get("/admin/roles");
     console.log(response.data);
     if (response.status === 200 && response.data) {
       setRoles(response.data);

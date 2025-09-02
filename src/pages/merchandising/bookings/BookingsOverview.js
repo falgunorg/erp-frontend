@@ -36,7 +36,7 @@ export default function BookingsOverview(props) {
   const [budgets, setBudegts] = useState([]);
   const getBudgets = async () => {
     setSpinner(true);
-    var response = await api.post("/bookings-overview", {
+    var response = await api.post("/merchandising/bookings-overview", {
       purchase_id: filterData.purchase_id,
       from_date: filterData.from_date,
       to_date: filterData.to_date,
@@ -56,7 +56,7 @@ export default function BookingsOverview(props) {
   const [purchases, setPurchases] = useState([]);
   const getPurchases = async () => {
     setSpinner(true);
-    var response = await api.post("/purchases");
+    var response = await api.post("/merchandising/purchases");
     if (response.status === 200 && response.data) {
       setPurchases(response.data.data);
     } else {

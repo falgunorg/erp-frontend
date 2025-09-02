@@ -15,7 +15,7 @@ export default function CreateLc(props) {
   const [contracts, setContracts] = useState([]);
   const getContracts = async () => {
     setSpinner(true);
-    var response = await api.post("/purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts");
     if (response.status === 200 && response.data) {
       setContracts(response.data.data);
     } else {
@@ -49,7 +49,7 @@ export default function CreateLc(props) {
   const [proformas, setProformas] = useState([]);
   const getProformas = async () => {
     setSpinner(true);
-    var response = await api.post("/proformas", {
+    var response = await api.post("/merchandising/proformas", {
       status: "Received",
       department: userInfo.department_title,
       designation: userInfo.designation_title,
@@ -68,7 +68,7 @@ export default function CreateLc(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {

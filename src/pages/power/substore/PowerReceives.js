@@ -130,7 +130,7 @@ export default function PowerReceives(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async (issue_type) => {
     setSpinner(true);
-    var response = await api.post("/employees", {
+    var response = await api.post("/admin/employees", {
       issue_type: "Self",
       without_me: true,
     });
@@ -144,7 +144,7 @@ export default function PowerReceives(props) {
   const getSuppliers = async () => {
     setSpinner(true);
     // Send the correct page parameter to the API request
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -159,7 +159,7 @@ export default function PowerReceives(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/power/substores/receives", {
+    var response = await api.post("/admin/substores/receives", {
       period: filterData.period,
       year: filterData.year,
       month: filterData.month,
@@ -204,7 +204,7 @@ export default function PowerReceives(props) {
         // Create an async function inside the then block to handle the async operation
         (async () => {
           try {
-            var response = await api.post("/substores-receive-undo", {
+            var response = await api.post("/substore/substores-receive-undo", {
               id: id,
             });
 

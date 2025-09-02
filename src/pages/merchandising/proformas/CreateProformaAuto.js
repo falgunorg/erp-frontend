@@ -27,7 +27,7 @@ export default function CreateProformaAuto(props) {
   const [contracts, setContracts] = useState([]);
   const getContracts = async () => {
     setSpinner(true);
-    var response = await api.post("/purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts");
     if (response.status === 200 && response.data) {
       setContracts(response.data.data);
     } else {
@@ -50,7 +50,7 @@ export default function CreateProformaAuto(props) {
 
   const getSupplier = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers-show", {
+    var response = await api.post("/admin/suppliers-show", {
       id: params.supplier_id,
     });
     if (response.status === 200 && response.data) {
@@ -91,7 +91,7 @@ export default function CreateProformaAuto(props) {
     if (name === "purchase_contract_id") {
       setSpinner(true);
       try {
-        const response = await api.post("/purchase-contracts-show", {
+        const response = await api.post("/merchandising/purchase-contracts-show", {
           id: parseInt(value),
         });
         if (response.status === 200 && response.data) {
@@ -248,7 +248,7 @@ export default function CreateProformaAuto(props) {
 
   const getBookingItems = async () => {
     setSpinner(true);
-    var response = await api.post("/bookings-items-wo-pi-by-supplier", {
+    var response = await api.post("/merchandising/bookings-items-wo-pi-by-supplier", {
       supplier_id: params.supplier_id,
       booking_user: props.userData.userId,
     });
@@ -301,7 +301,7 @@ export default function CreateProformaAuto(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/proformas-create-auto", data);
+      var response = await api.post("/merchandising/proformas-create-auto", data);
       if (response.status === 200 && response.data) {
         history.push("/merchandising/proformas");
       } else {

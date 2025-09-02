@@ -84,7 +84,7 @@ export default function PowerSubstore(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/power/substores", {
+    var response = await api.post("/admin/substores", {
       search: searchValue,
       page: currentPage,
       type: filterData.type,
@@ -172,7 +172,7 @@ export default function PowerSubstore(props) {
     data.append("photo", file);
     data.append("id", item.part_id);
     try {
-      const response = await api.post("/parts-upload-photo", data);
+      const response = await api.post("/substore/parts-upload-photo", data);
       if (response.status === 200 && response.data) {
         swal({
           title: "Update Success",

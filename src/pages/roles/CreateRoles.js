@@ -430,7 +430,7 @@ export default function CreateRoles() {
 
     if (valid) {
       setSpinner(true);
-      var response = await api.post("/roles-create", {
+      var response = await api.post("/admin/roles-create", {
         title: formData.title,
         level: formData.level,
         announcement_data: announcementData,

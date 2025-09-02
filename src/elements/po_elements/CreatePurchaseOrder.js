@@ -20,7 +20,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
 
   const getContracts = async () => {
     setSpinner(true);
-    var response = await api.post("/public-purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts-public");
     if (response.status === 200 && response.data) {
       setContracts(response.data.data);
     }
@@ -30,7 +30,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
   const [terms, setTerms] = useState([]);
   const getTerms = async () => {
     setSpinner(true);
-    var response = await api.post("/terms");
+    var response = await api.post("/admin/terms");
     if (response.status === 200 && response.data) {
       setTerms(response.data.data);
     }
@@ -105,7 +105,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
   const handleChange = async (name, value) => {
     if (name === "technical_package_id") {
       try {
-        const response = await api.post("/technical-package-show", {
+        const response = await api.post("/merchandising/technical-packages-show", {
           id: value,
         });
 
@@ -198,7 +198,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
         data.append("attatchments[]", selectedPoFiles[i]);
       }
       setSpinner(true);
-      const response = await api.post("/pos-create", data);
+      const response = await api.post("/merchandising/pos-create", data);
       if (response.status === 200 && response.data) {
         history.push("/purchase-orders/" + response.data.po.id);
         window.location.reload();
@@ -284,7 +284,7 @@ export default function CreatePurchaseOrder({ renderArea, setRenderArea }) {
   const [techpacks, setTechpacks] = useState([]);
 
   const getTechpacks = async () => {
-    const response = await api.post("/technical-packages-all-desc", {
+    const response = await api.post("/merchandising/technical-packages-all-desc", {
       // mode: "self",
     });
 

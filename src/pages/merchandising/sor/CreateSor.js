@@ -31,7 +31,7 @@ export default function CreateSor(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks", {
+    var response = await api.post("/merchandising/techpacks", {
       department: userInfo.department_title,
       designation: userInfo.designation_title,
       view: "team",
@@ -45,7 +45,7 @@ export default function CreateSor(props) {
   const [sampleTypes, setSampleTypes] = useState([]);
   const getSampleTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/sors-types");
+    var response = await api.post("/merchandising/sors-types");
     if (response.status === 200 && response.data) {
       setSampleTypes(response.data.data);
     } else {
@@ -260,7 +260,7 @@ export default function CreateSor(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/sors-create", data);
+      var response = await api.post("/merchandising/sors-create", data);
       if (response.status === 200 && response.data) {
         history.push("/merchandising/sors");
       } else {

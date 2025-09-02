@@ -14,7 +14,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
   const [techpack, setTechpack] = useState({});
   const getTechpack = async () => {
     setSpinner(true);
-    const response = await api.post("/technical-package-show", {
+    const response = await api.post("/merchandising/technical-packages-show", {
       id: params.id,
     });
     if (response.status === 200 && response.data) {
@@ -157,7 +157,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
   const [materialTypes, setMaterialTypes] = useState([]);
   const getMaterialTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    var response = await api.post("/common/item-types");
     if (response.status === 200 && response.data) {
       setMaterialTypes(response.data.data);
     }
@@ -167,7 +167,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
   const [items, setItems] = useState([]);
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     }
@@ -206,7 +206,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
 
   const [pos, setPos] = useState([]);
   const getPos = async () => {
-    const response = await api.post("/public-pos");
+    const response = await api.post("/merchandising/pos-public");
     if (response.status === 200 && response.data) {
       const data = response.data.data;
       setPos(data);
@@ -215,7 +215,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
 
   const [workOrders, setWorkOrders] = useState([]);
   const getWorkOrders = async () => {
-    const response = await api.post("/public-workorders");
+    const response = await api.post("/merchandising/workorders-public");
     if (response.status === 200 && response.data) {
       const data = response.data.data;
       setWorkOrders(data);
@@ -434,7 +434,7 @@ export default function EditBooking({ renderArea, setRenderArea }) {
 
       setSpinner(true);
 
-      const response = await api.post("/technical-package-update", data);
+      const response = await api.post("/merchandising/technical-packages-update", data);
 
       if (response.status === 200 && response.data) {
         history.push("/technical-packages/" + response.data.techpack.id);

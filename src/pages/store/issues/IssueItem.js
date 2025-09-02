@@ -13,7 +13,7 @@ export default function IssueItem(props) {
   const [bookings, setBookings] = useState([]);
   const getBookings = async () => {
     setSpinner(true);
-    var response = await api.post("/bookings");
+    var response = await api.post("/merchandising/bookings");
     if (response.status === 200 && response.data) {
       setBookings(response.data.all_bookings);
     }
@@ -23,7 +23,7 @@ export default function IssueItem(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks");
+    var response = await api.post("/merchandising/techpacks");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.all_items);
     }
@@ -32,7 +32,7 @@ export default function IssueItem(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -78,7 +78,7 @@ export default function IssueItem(props) {
   const [stores, setStores] = useState([]);
   const getStores = async () => {
     setSpinner(true);
-    var response = await api.post("/stores", {
+    var response = await api.post("/store/stores", {
       techpack_id: filterData.techpack_id,
       booking_id: filterData.booking_id,
       from_date: filterData.from_date,
@@ -100,7 +100,7 @@ export default function IssueItem(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async (issue_type) => {
     setSpinner(true);
-    var response = await api.post("/employees", {
+    var response = await api.post("/admin/employees", {
       issue_type: issue_type,
       without_me: true,
     });
@@ -123,7 +123,7 @@ export default function IssueItem(props) {
   const [issueModal, setIssueModal] = useState(false);
   const openIssueModal = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/stores-show", { id: item_id });
+    var response = await api.post("/store/stores-show", { id: item_id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
       setIssueModal(true);
@@ -235,7 +235,7 @@ export default function IssueItem(props) {
       }
       // Append the file to the FormData object
       formData.append("challan_copy", file);
-      var response = await api.post("/issues-create", formData);
+      var response = await api.post("/store/issues-create", formData);
       if (response.status === 200 && response.data) {
         setFormDataSet({});
         setErrors({});

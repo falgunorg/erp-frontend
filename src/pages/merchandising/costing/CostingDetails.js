@@ -38,7 +38,7 @@ export default function CostingDetails(props) {
 
   const getCosting = async () => {
     setSpinner(true);
-    var response = await api.post("/costings-show", { id: params.id });
+    var response = await api.post("/merchandising/costings-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setCosting(response.data.data);
       setCostingItems(response.data.data.costing_items);

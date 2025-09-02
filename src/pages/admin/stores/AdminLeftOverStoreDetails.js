@@ -16,7 +16,7 @@ export default function AdminLeftOverStoreDetails(props) {
 
   const getStore = async () => {
     setSpinner(true);
-    var response = await api.post("/left-overs-balance-details", {
+    var response = await api.post("/store/left-overs-balance-details", {
       id: params.id,
     });
     if (response.status === 200 && response.data) {

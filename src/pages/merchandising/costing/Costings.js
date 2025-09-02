@@ -38,7 +38,7 @@ export default function Costings(props) {
   const [costings, setCostings] = useState([]);
   const getCostings = async () => {
     setSpinner(true);
-    var response = await api.post("/costings", {
+    var response = await api.post("/merchandising/costings", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       status: filterData.status,
@@ -75,7 +75,7 @@ export default function Costings(props) {
   const [editForm, setEditForm] = useState({});
   const showDetails = async (id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks-show", { id: id });
+    var response = await api.post("/merchandising/techpacks-show", { id: id });
     if (response.status === 200 && response.data) {
       setEditForm(response.data.data);
       setConsumptionItems(response.data.consumption_items);

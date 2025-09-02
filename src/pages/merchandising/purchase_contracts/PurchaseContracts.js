@@ -38,7 +38,7 @@ export default function PurchaseContracts(props) {
   const [contracts, setContracts] = useState([]);
   const getContracts = async () => {
     setSpinner(true);
-    var response = await api.post("/purchase-contracts", {
+    var response = await api.post("/merchandising/purchase-contracts", {
       company_id: filterData.company_id,
       buyer_id: filterData.buyer_id,
       from_date: filterData.from_date,
@@ -169,7 +169,7 @@ export default function PurchaseContracts(props) {
   const submitContract = async () => {
     if (validateContractForm()) {
       setSpinner(true);
-      var response = await api.post("/purchase-contracts-create", contractForm);
+      var response = await api.post("/merchandising/purchase-contracts-create", contractForm);
       if (response.status === 200 && response.data) {
         setContractModal(false);
         setContractForm({
@@ -199,7 +199,7 @@ export default function PurchaseContracts(props) {
 
   const openEditForm = async (id) => {
     setSpinner(true);
-    var response = await api.post("/purchase-contracts-show", { id: id });
+    var response = await api.post("/merchandising/purchase-contracts-show", { id: id });
     if (response.status === 200 && response.data) {
       setEditForm(response.data.data);
       setEditModal(true);
@@ -257,7 +257,7 @@ export default function PurchaseContracts(props) {
   const submitEditContract = async () => {
     if (validateEditForm()) {
       setSpinner(true);
-      var response = await api.post("/purchase-contracts-update", editForm);
+      var response = await api.post("/merchandising/purchase-contracts-update", editForm);
       if (response.status === 200 && response.data) {
         setEditModal(false);
         getContracts();

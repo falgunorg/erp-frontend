@@ -62,7 +62,7 @@ export default function SubStoreReport(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substores");
+    var response = await api.post("/substore/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.company_wise);
     } else {
@@ -141,7 +141,7 @@ export default function SubStoreReport(props) {
   const getReports = async () => {
     if (validateForm()) {
       setSpinner(true);
-      var response = await api.post("/substores-report", filterData);
+      var response = await api.post("/substore/substores-report", filterData);
       if (response.status === 200 && response.data) {
         setReports(response.data.data);
         setReportSummary(response.data.reportSummary);

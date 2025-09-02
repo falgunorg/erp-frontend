@@ -12,7 +12,7 @@ export default function ReceiveItem(props) {
   const [bookings, setBookings] = useState([]);
   const getBookings = async () => {
     setSpinner(true);
-    var response = await api.post("/bookings", { status: "Confirmed" });
+    var response = await api.post("/merchandising/bookings", { status: "Confirmed" });
     if (response.status === 200 && response.data) {
       setBookings(response.data.data);
     }
@@ -22,7 +22,7 @@ export default function ReceiveItem(props) {
   const [bookingItems, setBookingItems] = useState([]);
   const getBooking = async (booking_id) => {
     setSpinner(true);
-    var response = await api.post("/bookings-show", { id: booking_id });
+    var response = await api.post("/merchandising/bookings-show", { id: booking_id });
     if (response.status === 200 && response.data) {
       setBookingItems(response.data.data.booking_items);
     } else {

@@ -9,7 +9,7 @@ export default function PowerMerchandising() {
   const [report, setReport] = useState({});
   const getReport = async () => {
     setSpinner(true);
-    var response = await api.post("/power/merchandising");
+    var response = await api.post("/admin/merchandising");
     if (response.status === 200 && response.data) {
       setReport(response.data.data);
     } else {

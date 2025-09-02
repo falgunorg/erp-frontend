@@ -42,7 +42,7 @@ export default function WorkOrders(props) {
 
   const [workorders, setWorkorders] = useState([]);
   const getWorkOrders = async () => {
-    const response = await api.post("/workorders", {
+    const response = await api.post("/merchandising/workorders", {
       department: props.sidebarFilter.department,
       purchase_contract_id: props.sidebarFilter.purchase_contract_id,
       technical_package_id: props.sidebarFilter.technical_package_id,
@@ -76,7 +76,7 @@ export default function WorkOrders(props) {
 
     if (confirmed) {
       try {
-        var response = await api.post("/workorders-delete", { id: id });
+        var response = await api.post("/merchandising/workorders-delete", { id: id });
         if (response.status === 200 && response.data) {
           swal("Deleted!", "The work order has been deleted.", "success").then(
             () => {

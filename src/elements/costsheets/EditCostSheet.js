@@ -15,7 +15,7 @@ export default function EditCostSheet({ renderArea, setRenderArea }) {
 
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    var response = await api.post("/common/item-types");
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }
@@ -26,7 +26,7 @@ export default function EditCostSheet({ renderArea, setRenderArea }) {
 
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     }
@@ -65,7 +65,7 @@ export default function EditCostSheet({ renderArea, setRenderArea }) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     }
@@ -253,7 +253,7 @@ export default function EditCostSheet({ renderArea, setRenderArea }) {
       data.append("factory_cpm", formData.factory_cpm);
       data.append("fob", formData.fob);
       setSpinner(true);
-      var response = await api.post("/costings-update", data);
+      var response = await api.post("/merchandising/costings-update", data);
       if (response.status === 200 && response.data) {
         history.push("/cost-sheets/" + response.data.data.id);
         setRenderArea("details");
@@ -268,7 +268,7 @@ export default function EditCostSheet({ renderArea, setRenderArea }) {
   const [costing, setCosting] = useState({});
   const getCosting = async () => {
     setSpinner(true);
-    const response = await api.post("/costings-show", { id: params.id });
+    const response = await api.post("/merchandising/costings-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const costingData = response.data.data;
       setCosting(costingData);

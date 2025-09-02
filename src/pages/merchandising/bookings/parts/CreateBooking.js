@@ -14,7 +14,7 @@ export default function CreateBooking({ setRenderArea }) {
   const [materialTypes, setMaterialTypes] = useState([]);
   const getMaterialTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    var response = await api.post("/common/item-types");
     if (response.status === 200 && response.data) {
       setMaterialTypes(response.data.data);
     }
@@ -22,7 +22,7 @@ export default function CreateBooking({ setRenderArea }) {
   };
   const [workOrders, setWorkOrders] = useState([]);
   const getWorkOrders = async () => {
-    const response = await api.post("/public-workorders");
+    const response = await api.post("/merchandising/workorders-public");
     if (response.status === 200 && response.data) {
       const data = response.data.data;
       setWorkOrders(data);
@@ -32,7 +32,7 @@ export default function CreateBooking({ setRenderArea }) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     }
@@ -74,7 +74,7 @@ export default function CreateBooking({ setRenderArea }) {
   const handleInputChange = async (name, value) => {
     if (name === "wo_id") {
       try {
-        const response = await api.post("/workorder-details-for-booking", {
+        const response = await api.post("/merchandising/workorders-details-for-booking", {
           id: value,
         });
 

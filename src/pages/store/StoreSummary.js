@@ -59,7 +59,7 @@ export default function StoreSummary(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -85,7 +85,7 @@ export default function StoreSummary(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks");
+    var response = await api.post("/merchandising/techpacks");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.all_items);
     } else {
@@ -98,7 +98,7 @@ export default function StoreSummary(props) {
   const [bookings, setBookings] = useState([]);
   const getBookings = async () => {
     setSpinner(true);
-    var response = await api.post("/bookings", { status: "Confirmed" });
+    var response = await api.post("/merchandising/bookings", { status: "Confirmed" });
     if (response.status === 200 && response.data) {
       setBookings(response.data.all_bookings);
     } else {
@@ -111,7 +111,7 @@ export default function StoreSummary(props) {
   const [items, setItems] = useState([]);
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/stores-summary", {
+    var response = await api.post("/store/stores-summary", {
       department: userInfo.department_title,
       designation: userInfo.designation_title,
       buyer_id: filterData.buyer_id,
@@ -137,7 +137,7 @@ export default function StoreSummary(props) {
 
   const getStore = async (id) => {
     setSpinner(true);
-    var response = await api.post("/stores-show", { id: id });
+    var response = await api.post("/store/stores-show", { id: id });
     if (response.status === 200 && response.data) {
       setStore(response.data.data);
       setReceives(response.data.data.receives);

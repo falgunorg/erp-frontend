@@ -42,7 +42,7 @@ export default function PowerTeams(props) {
   const [teams, setTeams] = useState([]);
   const getTeams = async () => {
     setSpinner(true);
-    var response = await api.post("/teams", {
+    var response = await api.post("/admin/teams", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       num_of_row: filterData.num_of_row,
@@ -63,7 +63,7 @@ export default function PowerTeams(props) {
   const [teamDetails, setTeamDetails] = useState({});
   const getTeamDetails = async (id) => {
     setSpinner(true);
-    var response = await api.post("/teams-show", { id: id });
+    var response = await api.post("/admin/teams-show", { id: id });
     if (response.status === 200 && response.data) {
       setTeamDetails(response.data.data);
       setTeamModal(true);

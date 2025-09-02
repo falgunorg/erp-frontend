@@ -228,7 +228,7 @@ export default function CreatePurchase(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/purchases-create", data);
+      var response = await api.post("/merchandising/purchases-create", data);
       if (response.status === 200 && response.data) {
         history.push(
           "/merchandising/purchases-details/" + response.data.data.id
@@ -242,7 +242,7 @@ export default function CreatePurchase(props) {
 
   const [purchaseContracts, setPurchaseContracts] = useState([]);
   const getPurchaseContracts = async () => {
-    var response = await api.post("/purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts");
     if (response.status === 200 && response.data) {
       setPurchaseContracts(response.data.data);
     }
@@ -272,7 +272,7 @@ export default function CreatePurchase(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async (contract_id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks", {
+    var response = await api.post("/merchandising/techpacks", {
       status: "Costing Done",
       view: "team",
       department: userInfo.department_title,

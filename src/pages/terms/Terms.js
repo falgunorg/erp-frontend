@@ -19,7 +19,7 @@ export default function Terms(props) {
   const [terms, setTerms] = useState([]);
   const getTerms = async () => {
     setSpinner(true);
-    var response = await api.post("/terms");
+    var response = await api.post("/admin/terms");
     if (response.status === 200 && response.data) {
       setTerms(response.data.data);
     } else {
@@ -63,7 +63,7 @@ export default function Terms(props) {
       data.append("description", message);
 
       setSpinner(true);
-      var response = await api.post("/terms-create", data);
+      var response = await api.post("/admin/terms-create", data);
       if (response.status === 200 && response.data) {
         setTermModal(false);
         getTerms();
@@ -113,7 +113,7 @@ export default function Terms(props) {
   const openEditModal = async (id) => {
     setSpinner(true);
 
-    var response = await api.post("/terms-show", { id: id });
+    var response = await api.post("/admin/terms-show", { id: id });
     if (response.status === 200 && response.data) {
       setEditModal(true);
       setEditForm(response.data.data);
@@ -130,7 +130,7 @@ export default function Terms(props) {
       data.append("description", editMessage);
       data.append("id", editForm.id);
       setSpinner(true);
-      var response = await api.post("/terms-update", data);
+      var response = await api.post("/admin/terms-update", data);
       if (response.status === 200 && response.data) {
         setEditModal(false);
         getTerms();

@@ -38,7 +38,7 @@ export default function SampleSors(props) {
   const [sor, setSor] = useState({});
   const openStatusModal = async (id) => {
     setSpinner(true);
-    var response = await api.post("/sors-show", { id: id });
+    var response = await api.post("/merchandising/sors-show", { id: id });
     if (response.status === 200 && response.data) {
       setSor(response.data.data);
       setStatusForm(response.data.data);
@@ -59,7 +59,7 @@ export default function SampleSors(props) {
     for (let i = 0; i < selectedFiles.length; i++) {
       data.append("attatchments[]", selectedFiles[i]);
     }
-    var response = await api.post("/sors-togglestatus", data);
+    var response = await api.post("/merchandising/sors-togglestatus", data);
     if (response.status === 200 && response.data) {
       setStatusForm({
         id: 0,
@@ -126,7 +126,7 @@ export default function SampleSors(props) {
   const [sors, setSors] = useState([]);
   const getSors = async () => {
     setSpinner(true);
-    var response = await api.post("/sample/sors", {
+    var response = await api.post("/merchandising/sors-samples", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       status: filterData.status,

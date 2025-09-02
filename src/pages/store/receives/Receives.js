@@ -71,7 +71,7 @@ export default function Recevies(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -94,7 +94,7 @@ export default function Recevies(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks");
+    var response = await api.post("/merchandising/techpacks");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.all_items);
     } else {
@@ -107,7 +107,7 @@ export default function Recevies(props) {
   const [bookings, setBookings] = useState([]);
   const getBookings = async () => {
     setSpinner(true);
-    var response = await api.post("/bookings");
+    var response = await api.post("/merchandising/bookings");
     if (response.status === 200 && response.data) {
       setBookings(response.data.all_bookings);
     } else {

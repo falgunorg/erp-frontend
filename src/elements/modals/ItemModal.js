@@ -45,7 +45,7 @@ export default function ItemModal(props) {
   const submitItem = async () => {
     const valid = validateItemInputs();
     if (valid) {
-      var response = await api.post("/items-create", itemForm);
+      var response = await api.post("/common/items-create", itemForm);
       if (response.status === 200 && response.data) {
         setItemErrors({
           title: "",

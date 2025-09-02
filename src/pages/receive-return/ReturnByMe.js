@@ -45,7 +45,7 @@ export default function ReturnByMe(props) {
   const [returns, setReturns] = useState([]);
   const getReturns = async () => {
     setSpinner(true);
-    var response = await api.post("/returns", {
+    var response = await api.post("/store/returns", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       num_of_row: filterData.num_of_row,
@@ -75,7 +75,7 @@ export default function ReturnByMe(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks");
+    var response = await api.post("/merchandising/techpacks");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.all_items);
     } else {
@@ -93,7 +93,7 @@ export default function ReturnByMe(props) {
     if (result) {
       setSpinner(true);
       try {
-        var response = await api.post("/returns-delete", { id: item_id });
+        var response = await api.post("/store/returns-delete", { id: item_id });
         if (response.status === 200 && response.data) {
           swal({
             icon: "success",

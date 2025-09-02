@@ -66,7 +66,7 @@ export default function TechnicalPackageDetails() {
 
   const getTechpack = async () => {
     setSpinner(true);
-    const response = await api.post("/technical-package-show", {
+    const response = await api.post("/merchandising/technical-packages-show", {
       id: params.id,
     });
     if (response.status === 200 && response.data) {

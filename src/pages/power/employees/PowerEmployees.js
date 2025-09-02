@@ -52,7 +52,7 @@ export default function PowerEmployees(props) {
       setPasswordError("Password must be at least 6 characters long");
     } else {
       try {
-        const response = await api.post("/employees-update-password", {
+        const response = await api.post("/admin/employees-update-password", {
           id: userID,
           password: password,
         });
@@ -79,7 +79,7 @@ export default function PowerEmployees(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async () => {
     setSpinner(true);
-    var response = await api.post("/employees");
+    var response = await api.post("/admin/employees");
     if (response.status === 200 && response.data) {
       setEmployees(response.data.data);
     } else {

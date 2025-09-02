@@ -252,7 +252,7 @@ const Board = () => {
   };
 
   const handleSubmit = async () => {
-    var response = await api.post("/employees-create", data);
+    var response = await api.post("/admin/employees-create", data);
     if (response.status === 200 && response.data) {
       //   history.push("/employees");
     } else {

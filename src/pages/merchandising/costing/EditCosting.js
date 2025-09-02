@@ -23,7 +23,7 @@ export default function EditCosting(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks", {
+    var response = await api.post("/merchandising/techpacks", {
       // status: "Consumption Done",
       view: "team",
       department: userInfo.department_title,
@@ -71,7 +71,7 @@ export default function EditCosting(props) {
   const [items, setItems] = useState([]);
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     }
@@ -85,7 +85,7 @@ export default function EditCosting(props) {
 
   const getTechpack = async (techpack_id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks-show", { id: techpack_id });
+    var response = await api.post("/merchandising/techpacks-show", { id: techpack_id });
     if (response.status === 200 && response.data) {
       setCostingItems(response.data.data.consumption_items);
     }
@@ -197,7 +197,7 @@ export default function EditCosting(props) {
 
   const getCosting = async () => {
     setSpinner(true);
-    var response = await api.post("/costings-show", { id: params.id });
+    var response = await api.post("/merchandising/costings-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
       setCostingItems(response.data.data.costing_items);
@@ -240,7 +240,7 @@ export default function EditCosting(props) {
       data.append("id", formDataSet.id);
       data.append("costing_items", JSON.stringify(costingItems));
       setSpinner(true);
-      var response = await api.post("/costings-update", data);
+      var response = await api.post("/merchandising/costings-update", data);
       if (response.status === 200 && response.data) {
         history.push("/merchandising/costings");
       } else {

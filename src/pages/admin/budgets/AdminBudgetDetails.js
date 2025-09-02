@@ -48,7 +48,7 @@ export default function AdminBudgetDetails(props) {
 
   const getBudget = async () => {
     setSpinner(true);
-    var response = await api.post("/budgets-show", { id: params.id });
+    var response = await api.post("/merchandising/budgets-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setBudget(response.data.data);
       setBudgetItems(response.data.data.budget_items);

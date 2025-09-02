@@ -9,7 +9,7 @@ export default function EditRoles() {
   const params = useParams();
 
   const getRole = async () => {
-    var response = await api.post("/roles-show", { id: params.id });
+    var response = await api.post("/admin/roles-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormData(response.data.role);
 
@@ -455,7 +455,7 @@ export default function EditRoles() {
 
     if (valid) {
       setSpinner(true);
-      var response = await api.post("/roles-update", {
+      var response = await api.post("/admin/roles-update", {
         title: formData.title,
         level: formData.level,
         id: params.id,

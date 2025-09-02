@@ -33,7 +33,7 @@ export default function SampleItemEntry(props) {
   const [items, setItems] = useState([]);
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     } else {
@@ -45,7 +45,7 @@ export default function SampleItemEntry(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async (buyer_id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks", { buyer_id: buyer_id });
+    var response = await api.post("/merchandising/techpacks", { buyer_id: buyer_id });
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.data);
     } else {
@@ -97,7 +97,7 @@ export default function SampleItemEntry(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async () => {
     setSpinner(true);
-    var response = await api.post("/employees", { department: 16 });
+    var response = await api.post("/admin/employees", { department: 16 });
     console.log(response.data);
     if (response.status === 200 && response.data) {
       setEmployees(response.data.data);

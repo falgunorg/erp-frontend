@@ -45,7 +45,7 @@ export default function SubStoreReceiveReport(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
 
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
@@ -57,7 +57,7 @@ export default function SubStoreReceiveReport(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substores");
+    var response = await api.post("/substore/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.company_wise);
     } else {
@@ -155,7 +155,7 @@ export default function SubStoreReceiveReport(props) {
   const getReports = async () => {
     if (validateForm()) {
       setSpinner(true);
-      var response = await api.post("/substores-receive-report", filterData);
+      var response = await api.post("/substore/substores-receive-report", filterData);
       if (response.status === 200 && response.data) {
         setReports(response.data.data);
         setReportSummary(response.data.reportSummary);

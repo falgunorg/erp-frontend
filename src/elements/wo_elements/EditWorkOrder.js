@@ -22,7 +22,7 @@ export default function EditWorkOrder({ renderArea, setRenderArea }) {
 
   const fetchWorkOrder = async () => {
     try {
-      const response = await api.post("/workorders-show", { id });
+      const response = await api.post("/merchandising/workorders-show", { id });
       if (response.status === 200 && response.data.workorder) {
         const data = response.data.workorder;
         setFormData({
@@ -54,7 +54,7 @@ export default function EditWorkOrder({ renderArea, setRenderArea }) {
   const handleChange = async (name, value) => {
     if (name === "technical_package_id") {
       try {
-        const response = await api.post("/technical-package-show", {
+        const response = await api.post("/merchandising/technical-packages-show", {
           id: value,
         });
         if (response.status === 200 && response.data) {
@@ -121,7 +121,7 @@ export default function EditWorkOrder({ renderArea, setRenderArea }) {
         }
       });
 
-      const response = await api.post("/workorders-update", data);
+      const response = await api.post("/merchandising/workorders-update", data);
       if (response.status === 200 && response.data) {
         history.push("/work-orders/" + response.data.workorder.id);
         setRenderArea("details");
@@ -143,7 +143,7 @@ export default function EditWorkOrder({ renderArea, setRenderArea }) {
 
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
-    const response = await api.post("/technical-packages-all-desc", {
+    const response = await api.post("/merchandising/technical-packages-all-desc", {
       // mode: "self",
     });
     if (response.status === 200 && response.data) {
@@ -153,7 +153,7 @@ export default function EditWorkOrder({ renderArea, setRenderArea }) {
 
   const [pos, setPos] = useState([]);
   const getPos = async () => {
-    const response = await api.post("/public-pos", {
+    const response = await api.post("/merchandising/pos-public", {
       technical_package_id: formData.technical_package_id,
     });
     if (response.status === 200 && response.data) {

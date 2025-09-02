@@ -33,7 +33,7 @@ export default function CreateBudget(props) {
   const [purchases, setPurchases] = useState([]);
   const getPurchases = async () => {
     setSpinner(true);
-    var response = await api.post("/purchases", {
+    var response = await api.post("/merchandising/purchases", {
       department: userInfo.department_title,
       designation: userInfo.designation_title,
       view: "team",
@@ -79,7 +79,7 @@ export default function CreateBudget(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -92,7 +92,7 @@ export default function CreateBudget(props) {
   const [items, setItems] = useState([]);
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     }
@@ -121,7 +121,7 @@ export default function CreateBudget(props) {
 
   const getPurchase = async (purchase_id) => {
     setSpinner(true);
-    var response = await api.post("/purchases-show", { id: purchase_id });
+    var response = await api.post("/merchandising/purchases-show", { id: purchase_id });
     if (response.status === 200 && response.data) {
       const poData = response.data.data;
       setBudgetItems(poData.costing_items);
@@ -419,7 +419,7 @@ export default function CreateBudget(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/budgets-create", data);
+      var response = await api.post("/merchandising/budgets-create", data);
       if (response.status === 200 && response.data) {
         history.push("/merchandising/budgets");
       } else {

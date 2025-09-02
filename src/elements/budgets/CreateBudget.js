@@ -14,7 +14,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
 
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    var response = await api.post("/common/item-types");
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }
@@ -25,7 +25,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
 
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     }
@@ -65,7 +65,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     }
@@ -76,7 +76,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
 
   const getCostings = async () => {
     setSpinner(true);
-    var response = await api.post("/public-costings");
+    var response = await api.post("/merchandising/costings-public");
     if (response.status === 200 && response.data) {
       setCostings(response.data.costings);
     }
@@ -148,7 +148,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
       try {
         setSpinner(true);
 
-        const response = await api.post("/costings-show", { id: value });
+        const response = await api.post("/merchandising/costings-show", { id: value });
 
         if (response.status === 200 && response.data) {
           const data = response.data.data;
@@ -294,7 +294,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
       data.append("factory_cpm", formData.factory_cpm);
       data.append("fob", formData.fob);
       setSpinner(true);
-      var response = await api.post("/budgets-create", data);
+      var response = await api.post("/merchandising/budgets-create", data);
       if (response.status === 200 && response.data) {
         history.push("/budget-sheets/" + response.data.data.id);
         setRenderArea("details");

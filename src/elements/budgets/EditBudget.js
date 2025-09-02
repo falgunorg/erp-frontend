@@ -15,7 +15,7 @@ export default function EditBudget({ renderArea, setRenderArea }) {
 
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    var response = await api.post("/common/item-types");
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }
@@ -26,7 +26,7 @@ export default function EditBudget({ renderArea, setRenderArea }) {
 
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     }
@@ -66,7 +66,7 @@ export default function EditBudget({ renderArea, setRenderArea }) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     }
@@ -132,7 +132,7 @@ export default function EditBudget({ renderArea, setRenderArea }) {
 
   const getBudget = async () => {
     setSpinner(true);
-    const response = await api.post("/budgets-show", { id: params.id });
+    const response = await api.post("/merchandising/budgets-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const data = response.data.data;
 
@@ -231,7 +231,7 @@ export default function EditBudget({ renderArea, setRenderArea }) {
       data.append("factory_cpm", formData.factory_cpm);
       data.append("fob", totalFob);
       setSpinner(true);
-      var response = await api.post("/budgets-update", data);
+      var response = await api.post("/merchandising/budgets-update", data);
       if (response.status === 200 && response.data) {
         history.push("/budget-sheets/" + response.data.data.id);
         setRenderArea("details");

@@ -13,7 +13,7 @@ export default function PowerEditTeam(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async () => {
     setSpinner(true);
-    var response = await api.post("/employees");
+    var response = await api.post("/admin/employees");
     if (response.status === 200 && response.data) {
       setEmployees(response.data.data);
     } else {
@@ -62,7 +62,7 @@ export default function PowerEditTeam(props) {
 
   const getTeam = async () => {
     setSpinner(true);
-    var response = await api.post("/teams-show", { id: params.id });
+    var response = await api.post("/admin/teams-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const team = response.data.data;
       setFormDataSet({
@@ -145,7 +145,7 @@ export default function PowerEditTeam(props) {
       dataSet.append("company_id", formDataSet.company_id);
       dataSet.append("description", formDataSet.description);
       dataSet.append("id", formDataSet.id);
-      var response = await api.post("/teams-update", dataSet);
+      var response = await api.post("/admin/teams-update", dataSet);
       if (response.status === 200 && response.data) {
         history.push("/power/teams");
       } else {

@@ -13,7 +13,7 @@ export default function SampleTypes(props) {
   const [sampleTypes, setSampleTypes] = useState([]);
   const getSampleTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/sors-types", {
+    var response = await api.post("/merchandising/sors-types", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       buyer_id: filterData.buyer_id,
@@ -90,7 +90,7 @@ export default function SampleTypes(props) {
 
   const openEditModal = async (id) => {
     setSpinner(true);
-    var response = await api.post("/sors-types-show", { id: id });
+    var response = await api.post("/merchandising/sors-types-show", { id: id });
     if (response.status === 200 && response.data) {
       setEditModal(true);
       setEditForm(response.data.data);
@@ -102,7 +102,7 @@ export default function SampleTypes(props) {
     event.preventDefault();
     if (validateEditForm()) {
       setSpinner(true);
-      var response = await api.post("/sors-types-update", editForm);
+      var response = await api.post("/merchandising/sors-types-update", editForm);
       if (response.status === 200 && response.data) {
         setEditModal(false);
         getSampleTypes();

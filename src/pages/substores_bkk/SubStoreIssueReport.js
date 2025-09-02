@@ -63,7 +63,7 @@ export default function SubStoreIssueReport(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async (issue_type) => {
     setSpinner(true);
-    var response = await api.post("/employees", {
+    var response = await api.post("/admin/employees", {
       issue_type: "Self",
       without_me: true,
     });
@@ -75,7 +75,7 @@ export default function SubStoreIssueReport(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substores");
+    var response = await api.post("/substore/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.company_wise);
     } else {
@@ -158,7 +158,7 @@ export default function SubStoreIssueReport(props) {
   const getReports = async () => {
     if (validateForm()) {
       setSpinner(true);
-      var response = await api.post("/substores-issue-report", filterData);
+      var response = await api.post("/substore/substores-issue-report", filterData);
       if (response.status === 200 && response.data) {
         setReports(response.data.data);
         setReportSummary(response.data.reportSummary);

@@ -34,7 +34,7 @@ export default function Profile(props) {
 
   const [roles, setRoles] = useState([]);
   const getRoles = async () => {
-    var response = await api.get("/roles");
+    var response = await api.get("/admin/roles");
     if (response.status === 200 && response.data) {
       setRoles(response.data);
     }

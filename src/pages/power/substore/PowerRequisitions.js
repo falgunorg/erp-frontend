@@ -130,7 +130,7 @@ export default function PowerRequisitions(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async (issue_type) => {
     setSpinner(true);
-    var response = await api.post("/employees", {
+    var response = await api.post("/admin/employees", {
       issue_type: "Self",
       without_me: true,
     });
@@ -159,7 +159,7 @@ export default function PowerRequisitions(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/power/substores/requisitions", {
+    var response = await api.post("/admin/substores/requisitions", {
       search: searchValue,
       period: filterData.period,
       year: filterData.year,

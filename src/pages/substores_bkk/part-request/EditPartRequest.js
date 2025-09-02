@@ -14,7 +14,7 @@ export default function EditPartRequest(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substores");
+    var response = await api.post("/substore/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.self_store);
     }
@@ -75,7 +75,7 @@ export default function EditPartRequest(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
-      var response = await api.post("/part-requests-update", formData);
+      var response = await api.post("/substore/part-requests-update", formData);
       if (response.status === 200 && response.data) {
         setErrors({});
         history.push("/part-requests");
@@ -87,7 +87,7 @@ export default function EditPartRequest(props) {
 
   const getRequest = async () => {
     setSpinner(true);
-    var response = await api.post("/part-requests-show", { id: params.id });
+    var response = await api.post("/substore/part-requests-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormData(response.data.data);
     }

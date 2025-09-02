@@ -51,7 +51,7 @@ export default function Recevies(props) {
   const [issues, setIssues] = useState([]);
   const getIssues = async () => {
     setSpinner(true);
-    var response = await api.post("/issues", {
+    var response = await api.post("/store/issues", {
       buyer_id: filterData.buyer_id,
       supplier_id: filterData.supplier_id,
       from_date: filterData.from_date,
@@ -72,7 +72,7 @@ export default function Recevies(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -96,7 +96,7 @@ export default function Recevies(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks");
+    var response = await api.post("/merchandising/techpacks");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.all_items);
     } else {
@@ -109,7 +109,7 @@ export default function Recevies(props) {
   const [bookings, setBookings] = useState([]);
   const getBookings = async () => {
     setSpinner(true);
-    var response = await api.post("/bookings", { status: "Confirmed" });
+    var response = await api.post("/merchandising/bookings", { status: "Confirmed" });
     if (response.status === 200 && response.data) {
       setBookings(response.data.data);
     } else {
@@ -124,7 +124,7 @@ export default function Recevies(props) {
   const [issue, setIssue] = useState({});
   const openIssueModal = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/issues-show", { id: item_id });
+    var response = await api.post("/store/issues-show", { id: item_id });
     if (response.status === 200 && response.data) {
       setIssue(response.data.data);
       setIssueModal(true);

@@ -45,7 +45,7 @@ export default function IssuedToMe(props) {
   const [issues, setIssues] = useState([]);
   const getIssues = async () => {
     setSpinner(true);
-    var response = await api.post("/issued-to-me", {
+    var response = await api.post("/store/issued-to-me", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       num_of_row: filterData.num_of_row,
@@ -77,7 +77,7 @@ export default function IssuedToMe(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks");
+    var response = await api.post("/merchandising/techpacks");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.all_items);
     } else {
@@ -92,7 +92,7 @@ export default function IssuedToMe(props) {
   const [formDataSet, setFormDataSet] = useState({});
   const openIssueModal = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/issues-show", { id: item_id });
+    var response = await api.post("/store/issues-show", { id: item_id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
       setIssueModal(true);
@@ -133,7 +133,7 @@ export default function IssuedToMe(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
-      var response = await api.post("/returns-create", formDataSet);
+      var response = await api.post("/store/returns-create", formDataSet);
       if (response.status === 200 && response.data) {
         setFormDataSet({});
         setErrors({});
@@ -156,7 +156,7 @@ export default function IssuedToMe(props) {
   const [storeForm, setStoreForm] = useState({});
   const openStoreModal = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/issues-show", { id: item_id });
+    var response = await api.post("/store/issues-show", { id: item_id });
     if (response.status === 200 && response.data) {
       setStoreForm(response.data.data);
       setAddStoreModal(true);

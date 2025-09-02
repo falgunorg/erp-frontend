@@ -151,7 +151,7 @@ export default function ChatBot() {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async () => {
     setSpinner(true);
-    var response = await api.post("/employees");
+    var response = await api.post("/admin/employees");
     if (response.status === 200 && response.data) {
       setEmployees(response.data.data);
     } else {

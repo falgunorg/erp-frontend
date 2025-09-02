@@ -45,7 +45,7 @@ export default function SampleTypeModal(props) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
-      var response = await api.post("/sors-types-create", formDataSet);
+      var response = await api.post("/merchandising/sors-types-create", formDataSet);
       if (response.status === 200 && response.data) {
         props.setSampleTypeModal(false);
         props.setCallSampleTypes(true);

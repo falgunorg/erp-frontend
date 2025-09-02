@@ -28,7 +28,7 @@ export default function SampleSorDetails(props) {
   const [sorItems, setSorItems] = useState([]);
   const getSor = async () => {
     setSpinner(true);
-    var response = await api.post("/sors-show", { id: params.id });
+    var response = await api.post("/merchandising/sors-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setSor(response.data.data);
       setStatusForm(response.data.data);
@@ -62,7 +62,7 @@ export default function SampleSorDetails(props) {
     for (let i = 0; i < selectedFiles.length; i++) {
       data.append("attatchments[]", selectedFiles[i]);
     }
-    var response = await api.post("/sors-togglestatus", data);
+    var response = await api.post("/merchandising/sors-togglestatus", data);
     if (response.status === 200 && response.data) {
       getSor();
       setStatusModal(false);

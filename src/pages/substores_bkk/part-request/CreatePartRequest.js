@@ -13,7 +13,7 @@ export default function CreatePartRequest(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substores");
+    var response = await api.post("/substore/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.company_wise);
     }
@@ -103,7 +103,7 @@ export default function CreatePartRequest(props) {
     data.append("line", userInfo.department_title);
     data.append("request_items", JSON.stringify(requisitionItems));
     setSpinner(true);
-    var response = await api.post("/part-requests-create", data);
+    var response = await api.post("/substore/part-requests-create", data);
     if (response.status === 200 && response.data) {
       history.push("/part-requests");
     } else {

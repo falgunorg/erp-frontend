@@ -14,7 +14,7 @@ export default function WorkOrderDetails() {
 
   const [workorder, setWorkorder] = useState({});
   const getWorkorder = async () => {
-    const response = await api.post("/workorders-show", { id: params.id });
+    const response = await api.post("/merchandising/workorders-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const data = response.data.workorder;
       setWorkorder(data);

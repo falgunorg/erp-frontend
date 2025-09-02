@@ -43,7 +43,7 @@ export default function Purchases(props) {
   const [purchases, setPurchases] = useState([]);
   const getPurchases = async () => {
     setSpinner(true);
-    var response = await api.post("/purchases", {
+    var response = await api.post("/merchandising/purchases", {
       status: filterData.status,
       vendor: filterData.vendor,
       buyer: filterData.buyer,

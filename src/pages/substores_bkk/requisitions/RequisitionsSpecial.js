@@ -61,7 +61,7 @@ export default function RequisitionsSpecial(props) {
   const [requisitions, setRequisitions] = useState([]);
   const getRequisitions = async () => {
     setSpinner(true);
-    var response = await api.post("/requisitions/special?page=" + currentPage, {
+    var response = await api.post("/substore/requisitions/special?page=" + currentPage, {
       company_id: params.company_id,
       from_date: filterData.from_date,
       to_date: filterData.to_date,

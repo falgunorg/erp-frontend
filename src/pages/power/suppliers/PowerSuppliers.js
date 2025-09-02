@@ -22,7 +22,7 @@ export default function PowerSuppliers(props) {
 
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
 
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);

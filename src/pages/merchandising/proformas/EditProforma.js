@@ -27,7 +27,7 @@ export default function EditProforma(props) {
   const [contracts, setContracts] = useState([]);
   const getContracts = async () => {
     setSpinner(true);
-    var response = await api.post("/purchase-contracts");
+    var response = await api.post("/merchandising/purchase-contracts");
     if (response.status === 200 && response.data) {
       setContracts(response.data.data);
     } else {
@@ -39,7 +39,7 @@ export default function EditProforma(props) {
   const [bookings, setBookings] = useState([]);
   const getBookings = async (supplier_id) => {
     setSpinner(true);
-    var response = await api.post("/bookings", { supplier_id: supplier_id });
+    var response = await api.post("/merchandising/bookings", { supplier_id: supplier_id });
     if (response.status === 200 && response.data) {
       setBookings(response.data.data);
     } else {
@@ -62,7 +62,7 @@ export default function EditProforma(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -196,7 +196,7 @@ export default function EditProforma(props) {
 
     if (field === "booking_id") {
       setSpinner(true);
-      var response = await api.post("/bookings-show", { id: value });
+      var response = await api.post("/merchandising/bookings-show", { id: value });
       if (response.status === 200 && response.data) {
         updatedItems[index].bookingItems = response.data.data.booking_items;
       } else {
@@ -299,7 +299,7 @@ export default function EditProforma(props) {
 
   const getPI = async () => {
     setSpinner(true);
-    var response = await api.post("/proformas-show", { id: params.id });
+    var response = await api.post("/merchandising/proformas-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
       getBookings(response.data.data.supplier_id);
@@ -346,7 +346,7 @@ export default function EditProforma(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/proformas-update", data);
+      var response = await api.post("/merchandising/proformas-update", data);
       if (response.status === 200 && response.data) {
         history.push("/merchandising/proformas");
       } else {

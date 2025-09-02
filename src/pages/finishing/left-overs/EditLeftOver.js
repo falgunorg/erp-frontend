@@ -26,7 +26,7 @@ export default function EditLeftOver(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async (buyer_id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks", { buyer_id: buyer_id });
+    var response = await api.post("/merchandising/techpacks", { buyer_id: buyer_id });
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.data);
     } else {
@@ -118,7 +118,7 @@ export default function EditLeftOver(props) {
       dataSet.append("remarks", formDataSet.remarks);
       dataSet.append("photo", imageFile ? imageFile : capturedPhoto);
       dataSet.append("id", formDataSet.id);
-      var response = await api.post("/left-overs-update", dataSet);
+      var response = await api.post("/store/left-overs-update", dataSet);
       if (response.status === 200 && response.data) {
         swal({
           title: "Record Updated Success",
@@ -134,7 +134,7 @@ export default function EditLeftOver(props) {
 
   const getLeftOver = async () => {
     setSpinner(true);
-    var response = await api.post("/left-overs-show", { id: params.id });
+    var response = await api.post("/store/left-overs-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
     } else {

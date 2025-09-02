@@ -49,7 +49,7 @@ export default function AdminBookingDetails(props) {
 
   const getBooking = async () => {
     setSpinner(true);
-    var response = await api.post("/bookings-show", { id: params.id });
+    var response = await api.post("/merchandising/bookings-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setBooking(response.data.data);
       setBookingItems(response.data.data.booking_items);

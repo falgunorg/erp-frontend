@@ -30,7 +30,7 @@ export default function BudgetSheets(props) {
   const [budgets, setBudgets] = useState([]);
 
   const getBudgets = async () => {
-    const response = await api.post("/budgets", {
+    const response = await api.post("/merchandising/budgets", {
       department: props.sidebarFilter.department,
       purchase_contract_id: props.sidebarFilter.purchase_contract_id,
       technical_package_id: props.sidebarFilter.technical_package_id,
@@ -87,7 +87,7 @@ export default function BudgetSheets(props) {
 
     if (confirmed) {
       try {
-        var response = await api.post("/budgets-delete", { id: id });
+        var response = await api.post("/merchandising/budgets-delete", { id: id });
         if (response.status === 200 && response.data) {
           swal("Deleted!", "The budget has been deleted.", "success").then(
             () => {

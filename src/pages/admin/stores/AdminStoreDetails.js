@@ -16,7 +16,7 @@ export default function AdminStoreDetails(props) {
 
   const getStore = async () => {
     setSpinner(true);
-    var response = await api.post("/stores-show", { id: params.id });
+    var response = await api.post("/store/stores-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setStore(response.data.data);
       setReceives(response.data.data.receives);

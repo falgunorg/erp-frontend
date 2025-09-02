@@ -79,7 +79,7 @@ export default function Sors(props) {
   const [sors, setSors] = useState([]);
   const getSors = async () => {
     setSpinner(true);
-    var response = await api.post("/sors", {
+    var response = await api.post("/merchandising/sors", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       status: filterData.status,

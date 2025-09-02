@@ -63,7 +63,7 @@ export default function SpecialSubstore(props) {
   const getAllItems = async () => {
     setSpinner(true);
     // Send the correct page parameter to the API request
-    var response = await api.post("/power/substores", {
+    var response = await api.post("/admin/substores", {
       search: searchValue,
       type: filterData.type,
       company_id: params.company_id,
@@ -83,7 +83,7 @@ export default function SpecialSubstore(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/power/substores", {
+    var response = await api.post("/admin/substores", {
       search: searchValue,
       page: currentPage,
       type: filterData.type,

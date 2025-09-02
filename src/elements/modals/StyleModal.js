@@ -50,7 +50,7 @@ export default function StyleModal(props) {
   const submitStyle = async () => {
     const valid = validateStyleForm();
     if (valid) {
-      var response = await api.post("/styles-create", styleForm);
+      var response = await api.post("/merchandising/styles-create", styleForm);
       if (response.status === 200 && response.data) {
         setStyleForm({
           title: "",

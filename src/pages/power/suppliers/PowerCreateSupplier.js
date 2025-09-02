@@ -73,7 +73,7 @@ export default function PowerCreateSupplier(props) {
     event.preventDefault();
     if (validateForm()) {
       setSpinner(true);
-      var response = await api.post("/suppliers-create", formDataSet);
+      var response = await api.post("/admin/suppliers-create", formDataSet);
       if (response.status === 200 && response.data) {
         history.push("/power/suppliers");
       } else {

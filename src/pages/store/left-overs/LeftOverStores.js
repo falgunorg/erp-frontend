@@ -44,7 +44,7 @@ export default function LeftOverStores(props) {
   const [overs, setOvers] = useState([]);
   const getOvers = async () => {
     setSpinner(true);
-    var response = await api.post("/left-overs-balance", {
+    var response = await api.post("/store/left-overs-balance", {
       buyer_id: filterData.buyer_id,
       from_date: filterData.from_date,
       to_date: filterData.to_date,
@@ -87,7 +87,7 @@ export default function LeftOverStores(props) {
   const [issueModal, setIssueModal] = useState(false);
   const openIssueModal = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/left-overs-balance-details", {
+    var response = await api.post("/store/left-overs-balance-details", {
       id: item_id,
     });
     if (response.status === 200 && response.data) {
@@ -187,7 +187,7 @@ export default function LeftOverStores(props) {
       }
       // Append the file to the FormData object
       formData.append("challan_copy", file);
-      var response = await api.post("/left-overs-balance-issue", formData);
+      var response = await api.post("/store/left-overs-balance-issue", formData);
       if (response.status === 200 && response.data) {
         setFormDataSet({});
         setErrors({});

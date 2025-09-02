@@ -52,7 +52,7 @@ export default function SorDetails(props) {
   const [sorItems, setSorItems] = useState([]);
   const getSor = async () => {
     setSpinner(true);
-    var response = await api.post("/sors-show", { id: params.id });
+    var response = await api.post("/merchandising/sors-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setSor(response.data.data);
       setSorItems(response.data.data.sor_items);
@@ -62,7 +62,7 @@ export default function SorDetails(props) {
 
   const submitSample = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/sors-togglestatus", {
+    var response = await api.post("/merchandising/sors-togglestatus", {
       id: item_id,
       status: "Confirmed",
     });
@@ -76,7 +76,7 @@ export default function SorDetails(props) {
   };
   const deleteSor = async (item_id) => {
     setSpinner(true);
-    var response = await api.post("/sors-delete", {
+    var response = await api.post("/merchandising/sors-delete", {
       id: item_id,
     });
     if (response.status === 200 && response.data) {

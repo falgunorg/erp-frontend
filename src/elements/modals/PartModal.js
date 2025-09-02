@@ -86,7 +86,7 @@ export default function PartModal(props) {
       data.append("model", partForm.model);
       data.append("min_balance", partForm.min_balance);
       data.append("photo", imageFile ? imageFile : capturedPhoto);
-      var response = await api.post("/parts-create", data);
+      var response = await api.post("/substore/parts-create", data);
       if (response.status === 200 && response.data) {
         setPartErrors({
           title: "",

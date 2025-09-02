@@ -11,7 +11,7 @@ export default function PowerEditSupplier(props) {
 
   const getSupplier = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers-show", { id: params.id });
+    var response = await api.post("/admin/suppliers-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
     }
@@ -84,7 +84,7 @@ export default function PowerEditSupplier(props) {
     event.preventDefault();
     if (validateForm()) {
       setSpinner(true);
-      var response = await api.post("/suppliers-update", formDataSet);
+      var response = await api.post("/admin/suppliers-update", formDataSet);
       if (response.status === 200 && response.data) {
         history.push("/power/suppliers");
       } else {

@@ -34,7 +34,7 @@ export default function Consumptions(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks", { status: "Placed" });
+    var response = await api.post("/merchandising/techpacks", { status: "Placed" });
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.data);
     } else {

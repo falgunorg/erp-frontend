@@ -27,7 +27,7 @@ export default function EditRequisition(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async () => {
     setSpinner(true);
-    var response = await api.post("/employees", {
+    var response = await api.post("/admin/employees", {
       recommended_group: true,
       without_me: true,
     });
@@ -43,7 +43,7 @@ export default function EditRequisition(props) {
   const [parts, setParts] = useState([]);
   const getParts = async () => {
     setSpinner(true);
-    var response = await api.post("/parts");
+    var response = await api.post("/substore/parts");
     if (response.status === 200 && response.data) {
       setParts(response.data.data);
     }
@@ -134,7 +134,7 @@ export default function EditRequisition(props) {
       data.append("requisition_items", JSON.stringify(requisitionItems));
       data.append("id", formDataSet.id);
       setSpinner(true);
-      var response = await api.post("/requisitions-update", data);
+      var response = await api.post("/substore/requisitions-update", data);
       if (response.status === 200 && response.data) {
         history.push("/requisitions");
       } else {
@@ -146,7 +146,7 @@ export default function EditRequisition(props) {
 
   const getRequisition = async () => {
     setSpinner(true);
-    var response = await api.post("/requisitions-show", { id: params.id });
+    var response = await api.post("/substore/requisitions-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
       setRequisitionItems(response.data.data.requisition_items);

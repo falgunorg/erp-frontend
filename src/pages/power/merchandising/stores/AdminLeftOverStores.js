@@ -38,7 +38,7 @@ export default function AdminLeftOverStores(props) {
   const [overs, setOvers] = useState([]);
   const getOvers = async () => {
     setSpinner(true);
-    var response = await api.post("/admin/left-overs-balance", {
+    var response = await api.post("/store/admin/left-overs-balance", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       buyer_id: filterData.buyer_id,
@@ -68,7 +68,7 @@ export default function AdminLeftOverStores(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks");
+    var response = await api.post("/merchandising/techpacks");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.data);
     } else {

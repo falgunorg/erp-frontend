@@ -15,7 +15,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
 
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    var response = await api.post("/common/item-types");
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }
@@ -26,7 +26,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
 
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     }
@@ -65,7 +65,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     }
@@ -76,7 +76,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
 
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/technical-packages-all-desc");
+    var response = await api.post("/merchandising/technical-packages-all-desc");
     if (response.status === 200 && response.data) {
       setTechpacks(response.data.data);
     }
@@ -240,7 +240,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
   const handleFormChange = async (name, value) => {
     if (name === "technical_package_id") {
       try {
-        const response = await api.post("/technical-package-show", {
+        const response = await api.post("/merchandising/technical-packages-show", {
           id: value,
         });
 
@@ -344,7 +344,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
       data.append("factory_cpm", formData.factory_cpm);
       data.append("fob", formData.fob);
       setSpinner(true);
-      var response = await api.post("/costings-create", data);
+      var response = await api.post("/merchandising/costings-create", data);
       if (response.status === 200 && response.data) {
         history.push("/cost-sheets/" + response.data.data.id);
         setRenderArea("details");

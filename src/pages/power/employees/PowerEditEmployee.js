@@ -60,7 +60,7 @@ export default function PowerEditEmployee(props) {
 
   const getEmployee = async () => {
     setSpinner(true);
-    var response = await api.post("/employees-show", { id: params.id });
+    var response = await api.post("/admin/employees-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
       setMailSign(response.data.data?.mailSign);
@@ -235,7 +235,7 @@ export default function PowerEditEmployee(props) {
 
   const [roles, setRoles] = useState([]);
   const getRoles = async () => {
-    var response = await api.get("/roles");
+    var response = await api.get("/admin/roles");
     if (response.status === 200 && response.data) {
       setRoles(response.data);
     }
@@ -339,7 +339,7 @@ export default function PowerEditEmployee(props) {
       data.append("id", formDataSet.id);
       data.append("mailSign", mailSign);
       setSpinner(true);
-      var response = await api.post("/employees-update", data);
+      var response = await api.post("/admin/employees-update", data);
       if (response.status === 200 && response.data) {
         history.push("/power/employees");
       } else {

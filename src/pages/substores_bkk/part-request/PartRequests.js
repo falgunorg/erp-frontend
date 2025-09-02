@@ -45,7 +45,7 @@ export default function PartRequests(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/part-requests?page=" + currentPage, {
+    var response = await api.post("/substore/part-requests?page=" + currentPage, {
       department: userInfo.department_title,
       designation: userInfo.designation_title,
     });
@@ -68,7 +68,7 @@ export default function PartRequests(props) {
 
   const toggleStatus = async (id, status) => {
     setSpinner(true);
-    var response = await api.post("/part-requests-toggle", {
+    var response = await api.post("/substore/part-requests-toggle", {
       id: id,
       status: status,
     });

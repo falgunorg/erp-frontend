@@ -11,7 +11,7 @@ export default function Test() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setSpinner(true);
-    var response = await api.post("/substores-report-mail");
+    var response = await api.post("/substore/substores-report-mail");
     if (response.status === 200 && response.data) {
       swal({
         icon: "success",

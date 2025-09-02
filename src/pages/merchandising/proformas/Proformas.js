@@ -32,7 +32,7 @@ export default function Proformas(props) {
   const [proformas, setProformas] = useState([]);
   const getProformas = async () => {
     setSpinner(true);
-    var response = await api.post("/proformas", {
+    var response = await api.post("/merchandising/proformas", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       status: filterData.status,

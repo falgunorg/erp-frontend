@@ -34,7 +34,7 @@ export default function EditBudget(props) {
   const [purchases, setPurchases] = useState([]);
   const getPurchases = async () => {
     setSpinner(true);
-    var response = await api.post("/purchases", {
+    var response = await api.post("/merchandising/purchases", {
       view: "team",
       department: userInfo.department_title,
       designation: userInfo.designation_title,
@@ -79,7 +79,7 @@ export default function EditBudget(props) {
 
   const getBudget = async () => {
     setSpinner(true);
-    var response = await api.post("/budgets-show", { id: params.id });
+    var response = await api.post("/merchandising/budgets-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const budgetData = response.data.data;
       setBudgetItems(budgetData.budget_items);
@@ -107,7 +107,7 @@ export default function EditBudget(props) {
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
-    var response = await api.post("/suppliers");
+    var response = await api.post("/admin/suppliers");
     if (response.status === 200 && response.data) {
       setSuppliers(response.data.data);
     } else {
@@ -120,7 +120,7 @@ export default function EditBudget(props) {
   const [items, setItems] = useState([]);
   const getItems = async () => {
     setSpinner(true);
-    var response = await api.post("/items");
+    var response = await api.post("/common/items");
     if (response.status === 200 && response.data) {
       setItems(response.data.data);
     }
@@ -149,7 +149,7 @@ export default function EditBudget(props) {
 
   const getPurchase = async (purchase_id) => {
     setSpinner(true);
-    var response = await api.post("/purchases-show", { id: purchase_id });
+    var response = await api.post("/merchandising/purchases-show", { id: purchase_id });
     if (response.status === 200 && response.data) {
       const poData = response.data.data;
       setBudgetItems(poData.costing_items);
@@ -447,7 +447,7 @@ export default function EditBudget(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/budgets-update", data);
+      var response = await api.post("/merchandising/budgets-update", data);
       if (response.status === 200 && response.data) {
         history.push("/merchandising/budgets");
       } else {

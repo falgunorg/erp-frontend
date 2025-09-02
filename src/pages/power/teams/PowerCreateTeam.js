@@ -12,7 +12,7 @@ export default function PowerCreateTeam(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async () => {
     setSpinner(true);
-    var response = await api.post("/employees");
+    var response = await api.post("/admin/employees");
     console.log(response.data);
     if (response.status === 200 && response.data) {
       setEmployees(response.data.data);
@@ -52,7 +52,7 @@ export default function PowerCreateTeam(props) {
   const zeroPad = (num, places) => String(num).padStart(places, "0");
   const getTeams = async () => {
     setSpinner(true);
-    var response = await api.post("/teams");
+    var response = await api.post("/admin/teams");
     if (response.status === 200 && response.data) {
       const currentYear = new Date().getFullYear().toString().slice(-2);
       const nextTeamNumber = `TEAM-${zeroPad(
@@ -138,7 +138,7 @@ export default function PowerCreateTeam(props) {
       dataSet.append("department", formDataSet.department);
       dataSet.append("company_id", formDataSet.company_id);
       dataSet.append("description", formDataSet.description);
-      var response = await api.post("/teams-create", dataSet);
+      var response = await api.post("/admin/teams-create", dataSet);
       if (response.status === 200 && response.data) {
         history.push("/power/teams");
       } else {

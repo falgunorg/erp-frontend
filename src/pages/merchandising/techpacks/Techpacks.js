@@ -74,7 +74,7 @@ export default function Techpacks(props) {
   const [techpacks, setTechpacks] = useState([]);
   const getTechpacks = async () => {
     setSpinner(true);
-    var response = await api.post("/techpacks", {
+    var response = await api.post("/merchandising/techpacks", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       status: filterData.status,
@@ -216,7 +216,7 @@ export default function Techpacks(props) {
         data.append("attatchments[]", selectedFiles[i]);
       }
       setSpinner(true);
-      var response = await api.post("/techpacks-create", data);
+      var response = await api.post("/merchandising/techpacks-create", data);
       if (response.status === 200 && response.data) {
         setTechModal(false);
         setTechForm({
@@ -243,7 +243,7 @@ export default function Techpacks(props) {
   const [editForm, setEditForm] = useState({});
   const showDetails = async (id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks-show", { id: id });
+    var response = await api.post("/merchandising/techpacks-show", { id: id });
     if (response.status === 200 && response.data) {
       setEditForm(response.data.data);
 
@@ -257,7 +257,7 @@ export default function Techpacks(props) {
 
   const toggleStatus = async (id) => {
     setSpinner(true);
-    var response = await api.post("/techpacks-toggle-status", {
+    var response = await api.post("/merchandising/techpacks-toggle-status", {
       id: id,
       status: "Placed",
     });

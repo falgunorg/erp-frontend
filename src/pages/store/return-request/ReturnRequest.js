@@ -41,7 +41,7 @@ export default function ReturnRequest(props) {
   const [returns, setReturns] = useState([]);
   const getReturns = async () => {
     setSpinner(true);
-    var response = await api.post("/store/return-request", {
+    var response = await api.post("/store/stores/return-request", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       num_of_row: filterData.num_of_row,
@@ -65,7 +65,7 @@ export default function ReturnRequest(props) {
     if (result) {
       setSpinner(true);
       try {
-        var response = await api.post("/store/receive-return-request", {
+        var response = await api.post("/store/stores/receive-return-request", {
           id: item_id,
         });
         if (response.status === 200 && response.data) {

@@ -42,7 +42,7 @@ export default function PurchaseOrders(props) {
   const [expandedGroups, setExpandedGroups] = useState({});
 
   const getPos = async () => {
-    const response = await api.post("/pos", {
+    const response = await api.post("/merchandising/pos", {
       department: props.sidebarFilter.department,
       purchase_contract_id: props.sidebarFilter.purchase_contract_id,
       technical_package_id: props.sidebarFilter.technical_package_id,
@@ -90,7 +90,7 @@ export default function PurchaseOrders(props) {
 
     if (confirmed) {
       try {
-        var response = await api.post("/pos-delete", { id: id });
+        var response = await api.post("/merchandising/pos-delete", { id: id });
         if (response.status === 200 && response.data) {
           swal(
             "Deleted!",

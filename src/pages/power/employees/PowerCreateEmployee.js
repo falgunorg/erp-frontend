@@ -181,7 +181,7 @@ export default function PowerCreateEmployee(props) {
 
   const [roles, setRoles] = useState([]);
   const getRoles = async () => {
-    var response = await api.get("/roles");
+    var response = await api.get("/admin/roles");
     if (response.status === 200 && response.data) {
       setRoles(response.data);
     }
@@ -285,7 +285,7 @@ export default function PowerCreateEmployee(props) {
       data.append("company", formDataSet.company);
       data.append("status", formDataSet.status);
       setSpinner(true);
-      var response = await api.post("/employees-create", data);
+      var response = await api.post("/admin/employees-create", data);
       if (response.status === 200 && response.data) {
         history.push("/power/employees");
       } else {

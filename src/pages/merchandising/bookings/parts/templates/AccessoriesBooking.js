@@ -46,7 +46,7 @@ export default function AccessoriesBooking(props) {
   };
 
   const getWorkOrder = async () => {
-    const response = await api.post("/workorder-details-for-booking", {
+    const response = await api.post("/merchandising/workorders-details-for-booking", {
       id: params.wo_id,
     });
 

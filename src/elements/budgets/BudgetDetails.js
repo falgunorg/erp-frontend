@@ -12,7 +12,7 @@ export default function BudgetDetails(props) {
   const [itemTypes, setItemTypes] = useState([]);
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/item-types");
+    var response = await api.post("/common/item-types");
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }
@@ -26,7 +26,7 @@ export default function BudgetDetails(props) {
   const [budget, setBudget] = useState([]);
   const getBudget = async () => {
     setSpinner(true);
-    const response = await api.post("/budgets-show", { id: params.id });
+    const response = await api.post("/merchandising/budgets-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const budgetData = response.data.data;
       setBudget(budgetData);

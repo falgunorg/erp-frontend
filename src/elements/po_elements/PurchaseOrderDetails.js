@@ -13,7 +13,7 @@ export default function PurchaseOrderDetails() {
   const [po, setPo] = useState({});
   const getPo = async () => {
     setSpinner(true);
-    const response = await api.post("/pos-show", { id: params.id });
+    const response = await api.post("/merchandising/pos-show", { id: params.id });
     if (response.status === 200 && response.data) {
       const poData = response.data.po;
       setPo(poData);

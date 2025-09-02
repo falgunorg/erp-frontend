@@ -13,7 +13,7 @@ const FullLayout = ({ children, ...rest }) => {
 
   const [rolePermission, setRolePermission] = useState({});
   const getRolePermission = async () => {
-    var response = await api.get("/get_role_permission");
+    var response = await api.get("/admin/get_role_permission");
     if (response.status === 200 && response.data) {
       setRolePermission(response.data.data);
     } else {

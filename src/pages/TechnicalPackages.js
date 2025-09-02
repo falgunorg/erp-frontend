@@ -47,7 +47,7 @@ export default function TechnicalPackages(props) {
   const [expandedGroups, setExpandedGroups] = useState({});
 
   const getTechnicalPackages = async () => {
-    const response = await api.post("/technical-packages", {
+    const response = await api.post("/merchandising/technical-packages", {
       department: props.sidebarFilter.department,
       purchase_contract_id: props.sidebarFilter.purchase_contract_id,
       technical_package_id: props.sidebarFilter.technical_package_id,
@@ -119,7 +119,7 @@ export default function TechnicalPackages(props) {
 
     if (confirmed) {
       try {
-        const response = await api.post("/technical-package-delete", { id });
+        const response = await api.post("/merchandising/technical-packages-delete", { id });
         if (response.status === 200 && response.data) {
           swal(
             "Deleted!",
@@ -156,7 +156,7 @@ export default function TechnicalPackages(props) {
 
     if (confirmed) {
       try {
-        const response = await api.post("/technical-package-delete-multiple", {
+        const response = await api.post("/merchandising/technical-packages-delete-multiple", {
           ids: selectedItems,
         });
         if (response.status === 200 && response.data) {
