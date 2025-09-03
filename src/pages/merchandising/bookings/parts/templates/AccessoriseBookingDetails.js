@@ -83,6 +83,14 @@ export default function AccessoriseBookingDetails(props) {
 
         <div className="col-lg-2 text-end">
           <Link
+            className="btn btn-primary me-2"
+            to={
+              "/merchandising/accessories-booking-supplier-copy/" + booking.id
+            }
+          >
+            View Supplier Copy
+          </Link>
+          <Link
             to={"/merchandising/edit-fabric-booking/" + booking.id}
             className="btn btn-primary"
           >

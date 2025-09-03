@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import IntlDateTime from "./IntlDateTime";
 import { useIsAuthenticated } from "@azure/msal-react";
 import SignInButton from "./mail/SignInButton";
 import SignOutButton from "./mail/SignOutButton";
-import { Badge } from "react-bootstrap";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import api from "services/api";
+import auth from "services/auth";
+import AppContext from "contexts/AppContext";
 
 import {
   HeaderBarIcon,
@@ -19,6 +20,13 @@ import {
 } from "./SvgIcons";
 
 export default function HeaderRightMenu(props) {
+  const { updateUserObj } = useContext(AppContext);
+  const logout = async (ev) => {
+    ev.preventDefault();
+    await auth.logout();
+    await updateUserObj();
+  };
+
   const isAuthenticated = useIsAuthenticated();
 
   const [expandSearch, setExpandSearch] = useState(false);
@@ -157,7 +165,24 @@ export default function HeaderRightMenu(props) {
         <Link to="#" className=" dropdown-toggle" data-bs-toggle="dropdown">
           <HeaderBarIcon />
         </Link>
-        <div className="dropdown-menu dropdown-menu-end">
+        <div className="dropdown-menu">
+          <li className="dropdown-item">
+            <Link to="#">Admin</Link>
+          </li>
+        
+          <li className="dropdown-item">
+            <Link to="#">Settings</Link>
+          </li>
+          <li className="dropdown-item">
+            <Link to="/profile">Profile</Link>
+          </li>
+          <li className="dropdown-item">
+            <Link to="#" onClick={logout}>
+              Log Out
+            </Link>
+          </li>
+          <hr/>
+
           {isAuthenticated ? <SignOutButton /> : <SignInButton />}
         </div>
       </div>

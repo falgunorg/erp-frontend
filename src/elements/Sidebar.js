@@ -646,7 +646,7 @@ export default function Sidebar(props) {
           </div> */}
         </div>
 
-        <div className="fixed_area bottom">
+        {/* <div className="fixed_area bottom">
           <div className="user_menu_bottom">
             <ul>
               <li>
@@ -691,7 +691,7 @@ export default function Sidebar(props) {
               </li>
             </ul>
           </div>
-        </div>
+        </div> */}
       </nav>
     </div>
   );
