@@ -46,9 +46,12 @@ export default function AccessoriesBooking(props) {
   };
 
   const getWorkOrder = async () => {
-    const response = await api.post("/merchandising/workorders-details-for-booking", {
-      id: params.wo_id,
-    });
+    const response = await api.post(
+      "/merchandising/workorders-details-for-booking",
+      {
+        id: params.wo_id,
+      }
+    );
 
     if (response.status === 200 && response.data) {
       const data = response.data.workorder;
@@ -187,12 +190,15 @@ export default function AccessoriesBooking(props) {
         })),
       };
 
-      const response = await api.post("/merchandising/fabric/booking", payload);
+      const response = await api.post(
+        "/merchandising/accessories/booking",
+        payload
+      );
 
       if (response.status === 201) {
         alert("Fabric booking saved successfully!");
         history.push(
-          "/merchandising/fabric-booking-details/" + response.data.data?.id
+          "/merchandising/accessories-booking-details/" + response.data.data?.id
         );
       }
     } catch (error) {
@@ -315,15 +321,6 @@ export default function AccessoriesBooking(props) {
           garment_qty: qty,
           item_type: existingRow?.item_type || "",
           item_description: existingRow?.item_description || item_details,
-
-          //new items
-
-          position: "",
-          item_size: "",
-          item_color: "",
-          item_material: "",
-          item_brand: "",
-
           consumption: existingRow?.consumption ?? consumption,
           total: qty * (existingRow?.consumption ?? consumption),
           wastage: existingRow?.wastage ?? allow,
@@ -351,6 +348,8 @@ export default function AccessoriesBooking(props) {
 
     setDisplayRows(rows);
   }, [expandedVariations, groups, formData]);
+
+  console.log("displayROWS", displayRows);
 
   return (
     <div className="create_technical_pack">
