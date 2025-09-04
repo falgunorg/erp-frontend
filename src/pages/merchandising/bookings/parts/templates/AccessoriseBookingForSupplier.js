@@ -64,8 +64,8 @@ export default function AccessoriseBookingForSupplier(props) {
       : "0.00";
 
   return (
-    <div className="create_technical_pack container">
-      <div class="po-header border-bottom pb-3 mb-4">
+    <div className="container-fluid">
+      <div class="po-header">
         <div class="row align-items-center">
           <div class="col-4">
             <img
@@ -76,10 +76,10 @@ export default function AccessoriseBookingForSupplier(props) {
           </div>
 
           <div class="col-8 text-end">
-            <h3 class="mb-0 fw-bold">
+            <h5 class="mb-0 fw-bold">
               {" "}
               {booking.workorder?.techpack?.company?.title || "-"}
-            </h3>
+            </h5>
             <small class="d-block">
               {booking.workorder?.techpack?.company?.address || "-"}
             </small>
@@ -89,112 +89,179 @@ export default function AccessoriseBookingForSupplier(props) {
             <small class="d-block">www.falgun.org</small>
           </div>
         </div>
-
-        <div class="row mt-3">
-          <div class="col-12 text-center">
-            <h2 class="fw-bold text-uppercase border-top border-bottom py-2">
-              Booking Order
-            </h2>
-          </div>
-        </div>
-
-        <div class="row mt-4">
-          <div class="col-6">
-            <p class="mb-1">
-              <strong>Buyer:</strong>{" "}
-              {booking.workorder?.techpack?.buyer?.name || "-"}
-            </p>
-            <p class="mb-1">
-              <strong>Tech Pack / Style#:</strong>{" "}
-              {booking.workorder.techpack?.techpack_number || "-"}
-            </p>
-            <p class="mb-1">
-              <strong>Company:</strong>{" "}
-              {booking.workorder?.techpack?.company?.title || "-"}
-            </p>
-            <p class="mb-1">
-              <strong>Delivery Address:</strong>{" "}
-              {booking.workorder?.techpack?.company?.address || "-"}
-            </p>
-            <p class="mb-1">
-              <strong>Garment Qty:</strong> {totalGarmentQty}
-            </p>
-            <p class="mb-1">
-              <strong>Booking Qty:</strong> {totalBookingQty} / {booking.unit}
-            </p>
-          </div>
-          <div class="col-6 text-end">
-            <p class="mb-1">
-              <strong>Supplier:</strong> {booking.supplier?.company_name}
-            </p>
-            <p class="mb-1">
-              <strong>Attention:</strong> {booking.supplier?.attention_person}/
-              {booking.supplier?.mobile_number}
-            </p>
-            <p class="mb-1">
-              <strong>Supplier Address:</strong> {booking.supplier?.address}
-            </p>
-            <p class="mb-1">
-              <strong>LC Terms:</strong> {booking.lc_term}
-            </p>
-            <p class="mb-1">
-              <strong>ETD:</strong> {booking.etd}
-            </p>
-            <p class="mb-1">
-              <strong>ETA:</strong> {booking.eta}
-            </p>
-          </div>
-          <div class="col-6">
-            <p class="mb-1">
-              <strong>PO Numbers: </strong>
-              {booking.workorder?.pos?.map((item, index) => (
-                <a href={"/purchase-orders/" + item.id} key={index}>
-                  {item.po_number}
-                  {index !== booking.workorder?.pos.length - 1 ? ", " : ""}
-                </a>
-              ))}
-            </p>
-            <p class="mb-1">
-              <strong>Item: </strong>
-              {booking.item?.title}
-            </p>
-          </div>
-          <div class="col-6 text-end">
-            <p class="mb-1">
-              <strong>EID:</strong> {booking.eid}
-            </p>
-            <p class="mb-1">
-              <strong>Remarks:</strong> {booking.remarks}
-            </p>
-          </div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-12 text-center">
+          <h5 class="fw-bold text-uppercase border-bottom py-2">
+            Booking Order
+          </h5>
         </div>
       </div>
-      <div className="row">
-        <div className="table-responsive mt-3">
-          <table className="table table-bordered">
-            <thead>
+
+      <div className="row mt-4">
+        {/* Left Column */}
+        <div className="col-6">
+          <table className="table table-borderless mb-0">
+            <tbody>
               <tr>
+                <td style={{ width: "50%" }} className="fw-bold">
+                  Buyer:
+                </td>
+                <td>{booking.workorder?.techpack?.buyer?.name || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold">
+                  Style#:
+                </td>
+                <td>{booking.workorder.techpack?.techpack_number || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold">
+                  Company:
+                </td>
+                <td>{booking.workorder?.techpack?.company?.title || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold">
+                  Delivery Address:
+                </td>
+                <td>{booking.workorder?.techpack?.company?.address || "-"}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold">
+                  Garment Qty:
+                </td>
+                <td>{totalGarmentQty}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold">
+                  Booking Qty:
+                </td>
+                <td>
+                  {totalBookingQty} / {booking.unit}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold">
+                  PO Numbers:
+                </td>
+                <td>
+                  {booking.workorder?.pos?.map((item, index) => (
+                    <a href={"/purchase-orders/" + item.id} key={index}>
+                      {item.po_number}
+                      {index !== booking.workorder?.pos.length - 1 ? ", " : ""}
+                    </a>
+                  ))}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold">
+                  Item:
+                </td>
+                <td>{booking.item?.title}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Right Column */}
+        <div className="col-6">
+          <table className="table table-borderless mb-0">
+            <tbody>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold text-end">
+                  Supplier:
+                </td>
+                <td className="text-end">{booking.supplier?.company_name}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold text-end">
+                  Attention:
+                </td>
+                <td className="text-end">
+                  {booking.supplier?.attention_person} /{" "}
+                  {booking.supplier?.mobile_number}
+                </td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold text-end">
+                  Supplier Address:
+                </td>
+                <td className="text-end">{booking.supplier?.address}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold text-end">
+                  LC Terms:
+                </td>
+                <td className="text-end">{booking.lc_term}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold text-end">
+                  ETD:
+                </td>
+                <td className="text-end">{booking.etd}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold text-end">
+                  ETA:
+                </td>
+                <td className="text-end">{booking.eta}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold text-end">
+                  EID:
+                </td>
+                <td className="text-end">{booking.eid}</td>
+              </tr>
+              <tr>
+                <td style={{ width: "50%" }} className="fw-bold text-end">
+                  Remarks:
+                </td>
+                <td className="text-end">{booking.remarks}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="row">
+        <div className="table-responsive mt-4">
+          <table className="table table-bordered table-striped align-middle">
+            <thead className="table-light">
+              <tr>
+                <th colSpan={3} className="text-center fw-bold text-uppercase">
+                  Garment Details
+                </th>
+                <th colSpan={10} className="text-center fw-bold text-uppercase">
+                  Item Details
+                </th>
+              </tr>
+              <tr>
+                {/* Garment Details */}
                 <th>Garment Color</th>
                 <th>Size Ranges</th>
+                <th>Garment QTY</th>
+
+                {/* Item Details */}
                 <th>Material Type</th>
                 <th>Position</th>
                 <th>Size / Dimension</th>
-                <th>Description / Specification/Composition</th>
+                <th>Description / Specification / Composition</th>
                 <th>Color / Pantone</th>
                 <th>Item Material</th>
                 <th>Brand / Logo</th>
-                <th>Garment QTY</th>
-
                 <th>Booking QTY</th>
                 <th>Sample Requirement</th>
-                <th>Comment/Remarks</th>
+                <th>Comment / Remarks</th>
               </tr>
             </thead>
+
             <tbody>
               {variationItems.map((item, index) => (
                 <tr key={index}>
                   <td>{item.garment_color}</td>
                   <td>{item.size_range}</td>
+                  <td className="text-end">{item.garment_qty}</td>
                   <td>{item.item_type}</td>
                   <td>{item.position}</td>
                   <td>{item.item_size}</td>
@@ -202,24 +269,26 @@ export default function AccessoriseBookingForSupplier(props) {
                   <td>{item.item_color}</td>
                   <td>{item.item_material}</td>
                   <td>{item.item_brand}</td>
-                  <td>{item.garment_qty}</td>
-                  <td>{item.booking_qty}</td>
-                  <td>{item.sample_requirement}</td>
+                  <td className="text-end">{item.booking_qty}</td>
+                  <td className="text-end">{item.sample_requirement}</td>
                   <td>{item.comment}</td>
                 </tr>
               ))}
-              <tr>
-                <td colSpan="9" className="text-end">
-                  <strong>Total:</strong>
+
+              {/* Totals Row */}
+              <tr className="table-secondary fw-bold">
+                <td colSpan="2" className="text-center">
+                  Total
                 </td>
-                <td>
-                  <strong>{totalGarmentQty}</strong>
+                <td className="text-end">{totalGarmentQty}</td>
+                <td colSpan="7" className="text-end">
+                  Grand Total
                 </td>
-                <td>
-                  <strong>{totalBookingQty.toFixed(2)}</strong>
+                <td className="text-end">
+                  {totalBookingQty.toFixed(2)} {booking.unit}
                 </td>
-                <td>
-                  <strong>{totalSampleRequiredQty.toFixed(2)}</strong>
+                <td className="text-end">
+                  {totalSampleRequiredQty.toFixed(2)}
                 </td>
                 <td></td>
               </tr>
@@ -227,6 +296,7 @@ export default function AccessoriseBookingForSupplier(props) {
           </table>
         </div>
       </div>
+
       <br />
       <hr />
 
