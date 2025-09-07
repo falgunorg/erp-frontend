@@ -261,6 +261,7 @@ import AccessoriesBooking from "pages/merchandising/bookings/parts/templates/Acc
 import AccessoriseBookingDetails from "pages/merchandising/bookings/parts/templates/AccessoriseBookingDetails";
 import AccessoriseBookingForSupplier from "pages/merchandising/bookings/parts/templates/AccessoriseBookingForSupplier";
 
+import StoreManagementSystem from "pages/StoreManager";
 function OpenRoutes() {
   return (
     <BrowserRouter>
@@ -278,6 +279,11 @@ class PrivateRoutes extends Component {
     return (
       <BrowserRouter>
         <Switch>
+          <PrivateRoute
+            exact
+            path="/manage-store"
+            component={StoreManagementSystem}
+          ></PrivateRoute>
           <PrivateRoute
             exact
             path="/dashboard"

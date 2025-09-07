@@ -1,7 +1,7 @@
 // var configEnv = "development";
 // var configEnv = "staging";
-// var configEnv = "production";
-var configEnv = "debian";
+var configEnv = "production";
+// var configEnv = "debian";
 
 var config = {
   //######### Staging config ##########
