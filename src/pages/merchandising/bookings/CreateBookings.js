@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 import api from "services/api";
-import Logo from "../../../../../assets/images/logos/logo-short.png"; // Adjust path if needed
+import Logo from "../../../assets/images/logos/logo-short.png";
 import CustomSelect from "elements/CustomSelect";
 import QuailEditor from "elements/QuailEditor";
 
-export default function AccessoriesBooking(props) {
+export default function CreateBookings(props) {
   const params = useParams();
   const history = useHistory();
 
@@ -190,16 +190,11 @@ export default function AccessoriesBooking(props) {
         })),
       };
 
-      const response = await api.post(
-        "/merchandising/accessories/booking",
-        payload
-      );
+      const response = await api.post("/merchandising/bookings", payload);
 
       if (response.status === 201) {
         alert("Fabric booking saved successfully!");
-        history.push(
-          "/merchandising/accessories-booking-details/" + response.data.data?.id
-        );
+        history.push("/merchandising/bookings");
       }
     } catch (error) {
       if (error.response && error.response.status === 422) {
@@ -320,6 +315,11 @@ export default function AccessoriesBooking(props) {
           sizeRange: uniq(sizeGroup).join(", "),
           garment_qty: qty,
           item_type: existingRow?.item_type || "",
+          position: existingRow?.position || "", // ✅ ensure not null
+          item_size: existingRow?.item_size || "", // ✅ ensure not null
+          item_color: existingRow?.item_color || "", // ✅ ensure not null
+          item_material: existingRow?.item_material || "",
+          item_brand: existingRow?.item_brand || "", // ✅ ensure not null
           item_description: existingRow?.item_description || item_details,
           consumption: existingRow?.consumption ?? consumption,
           total: qty * (existingRow?.consumption ?? consumption),
@@ -584,13 +584,19 @@ export default function AccessoriesBooking(props) {
               <tr>
                 <th>Garment Color</th>
                 <th>Size Ranges</th>
-                <th>Material Type</th>
-                <th>Position</th>
-                <th>Size / Dimension</th>
+                <th>Size / Dimension/Width</th>
                 <th>Description / Specification/Composition</th>
-                <th>Color / Pantone</th>
-                <th>Item Material</th>
-                <th>Brand / Logo</th>
+                <th>Color / Pantone /Code</th>
+
+                {/* ✅ Conditionally show these headers */}
+                {formData.item_type_id !== 1 && (
+                  <>
+                    <th>Material Type</th>
+                    <th>Position</th>
+                    <th>Brand / Logo</th>
+                  </>
+                )}
+
                 <th>Garment QTY</th>
                 <th>Consumption</th>
                 <th>Total</th>
@@ -601,6 +607,7 @@ export default function AccessoriesBooking(props) {
                 <th>Comment/Remarks</th>
               </tr>
             </thead>
+
             <tbody>
               {displayRows.map((row, index) => {
                 const sizeOptions = uniq(
@@ -621,40 +628,12 @@ export default function AccessoriesBooking(props) {
                         onChange={(selected) =>
                           handleGroupChange(
                             row.color,
-                            row.groupIndex, // ✅ per-color index
+                            row.groupIndex,
                             selected ? selected.map((s) => s.value) : []
                           )
                         }
                       />
                     </td>
-
-                    <td style={{ width: "150px" }}>
-                      <input
-                        className="form-value"
-                        value={row.item_type}
-                        onChange={(e) =>
-                          handleVariationInputChange(
-                            index,
-                            "item_type",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
-                    <td style={{ width: "150px" }}>
-                      <input
-                        className="form-value"
-                        value={row.position}
-                        onChange={(e) =>
-                          handleVariationInputChange(
-                            index,
-                            "position",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
-
                     <td style={{ width: "150px" }}>
                       <input
                         className="form-value"
@@ -668,9 +647,10 @@ export default function AccessoriesBooking(props) {
                         }
                       />
                     </td>
-
                     <td style={{ minWidth: "200px" }}>
                       <textarea
+                        className="form-value"
+                        value={row.item_description || ""}
                         onChange={(e) =>
                           handleVariationInputChange(
                             index,
@@ -678,11 +658,9 @@ export default function AccessoriesBooking(props) {
                             e.target.value
                           )
                         }
-                        className="form-value"
-                        value={row.item_description || ""}
                       />
                     </td>
-                    <td style={{ width: "70px" }}>
+                    <td style={{ width: "150px" }}>
                       <input
                         className="form-value"
                         value={row.item_color}
@@ -695,32 +673,52 @@ export default function AccessoriesBooking(props) {
                         }
                       />
                     </td>
-                    <td style={{ width: "70px" }}>
-                      <input
-                        className="form-value"
-                        value={row.item_material}
-                        onChange={(e) =>
-                          handleVariationInputChange(
-                            index,
-                            "item_material",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
-                    <td style={{ width: "70px" }}>
-                      <input
-                        className="form-value"
-                        value={row.item_brand}
-                        onChange={(e) =>
-                          handleVariationInputChange(
-                            index,
-                            "item_brand",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
+
+                    {/* ✅ Conditionally render next 3 fields */}
+                    {formData.item_type_id !== 1 && (
+                      <>
+                        <td style={{ width: "150px" }}>
+                          <input
+                            className="form-value"
+                            value={row.item_type}
+                            onChange={(e) =>
+                              handleVariationInputChange(
+                                index,
+                                "item_type",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td style={{ width: "150px" }}>
+                          <input
+                            className="form-value"
+                            value={row.position}
+                            onChange={(e) =>
+                              handleVariationInputChange(
+                                index,
+                                "position",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                        <td style={{ width: "150px" }}>
+                          <input
+                            className="form-value"
+                            value={row.item_brand}
+                            onChange={(e) =>
+                              handleVariationInputChange(
+                                index,
+                                "item_brand",
+                                e.target.value
+                              )
+                            }
+                          />
+                        </td>
+                      </>
+                    )}
+
                     <td>{row.garment_qty}</td>
                     <td style={{ width: "60px" }}>
                       <input
@@ -740,7 +738,6 @@ export default function AccessoriesBooking(props) {
                         }
                       />
                     </td>
-
                     <td>{row.total.toFixed(2)}</td>
                     <td style={{ width: "60px" }}>
                       <input
@@ -775,6 +772,8 @@ export default function AccessoriesBooking(props) {
                       <input
                         value={row.sample_requirement}
                         className="form-value"
+                        type="number"
+                        min={0}
                         onChange={(e) =>
                           handleVariationInputChange(
                             index,
@@ -782,14 +781,13 @@ export default function AccessoriesBooking(props) {
                             e.target.value
                           )
                         }
-                        type="number"
-                        min={0}
                       />
                     </td>
                     <td>
                       <input
                         value={row.comment}
-                        className="form-value form-value"
+                        className="form-value"
+                        type="text"
                         onChange={(e) =>
                           handleVariationInputChange(
                             index,
@@ -797,29 +795,30 @@ export default function AccessoriesBooking(props) {
                             e.target.value
                           )
                         }
-                        type="text"
                       />
                     </td>
                   </tr>
                 );
               })}
+
+              {/* ✅ Totals Row */}
               <tr>
-                <td colSpan="9" style={{ textAlign: "right" }}>
-                  <strong> Total:</strong>
+                <td
+                  colSpan={formData.item_type_id === 1 ? "5" : "8"}
+                  style={{ textAlign: "right" }}
+                >
+                  <strong>Total:</strong>
                 </td>
                 <td>
-                  {" "}
-                  <strong> {totalGarmentQty.toFixed(2)}</strong>
-                </td>
-                <td></td>
-                <td>
-                  {" "}
-                  <strong> {totalFabric.toFixed(2)}</strong>
+                  <strong>{totalGarmentQty.toFixed(2)}</strong>
                 </td>
                 <td></td>
                 <td>
-                  {" "}
-                  <strong> {totalFinalQty.toFixed(2)}</strong>
+                  <strong>{totalFabric.toFixed(2)}</strong>
+                </td>
+                <td></td>
+                <td>
+                  <strong>{totalFinalQty.toFixed(2)}</strong>
                 </td>
                 <td>
                   <strong>{totalBookingQty.toFixed(2)}</strong>
@@ -833,6 +832,7 @@ export default function AccessoriesBooking(props) {
           </table>
         </div>
       </div>
+
       <br />
       <hr />
 

@@ -1,7 +1,5 @@
-// src/pages/StoreManagementSystem.js
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
-  Container,
   Grid,
   Button,
   Card,
@@ -31,15 +29,19 @@ import {
   Tab,
   Box,
 } from "@mui/material";
-
-import WarehouseIcon from "@mui/icons-material/Warehouse";
 import PackageIcon from "@mui/icons-material/Inventory2";
 import InboxIcon from "@mui/icons-material/Inbox";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import SendIcon from "@mui/icons-material/Send";
 import UploadIcon from "@mui/icons-material/Upload";
 import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
+import SendIcon from "@mui/icons-material/Send";
+import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import VerifiedIcon from "@mui/icons-material/Verified";
+
+import { Link } from "react-router-dom";
 
 // -----------------------------
 // Mock Data
@@ -377,18 +379,36 @@ const seedBookings = [
   },
 ];
 
+// 🔹 Dummy Data for Dropdowns
+const woList = [
+  { id: 1, name: "WO-1001" },
+  { id: 2, name: "WO-1002" },
+  { id: 3, name: "WO-1003" },
+  { id: 4, name: "WO-1004" },
+];
+
+const technicalPackages = [
+  { id: 1, name: "TP-2001" },
+  { id: 2, name: "TP-2002" },
+  { id: 3, name: "TP-2003" },
+  { id: 4, name: "TP-2004" },
+];
+
+const buyers = [
+  { id: 1, name: "H&M" },
+  { id: 2, name: "Zara" },
+  { id: 3, name: "Nike" },
+  { id: 4, name: "Adidas" },
+];
+
 // -----------------------------
 // Helper Components
 // -----------------------------
 const StatCard = ({ icon: Icon, title, value, hint }) => (
   <Card variant="outlined">
     <CardContent>
-      <Typography
-        variant="subtitle2"
-        color="textSecondary"
-        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-      >
-        <Icon fontSize="small" /> {title}
+      <Typography variant="subtitle2" color="textSecondary">
+        <Icon style={{ color: "#f6a33f" }} fontSize="small" /> {title}
       </Typography>
       <Typography variant="h5">{value}</Typography>
       {hint && (
@@ -415,6 +435,10 @@ const StatusBadge = ({ status }) => {
 // Filter Hook
 // -----------------------------
 function useFilters(items) {
+  const [woId, setWoId] = useState("all");
+  const [technicalPackageId, setTechnicalPackageId] = useState("all");
+  const [buyerId, setBuyerId] = useState("all");
+
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [status, setStatus] = useState("all");
@@ -423,6 +447,17 @@ function useFilters(items) {
 
   const filtered = useMemo(() => {
     let out = [...items];
+
+    // 🔹 Work order, Technical Package, Buyer filters
+    if (woId && woId !== "all") out = out.filter((i) => i.wo_id === woId);
+    if (technicalPackageId && technicalPackageId !== "all")
+      out = out.filter((i) => i.technical_package_id === technicalPackageId);
+    if (buyerId && buyerId !== "all")
+      out = out.filter(
+        (i) =>
+          i.buyer_id === buyerId || i.workorder?.techpack?.buyer_id === buyerId
+      );
+
     if (query.trim()) {
       const q = query.toLowerCase();
       out = out.filter(
@@ -448,9 +483,20 @@ function useFilters(items) {
       return 0;
     });
     return out;
-  }, [items, query, category, status, inStockOnly, sortBy]);
+  }, [
+    items,
+    query,
+    category,
+    status,
+    inStockOnly,
+    sortBy,
+    woId,
+    technicalPackageId,
+    buyerId,
+  ]);
 
   return {
+    filtered,
     query,
     setQuery,
     category,
@@ -461,14 +507,20 @@ function useFilters(items) {
     setInStockOnly,
     sortBy,
     setSortBy,
-    filtered,
+    woId,
+    setWoId,
+    technicalPackageId,
+    setTechnicalPackageId,
+    buyerId,
+    setBuyerId,
   };
 }
 
 // -----------------------------
 // Main Component
 // -----------------------------
-export default function StoreManagementSystem() {
+
+export default function StoreManagementSystem(props) {
   const [items, setItems] = useState(seedItems);
   const [bookings, setBookings] = useState(seedBookings);
   const [selected, setSelected] = useState([]);
@@ -482,11 +534,25 @@ export default function StoreManagementSystem() {
     const totalReceived = items.reduce((s, i) => s + i.total_received, 0);
     const totalIssued = items.reduce((s, i) => s + i.total_issues, 0);
     const issuedToday = 260;
+    const completed = 200;
+    const checked = 200;
+    const delayed = 200;
+    const verified = 200;
+
     const available = items.reduce(
       (s, i) => s + Math.max(0, i.total_received - i.total_issues),
       0
     );
-    return { totalReceived, totalIssued, issuedToday, available };
+    return {
+      totalReceived,
+      totalIssued,
+      issuedToday,
+      available,
+      completed,
+      checked,
+      delayed,
+      verified,
+    };
   }, [items]);
 
   const toggleSelected = (id) =>
@@ -556,92 +622,183 @@ export default function StoreManagementSystem() {
     setIssueOpen(false);
   };
 
-  const [tab, setTab] = useState("upcoming");
-
+  const [tab, setTab] = useState("receives");
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "Store Dashboard",
+      isNewButton: false,
+      newButtonLink: "",
+      isInnerSearch: false,
+      innerSearchValue: "",
+      isDropdown: false,
+      DropdownMenu: [],
+    });
+  }, []);
   return (
     <div>
       <div className="row">
-        <div className="col-lg-10">
-          <Grid container spacing={1} alignItems="center" sx={{ mb: 3 }}>
-            <Grid item xs={12} md={6}>
-              <Typography
-                variant="h4"
-                sx={{ display: "flex", alignItems: "center", gap: 1 }}
-              >
-                <WarehouseIcon /> Store Management
-              </Typography>
-              <Typography variant="body2" color="textSecondary">
-                View inventory, receive bookings, and issue to departments.
-              </Typography>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              md={6}
-              sx={{
-                display: "flex",
-                justifyContent: { xs: "flex-start", md: "flex-end" },
-                gap: 1,
-              }}
-            >
-              <Button variant="outlined" startIcon={<DownloadIcon />}>
-                Export
-              </Button>
-              <Button variant="contained" startIcon={<AddIcon />}>
-                New Item
-              </Button>
-            </Grid>
-          </Grid>
-
-          {/* Stats */}
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={12} md={3}>
+        <div className="col-lg-10 col-xl-9">
+          {/* Stat Cards */}
+          <Grid container spacing={0.5} sx={{ mb: 1 }}>
+            <Grid item xs={4} md={1.5}>
               <StatCard
                 icon={PackageIcon}
                 title="Total Received"
                 value={totals.totalReceived.toLocaleString()}
                 hint="Received"
+                sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={4} md={1.5}>
               <StatCard
                 icon={InboxIcon}
                 title="Total Issues"
                 value={totals.totalIssued.toLocaleString()}
                 hint="Issued"
+                sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={4} md={1.5}>
               <StatCard
                 icon={ArchiveIcon}
                 title="Available"
                 value={totals.available.toLocaleString()}
                 hint="Received - Issued"
+                sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
             </Grid>
-            <Grid item xs={12} md={3}>
+            <Grid item xs={4} md={1.5}>
               <StatCard
                 icon={SendIcon}
                 title="Issued Today"
                 value={totals.issuedToday.toLocaleString()}
                 hint="Departments"
+                sx={{ p: 0.5, fontSize: "0.75rem" }}
+              />
+            </Grid>
+
+            {/* 🔹 New 4 StatCards */}
+            <Grid item xs={4} md={1.5}>
+              <StatCard
+                icon={HourglassEmptyIcon}
+                title="Pending"
+                value={totals.delayed}
+                hint="Waiting"
+                sx={{ p: 0.5, fontSize: "0.75rem" }}
+              />
+            </Grid>
+            <Grid item xs={4} md={1.5}>
+              <StatCard
+                icon={CheckCircleIcon}
+                title="Completed"
+                value={totals.completed}
+                hint="Done"
+                sx={{ p: 0.5, fontSize: "0.75rem" }}
+              />
+            </Grid>
+            <Grid item xs={4} md={1.5}>
+              <StatCard
+                icon={WarningAmberIcon}
+                title="Delayed"
+                value={totals.delayed}
+                hint="Alerts"
+                sx={{ p: 0.5, fontSize: "0.75rem" }}
+              />
+            </Grid>
+            <Grid item xs={4} md={1.5}>
+              <StatCard
+                icon={VerifiedIcon}
+                title="Verified"
+                value={totals.verified}
+                hint="Checked"
+                sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
             </Grid>
           </Grid>
 
           {/* Filters */}
-          <Card variant="outlined" sx={{ mb: 3, p: 2 }}>
-            <Grid container spacing={2} alignItems="flex-end">
+          <Card variant="outlined" sx={{ mb: 2, p: 1 }}>
+            <Grid container spacing={1} alignItems="flex-end">
+              {/* 🔹 WO ID */}
               <Grid item xs={12} md={4}>
                 <TextField
+                  size="small"
                   fullWidth
                   label="Search SKU, Name, Color..."
                   value={filters.query}
                   onChange={(e) => filters.setQuery(e.target.value)}
                 />
               </Grid>
-              <Grid item xs={6} md={2}>
-                <FormControl fullWidth>
+              <Grid item xs={6} md={1}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>WO</InputLabel>
+                  <Select
+                    value={filters.woId}
+                    label="WO"
+                    onChange={(e) => filters.setWoId(e.target.value)}
+                  >
+                    <MenuItem value="all">All</MenuItem>
+                    {woList.map((wo) => (
+                      <MenuItem key={wo.id} value={wo.id}>
+                        {wo.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* 🔹 Technical Package ID */}
+              <Grid item xs={6} md={1}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>TECHPACK</InputLabel>
+                  <Select
+                    value={filters.technicalPackageId}
+                    label="TECHPACK"
+                    onChange={(e) =>
+                      filters.setTechnicalPackageId(e.target.value)
+                    }
+                  >
+                    <MenuItem value="all">All</MenuItem>
+                    {technicalPackages.map((pkg) => (
+                      <MenuItem key={pkg.id} value={pkg.id}>
+                        {pkg.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* 🔹 Buyer ID */}
+              <Grid item xs={6} md={1}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>BUYER</InputLabel>
+                  <Select
+                    value={filters.buyerId}
+                    label="BUYER"
+                    onChange={(e) => filters.setBuyerId(e.target.value)}
+                  >
+                    <MenuItem value="all">All</MenuItem>
+                    {buyers.map((buyer) => (
+                      <MenuItem key={buyer.id} value={buyer.id}>
+                        {buyer.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              <Grid item xs={6} md={1}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  label="Color"
+                  value={filters.color}
+                  onChange={(e) => filters.setColor(e.target.value)}
+                />
+              </Grid>
+
+              <Grid item xs={6} md={1}>
+                <FormControl size="small" fullWidth>
                   <InputLabel>Category</InputLabel>
                   <Select
                     value={filters.category}
@@ -657,8 +814,8 @@ export default function StoreManagementSystem() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={6} md={2}>
-                <FormControl fullWidth>
+              <Grid item xs={6} md={1}>
+                <FormControl size="small" fullWidth>
                   <InputLabel>Status</InputLabel>
                   <Select
                     value={filters.status}
@@ -672,19 +829,27 @@ export default function StoreManagementSystem() {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={6} md={2}>
+              <Grid item xs={6} md={1}>
                 <FormControlLabel
+                  sx={{
+                    marginLeft: "5px",
+                    display: "block",
+                    width: "100%",
+                    fontSize: "10px",
+                  }}
+                  label="Stock Only"
                   control={
                     <Switch
+                      size="small"
+                      style={{ fontSize: "10px" }}
                       checked={filters.inStockOnly}
                       onChange={(e) => filters.setInStockOnly(e.target.checked)}
                     />
                   }
-                  label="In Stock Only"
                 />
               </Grid>
-              <Grid item xs={6} md={2}>
-                <FormControl fullWidth>
+              <Grid item xs={6} md={1}>
+                <FormControl size="small" fullWidth>
                   <InputLabel>Sort By</InputLabel>
                   <Select
                     value={filters.sortBy}
@@ -702,12 +867,31 @@ export default function StoreManagementSystem() {
               </Grid>
             </Grid>
           </Card>
-          <Card variant="outlined" sx={{ maxHeight: 500, overflow: "auto" }}>
-            <Table stickyHeader>
+
+          {/* Actions */}
+          <Grid
+            sx={{
+              display: "flex",
+              mb: 2,
+              justifyContent: { xs: "flex-start", md: "flex-end" },
+              gap: 1,
+            }}
+          >
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+            >
+              Export
+            </Button>
+          </Grid>
+          <Card variant="outlined" sx={{ maxHeight: 573, overflow: "auto" }}>
+            <Table stickyHeader size="small">
               <TableHead>
                 <TableRow>
                   <TableCell padding="checkbox">
                     <Checkbox
+                      size="small"
                       checked={selected.length === filters.filtered.length}
                       onChange={() =>
                         setSelected(
@@ -718,43 +902,43 @@ export default function StoreManagementSystem() {
                       }
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>#WO</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>#STYLE</strong>
                   </TableCell>
-                  <TableCell>
-                    <strong> ITEM NAME NAME</strong>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                    <strong>ITEM NAME</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>TYPE</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>ITEM DETAILS</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>ITEM COLOR</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>ITEM SIZE</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>UNIT</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>STOCK</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>TOTAL RECEIVED</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>ITEM ISSUES</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>STATUS</strong>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>ACTIONS</strong>
                   </TableCell>
                 </TableRow>
@@ -765,9 +949,11 @@ export default function StoreManagementSystem() {
                     key={item.id}
                     hover
                     selected={selected.includes(item.id)}
+                    sx={{ "& td": { fontSize: "0.8rem", py: 0.5 } }}
                   >
                     <TableCell padding="checkbox">
                       <Checkbox
+                        size="small"
                         checked={selected.includes(item.id)}
                         onChange={() => toggleSelected(item.id)}
                       />
@@ -791,7 +977,7 @@ export default function StoreManagementSystem() {
                       <Button
                         size="small"
                         variant="outlined"
-                        sx={{ mr: 1 }}
+                        sx={{ mr: 0.5 }}
                         onClick={() => {
                           setActiveItem(item);
                           setReceiveOpen(true);
@@ -801,6 +987,7 @@ export default function StoreManagementSystem() {
                       </Button>
                       <Button
                         size="small"
+                        sx={{ bgcolor: "#f6a33f" }}
                         variant="contained"
                         onClick={() => {
                           setActiveItem(item);
@@ -816,7 +1003,8 @@ export default function StoreManagementSystem() {
             </Table>
           </Card>
         </div>
-        <div className="col-lg-2">
+
+        <div className="col-lg-2 col-xl-3">
           {/* Tabs */}
           <Tabs
             value={tab}
@@ -824,148 +1012,160 @@ export default function StoreManagementSystem() {
             variant="fullWidth"
             className="mb-3"
           >
-            <Tab label="Upcoming" value="upcoming" />
-            <Tab label="History" value="history" />
+            <Tab label="RECEIVES" value="receives" />
+            <Tab label="ISSUES" value="issues" />
+            <Tab label="WAITING" value="upcoming" />
           </Tabs>
 
-          <Card className="mb-4">
-            {/* Upcoming Items */}
-            {tab === "upcoming" && (
-              <CardContent style={{ maxHeight: "750px", overflowY: "auto" }}>
-                {bookings.map((b) => (
-                  <Card key={b.bookingNo} className="mb-2 border">
-                    <CardContent>
-                      <div className="d-flex justify-content-between">
-                        <Typography fontWeight={500}>{b.itemName}</Typography>
-                      </div>
-
-                      <div className="row text-secondary small mt-1">
-                        <div className="col-6">
-                          <small>
-                            <strong>Item:</strong> {b.itemId}
-                          </small>
+          <Card
+            style={{ height: "calc(100vh - 155px)", overflowY: "auto" }}
+            className="mb-4"
+          >
+            <CardContent>
+              {tab === "receives" && (
+                <>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((r) => (
+                    <Card key={r} className="mb-2 border">
+                      <CardContent className="p-2">
+                        <div className="d-flex justify-content-between">
+                          <Typography variant="caption" fontWeight={500}>
+                            Cotton Twill Fabric
+                          </Typography>
+                          <Badge bg="primary">{`GRN-${9000 + r}`}</Badge>
                         </div>
-                        <div className="col-6">
-                          <small>
-                            <strong>Buyer:</strong> {b.buyer}
-                          </small>
+                        <div className="row text-secondary small mt-1">
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Qty:</strong>{" "}
+                              {Math.floor(Math.random() * 500) + 50} yard
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Supplier:</strong> Supplier {r}
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Date:</strong> 2025-09-{10 + r}
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Received By:</strong> Store Dept
+                            </Typography>
+                          </div>
                         </div>
-                        <div className="col-6">
-                          <small>
-                            <strong>Order:</strong> {b.orderRef}
-                          </small>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <Link to="#" className="btn btn-info">
+                    See All Receives
+                  </Link>
+                </>
+              )}
+
+              {tab === "issues" && (
+                <>
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i} className="mb-2 border">
+                      <CardContent className="p-2">
+                        <div className="d-flex justify-content-between">
+                          <Typography variant="caption" fontWeight={500}>
+                            Zipper #5 Nylon
+                          </Typography>
+                          <Badge bg="warning">{`ISS-${100 + i}`}</Badge>
                         </div>
-                        <div className="col-6">
-                          <small>
-                            <strong>Delivery:</strong> {b.deliveryDate}
-                          </small>
+                        <div className="row text-secondary small mt-1">
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Qty:</strong>{" "}
+                              {Math.floor(Math.random() * 300) + 10} pcs
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Department:</strong> Sewing
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Date:</strong> 2025-09-{12 + i}
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Issued By:</strong> Store Dept
+                            </Typography>
+                          </div>
                         </div>
-                      </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  <Link to="#" className="btn btn-primary">
+                    See All Issues
+                  </Link>
+                </>
+              )}
 
-                      <Typography variant="body2" className="mt-1">
-                        <small>
-                          <strong>Required:</strong>{" "}
-                          {b.requiredQty.toLocaleString()} {b.uom}
-                        </small>
-                      </Typography>
+              {tab === "upcoming" && (
+                <>
+                  {bookings.map((b) => (
+                    <Card key={b.bookingNo} className="mb-2 border">
+                      <CardContent>
+                        <div className="d-flex justify-content-between">
+                          <Typography fontWeight={500}>{b.itemName}</Typography>
+                        </div>
 
-                      <hr />
+                        <div className="row text-secondary small mt-1">
+                          <div className="col-6">
+                            <small>
+                              <strong>Item:</strong> {b.itemId}
+                            </small>
+                          </div>
+                          <div className="col-6">
+                            <small>
+                              <strong>Buyer:</strong> {b.buyer}
+                            </small>
+                          </div>
+                          <div className="col-6">
+                            <small>
+                              <strong>Order:</strong> {b.orderRef}
+                            </small>
+                          </div>
+                          <div className="col-6">
+                            <small>
+                              <strong>Delivery:</strong> {b.deliveryDate}
+                            </small>
+                          </div>
+                        </div>
 
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        onClick={() => {
-                          setActiveItem(b);
-                          setReceiveOpen(true);
-                        }}
-                        startIcon={<AddIcon />}
-                      >
-                        <small>Receive</small>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </CardContent>
-            )}
-
-            {/* History Items */}
-            {tab === "history" && (
-              <CardContent style={{ maxHeight: "750px", overflowY: "auto" }}>
-                {/* Receipts */}
-                {[1, 2, 3].map((r) => (
-                  <Card key={r} className="mb-2 border">
-                    <CardContent className="p-2">
-                      <div className="d-flex justify-content-between">
-                        <Typography variant="caption" fontWeight={500}>
-                          Cotton Twill Fabric
+                        <Typography variant="body2" className="mt-1">
+                          <small>
+                            <strong>Required:</strong>{" "}
+                            {b.requiredQty.toLocaleString()} {b.uom}
+                          </small>
                         </Typography>
-                        <Badge bg="primary">{`GRN-${9000 + r}`}</Badge>
-                      </div>
-                      <div className="row text-secondary small mt-1">
-                        <div className="col-6">
-                          <Typography variant="caption">
-                            <strong>Qty:</strong>{" "}
-                            {Math.floor(Math.random() * 500) + 50} yard
-                          </Typography>
-                        </div>
-                        <div className="col-6">
-                          <Typography variant="caption">
-                            <strong>Supplier:</strong> Supplier {r}
-                          </Typography>
-                        </div>
-                        <div className="col-6">
-                          <Typography variant="caption">
-                            <strong>Date:</strong> 2025-09-{10 + r}
-                          </Typography>
-                        </div>
-                        <div className="col-6">
-                          <Typography variant="caption">
-                            <strong>Received By:</strong> Store Dept
-                          </Typography>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
 
-                {/* Issues */}
-                {[1, 2, 3].map((i) => (
-                  <Card key={i} className="mb-2 border">
-                    <CardContent className="p-2">
-                      <div className="d-flex justify-content-between">
-                        <Typography variant="caption" fontWeight={500}>
-                          Zipper #5 Nylon
-                        </Typography>
-                        <Badge bg="warning">{`ISS-${100 + i}`}</Badge>
-                      </div>
-                      <div className="row text-secondary small mt-1">
-                        <div className="col-6">
-                          <Typography variant="caption">
-                            <strong>Qty:</strong>{" "}
-                            {Math.floor(Math.random() * 300) + 10} pcs
-                          </Typography>
-                        </div>
-                        <div className="col-6">
-                          <Typography variant="caption">
-                            <strong>Department:</strong> Sewing
-                          </Typography>
-                        </div>
-                        <div className="col-6">
-                          <Typography variant="caption">
-                            <strong>Date:</strong> 2025-09-{12 + i}
-                          </Typography>
-                        </div>
-                        <div className="col-6">
-                          <Typography variant="caption">
-                            <strong>Issued By:</strong> Store Dept
-                          </Typography>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </CardContent>
-            )}
+                        <hr />
+
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => {
+                            setActiveItem(b);
+                            setReceiveOpen(true);
+                          }}
+                          startIcon={<AddIcon />}
+                        >
+                          <small>Receive</small>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </>
+              )}
+            </CardContent>
           </Card>
         </div>
       </div>

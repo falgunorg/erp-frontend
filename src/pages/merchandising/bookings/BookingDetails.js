@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { Link, useHistory, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import api from "services/api";
-import Logo from "../../../../../assets/images/logos/logo-short.png"; // Adjust path if needed
+import Logo from "../../../assets/images/logos/logo-short.png"; // Adjust path if needed
 
-export default function FabricBookingDetails(props) {
+export default function BookingDetails(props) {
   const params = useParams();
   const [booking, setBooking] = useState({});
   const [variationItems, setVariationItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const fetchBooking = async () => {
     try {
-      const response = await api.post("/merchandising/fabric/booking/details", {
-        id: params.id,
-      });
+      const response = await api.get("/merchandising/bookings/" + params.id);
       if (response.status === 200) {
         setBooking(response.data.data);
         setVariationItems(response.data.data.items || []);
@@ -78,14 +76,7 @@ export default function FabricBookingDetails(props) {
           </div>
         </div>
 
-        <div className="col-lg-2 text-end">
-          <Link
-            to={"/merchandising/edit-fabric-booking/" + booking.id}
-            className="btn btn-primary"
-          >
-            Edit
-          </Link>
-        </div>
+        <div className="col-lg-2 text-end"></div>
       </div>
       <br />
       <br />
@@ -235,13 +226,21 @@ export default function FabricBookingDetails(props) {
             <thead>
               <tr>
                 <th>Garment Color</th>
-                <th>Size Range</th>
-                <th>Fabric Code</th>
-                <th>Fabric Details</th>
-                <th>Width</th>
+                <th>Size Ranges</th>
+                <th>Size / Dimension / Width</th>
+                <th>Description / Specification/Composition</th>
+                <th>Color / Pantone / Code</th>
+                {booking?.item_type_id !== 1 && (
+                  <>
+                    <th>Material Type</th>
+                    <th>Position</th>
+                    <th>Brand / Logo</th>
+                  </>
+                )}
+
                 <th>Garment QTY</th>
                 <th>Consumption</th>
-                <th>Fabric</th>
+                <th>Total</th>
                 <th>Allow %</th>
                 <th>Final</th>
                 <th>Booking QTY</th>
@@ -254,9 +253,18 @@ export default function FabricBookingDetails(props) {
                 <tr key={index}>
                   <td>{item.garment_color}</td>
                   <td>{item.size_range}</td>
-                  <td>{item.fabric_code}</td>
-                  <td>{item.fabric_details}</td>
-                  <td>{item.width}</td>
+                  <td>{item.item_size}</td>
+                  <td>{item.item_description}</td>
+                  <td>{item.item_color}</td>
+
+                  {booking?.item_type_id !== 1 && (
+                    <>
+                      <td>{item.item_type}</td>
+                      <td>{item.position}</td>
+                      <td>{item.item_brand}</td>
+                    </>
+                  )}
+
                   <td>{item.garment_qty}</td>
                   <td>{item.consumption}</td>
                   <td>{item.garment_qty * item.consumption}</td>
@@ -268,7 +276,10 @@ export default function FabricBookingDetails(props) {
                 </tr>
               ))}
               <tr>
-                <td colSpan="5" className="text-end">
+                <td
+                  colSpan={booking.item_type_id === 1 ? "5" : "8"}
+                  className="text-end"
+                >
                   <strong>Total:</strong>
                 </td>
                 <td>

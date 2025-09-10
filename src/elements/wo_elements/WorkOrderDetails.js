@@ -14,7 +14,9 @@ export default function WorkOrderDetails() {
 
   const [workorder, setWorkorder] = useState({});
   const getWorkorder = async () => {
-    const response = await api.post("/merchandising/workorders-show", { id: params.id });
+    const response = await api.post("/merchandising/workorders-show", {
+      id: params.id,
+    });
     if (response.status === 200 && response.data) {
       const data = response.data.workorder;
       setWorkorder(data);
@@ -496,31 +498,17 @@ export default function WorkOrderDetails() {
                           </td>
                           <td>{material.supplier?.company_name}</td>
                           <td>
-                            {material.item_type_id === 1 ? (
-                              <Link
-                                to={
-                                  "/merchandising/fabric-booking/" +
-                                  workorder.id +
-                                  "/" +
-                                  material.id
-                                }
-                                className="btn btn-success btn-sm"
-                              >
-                                Book Now
-                              </Link>
-                            ) : (
-                              <Link
-                                to={
-                                  "/merchandising/accessories-booking/" +
-                                  workorder.id +
-                                  "/" +
-                                  material.id
-                                }
-                                className="btn btn-success btn-sm"
-                              >
-                                Book Now
-                              </Link>
-                            )}
+                            <Link
+                              to={
+                                "/merchandising/create-booking/" +
+                                workorder.id +
+                                "/" +
+                                material.id
+                              }
+                              className="btn btn-success btn-sm"
+                            >
+                              Book Now
+                            </Link>
                           </td>
                         </tr>
                       ))}

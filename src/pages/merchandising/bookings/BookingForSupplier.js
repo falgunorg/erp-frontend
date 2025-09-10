@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useHistory, useParams } from "react-router-dom";
 import api from "services/api";
-import Logo from "../../../../../assets/images/logos/logo-short.png"; // Adjust path if needed
+import Logo from "../../../assets/images/logos/logo-short.png"; // Adjust path if needed
 
-export default function AccessoriseBookingForSupplier(props) {
+export default function BookingForSupplier(props) {
   const params = useParams();
   const [booking, setBooking] = useState({});
   const [variationItems, setVariationItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const fetchBooking = async () => {
     try {
-      const response = await api.post(
-        "/merchandising/accessories/booking/details",
-        {
-          id: params.id,
-        }
-      );
+      const response = await api.get("/merchandising/bookings/" + params.id);
       if (response.status === 200) {
         setBooking(response.data.data);
         setVariationItems(response.data.data.items || []);
@@ -241,15 +236,19 @@ export default function AccessoriseBookingForSupplier(props) {
                 <th>Garment Color</th>
                 <th>Size Ranges</th>
                 <th>Garment QTY</th>
-
-                {/* Item Details */}
-                <th>Material Type</th>
-                <th>Position</th>
                 <th>Size / Dimension</th>
                 <th>Description / Specification / Composition</th>
-                <th>Color / Pantone</th>
-                <th>Item Material</th>
-                <th>Brand / Logo</th>
+                <th>Color / Pantone / Code</th>
+
+                {/* Item Details */}
+                {booking.item_type_id !== 1 && (
+                  <>
+                    <th>Material Type</th>
+                    <th>Position</th>
+                    <th>Brand / Logo</th>
+                  </>
+                )}
+
                 <th>Booking QTY</th>
                 <th>Sample Requirement</th>
                 <th>Comment / Remarks</th>
@@ -262,13 +261,17 @@ export default function AccessoriseBookingForSupplier(props) {
                   <td>{item.garment_color}</td>
                   <td>{item.size_range}</td>
                   <td className="text-end">{item.garment_qty}</td>
-                  <td>{item.item_type}</td>
-                  <td>{item.position}</td>
                   <td>{item.item_size}</td>
                   <td>{item.item_description}</td>
                   <td>{item.item_color}</td>
-                  <td>{item.item_material}</td>
-                  <td>{item.item_brand}</td>
+                  {booking.item_type_id !== 1 && (
+                    <>
+                      <td>{item.item_type}</td>
+                      <td>{item.position}</td>
+                      <td>{item.item_brand}</td>
+                    </>
+                  )}
+
                   <td className="text-end">{item.booking_qty}</td>
                   <td className="text-end">{item.sample_requirement}</td>
                   <td>{item.comment}</td>
@@ -281,7 +284,10 @@ export default function AccessoriseBookingForSupplier(props) {
                   Total
                 </td>
                 <td className="text-end">{totalGarmentQty}</td>
-                <td colSpan="7" className="text-end">
+                <td
+                  colSpan={booking.item_type_id === 1 ? "3" : "6"}
+                  className="text-end"
+                >
                   Grand Total
                 </td>
                 <td className="text-end">

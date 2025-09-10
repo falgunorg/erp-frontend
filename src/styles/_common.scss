@@ -1,6 +1,12 @@
 .jodit-status-bar {
   display: none !important;
 }
+.primary,
+.bg-brimary,
+.btn-primary {
+  background-color: $theme_color !important;
+  border-color: $theme_color !important;
+}
 
 .purchase_order_page {
   table thead tr th,

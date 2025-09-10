@@ -244,23 +244,20 @@ import CostSheets from "pages/CostSheets";
 import BudgetSheets from "pages/BudgetSheets";
 import PurchaseOrders from "../pages/PurchaseOrders";
 import WorkOrders from "../pages/WorkOrders";
+
+// Executed Booking Routes
 import Bookings from "../pages/merchandising/bookings/Bookings";
+import CreateBookings from "../pages/merchandising/bookings/CreateBookings";
+import BookingDetails from "pages/merchandising/bookings/BookingDetails";
+import BookingForSupplier from "pages/merchandising/bookings/BookingForSupplier";
+import EditBookings from "pages/merchandising/bookings/EditBookings";
 import BookingsOverview from "../pages/merchandising/bookings/BookingsOverview";
 import BookingManager from "../pages/BookingManager";
+// End Booking Routes
+
 import PurchaseContractsList from "../pages/PurchaseContractsList";
 import Tasks from "../pages/Tasks";
-
 import TimeAndActions from "../pages/TimeAndActions";
-
-//testing for fabric bookins
-
-import FabricBooking from "pages/merchandising/bookings/parts/templates/FabricBooking";
-import EditFabricBooking from "pages/merchandising/bookings/parts/templates/EditFabricBooking";
-import FabricBookingDetails from "pages/merchandising/bookings/parts/templates/FabricBookingDetails";
-import AccessoriesBooking from "pages/merchandising/bookings/parts/templates/AccessoriesBooking";
-import AccessoriseBookingDetails from "pages/merchandising/bookings/parts/templates/AccessoriseBookingDetails";
-import AccessoriseBookingForSupplier from "pages/merchandising/bookings/parts/templates/AccessoriseBookingForSupplier";
-
 import StoreManagementSystem from "pages/StoreManager";
 function OpenRoutes() {
   return (
@@ -321,16 +318,39 @@ class PrivateRoutes extends Component {
             path="/purchase-orders/:id?"
             component={PurchaseOrders}
           ></PrivateRoute>
+          {/* //Bookings routes */}
+          <PrivateRoute
+            exact
+            path="/merchandising/bookings"
+            component={Bookings}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/merchandising/create-booking/:wo_id?/:costing_item_id?"
+            component={CreateBookings}
+          ></PrivateRoute>
           <PrivateRoute
             exact
             path="/merchandising/bookings/:id?"
-            component={Bookings}
+            component={BookingDetails}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/merchandising/edit-bookings/:id?"
+            component={EditBookings}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/merchandising/bookings-supplier-copy/:id?"
+            component={BookingForSupplier}
           ></PrivateRoute>
           <PrivateRoute
             exact
             path="/merchandising/bookings-overview"
             component={BookingsOverview}
           ></PrivateRoute>
+          {/* End Booking Routes */}
+
           <PrivateRoute
             exact
             path="/purchase-contracts/:id?"
@@ -345,37 +365,6 @@ class PrivateRoutes extends Component {
             exact
             path="/booking-manager"
             component={BookingManager}
-          ></PrivateRoute>
-          {/* create fabric booking */}
-          <PrivateRoute
-            exact
-            path="/merchandising/fabric-booking/:wo_id?/:costing_item_id?"
-            component={FabricBooking}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/edit-fabric-booking/:id?"
-            component={EditFabricBooking}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/fabric-booking-details/:id?"
-            component={FabricBookingDetails}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/accessories-booking/:wo_id?/:costing_item_id?"
-            component={AccessoriesBooking}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/accessories-booking-details/:id?"
-            component={AccessoriseBookingDetails}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/merchandising/accessories-booking-supplier-copy/:id?"
-            component={AccessoriseBookingForSupplier}
           ></PrivateRoute>
           {/* end v-101.1 */}
           <PrivateRoute

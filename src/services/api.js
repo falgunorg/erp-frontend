@@ -135,6 +135,48 @@ class Api {
     }
   }
 
+  //put and delete
+
+  async put(url, putData, headers, getParams, retrying) {
+    if (retrying === undefined) retrying = false;
+    try {
+      headers = await this.attachAuthorizeHeader(headers);
+      url = this.firstTouch(url);
+      url = this.finalTouch(url);
+      const response = await axios.put(url, putData, {
+        params: getParams,
+        headers: headers,
+      });
+      return response;
+    } catch (error) {
+      if (!retrying && error.response && error.response.status === 401) {
+        await this.refreshToken();
+        return await this.put(url, putData, headers, getParams, true);
+      }
+      return this.formatErrorResponse(error);
+    }
+  }
+
+  async delete(url, headers, getParams, retrying) {
+    if (retrying === undefined) retrying = false;
+    try {
+      headers = await this.attachAuthorizeHeader(headers);
+      url = this.firstTouch(url);
+      url = this.finalTouch(url);
+      const response = await axios.delete(url, {
+        params: getParams,
+        headers: headers,
+      });
+      return response;
+    } catch (error) {
+      if (!retrying && error.response && error.response.status === 401) {
+        await this.refreshToken();
+        return await this.delete(url, headers, getParams, true);
+      }
+      return this.formatErrorResponse(error);
+    }
+  }
+
   async download(url) {
     try {
       var accessToken = auth.getAccessToken();
