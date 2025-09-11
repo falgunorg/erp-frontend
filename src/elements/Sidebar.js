@@ -264,9 +264,9 @@ export default function Sidebar(props) {
                   <li>
                     <Link
                       className={
-                        location.pathname === "/manage-store" ? "active" : ""
+                        location.pathname === "/store/dashboard" ? "active" : ""
                       }
-                      to="/manage-store"
+                      to="/store/dashboard"
                     >
                       ST
                     </Link>

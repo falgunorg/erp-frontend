@@ -520,7 +520,7 @@ function useFilters(items) {
 // Main Component
 // -----------------------------
 
-export default function StoreManagementSystem(props) {
+export default function StoreDashboard(props) {
   const [items, setItems] = useState(seedItems);
   const [bookings, setBookings] = useState(seedBookings);
   const [selected, setSelected] = useState([]);
@@ -877,6 +877,13 @@ export default function StoreManagementSystem(props) {
               gap: 1,
             }}
           >
+            <Link
+              to="/store/receives-create"
+              size="small"
+              className="btn btn-small btn-primary"
+            >
+              + Receive New
+            </Link>
             <Button
               size="small"
               variant="outlined"

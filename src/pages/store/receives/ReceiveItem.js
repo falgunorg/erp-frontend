@@ -1,413 +1,470 @@
-import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
-import Spinner from "../../../elements/Spinner";
-import Select from "react-select";
+import React, { useState, useEffect, useCallback } from "react";
 import api from "services/api";
-import { Modal, Button } from "react-bootstrap";
-import swal from "sweetalert";
+import CustomSelect from "elements/CustomSelect";
+import {
+  Box,
+  Grid,
+  Button,
+  Drawer,
+  TextField,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Collapse,
+  IconButton,
+  CircularProgress,
+  Divider,
+  Card,
+  CardContent,
+} from "@mui/material";
+import { ExpandMore, ExpandLess } from "@mui/icons-material";
+import axios from "axios";
 
-export default function ReceiveItem(props) {
-  const history = useHistory();
-  const [spinner, setSpinner] = useState();
+const FilterSelect = ({ label, options, value, onChange }) => (
+  <Box>
+    <Typography variant="caption" fontWeight={600} color="textSecondary">
+      {label}
+    </Typography>
+    <CustomSelect
+      placeholder={label}
+      options={options}
+      value={options.find((opt) => opt.value === value)}
+      onChange={(opt) => onChange(opt?.value || "")}
+    />
+  </Box>
+);
+
+export default function ReceiveItem({ setHeaderData }) {
   const [bookings, setBookings] = useState([]);
-  const getBookings = async () => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/bookings", { status: "Confirmed" });
-    if (response.status === 200 && response.data) {
-      setBookings(response.data.data);
+  const [workorders, setWorkorders] = useState([]);
+  const [techpacks, setTechpacks] = useState([]);
+  const [filterData, setFilterData] = useState({
+    wo_id: "",
+    id: "",
+    technical_package_id: "",
+  });
+
+  const [receivableItems, setReceivableItems] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState({});
+  const [expandedRow, setExpandedRow] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const [grnForm, setGrnForm] = useState({
+    invoice_number: "",
+    challan_number: "",
+    received_date: "",
+    qty: 0,
+  });
+
+  const handleFilterChange = (name, value) =>
+    setFilterData((prev) => ({ ...prev, [name]: value }));
+
+  const fetchOptions = useCallback(async () => {
+    try {
+      const [bookingRes, woRes, techPackRes] = await Promise.all([
+        api.post("/merchandising/bookings-public"),
+        api.post("/merchandising/workorders-public"),
+        api.post("/merchandising/technical-packages-all-desc"),
+      ]);
+      setBookings(bookingRes.data.data || []);
+      setWorkorders(woRes.data.data || []);
+      setTechpacks(techPackRes.data.data || []);
+    } catch (error) {
+      console.error("Error fetching options:", error);
     }
-    setSpinner(false);
-  };
-
-  const [bookingItems, setBookingItems] = useState([]);
-  const getBooking = async (booking_id) => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/bookings-show", { id: booking_id });
-    if (response.status === 200 && response.data) {
-      setBookingItems(response.data.data.booking_items);
-    } else {
-      setBookingItems([]);
-    }
-    setSpinner(false);
-  };
-  const bookingChange = (selectedOption) => {
-    if (selectedOption) {
-      getBooking(selectedOption.value);
-    }
-  };
-  //receiving items
-  const [receiveModal, setReceiveModal] = useState(false);
-  const openReceiveModal = async (item_id) => {
-    setSpinner(true);
-    var response = await api.post("/single-booking-item", { id: item_id });
-    if (response.status === 200 && response.data) {
-      setFormDataSet(response.data.data);
-      setReceiveModal(true);
-    }
-    setSpinner(false);
-  };
-
-  const closeReceiveModal = () => {
-    setFormDataSet({});
-    setErrors({});
-    setReceiveModal(false);
-  };
-
-  const [errors, setErrors] = useState({});
-  const [formDataSet, setFormDataSet] = useState({});
-  const [file, setFile] = useState(null);
-
-  const handleChange = (ev) => {
-    let formErrors = {};
-    const name = ev.target.name;
-    const value = ev.target.value;
-
-    if (name === "receive_qty" && Number(value) > formDataSet.left_balance) {
-      formErrors.receive_qty = "Cannot insert over order qty";
-    }
-
-    if (name === "challan_copy") {
-      setFile(ev.target.files[0]); // Store the selected file
-      if (!ev.target.files[0]) {
-        formErrors.challan_copy = "Please select a PDF file";
-      } else {
-        formErrors.challan_copy = ""; // Clear any previous error
-      }
-    }
-
-    setFormDataSet({
-      ...formDataSet,
-      [name]: value,
-    });
-    setErrors(formErrors);
-  };
-
-  const validateForm = () => {
-    let formErrors = {};
-    if (!formDataSet.receive_qty) {
-      formErrors.receive_qty = "Please Insert Receiving QTY";
-    }
-    if (Number(formDataSet.receive_qty) > formDataSet.left_balance) {
-      formErrors.receive_qty = "Cannot insert over order qty";
-    }
-    if (!formDataSet.challan_no) {
-      formErrors.challan_no = "Please Insert Challan No";
-    }
-    if (!formDataSet.gate_pass) {
-      formErrors.gate_pass = "Please Insert Gate In No";
-    }
-    if (!formDataSet.challan_copy) {
-      formErrors.challan_copy = "Please select a PDF file";
-    }
-
-    setErrors(formErrors);
-    return Object.keys(formErrors).length === 0;
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (validateForm()) {
-      // Create a FormData object
-      var formData = new FormData();
-
-      // Append form data to the FormData object
-      for (const key in formDataSet) {
-        formData.append(key, formDataSet[key]);
-      }
-
-      // Append the file to the FormData object
-      formData.append("challan_copy", file);
-
-      // Send the FormData object in the API request
-      var response = await api.post("/receives-create", formData);
-      if (response.status === 200 && response.data) {
-        setFormDataSet({});
-        setErrors({});
-        setReceiveModal(false);
-        swal({
-          title: "Successfully Received Item",
-          icon: "success",
-        });
-        history.push("/store/receives");
-      } else {
-        setErrors(response.data.errors);
-      }
-    }
-  };
-
-  // const handleSubmit = async (event) => {
-  //   event.preventDefault();
-  //   if (validateForm()) {
-  //     var response = await api.post("/receives-create", formDataSet);
-  //     if (response.status === 200 && response.data) {
-  //       setFormDataSet({});
-  //       setErrors({});
-  //       setReceiveModal(false);
-  //       swal({
-  //         title: "Successfully Received Item",
-  //         icon: "success",
-  //       });
-  //       history.push("/store/receives");
-  //     } else {
-  //       setErrors(response.data.errors);
-  //     }
-  //   }
-  // };
-
-  useEffect(async () => {
-    getBookings();
   }, []);
 
-  useEffect(async () => {
-    props.setSection("stores");
-  }, []);
+  const fetchReceivableItems = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await api.post("/merchandising/bookings-items-public", {
+        id: filterData.id,
+        wo_id: filterData.wo_id,
+        technical_package_id: filterData.technical_package_id,
+      });
+      setReceivableItems(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [filterData]);
 
   useEffect(() => {
-    const checkAccess = async () => {
-      if (props.userData?.department_title !== "Store") {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
+    fetchOptions();
+    setHeaderData({
+      pageName: "GRN",
+      isNewButton: true,
+      newButtonText: "New GRN",
+      isInnerSearch: true,
+    });
+  }, [fetchOptions, setHeaderData]);
 
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props, history]);
+  useEffect(() => {
+    fetchReceivableItems();
+  }, [fetchReceivableItems]);
+
+  const handleReceiveClick = (item) => {
+    setCurrentItem(item);
+    setGrnForm({
+      invoice_number: "",
+      challan_number: "",
+      received_date: new Date().toISOString().split("T")[0],
+      qty: item.balance_qty || 0,
+    });
+    setDrawerOpen(true);
+  };
+
+  const handleFormChange = (e) =>
+    setGrnForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmitGrn = async () => {
+    try {
+      await axios.post("/api/grns", {
+        ...grnForm,
+        booking_id: currentItem.booking_id,
+        booking_item_id: currentItem.id,
+        wo_id: currentItem.wo_id,
+        technical_package_id: currentItem.technical_package_id,
+        buyer_id: currentItem.buyer_id,
+        supplier_id: currentItem.supplier_id,
+        company_id: currentItem.company_id,
+        item_type_id: currentItem.item_type_id,
+        item_id: currentItem.item_id,
+        garment_color: currentItem.garment_color,
+        item_size: currentItem.item_size,
+        item_color: currentItem.item_color,
+        item_brand: currentItem.item_brand,
+        item_description: currentItem.item_description,
+        size_range: currentItem.size_range,
+        unit: currentItem.unit,
+        warehouse_location: currentItem.warehouse_location,
+        batch_no: currentItem.batch_no,
+        booked_by: 1,
+        received_by: 1,
+      });
+      alert("GRN created successfully!");
+      setDrawerOpen(false);
+      fetchReceivableItems();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
-    <div className="create_edit_page">
-      {spinner && <Spinner />}
-      <div className="create_page_heading">
-        <div className="page_name">Receive Items</div>
-        <div className="actions">
-          <Link to="/store/receives" className="btn btn-danger rounded-circle">
-            <i className="fal fa-times"></i>
-          </Link>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col-lg-6">
-          <div className="form-group">
-            <label>Booking No:</label>
+    <Box p={2}>
+      {/* Filter Row */}
+      <Grid container spacing={2} mb={2}>
+        <Grid item xs={12} sm={4} md={3}>
+          <FilterSelect
+            label="Booking"
+            options={bookings.map(({ booking_number, id }) => ({
+              value: id,
+              label: booking_number,
+            }))}
+            value={filterData.id}
+            onChange={(val) => handleFilterChange("id", val)}
+          />
+        </Grid>
+        <Grid item xs={12} sm={4} md={3}>
+          <FilterSelect
+            label="Work Order"
+            options={workorders.map(({ wo_number, id }) => ({
+              value: id,
+              label: wo_number,
+            }))}
+            value={filterData.wo_id}
+            onChange={(val) => handleFilterChange("wo_id", val)}
+          />
+        </Grid>
+        <Grid item xs={12} sm={4} md={3}>
+          <FilterSelect
+            label="Techpack / Style"
+            options={techpacks.map(({ techpack_number, id }) => ({
+              value: id,
+              label: techpack_number,
+            }))}
+            value={filterData.technical_package_id}
+            onChange={(val) => handleFilterChange("technical_package_id", val)}
+          />
+        </Grid>
+      </Grid>
+      <hr />
 
-            <Select
-              placeholder="Select or Search"
-              onChange={bookingChange}
-              options={bookings.map((item) => ({
-                value: item.id,
-                label: item.booking_number,
-              }))}
-            />
-          </div>
-        </div>
-      </div>
-      <br />
-      <br />
-      <div className="row">
-        <h6>Bookings Item's</h6>
-        <div className="Import_booking_item_table">
-          <table className="table text-start align-middle table-bordered table-hover mb-0">
-            <thead className="bg-dark text-white">
-              <tr>
-                <th>Booking No</th>
-                <th>Style</th>
-                <th>Item</th>
-                <th>Item Details </th>
-                <th>Attatchment</th>
-                <th>Color</th>
-                <th>Size</th>
-                <th>Shade</th>
-                <th>Tex</th>
-                <th>Order QTY</th>
-                <th>Received QTY</th>
-                <th>Left QTY</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookingItems.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.booking_number}</td>
-                  <td>{item.techpack}</td>
-                  <td>{item.item_name}</td>
-                  <td>
-                    <pre>{item.description}</pre>
-                  </td>
-                  <td>
-                    <img
-                      style={{ height: "80px", width: "120px" }}
-                      src={item.image_source}
-                    />
-                  </td>
-                  <td>{item.color}</td>
-                  <td>{item.size}</td>
-                  <td>{item.shade}</td>
-                  <td>{item.tex}</td>
+      {/* Items Table */}
+      {loading ? (
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress />
+        </Box>
+      ) : receivableItems.length === 0 ? (
+        <Typography color="textSecondary" align="center" mt={4}>
+          No receivable items found.
+        </Typography>
+      ) : (
+        <TableContainer component={Paper} sx={{ maxHeight: 757 }}>
+          <Table stickyHeader size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell />
+                <TableCell>Buyer</TableCell>
+                <TableCell>Techpack</TableCell>
+                <TableCell>Item Type</TableCell>
+                <TableCell>Item</TableCell>
+                <TableCell>Garment Color</TableCell>
+                <TableCell>Size Range</TableCell>
+                <TableCell>Qty Booked</TableCell>
+                <TableCell>Qty Received</TableCell>
+                <TableCell>Qty Left</TableCell>
+                <TableCell>Action</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {receivableItems.map((item) => {
+                const isExpanded = expandedRow === item.id;
+                return (
+                  <React.Fragment key={item.id}>
+                    <TableRow hover>
+                      <TableCell>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            setExpandedRow(isExpanded ? null : item.id)
+                          }
+                        >
+                          {isExpanded ? <ExpandLess /> : <ExpandMore />}
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        {item.workorder?.techpack?.buyer?.name}
+                      </TableCell>
 
-                  <td>
-                    {item.qty} {item.unit}
-                  </td>
-                  <td>
-                    {item.already_received} {item.unit}
-                  </td>
-                  <td>
-                    {item.left_balance} {item.unit}
-                  </td>
-                  <td>
-                    {item.left_balance > 0 && (
-                      <button
-                        onClick={() => openReceiveModal(item.id)}
-                        className="btn btn-sm btn-success"
-                      >
-                        Receive
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <Modal show={receiveModal} onHide={closeReceiveModal}>
-            <Modal.Header closeButton>
-              <Modal.Title>Insert Received QTY</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <div className="row">
-                <div className="col-lg-6 offset-lg-3">
-                  <img
-                    style={{ width: "100%" }}
-                    src={formDataSet.image_source}
-                  />
-                </div>
-                <br />
+                      <TableCell>
+                        {item.workorder?.techpack?.techpack_number}
+                      </TableCell>
+                      <TableCell>{item.item?.item_type?.title}</TableCell>
+                      <TableCell>{item.item?.title}</TableCell>
+                      <TableCell>{item.garment_color}</TableCell>
+                      <TableCell>{item.size_range}</TableCell>
+                      <TableCell>{item.booking_qty}</TableCell>
+                      <TableCell>{item.received_qty || "0"}</TableCell>
+                      <TableCell>{item.left_qty || "0"}</TableCell>
+                      <TableCell>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={() => handleReceiveClick(item)}
+                        >
+                          Receive
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell colSpan={11} sx={{ p: 0 }}>
+                        <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                          <Box p={2} bgcolor="grey.50">
+                            <Grid container spacing={2}>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">WO</Typography>
+                                <Typography>
+                                  {item.workorder?.wo_number}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">
+                                  BOOKING NO.
+                                </Typography>
+                                <Typography>
+                                  {item.booking?.booking_number}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">
+                                  Booked By
+                                </Typography>
+                                <Typography>
+                                  {item.booking?.user?.full_name}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">
+                                  Item Type
+                                </Typography>
+                                <Typography>
+                                  {item.item?.item_type?.title}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">
+                                  Item Name
+                                </Typography>
+                                <Typography>{item.item?.title}</Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">
+                                  Description
+                                </Typography>
+                                <Typography>{item.item_description}</Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">
+                                  Position
+                                </Typography>
+                                <Typography>{item.position}</Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">Size</Typography>
+                                <Typography>{item.item_size}</Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">Color</Typography>
+                                <Typography>{item.item_color}</Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={4}>
+                                <Typography variant="caption">Brand</Typography>
+                                <Typography>{item.item_brand}</Typography>
+                              </Grid>
+                            </Grid>
+                            <Divider sx={{ my: 2 }} />
+                            <Typography variant="body2" color="textSecondary">
+                              Warehouse: {item.warehouse_location || "N/A"} |
+                              Batch No: {item.batch_no || "N/A"} | Unit:{" "}
+                              {item.booking?.unit}
+                            </Typography>
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </React.Fragment>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <br />
-                    <label>Receiving QTY</label>
-                    <input
-                      type="number"
-                      onWheel={(event) => event.target.blur()}
-                      className="form-control"
-                      name="receive_qty"
-                      min={1}
-                      value={formDataSet.receive_qty}
-                      onChange={handleChange}
-                    />
-                    {errors.receive_qty && (
-                      <div className="errorMsg">{errors.receive_qty}</div>
-                    )}
-                  </div>
-                </div>
+      {/* Drawer Form */}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <Box
+          width={400}
+          p={3}
+          display="flex"
+          flexDirection="column"
+          // height="100%"
+        >
+          {/* Header */}
+          <Typography variant="h6" gutterBottom>
+            📦 Receive GRN
+          </Typography>
 
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <br />
-                    <label>Challan No</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="challan_no"
-                      value={formDataSet.challan_no}
-                      onChange={handleChange}
-                    />
-                    {errors.challan_no && (
-                      <div className="errorMsg">{errors.challan_no}</div>
-                    )}
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label>Gate Pass</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="gate_pass"
-                      value={formDataSet.gate_pass}
-                      onChange={handleChange}
-                    />
-                    {errors.gate_pass && (
-                      <div className="errorMsg">{errors.gate_pass}</div>
-                    )}
-                  </div>
-                </div>
-                <div className="col-lg-12">
-                  <div className="form-group">
-                    <label>Challan Copy (PDF only)</label>
-                    <input
-                      type="file"
-                      className="form-control"
-                      name="challan_copy"
-                      value={formDataSet.challan_copy}
-                      onChange={handleChange}
-                      accept=".pdf"
-                      required
-                    />
-                    {errors.challan_copy && (
-                      <div className="errorMsg">{errors.challan_copy}</div>
-                    )}
-                  </div>
-                </div>
+          {/* Item Info Section */}
+          <Card
+            variant="outlined"
+            sx={{ mb: 2, borderRadius: 2, boxShadow: 1 }}
+          >
+            <CardContent>
+              <Typography variant="subtitle1" gutterBottom>
+                Item Information
+              </Typography>
+              <Grid container spacing={1}>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Item Name:</strong>{" "}
+                    {currentItem?.item?.title || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="body2">
+                    <strong>Color:</strong> {currentItem?.item_color || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="body2">
+                    <strong>Size:</strong> {currentItem?.item_size || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography variant="body2">
+                    <strong>Booking QTY:</strong>{" "}
+                    {currentItem?.booking_qty || "0"}
+                  </Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
 
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label>Order QTY</label>
-                    <input
-                      type="number"
-                      onWheel={(event) => event.target.blur()}
-                      disabled
-                      className="form-control"
-                      name="qty"
-                      value={formDataSet.qty}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label>Already Received QTY</label>
-                    <input
-                      type="number"
-                      onWheel={(event) => event.target.blur()}
-                      disabled
-                      className="form-control"
-                      name="already_received"
-                      value={formDataSet.already_received}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-                <div className="col-lg-6">
-                  <div className="form-group">
-                    <label>Left QTY</label>
-                    <input
-                      type="number"
-                      onWheel={(event) => event.target.blur()}
-                      disabled
-                      className="form-control"
-                      name="left_balance"
-                      value={formDataSet.left_balance}
-                      onChange={handleChange}
-                    />
-                  </div>
-                </div>
-              </div>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="primary" onClick={handleSubmit}>
-                Receive
-              </Button>
-              <Button variant="secondary" onClick={closeReceiveModal}>
-                Close
-              </Button>
-            </Modal.Footer>
-          </Modal>
-          <br />
-          <br />
-        </div>
-      </div>
-    </div>
+          <Divider sx={{ mb: 2 }} />
+
+          {/* GRN Form Fields */}
+          <TextField
+            label="Invoice Number"
+            name="invoice_number"
+            value={grnForm.invoice_number}
+            onChange={handleFormChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Challan Number"
+            name="challan_number"
+            value={grnForm.challan_number}
+            onChange={handleFormChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Received Date"
+            name="received_date"
+            type="date"
+            value={grnForm.received_date}
+            onChange={handleFormChange}
+            fullWidth
+            margin="normal"
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            label="Quantity"
+            name="qty"
+            type="number"
+            value={grnForm.qty}
+            onChange={handleFormChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Remarks"
+            name="remarks"
+            value={grnForm.remarks}
+            onChange={handleFormChange}
+            fullWidth
+            margin="normal"
+            multiline
+            rows={3}
+          />
+
+          {/* Submit Button */}
+          <Box mt="auto">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmitGrn}
+              fullWidth
+              sx={{ py: 1.5, borderRadius: 2 }}
+            >
+              ✅ Submit GRN
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
+    </Box>
   );
 }

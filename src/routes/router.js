@@ -120,7 +120,6 @@ import StoreSummary from "../pages/store/StoreSummary";
 
 // RECEIVES
 import Receives from "../pages/store/receives/Receives";
-import ReceiveItem from "../pages/store/receives/ReceiveItem";
 
 // RETURN TO STORE
 
@@ -255,10 +254,14 @@ import BookingsOverview from "../pages/merchandising/bookings/BookingsOverview";
 import BookingManager from "../pages/BookingManager";
 // End Booking Routes
 
+// Store Routes
+import StoreDashboard from "pages/store/StoreDashboard";
+import ReceiveItem from "../pages/store/receives/ReceiveItem";
+
 import PurchaseContractsList from "../pages/PurchaseContractsList";
 import Tasks from "../pages/Tasks";
 import TimeAndActions from "../pages/TimeAndActions";
-import StoreManagementSystem from "pages/StoreManager";
+
 function OpenRoutes() {
   return (
     <BrowserRouter>
@@ -276,11 +279,6 @@ class PrivateRoutes extends Component {
     return (
       <BrowserRouter>
         <Switch>
-          <PrivateRoute
-            exact
-            path="/manage-store"
-            component={StoreManagementSystem}
-          ></PrivateRoute>
           <PrivateRoute
             exact
             path="/dashboard"
@@ -350,7 +348,18 @@ class PrivateRoutes extends Component {
             component={BookingsOverview}
           ></PrivateRoute>
           {/* End Booking Routes */}
-
+          {/* start store routes */}
+          <PrivateRoute
+            exact
+            path="/store/dashboard"
+            component={StoreDashboard}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/store/receives-create"
+            component={ReceiveItem}
+          ></PrivateRoute>
+          {/* end store routes */}
           <PrivateRoute
             exact
             path="/purchase-contracts/:id?"
@@ -659,11 +668,6 @@ class PrivateRoutes extends Component {
             exact
             path="/store/receives"
             component={Receives}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/store/receives-create"
-            component={ReceiveItem}
           ></PrivateRoute>
           {/* Return to store */}
           <PrivateRoute
