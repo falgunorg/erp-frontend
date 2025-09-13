@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Grid,
   Button,
@@ -40,20 +40,9 @@ import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import VerifiedIcon from "@mui/icons-material/Verified";
-
+import api from "services/api";
 import { Link } from "react-router-dom";
 
-// -----------------------------
-// Mock Data
-// -----------------------------
-const CATEGORIES = [
-  "Fabric",
-  "Trims",
-  "Accessories",
-  "Packaging",
-  "Labels",
-  "Thread",
-];
 const DEPARTMENTS = [
   "Cutting",
   "Sewing",
@@ -379,28 +368,6 @@ const seedBookings = [
   },
 ];
 
-// 🔹 Dummy Data for Dropdowns
-const woList = [
-  { id: 1, name: "WO-1001" },
-  { id: 2, name: "WO-1002" },
-  { id: 3, name: "WO-1003" },
-  { id: 4, name: "WO-1004" },
-];
-
-const technicalPackages = [
-  { id: 1, name: "TP-2001" },
-  { id: 2, name: "TP-2002" },
-  { id: 3, name: "TP-2003" },
-  { id: 4, name: "TP-2004" },
-];
-
-const buyers = [
-  { id: 1, name: "H&M" },
-  { id: 2, name: "Zara" },
-  { id: 3, name: "Nike" },
-  { id: 4, name: "Adidas" },
-];
-
 // -----------------------------
 // Helper Components
 // -----------------------------
@@ -431,104 +398,65 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-// -----------------------------
-// Filter Hook
-// -----------------------------
-function useFilters(items) {
-  const [woId, setWoId] = useState("all");
-  const [technicalPackageId, setTechnicalPackageId] = useState("all");
-  const [buyerId, setBuyerId] = useState("all");
-
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [inStockOnly, setInStockOnly] = useState(false);
-  const [sortBy, setSortBy] = useState("name-asc");
-
-  const filtered = useMemo(() => {
-    let out = [...items];
-
-    // 🔹 Work order, Technical Package, Buyer filters
-    if (woId && woId !== "all") out = out.filter((i) => i.wo_id === woId);
-    if (technicalPackageId && technicalPackageId !== "all")
-      out = out.filter((i) => i.technical_package_id === technicalPackageId);
-    if (buyerId && buyerId !== "all")
-      out = out.filter(
-        (i) =>
-          i.buyer_id === buyerId || i.workorder?.techpack?.buyer_id === buyerId
-      );
-
-    if (query.trim()) {
-      const q = query.toLowerCase();
-      out = out.filter(
-        (i) =>
-          i.id.toLowerCase().includes(q) ||
-          i.name.toLowerCase().includes(q) ||
-          i.color.toLowerCase().includes(q) ||
-          i.wo_number.toLowerCase().includes(q) ||
-          i.category.toLowerCase().includes(q)
-      );
-    }
-    if (category !== "all") out = out.filter((i) => i.category === category);
-    if (status !== "all") out = out.filter((i) => i.status === status);
-    if (inStockOnly) out = out.filter((i) => i.stock > 0);
-
-    const [key, dir] = sortBy.split("-");
-    out.sort((a, b) => {
-      const mul = dir === "asc" ? 1 : -1;
-      if (key === "name") return a.name.localeCompare(b.name) * mul;
-      if (key === "stock") return (a.stock - b.stock) * mul;
-      if (key === "available")
-        return (a.stock - a.booked - (b.stock - b.booked)) * mul;
-      return 0;
-    });
-    return out;
-  }, [
-    items,
-    query,
-    category,
-    status,
-    inStockOnly,
-    sortBy,
-    woId,
-    technicalPackageId,
-    buyerId,
-  ]);
-
-  return {
-    filtered,
-    query,
-    setQuery,
-    category,
-    setCategory,
-    status,
-    setStatus,
-    inStockOnly,
-    setInStockOnly,
-    sortBy,
-    setSortBy,
-    woId,
-    setWoId,
-    technicalPackageId,
-    setTechnicalPackageId,
-    buyerId,
-    setBuyerId,
-  };
-}
-
-// -----------------------------
-// Main Component
-// -----------------------------
-
 export default function StoreDashboard(props) {
+  //real items
+  const [techpacks, setTechpacks] = useState([]);
+  const [buyers, setBuyers] = useState([]);
+  const [itemTypes, setItemTypes] = useState([]);
+
+  const [receives, setReceives] = useState([]);
+  const getReceives = async () => {
+    try {
+      const res = await api.post("/store/recent-five-grn-items");
+      setReceives(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  useEffect(() => {
+    getReceives();
+  }, []);
+
+  const fetchOptions = useCallback(async () => {
+    try {
+      const [buyerRes, techPackRes, itemTypeRes] = await Promise.all([
+        api.post("/common/buyers"),
+        api.post("/merchandising/technical-packages-all-desc"),
+        api.post("/common/item-types"),
+      ]);
+      setBuyers(buyerRes.data.data || []);
+      setItemTypes(itemTypeRes.data.data || []);
+      setTechpacks(techPackRes.data.data || []);
+    } catch (error) {
+      console.error("Error fetching options:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOptions();
+  }, []);
+
+  const [filterData, setFilterData] = useState({
+    technical_package_id: "",
+    buyer_id: "",
+    item_type_id: "",
+    search: "",
+    color: "",
+    status: "",
+    stock_only: false,
+    sort_by: "",
+    sort_order: "",
+  });
+
+  const handleFilterChange = (name, value) =>
+    setFilterData((prev) => ({ ...prev, [name]: value }));
+
   const [items, setItems] = useState(seedItems);
   const [bookings, setBookings] = useState(seedBookings);
   const [selected, setSelected] = useState([]);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [issueOpen, setIssueOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
-
-  const filters = useFilters(items);
 
   const totals = useMemo(() => {
     const totalReceived = items.reduce((s, i) => s + i.total_received, 0);
@@ -634,6 +562,8 @@ export default function StoreDashboard(props) {
       DropdownMenu: [],
     });
   }, []);
+
+  console.log("FILTER DATA", filterData);
   return (
     <div>
       <div className="row">
@@ -725,26 +655,9 @@ export default function StoreDashboard(props) {
                   size="small"
                   fullWidth
                   label="Search SKU, Name, Color..."
-                  value={filters.query}
-                  onChange={(e) => filters.setQuery(e.target.value)}
+                  value={filterData.search}
+                  onChange={(e) => handleFilterChange("search", e.target.value)}
                 />
-              </Grid>
-              <Grid item xs={6} md={1}>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>WO</InputLabel>
-                  <Select
-                    value={filters.woId}
-                    label="WO"
-                    onChange={(e) => filters.setWoId(e.target.value)}
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {woList.map((wo) => (
-                      <MenuItem key={wo.id} value={wo.id}>
-                        {wo.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
               </Grid>
 
               {/* 🔹 Technical Package ID */}
@@ -752,16 +665,16 @@ export default function StoreDashboard(props) {
                 <FormControl size="small" fullWidth>
                   <InputLabel>TECHPACK</InputLabel>
                   <Select
-                    value={filters.technicalPackageId}
-                    label="TECHPACK"
+                    value={filterData.technical_package_id}
                     onChange={(e) =>
-                      filters.setTechnicalPackageId(e.target.value)
+                      handleFilterChange("technical_package_id", e.target.value)
                     }
+                    label="TECHPACK"
                   >
                     <MenuItem value="all">All</MenuItem>
-                    {technicalPackages.map((pkg) => (
+                    {techpacks.map((pkg) => (
                       <MenuItem key={pkg.id} value={pkg.id}>
-                        {pkg.name}
+                        {pkg.techpack_number}
                       </MenuItem>
                     ))}
                   </Select>
@@ -773,9 +686,11 @@ export default function StoreDashboard(props) {
                 <FormControl size="small" fullWidth>
                   <InputLabel>BUYER</InputLabel>
                   <Select
-                    value={filters.buyerId}
+                    value={filterData.buyer_id}
                     label="BUYER"
-                    onChange={(e) => filters.setBuyerId(e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("buyer_id", e.target.value)
+                    }
                   >
                     <MenuItem value="all">All</MenuItem>
                     {buyers.map((buyer) => (
@@ -792,8 +707,8 @@ export default function StoreDashboard(props) {
                   size="small"
                   fullWidth
                   label="Color"
-                  value={filters.color}
-                  onChange={(e) => filters.setColor(e.target.value)}
+                  value={filterData.color}
+                  onChange={(e) => handleFilterChange("color", e.target.value)}
                 />
               </Grid>
 
@@ -801,14 +716,16 @@ export default function StoreDashboard(props) {
                 <FormControl size="small" fullWidth>
                   <InputLabel>Category</InputLabel>
                   <Select
-                    value={filters.category}
+                    value={filterData.item_type_id}
                     label="Category"
-                    onChange={(e) => filters.setCategory(e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("item_type_id", e.target.value)
+                    }
                   >
                     <MenuItem value="all">All</MenuItem>
-                    {CATEGORIES.map((c) => (
-                      <MenuItem key={c} value={c}>
-                        {c}
+                    {itemTypes.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.title}
                       </MenuItem>
                     ))}
                   </Select>
@@ -818,9 +735,11 @@ export default function StoreDashboard(props) {
                 <FormControl size="small" fullWidth>
                   <InputLabel>Status</InputLabel>
                   <Select
-                    value={filters.status}
+                    value={filterData.status}
                     label="Status"
-                    onChange={(e) => filters.setStatus(e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("status", e.target.value)
+                    }
                   >
                     <MenuItem value="all">All</MenuItem>
                     <MenuItem value="In Stock">In Stock</MenuItem>
@@ -842,8 +761,10 @@ export default function StoreDashboard(props) {
                     <Switch
                       size="small"
                       style={{ fontSize: "10px" }}
-                      checked={filters.inStockOnly}
-                      onChange={(e) => filters.setInStockOnly(e.target.checked)}
+                      checked={filterData.stock_only}
+                      onChange={(e) =>
+                        handleFilterChange("stock_only", e.target.checked)
+                      }
                     />
                   }
                 />
@@ -852,9 +773,11 @@ export default function StoreDashboard(props) {
                 <FormControl size="small" fullWidth>
                   <InputLabel>Sort By</InputLabel>
                   <Select
-                    value={filters.sortBy}
+                    value={filterData.sort_by}
                     label="Sort By"
-                    onChange={(e) => filters.setSortBy(e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("sort_by", e.target.value)
+                    }
                   >
                     <MenuItem value="name-asc">Name ↑</MenuItem>
                     <MenuItem value="name-desc">Name ↓</MenuItem>
@@ -899,12 +822,12 @@ export default function StoreDashboard(props) {
                   <TableCell padding="checkbox">
                     <Checkbox
                       size="small"
-                      checked={selected.length === filters.filtered.length}
+                      checked={selected.length === items.length}
                       onChange={() =>
                         setSelected(
-                          selected.length === filters.filtered.length
+                          selected.length === items.length
                             ? []
-                            : filters.filtered.map((i) => i.id)
+                            : items.map((i) => i.id)
                         )
                       }
                     />
@@ -951,7 +874,7 @@ export default function StoreDashboard(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {filters.filtered.map((item) => (
+                {items.map((item) => (
                   <TableRow
                     key={item.id}
                     hover
@@ -1031,35 +954,35 @@ export default function StoreDashboard(props) {
             <CardContent>
               {tab === "receives" && (
                 <>
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((r) => (
-                    <Card key={r} className="mb-2 border">
+                  {receives.map((r, index) => (
+                    <Card key={index} className="mb-2 border">
                       <CardContent className="p-2">
                         <div className="d-flex justify-content-between">
                           <Typography variant="caption" fontWeight={500}>
-                            Cotton Twill Fabric
+                            {r.item.title}
                           </Typography>
-                          <Badge bg="primary">{`GRN-${9000 + r}`}</Badge>
+                          <Badge bg="primary">{r.grn_number}</Badge>
                         </div>
                         <div className="row text-secondary small mt-1">
                           <div className="col-6">
                             <Typography variant="caption">
-                              <strong>Qty:</strong>{" "}
-                              {Math.floor(Math.random() * 500) + 50} yard
+                              <strong>Qty:</strong> {r.qty} {r.unit}
                             </Typography>
                           </div>
                           <div className="col-6">
                             <Typography variant="caption">
-                              <strong>Supplier:</strong> Supplier {r}
+                              <strong>Supplier:</strong>{" "}
+                              {r.supplier?.company_name}
                             </Typography>
                           </div>
                           <div className="col-6">
                             <Typography variant="caption">
-                              <strong>Date:</strong> 2025-09-{10 + r}
+                              <strong>Date:</strong> {r.received_date}
                             </Typography>
                           </div>
                           <div className="col-6">
                             <Typography variant="caption">
-                              <strong>Received By:</strong> Store Dept
+                              <strong>Received By:</strong> {r.user?.full_name}
                             </Typography>
                           </div>
                         </div>
