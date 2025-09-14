@@ -10,30 +10,23 @@ import {
   FormControl,
   InputLabel,
   Switch,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Drawer,
   Table,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
-  Chip,
-  Checkbox,
   FormControlLabel,
-  CardHeader,
   Typography,
   Badge,
   Tabs,
   Tab,
   Box,
+  Pagination,
 } from "@mui/material";
 import PackageIcon from "@mui/icons-material/Inventory2";
 import InboxIcon from "@mui/icons-material/Inbox";
 import ArchiveIcon from "@mui/icons-material/Archive";
-import UploadIcon from "@mui/icons-material/Upload";
-import AddIcon from "@mui/icons-material/Add";
 import DownloadIcon from "@mui/icons-material/Download";
 import SendIcon from "@mui/icons-material/Send";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
@@ -43,334 +36,8 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import api from "services/api";
 import { Link } from "react-router-dom";
 
-const DEPARTMENTS = [
-  "Cutting",
-  "Sewing",
-  "Finishing",
-  "Washing",
-  "QC",
-  "Store Return",
-];
+const departments = ["Cutting", "Sewing", "Finishing", "Washing", "QC"];
 
-const seedItems = [
-  {
-    id: "SKU-1001",
-    name: "Cotton Twill Fabric",
-    category: "Fabric",
-    color: "Navy",
-    size: "152cm",
-    unit: "yard",
-    stock: 1200,
-    status: "In Stock",
-    description: "High-quality cotton twill fabric for shirts and jackets.",
-    wo_number: "WO-2001",
-    total_received: 900,
-    total_issues: 300,
-  },
-  {
-    id: "SKU-1002",
-    name: "Poly Button 4-hole",
-    category: "Accessories",
-    color: "Black",
-    size: "18L",
-    unit: "pcs",
-    stock: 4500,
-    status: "In Stock",
-    description: "Durable poly buttons for garments.",
-    wo_number: "WO-2002",
-    total_received: 3300,
-    total_issues: 1200,
-  },
-  {
-    id: "SKU-1003",
-    name: "Woven Label Main",
-    category: "Labels",
-    color: "White",
-    size: "25mm",
-    unit: "pcs",
-    stock: 200,
-    status: "Low",
-    description: "Custom woven labels for branding.",
-    wo_number: "WO-2003",
-    total_received: 380,
-    total_issues: 180,
-  },
-  {
-    id: "SKU-1004",
-    name: "Carton Box 5ply",
-    category: "Packaging",
-    color: "Brown",
-    size: "60x40x40",
-    unit: "pcs",
-    stock: 0,
-    status: "Out of Stock",
-    description: "Strong 5-ply cartons for shipping.",
-    wo_number: "WO-2004",
-    total_received: 0,
-    total_issues: 0,
-  },
-  {
-    id: "SKU-1005",
-    name: "Tex Thread 40/2",
-    category: "Thread",
-    color: "Royal Blue",
-    size: "5000m",
-    unit: "cone",
-    stock: 650,
-    status: "In Stock",
-    description: "High strength sewing thread.",
-    wo_number: "WO-2005",
-    total_received: 740,
-    total_issues: 90,
-  },
-  {
-    id: "SKU-1006",
-    name: "Zipper #5 Nylon",
-    category: "Trims",
-    color: "Silver",
-    size: "20cm",
-    unit: "pcs",
-    stock: 3200,
-    status: "In Stock",
-    description: "Durable nylon zipper for jackets and pants.",
-    wo_number: "WO-2006",
-    total_received: 4200,
-    total_issues: 1000,
-  },
-  {
-    id: "SKU-1007",
-    name: "Denim Fabric",
-    category: "Fabric",
-    color: "Blue",
-    size: "160cm",
-    unit: "yard",
-    stock: 800,
-    status: "In Stock",
-    description: "Premium denim fabric for jeans.",
-    wo_number: "WO-2007",
-    total_received: 1000,
-    total_issues: 200,
-  },
-  {
-    id: "SKU-1008",
-    name: "Metal Snap Button",
-    category: "Accessories",
-    color: "Silver",
-    size: "12mm",
-    unit: "pcs",
-    stock: 2500,
-    status: "In Stock",
-    description: "Strong metal snaps for jackets.",
-    wo_number: "WO-2008",
-    total_received: 3000,
-    total_issues: 500,
-  },
-  {
-    id: "SKU-1009",
-    name: "Polyester Lining",
-    category: "Fabric",
-    color: "White",
-    size: "150cm",
-    unit: "yard",
-    stock: 600,
-    status: "In Stock",
-    description: "Smooth polyester lining for garments.",
-    wo_number: "WO-2009",
-    total_received: 800,
-    total_issues: 200,
-  },
-  {
-    id: "SKU-1010",
-    name: "Elastic Band 2cm",
-    category: "Trims",
-    color: "Black",
-    size: "2cm",
-    unit: "meter",
-    stock: 1200,
-    status: "In Stock",
-    description: "Elastic band for waistbands and cuffs.",
-    wo_number: "WO-2010",
-    total_received: 1500,
-    total_issues: 300,
-  },
-  {
-    id: "SKU-1011",
-    name: "Cotton Poplin Fabric",
-    category: "Fabric",
-    color: "White",
-    size: "150cm",
-    unit: "yard",
-    stock: 1000,
-    status: "In Stock",
-    description: "Smooth cotton poplin for shirts.",
-    wo_number: "WO-2011",
-    total_received: 1200,
-    total_issues: 200,
-  },
-  {
-    id: "SKU-1012",
-    name: "Plastic Buckle 30mm",
-    category: "Accessories",
-    color: "Black",
-    size: "30mm",
-    unit: "pcs",
-    stock: 1800,
-    status: "In Stock",
-    description: "Durable plastic buckle for bags.",
-    wo_number: "WO-2012",
-    total_received: 2000,
-    total_issues: 200,
-  },
-  {
-    id: "SKU-1013",
-    name: "Woven Label Care",
-    category: "Labels",
-    color: "White",
-    size: "30mm",
-    unit: "pcs",
-    stock: 400,
-    status: "In Stock",
-    description: "Woven care labels.",
-    wo_number: "WO-2013",
-    total_received: 500,
-    total_issues: 100,
-  },
-  {
-    id: "SKU-1014",
-    name: "Carton Box 3ply",
-    category: "Packaging",
-    color: "Brown",
-    size: "50x35x35",
-    unit: "pcs",
-    stock: 100,
-    status: "Low",
-    description: "Lightweight carton boxes.",
-    wo_number: "WO-2014",
-    total_received: 200,
-    total_issues: 100,
-  },
-  {
-    id: "SKU-1015",
-    name: "Tex Thread 30/2",
-    category: "Thread",
-    color: "White",
-    size: "5000m",
-    unit: "cone",
-    stock: 500,
-    status: "In Stock",
-    description: "Strong sewing thread.",
-    wo_number: "WO-2015",
-    total_received: 600,
-    total_issues: 100,
-  },
-  {
-    id: "SKU-1016",
-    name: "Zipper #3 Nylon",
-    category: "Trims",
-    color: "Black",
-    size: "15cm",
-    unit: "pcs",
-    stock: 1500,
-    status: "In Stock",
-    description: "Small nylon zippers for shirts.",
-    wo_number: "WO-2016",
-    total_received: 1800,
-    total_issues: 300,
-  },
-  {
-    id: "SKU-1017",
-    name: "Silk Fabric",
-    category: "Fabric",
-    color: "Red",
-    size: "140cm",
-    unit: "yard",
-    stock: 300,
-    status: "Low",
-    description: "Luxury silk fabric.",
-    wo_number: "WO-2017",
-    total_received: 350,
-    total_issues: 50,
-  },
-  {
-    id: "SKU-1018",
-    name: "Metal Button 2-hole",
-    category: "Accessories",
-    color: "Silver",
-    size: "15mm",
-    unit: "pcs",
-    stock: 1200,
-    status: "In Stock",
-    description: "Shiny metal buttons.",
-    wo_number: "WO-2018",
-    total_received: 1500,
-    total_issues: 300,
-  },
-  {
-    id: "SKU-1019",
-    name: "Poly Label Main",
-    category: "Labels",
-    color: "White",
-    size: "25mm",
-    unit: "pcs",
-    stock: 300,
-    status: "Low",
-    description: "Durable polyester labels.",
-    wo_number: "WO-2019",
-    total_received: 400,
-    total_issues: 100,
-  },
-  {
-    id: "SKU-1020",
-    name: "Carton Box 7ply",
-    category: "Packaging",
-    color: "Brown",
-    size: "70x50x50",
-    unit: "pcs",
-    stock: 50,
-    status: "Low",
-    description: "Extra strong shipping cartons.",
-    wo_number: "WO-2020",
-    total_received: 100,
-    total_issues: 50,
-  },
-];
-
-const seedBookings = [
-  {
-    bookingNo: "BK-240915-01",
-    itemId: "SKU-1006",
-    itemName: "Zipper #5 Nylon",
-    requiredQty: 1500,
-    uom: "pcs",
-    orderRef: "PO-8891",
-    buyer: "H&M",
-    deliveryDate: "2025-09-15",
-  },
-  {
-    bookingNo: "BK-240920-02",
-    itemId: "SKU-1002",
-    itemName: "Poly Button 4-hole",
-    requiredQty: 2000,
-    uom: "pcs",
-    orderRef: "PO-8892",
-    buyer: "PVH",
-    deliveryDate: "2025-09-20",
-  },
-  {
-    bookingNo: "BK-240925-03",
-    itemId: "SKU-1001",
-    itemName: "Cotton Twill Fabric",
-    requiredQty: 800,
-    uom: "yard",
-    orderRef: "PO-8893",
-    buyer: "Zara",
-    deliveryDate: "2025-09-25",
-  },
-];
-
-// -----------------------------
-// Helper Components
-// -----------------------------
 const StatCard = ({ icon: Icon, title, value, hint }) => (
   <Card variant="outlined">
     <CardContent>
@@ -387,23 +54,12 @@ const StatCard = ({ icon: Icon, title, value, hint }) => (
   </Card>
 );
 
-const StatusBadge = ({ status }) => {
-  const colorMap = {
-    "In Stock": "success",
-    Low: "warning",
-    "Out of Stock": "error",
-  };
-  return (
-    <Chip label={status} color={colorMap[status] || "default"} size="small" />
-  );
-};
-
 export default function StoreDashboard(props) {
-  //real items
+  //real stocks
+  const [stocks, setStocks] = useState([]);
   const [techpacks, setTechpacks] = useState([]);
   const [buyers, setBuyers] = useState([]);
   const [itemTypes, setItemTypes] = useState([]);
-
   const [receives, setReceives] = useState([]);
   const getReceives = async () => {
     try {
@@ -413,10 +69,6 @@ export default function StoreDashboard(props) {
       console.error(err);
     }
   };
-  useEffect(() => {
-    getReceives();
-  }, []);
-
   const fetchOptions = useCallback(async () => {
     try {
       const [buyerRes, techPackRes, itemTypeRes] = await Promise.all([
@@ -434,43 +86,74 @@ export default function StoreDashboard(props) {
 
   useEffect(() => {
     fetchOptions();
+    getReceives();
   }, []);
 
   const [filterData, setFilterData] = useState({
-    technical_package_id: "",
-    buyer_id: "",
-    item_type_id: "",
+    technical_package_id: "all",
+    buyer_id: "all",
+    item_type_id: "all",
     search: "",
     color: "",
-    status: "",
     stock_only: false,
     sort_by: "",
-    sort_order: "",
+  });
+
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    per_page: 50,
+    total: 0,
   });
 
   const handleFilterChange = (name, value) =>
     setFilterData((prev) => ({ ...prev, [name]: value }));
 
-  const [items, setItems] = useState(seedItems);
-  const [bookings, setBookings] = useState(seedBookings);
-  const [selected, setSelected] = useState([]);
-  const [receiveOpen, setReceiveOpen] = useState(false);
+  const getStocks = async (page = 1) => {
+    try {
+      const payload = {
+        ...filterData,
+        technical_package_id:
+          filterData.technical_package_id === "all"
+            ? ""
+            : filterData.technical_package_id,
+        buyer_id: filterData.buyer_id === "all" ? "" : filterData.buyer_id,
+        item_type_id:
+          filterData.item_type_id === "all" ? "" : filterData.item_type_id,
+        page,
+        per_page: pagination.per_page,
+      };
+
+      const res = await api.post("/store/stocks", payload);
+      setStocks(res.data.data || []);
+      setPagination({
+        current_page: res.data.current_page,
+        per_page: res.data.per_page,
+        total: res.data.total,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    getStocks();
+  }, [filterData]);
+
+  console.log("STOCKS", stocks);
+
+  const [bookings, setBookings] = useState([]);
   const [issueOpen, setIssueOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
 
   const totals = useMemo(() => {
-    const totalReceived = items.reduce((s, i) => s + i.total_received, 0);
-    const totalIssued = items.reduce((s, i) => s + i.total_issues, 0);
+    const totalReceived = 400;
+    const totalIssued = 500;
     const issuedToday = 260;
     const completed = 200;
     const checked = 200;
     const delayed = 200;
     const verified = 200;
-
-    const available = items.reduce(
-      (s, i) => s + Math.max(0, i.total_received - i.total_issues),
-      0
-    );
+    const available = 600;
     return {
       totalReceived,
       totalIssued,
@@ -481,72 +164,25 @@ export default function StoreDashboard(props) {
       delayed,
       verified,
     };
-  }, [items]);
+  }, []);
 
-  const toggleSelected = (id) =>
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-
-  const [receiveForm, setReceiveForm] = useState({
-    bookingNo: "",
-    qty: "",
-    supplier: "",
-    grn: "",
-    date: new Date().toISOString().slice(0, 10),
-  });
   const [issueForm, setIssueForm] = useState({
-    dept: DEPARTMENTS[0],
+    dept: departments[0],
+    issue_to: "",
     qty: "",
+    requisition_number: "",
+    ref: "",
     remarks: "",
   });
 
-  const computeStatus = (stock, booked) => {
-    if (stock <= 0) return "Out of Stock";
-    if (stock - booked < 150) return "Low";
-    return "In Stock";
-  };
-
-  const handleReceiveSubmit = () => {
-    const qty = Number(receiveForm.qty || 0);
-    if (!activeItem || !qty) return setReceiveOpen(false);
-    setItems((prev) =>
-      prev.map((it) =>
-        it.id === activeItem.id
-          ? {
-              ...it,
-              stock: it.stock + qty,
-              status: computeStatus(it.stock + qty, it.booked),
-            }
-          : it
-      )
-    );
-    if (receiveForm.bookingNo) {
-      setBookings((prev) =>
-        prev.map((b) =>
-          b.bookingNo === receiveForm.bookingNo
-            ? { ...b, requiredQty: Math.max(0, b.requiredQty - qty) }
-            : b
-        )
-      );
-    }
-    setReceiveOpen(false);
+  const handleIssueFormChange = (field, value) => {
+    setIssueForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleIssueSubmit = () => {
     const qty = Number(issueForm.qty || 0);
     if (!activeItem || !qty) return setIssueOpen(false);
-    setItems((prev) =>
-      prev.map((it) =>
-        it.id === activeItem.id
-          ? {
-              ...it,
-              stock: Math.max(0, it.stock - qty),
-              status: computeStatus(Math.max(0, it.stock - qty), it.booked),
-            }
-          : it
-      )
-    );
+
     setIssueOpen(false);
   };
 
@@ -563,7 +199,6 @@ export default function StoreDashboard(props) {
     });
   }, []);
 
-  console.log("FILTER DATA", filterData);
   return (
     <div>
       <div className="row">
@@ -574,7 +209,7 @@ export default function StoreDashboard(props) {
               <StatCard
                 icon={PackageIcon}
                 title="Total Received"
-                value={totals.totalReceived.toLocaleString()}
+                value={totals.totalReceived}
                 hint="Received"
                 sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
@@ -583,7 +218,7 @@ export default function StoreDashboard(props) {
               <StatCard
                 icon={InboxIcon}
                 title="Total Issues"
-                value={totals.totalIssued.toLocaleString()}
+                value={totals.totalIssued}
                 hint="Issued"
                 sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
@@ -592,7 +227,7 @@ export default function StoreDashboard(props) {
               <StatCard
                 icon={ArchiveIcon}
                 title="Available"
-                value={totals.available.toLocaleString()}
+                value={totals.available}
                 hint="Received - Issued"
                 sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
@@ -601,7 +236,7 @@ export default function StoreDashboard(props) {
               <StatCard
                 icon={SendIcon}
                 title="Issued Today"
-                value={totals.issuedToday.toLocaleString()}
+                value={totals.issuedToday}
                 hint="Departments"
                 sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
@@ -731,23 +366,7 @@ export default function StoreDashboard(props) {
                   </Select>
                 </FormControl>
               </Grid>
-              <Grid item xs={6} md={1}>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={filterData.status}
-                    label="Status"
-                    onChange={(e) =>
-                      handleFilterChange("status", e.target.value)
-                    }
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    <MenuItem value="In Stock">In Stock</MenuItem>
-                    <MenuItem value="Low">Low</MenuItem>
-                    <MenuItem value="Out of Stock">Out of Stock</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
+
               <Grid item xs={6} md={1}>
                 <FormControlLabel
                   sx={{
@@ -783,8 +402,6 @@ export default function StoreDashboard(props) {
                     <MenuItem value="name-desc">Name ↓</MenuItem>
                     <MenuItem value="stock-asc">Stock ↑</MenuItem>
                     <MenuItem value="stock-desc">Stock ↓</MenuItem>
-                    <MenuItem value="available-asc">Available ↑</MenuItem>
-                    <MenuItem value="available-desc">Available ↓</MenuItem>
                   </Select>
                 </FormControl>
               </Grid>
@@ -819,30 +436,20 @@ export default function StoreDashboard(props) {
             <Table stickyHeader size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      size="small"
-                      checked={selected.length === items.length}
-                      onChange={() =>
-                        setSelected(
-                          selected.length === items.length
-                            ? []
-                            : items.map((i) => i.id)
-                        )
-                      }
-                    />
-                  </TableCell>
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>#WO</strong>
+                    <strong>#BUYER</strong>
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>#STYLE</strong>
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>ITEM NAME</strong>
+                    <strong>GARMENT COLOR</strong>
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>TYPE</strong>
+                  </TableCell>
+                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                    <strong>ITEM</strong>
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>ITEM DETAILS</strong>
@@ -853,20 +460,15 @@ export default function StoreDashboard(props) {
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>ITEM SIZE</strong>
                   </TableCell>
+
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>UNIT</strong>
+                    <strong>RECEIVED</strong>
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>STOCK</strong>
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>TOTAL RECEIVED</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>ITEM ISSUES</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>STATUS</strong>
+                    <strong>ISSUES</strong>
                   </TableCell>
                   <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
                     <strong>ACTIONS</strong>
@@ -874,47 +476,32 @@ export default function StoreDashboard(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {items.map((item) => (
+                {stocks.map((item) => (
                   <TableRow
                     key={item.id}
                     hover
-                    selected={selected.includes(item.id)}
                     sx={{ "& td": { fontSize: "0.8rem", py: 0.5 } }}
                   >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        size="small"
-                        checked={selected.includes(item.id)}
-                        onChange={() => toggleSelected(item.id)}
-                      />
+                    <TableCell>{item.buyer?.name}</TableCell>
+                    <TableCell>{item.techpack?.techpack_number}</TableCell>
+                    <TableCell>{item.garment_color}</TableCell>
+                    <TableCell>{item.item_type?.title}</TableCell>
+                    <TableCell>{item.item?.title}</TableCell>
+                    <TableCell>{item.item_description}</TableCell>
+                    <TableCell>{item.item_color}</TableCell>
+                    <TableCell>{item.item_size}</TableCell>
+                    <TableCell>
+                      {(item.grns ?? [])
+                        .reduce((sum, grn) => sum + parseFloat(grn.qty ?? 0), 0)
+                        .toLocaleString()}
                     </TableCell>
 
-                    <TableCell>{item.wo_number}</TableCell>
-                    <TableCell>{item.id}</TableCell>
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.category}</TableCell>
-                    <TableCell>{item.description}</TableCell>
-                    <TableCell>{item.color}</TableCell>
-                    <TableCell>{item.size}</TableCell>
-                    <TableCell>{item.unit}</TableCell>
-                    <TableCell>{item.stock.toLocaleString()}</TableCell>
-                    <TableCell>{item.total_received}</TableCell>
-                    <TableCell>{item.total_issues}</TableCell>
                     <TableCell>
-                      <StatusBadge status={item.status} />
+                      {item.balance_qty} {item.unit}
                     </TableCell>
+                    <TableCell>N/A</TableCell>
+
                     <TableCell>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        sx={{ mr: 0.5 }}
-                        onClick={() => {
-                          setActiveItem(item);
-                          setReceiveOpen(true);
-                        }}
-                      >
-                        Receive
-                      </Button>
                       <Button
                         size="small"
                         sx={{ bgcolor: "#f6a33f" }}
@@ -931,6 +518,11 @@ export default function StoreDashboard(props) {
                 ))}
               </TableBody>
             </Table>
+            <Pagination
+              count={Math.ceil(pagination.total / pagination.per_page)}
+              page={pagination.current_page}
+              onChange={(e, value) => getStocks(value)}
+            />
           </Card>
         </div>
 
@@ -1072,24 +664,11 @@ export default function StoreDashboard(props) {
 
                         <Typography variant="body2" className="mt-1">
                           <small>
-                            <strong>Required:</strong>{" "}
-                            {b.requiredQty.toLocaleString()} {b.uom}
+                            <strong>Required:</strong> {b.requiredQty} {b.uom}
                           </small>
                         </Typography>
 
                         <hr />
-
-                        <Button
-                          size="small"
-                          variant="outlined"
-                          onClick={() => {
-                            setActiveItem(b);
-                            setReceiveOpen(true);
-                          }}
-                          startIcon={<AddIcon />}
-                        >
-                          <small>Receive</small>
-                        </Button>
                       </CardContent>
                     </Card>
                   ))}
@@ -1100,121 +679,165 @@ export default function StoreDashboard(props) {
         </div>
       </div>
 
-      <Dialog open={receiveOpen} onClose={() => setReceiveOpen(false)}>
-        <DialogTitle>Receive Item: {activeItem?.name}</DialogTitle>
-        <DialogContent>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Booking No (Optional)</InputLabel>
-            <Select
-              value={receiveForm.bookingNo}
-              onChange={(e) =>
-                setReceiveForm((f) => ({ ...f, bookingNo: e.target.value }))
-              }
-              label="Booking No"
-            >
-              <MenuItem value="">-- None --</MenuItem>
-              {bookings.map((b) => (
-                <MenuItem key={b.bookingNo} value={b.bookingNo}>
-                  {b.bookingNo}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Quantity Received"
-            type="number"
-            value={receiveForm.qty}
-            onChange={(e) =>
-              setReceiveForm((f) => ({ ...f, qty: e.target.value }))
-            }
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Supplier Name"
-            value={receiveForm.supplier}
-            onChange={(e) =>
-              setReceiveForm((f) => ({ ...f, supplier: e.target.value }))
-            }
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="GRN No"
-            value={receiveForm.grn}
-            onChange={(e) =>
-              setReceiveForm((f) => ({ ...f, grn: e.target.value }))
-            }
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Date"
-            type="date"
-            value={receiveForm.date}
-            onChange={(e) =>
-              setReceiveForm((f) => ({ ...f, date: e.target.value }))
-            }
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setReceiveOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleReceiveSubmit}>
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Drawer
+        anchor="left"
+        open={issueOpen}
+        onClose={() => setIssueOpen(false)}
+      >
+        <Box
+          sx={{
+            width: 500,
+            p: 3,
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          {/* Title */}
+          <Typography variant="h6" gutterBottom>
+            Issue Item: {activeItem?.item?.title}
+          </Typography>
 
-      <Dialog open={issueOpen} onClose={() => setIssueOpen(false)}>
-        <DialogTitle>Issue Item: {activeItem?.name}</DialogTitle>
-        <DialogContent>
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Department</InputLabel>
-            <Select
-              value={issueForm.dept}
-              onChange={(e) =>
-                setIssueForm((f) => ({ ...f, dept: e.target.value }))
-              }
-              label="Department"
-            >
-              {DEPARTMENTS.map((d) => (
-                <MenuItem key={d} value={d}>
-                  {d}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Quantity"
-            type="number"
-            value={issueForm.qty}
-            onChange={(e) =>
-              setIssueForm((f) => ({ ...f, qty: e.target.value }))
-            }
-          />
-          <TextField
-            fullWidth
-            margin="normal"
-            label="Remarks"
-            multiline
-            rows={2}
-            value={issueForm.remarks}
-            onChange={(e) =>
-              setIssueForm((f) => ({ ...f, remarks: e.target.value }))
-            }
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIssueOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleIssueSubmit}>
-            Submit
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <Card
+            variant="outlined"
+            sx={{ mb: 2, borderRadius: 2, boxShadow: 1 }}
+          >
+            <CardContent>
+              <Grid container spacing={1}>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Buyer:</strong> {activeItem?.buyer?.name || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Style/Techpack:</strong>{" "}
+                    {activeItem?.techpack?.techpack_number || "-"} /{" "}
+                    {activeItem?.garment_color} / {activeItem?.size_range}
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Item Name:</strong> {activeItem?.item?.title || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Color:</strong> {activeItem?.item_color || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Item Size/Width/Dimention:</strong>{" "}
+                    {activeItem?.item_size || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Balance QTY:</strong>{" "}
+                    {activeItem?.balance_qty || "0"} / {activeItem?.unit}
+                  </Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              {" "}
+              <TextField
+                fullWidth
+                margin="normal"
+                label="Issue To"
+                value={issueForm.issue_to}
+                onChange={(e) =>
+                  handleIssueFormChange("issue_to", e.target.value)
+                }
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <FormControl fullWidth margin="normal">
+                <InputLabel>Department</InputLabel>
+                <Select
+                  value={issueForm.dept}
+                  onChange={(e) =>
+                    handleIssueFormChange("dept", e.target.value)
+                  }
+                  label="Department"
+                >
+                  {departments.map((d) => (
+                    <MenuItem key={d} value={d}>
+                      {d}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                margin="normal"
+                label="Quantity"
+                type="number"
+                value={issueForm.qty}
+                onChange={(e) => handleIssueFormChange("qty", e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                margin="normal"
+                label="Reference"
+                value={issueForm.ref}
+                onChange={(e) => handleIssueFormChange("ref", e.target.value)}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                fullWidth
+                margin="normal"
+                label="Requisition Number"
+                value={issueForm.requisition_number}
+                onChange={(e) =>
+                  handleIssueFormChange("requisition_number", e.target.value)
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              {" "}
+              <TextField
+                fullWidth
+                margin="normal"
+                label="Remarks"
+                multiline
+                rows={3}
+                value={issueForm.remarks}
+                onChange={(e) =>
+                  handleIssueFormChange("remarks", e.target.value)
+                }
+              />
+            </Grid>
+          </Grid>
+
+          {/* Actions */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 1,
+              mt: "auto", // push buttons to the bottom
+            }}
+          >
+            <Button onClick={() => setIssueOpen(false)}>Cancel</Button>
+            <Button variant="contained" onClick={handleIssueSubmit}>
+              Submit
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
     </div>
   );
 }
