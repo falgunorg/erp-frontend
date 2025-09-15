@@ -119,7 +119,7 @@ import StoreDetails from "../pages/store/StoreDetails";
 import StoreSummary from "../pages/store/StoreSummary";
 
 // RECEIVES
-import Receives from "../pages/store/receives/Receives";
+import Receives from "../pages/store/receives/Grns";
 
 // RETURN TO STORE
 
@@ -257,6 +257,7 @@ import BookingManager from "../pages/BookingManager";
 // Store Routes
 import StoreDashboard from "pages/store/StoreDashboard";
 import ReceiveItem from "../pages/store/receives/ReceiveItem";
+import Grns from "../pages/store/receives/Grns";
 
 import PurchaseContractsList from "../pages/PurchaseContractsList";
 import Tasks from "../pages/Tasks";
@@ -358,6 +359,11 @@ class PrivateRoutes extends Component {
             exact
             path="/store/receives-create"
             component={ReceiveItem}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/store/receives"
+            component={Grns}
           ></PrivateRoute>
           {/* end store routes */}
           <PrivateRoute

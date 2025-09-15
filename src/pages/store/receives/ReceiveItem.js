@@ -389,7 +389,7 @@ export default function ReceiveItem({ setHeaderData }) {
 
       {/* Drawer Form */}
       <Drawer
-        anchor="right"
+        anchor="left"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
       >

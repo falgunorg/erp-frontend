@@ -59,8 +59,12 @@ export default function StoreDashboard(props) {
   const [stocks, setStocks] = useState([]);
   const [techpacks, setTechpacks] = useState([]);
   const [buyers, setBuyers] = useState([]);
+  const [companies, setCompanies] = useState([]);
   const [itemTypes, setItemTypes] = useState([]);
   const [receives, setReceives] = useState([]);
+  const [issues, setIssues] = useState([]);
+  const [issueUsers, setIssueUsers] = useState([]);
+
   const getReceives = async () => {
     try {
       const res = await api.post("/store/recent-five-grn-items");
@@ -69,16 +73,35 @@ export default function StoreDashboard(props) {
       console.error(err);
     }
   };
+
+  const getIssues = async () => {
+    try {
+      const res = await api.post("/store/recent-five-issue-items");
+      setIssues(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchOptions = useCallback(async () => {
     try {
-      const [buyerRes, techPackRes, itemTypeRes] = await Promise.all([
-        api.post("/common/buyers"),
-        api.post("/merchandising/technical-packages-all-desc"),
-        api.post("/common/item-types"),
-      ]);
+      const [buyerRes, techPackRes, itemTypeRes, companyRes, usersRef] =
+        await Promise.all([
+          api.post("/common/buyers"),
+          api.post("/merchandising/technical-packages-all-desc"),
+          api.post("/common/item-types"),
+          api.post("/common/companies", {
+            type: issueForm.issue_type === "Stock-Lot" ? "Other" : "Own",
+          }),
+          api.post("/admin/employees", {
+            issue_type: "Self",
+          }),
+        ]);
       setBuyers(buyerRes.data.data || []);
       setItemTypes(itemTypeRes.data.data || []);
       setTechpacks(techPackRes.data.data || []);
+      setCompanies(companyRes.data.data || []);
+      setIssueUsers(usersRef.data.data || []);
     } catch (error) {
       console.error("Error fetching options:", error);
     }
@@ -87,6 +110,7 @@ export default function StoreDashboard(props) {
   useEffect(() => {
     fetchOptions();
     getReceives();
+    getIssues();
   }, []);
 
   const [filterData, setFilterData] = useState({
@@ -139,8 +163,6 @@ export default function StoreDashboard(props) {
     getStocks();
   }, [filterData]);
 
-  console.log("STOCKS", stocks);
-
   const [bookings, setBookings] = useState([]);
   const [issueOpen, setIssueOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
@@ -167,24 +189,106 @@ export default function StoreDashboard(props) {
   }, []);
 
   const [issueForm, setIssueForm] = useState({
-    dept: departments[0],
+    issue_type: "Self",
+    issue_date: new Date().toISOString().split("T")[0],
+    department: "",
     issue_to: "",
+    issuing_company: "",
+    line: "",
     qty: "",
-    requisition_number: "",
     ref: "",
+    requisition_number: "",
+    delivery_challan: "",
     remarks: "",
   });
+
+  const issueTypes = [
+    "Self",
+    "Sister-Factory",
+    "Sub-Contract",
+    "Sample",
+    "Stock-Lot",
+  ];
 
   const handleIssueFormChange = (field, value) => {
     setIssueForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleIssueSubmit = () => {
-    const qty = Number(issueForm.qty || 0);
-    if (!activeItem || !qty) return setIssueOpen(false);
+  const [errors, setErrors] = useState({});
 
-    setIssueOpen(false);
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Quantity validation
+    const qty = parseFloat(issueForm.qty);
+    if (issueForm.qty === "" || isNaN(qty) || qty < 0) {
+      newErrors.qty = "Quantity must be 0 or greater";
+    }
+
+    // Issue type validation
+    if (!issueForm.issue_type) {
+      newErrors.issue_type = "Issue Type is required";
+    }
+
+    if (!issueForm.requisition_number) {
+      newErrors.requisition_number = "Requisition Number is required";
+    }
+
+    // Conditional validations
+    if (issueForm.issue_type === "Self") {
+      if (!issueForm.department) {
+        newErrors.department = "Department To is required for Self";
+      }
+      if (!issueForm.issue_to) {
+        newErrors.issue_to = "Issue To is required for Self";
+      }
+      if (!issueForm.line) {
+        newErrors.line = "Line is required for Self";
+      }
+    }
+
+    if (
+      ["Sister-Factory", "Sub-Contract", "Sample"].includes(
+        issueForm.issue_type
+      )
+    ) {
+      if (!issueForm.issuing_company) {
+        newErrors.issuing_company = "Issuing Company is required";
+      }
+    }
+
+    return newErrors;
   };
+
+  const handleIssueSubmit = async () => {
+    const newErrors = validateForm();
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      return; // Stop submit if errors exist
+    }
+    try {
+      const response = await api.post("/store/issues", {
+        ...issueForm,
+        stock_id: activeItem.id ?? "",
+        unit: activeItem.unit ?? "",
+      });
+
+      if (response.status === 201) {
+        alert("Issues created successfully!");
+        setIssueOpen(false);
+        getStocks();
+        getIssues();
+        setErrors({});
+      } else {
+        setErrors(response.data.errors);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  console.log("ISSUE FORM", issueForm);
 
   const [tab, setTab] = useState("receives");
   useEffect(async () => {
@@ -200,82 +304,32 @@ export default function StoreDashboard(props) {
   }, []);
 
   return (
-    <div>
+    <div className="">
       <div className="row">
         <div className="col-lg-10 col-xl-9">
           {/* Stat Cards */}
           <Grid container spacing={0.5} sx={{ mb: 1 }}>
-            <Grid item xs={4} md={1.5}>
+            <Grid item xs={4} md={2}>
               <StatCard
-                icon={PackageIcon}
-                title="Total Received"
+                icon={ArchiveIcon}
                 value={totals.totalReceived}
                 hint="Received"
                 sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
             </Grid>
-            <Grid item xs={4} md={1.5}>
+            <Grid item xs={4} md={2}>
               <StatCard
-                icon={InboxIcon}
-                title="Total Issues"
-                value={totals.totalIssued}
-                hint="Issued"
-                sx={{ p: 0.5, fontSize: "0.75rem" }}
-              />
-            </Grid>
-            <Grid item xs={4} md={1.5}>
-              <StatCard
-                icon={ArchiveIcon}
-                title="Available"
+                icon={PackageIcon}
                 value={totals.available}
-                hint="Received - Issued"
+                hint="Balance"
                 sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
             </Grid>
-            <Grid item xs={4} md={1.5}>
+            <Grid item xs={4} md={2}>
               <StatCard
                 icon={SendIcon}
-                title="Issued Today"
-                value={totals.issuedToday}
-                hint="Departments"
-                sx={{ p: 0.5, fontSize: "0.75rem" }}
-              />
-            </Grid>
-
-            {/* 🔹 New 4 StatCards */}
-            <Grid item xs={4} md={1.5}>
-              <StatCard
-                icon={HourglassEmptyIcon}
-                title="Pending"
-                value={totals.delayed}
-                hint="Waiting"
-                sx={{ p: 0.5, fontSize: "0.75rem" }}
-              />
-            </Grid>
-            <Grid item xs={4} md={1.5}>
-              <StatCard
-                icon={CheckCircleIcon}
-                title="Completed"
-                value={totals.completed}
-                hint="Done"
-                sx={{ p: 0.5, fontSize: "0.75rem" }}
-              />
-            </Grid>
-            <Grid item xs={4} md={1.5}>
-              <StatCard
-                icon={WarningAmberIcon}
-                title="Delayed"
-                value={totals.delayed}
-                hint="Alerts"
-                sx={{ p: 0.5, fontSize: "0.75rem" }}
-              />
-            </Grid>
-            <Grid item xs={4} md={1.5}>
-              <StatCard
-                icon={VerifiedIcon}
-                title="Verified"
-                value={totals.verified}
-                hint="Checked"
+                value={totals.totalIssued}
+                hint="Issued"
                 sx={{ p: 0.5, fontSize: "0.75rem" }}
               />
             </Grid>
@@ -285,7 +339,7 @@ export default function StoreDashboard(props) {
           <Card variant="outlined" sx={{ mb: 2, p: 1 }}>
             <Grid container spacing={1} alignItems="flex-end">
               {/* 🔹 WO ID */}
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={3}>
                 <TextField
                   size="small"
                   fullWidth
@@ -296,7 +350,7 @@ export default function StoreDashboard(props) {
               </Grid>
 
               {/* 🔹 Technical Package ID */}
-              <Grid item xs={6} md={1}>
+              <Grid item xs={6} md={2}>
                 <FormControl size="small" fullWidth>
                   <InputLabel>TECHPACK</InputLabel>
                   <Select
@@ -317,7 +371,7 @@ export default function StoreDashboard(props) {
               </Grid>
 
               {/* 🔹 Buyer ID */}
-              <Grid item xs={6} md={1}>
+              <Grid item xs={6} md={2}>
                 <FormControl size="small" fullWidth>
                   <InputLabel>BUYER</InputLabel>
                   <Select
@@ -337,17 +391,7 @@ export default function StoreDashboard(props) {
                 </FormControl>
               </Grid>
 
-              <Grid item xs={6} md={1}>
-                <TextField
-                  size="small"
-                  fullWidth
-                  label="Color"
-                  value={filterData.color}
-                  onChange={(e) => handleFilterChange("color", e.target.value)}
-                />
-              </Grid>
-
-              <Grid item xs={6} md={1}>
+              <Grid item xs={6} md={2}>
                 <FormControl size="small" fullWidth>
                   <InputLabel>Category</InputLabel>
                   <Select
@@ -388,7 +432,7 @@ export default function StoreDashboard(props) {
                   }
                 />
               </Grid>
-              <Grid item xs={6} md={1}>
+              <Grid item xs={6} md={2}>
                 <FormControl size="small" fullWidth>
                   <InputLabel>Sort By</InputLabel>
                   <Select
@@ -487,7 +531,9 @@ export default function StoreDashboard(props) {
                     <TableCell>{item.garment_color}</TableCell>
                     <TableCell>{item.item_type?.title}</TableCell>
                     <TableCell>{item.item?.title}</TableCell>
-                    <TableCell>{item.item_description}</TableCell>
+                    <TableCell sx={{ maxWidth: "200px" }}>
+                      {item.item_description}
+                    </TableCell>
                     <TableCell>{item.item_color}</TableCell>
                     <TableCell>{item.item_size}</TableCell>
                     <TableCell>
@@ -499,7 +545,12 @@ export default function StoreDashboard(props) {
                     <TableCell>
                       {item.balance_qty} {item.unit}
                     </TableCell>
-                    <TableCell>N/A</TableCell>
+                    <TableCell>
+                      {" "}
+                      {(item.issues ?? [])
+                        .reduce((sum, iss) => sum + parseFloat(iss.qty ?? 0), 0)
+                        .toLocaleString()}
+                    </TableCell>
 
                     <TableCell>
                       <Button
@@ -556,6 +607,14 @@ export default function StoreDashboard(props) {
                           <Badge bg="primary">{r.grn_number}</Badge>
                         </div>
                         <div className="row text-secondary small mt-1">
+                          <div className="col-12">
+                            <Typography variant="caption">
+                              <strong>
+                                {r.techpack?.techpack_number} /{" "}
+                                {r.garment_color} /{r.size_range}
+                              </strong>
+                            </Typography>
+                          </div>
                           <div className="col-6">
                             <Typography variant="caption">
                               <strong>Qty:</strong> {r.qty} {r.unit}
@@ -581,7 +640,7 @@ export default function StoreDashboard(props) {
                       </CardContent>
                     </Card>
                   ))}
-                  <Link to="#" className="btn btn-info">
+                  <Link to="/store/receives" className="btn btn-info">
                     See All Receives
                   </Link>
                 </>
@@ -589,35 +648,49 @@ export default function StoreDashboard(props) {
 
               {tab === "issues" && (
                 <>
-                  {[1, 2, 3].map((i) => (
+                  {issues.map((i, index) => (
                     <Card key={i} className="mb-2 border">
                       <CardContent className="p-2">
                         <div className="d-flex justify-content-between">
                           <Typography variant="caption" fontWeight={500}>
-                            Zipper #5 Nylon
+                            {i.stock?.item?.title}
                           </Typography>
-                          <Badge bg="warning">{`ISS-${100 + i}`}</Badge>
+                          <Badge bg="warning">{i.issue_number}</Badge>
                         </div>
                         <div className="row text-secondary small mt-1">
-                          <div className="col-6">
+                          <div className="col-12">
                             <Typography variant="caption">
-                              <strong>Qty:</strong>{" "}
-                              {Math.floor(Math.random() * 300) + 10} pcs
+                              <strong>
+                                {i.stock?.techpack?.techpack_number} /{" "}
+                                {i.stock?.garment_color} /{i.stock?.size_range}
+                              </strong>
                             </Typography>
                           </div>
                           <div className="col-6">
                             <Typography variant="caption">
-                              <strong>Department:</strong> Sewing
+                              <strong>Issue Type:</strong>{" "}
+                              {i.issue_type ?? "N/A"}
                             </Typography>
                           </div>
                           <div className="col-6">
                             <Typography variant="caption">
-                              <strong>Date:</strong> 2025-09-{12 + i}
+                              <strong>Qty:</strong> {i.qty} {i.unit}
                             </Typography>
                           </div>
                           <div className="col-6">
                             <Typography variant="caption">
-                              <strong>Issued By:</strong> Store Dept
+                              <strong>Department:</strong>{" "}
+                              {i.department ?? "N/A"}
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Date:</strong> {i.issue_date}
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Issued By:</strong> {i.user?.full_name}
                             </Typography>
                           </div>
                         </div>
@@ -680,13 +753,13 @@ export default function StoreDashboard(props) {
       </div>
 
       <Drawer
-        anchor="left"
+        anchor="right"
         open={issueOpen}
         onClose={() => setIssueOpen(false)}
       >
         <Box
           sx={{
-            width: 500,
+            width: 600,
             p: 3,
             display: "flex",
             flexDirection: "column",
@@ -699,6 +772,7 @@ export default function StoreDashboard(props) {
             Issue Item: {activeItem?.item?.title}
           </Typography>
 
+          {/* Stock Info Card */}
           <Card
             variant="outlined"
             sx={{ mb: 2, borderRadius: 2, boxShadow: 1 }}
@@ -717,7 +791,6 @@ export default function StoreDashboard(props) {
                     {activeItem?.garment_color} / {activeItem?.size_range}
                   </Typography>
                 </Grid>
-
                 <Grid item xs={12}>
                   <Typography variant="body2">
                     <strong>Item Name:</strong> {activeItem?.item?.title || "-"}
@@ -730,7 +803,7 @@ export default function StoreDashboard(props) {
                 </Grid>
                 <Grid item xs={12}>
                   <Typography variant="body2">
-                    <strong>Item Size/Width/Dimention:</strong>{" "}
+                    <strong>Item Size/Width/Dimension:</strong>{" "}
                     {activeItem?.item_size || "-"}
                   </Typography>
                 </Grid>
@@ -744,82 +817,233 @@ export default function StoreDashboard(props) {
             </CardContent>
           </Card>
 
+          {/* Issue Form */}
           <Grid container spacing={1}>
-            <Grid item xs={6}>
-              {" "}
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Issue To"
-                value={issueForm.issue_to}
-                onChange={(e) =>
-                  handleIssueFormChange("issue_to", e.target.value)
-                }
-              />
-            </Grid>
-
-            <Grid item xs={6}>
+            {/* Issue Type */}
+            <Grid item xs={12}>
               <FormControl fullWidth margin="normal">
-                <InputLabel>Department</InputLabel>
+                <InputLabel>Issue Type</InputLabel>
                 <Select
-                  value={issueForm.dept}
+                  value={issueForm.issue_type || ""}
                   onChange={(e) =>
-                    handleIssueFormChange("dept", e.target.value)
+                    handleIssueFormChange("issue_type", e.target.value)
                   }
-                  label="Department"
+                  label="Issue Type"
                 >
-                  {departments.map((d) => (
-                    <MenuItem key={d} value={d}>
-                      {d}
+                  {issueTypes.map((type) => (
+                    <MenuItem key={type} value={type}>
+                      {type}
                     </MenuItem>
                   ))}
                 </Select>
+                {errors.issue_type && (
+                  <small className="text-danger">{errors.issue_type}</small>
+                )}
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Quantity"
-                type="number"
-                value={issueForm.qty}
-                onChange={(e) => handleIssueFormChange("qty", e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Reference"
-                value={issueForm.ref}
-                onChange={(e) => handleIssueFormChange("ref", e.target.value)}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Requisition Number"
-                value={issueForm.requisition_number}
-                onChange={(e) =>
-                  handleIssueFormChange("requisition_number", e.target.value)
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              {" "}
-              <TextField
-                fullWidth
-                margin="normal"
-                label="Remarks"
-                multiline
-                rows={3}
-                value={issueForm.remarks}
-                onChange={(e) =>
-                  handleIssueFormChange("remarks", e.target.value)
-                }
-              />
-            </Grid>
+            {/* Conditionally render fields based on issue_type */}
+            {issueForm.issue_type === "Self" && (
+              <>
+                <Grid item xs={6}>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Department</InputLabel>
+                    <Select
+                      value={issueForm.department || ""}
+                      onChange={(e) =>
+                        handleIssueFormChange("department", e.target.value)
+                      }
+                      label="Department"
+                    >
+                      {departments.map((type) => (
+                        <MenuItem key={type} value={type}>
+                          {type}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {errors.department && (
+                      <small className="text-danger">{errors.department}</small>
+                    )}
+                  </FormControl>
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Line"
+                    value={issueForm.line || ""}
+                    onChange={(e) =>
+                      handleIssueFormChange("line", e.target.value)
+                    }
+                  />
+                  {errors.line && (
+                    <small className="text-danger">{errors.line}</small>
+                  )}
+                </Grid>
+                <Grid item xs={6}>
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel>Issuing To</InputLabel>
+                    <Select
+                      value={issueForm.issue_to || ""}
+                      onChange={(e) =>
+                        handleIssueFormChange("issue_to", e.target.value)
+                      }
+                      label="Issue To"
+                    >
+                      {issueUsers.map((c) => (
+                        <MenuItem key={c.id} value={c.id}>
+                          {c.full_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                    {errors.issue_to && (
+                      <small className="text-danger">{errors.issue_to}</small>
+                    )}
+                  </FormControl>
+                </Grid>
+              </>
+            )}
+            {["Sister-Factory", "Sub-Contract", "Sample"].includes(
+              issueForm.issue_type
+            ) && (
+              <Grid item xs={6}>
+                <FormControl fullWidth margin="normal">
+                  <InputLabel>Issuing Company</InputLabel>
+                  <Select
+                    value={issueForm.issuing_company || ""}
+                    onChange={(e) =>
+                      handleIssueFormChange("issuing_company", e.target.value)
+                    }
+                    label="Issuing Company"
+                  >
+                    {companies.map((c) => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {errors.issuing_company && (
+                    <small className="text-danger">
+                      {errors.issuing_company}
+                    </small>
+                  )}
+                </FormControl>
+              </Grid>
+            )}
+
+            {issueForm.issue_type && (
+              <>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Issue Date"
+                    name="issue_date"
+                    type="date"
+                    value={issueForm.issue_date}
+                    onChange={(e) =>
+                      handleIssueFormChange("issue_date", e.target.value)
+                    }
+                    fullWidth
+                    margin="normal"
+                    InputLabelProps={{ shrink: true }}
+                  />
+                  {errors.issue_date && (
+                    <small className="text-danger">{errors.issue_to}</small>
+                  )}
+                </Grid>
+                {/* Common fields */}
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Quantity"
+                    type="number"
+                    value={issueForm.qty || ""}
+                    onChange={(e) => {
+                      let val = parseFloat(e.target.value);
+                      if (isNaN(val) || val < 0) {
+                        val = 0; // enforce min 0
+                      }
+                      handleIssueFormChange("qty", val);
+                    }}
+                    inputProps={{
+                      min: 0,
+                      step: "any", // allows decimals
+                    }}
+                  />
+                  {errors.qty && (
+                    <small className="text-danger">{errors.qty}</small>
+                  )}
+                </Grid>
+
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Delivery Challan"
+                    value={issueForm.delivery_challan || ""}
+                    onChange={(e) =>
+                      handleIssueFormChange("delivery_challan", e.target.value)
+                    }
+                  />
+                  {errors.delivery_challan && (
+                    <small className="text-danger">
+                      {errors.delivery_challan}
+                    </small>
+                  )}
+                </Grid>
+
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Reference"
+                    value={issueForm.ref || ""}
+                    onChange={(e) =>
+                      handleIssueFormChange("ref", e.target.value)
+                    }
+                  />
+                  {errors.ref && (
+                    <small className="text-danger">{errors.ref}</small>
+                  )}
+                </Grid>
+
+                <Grid item xs={6}>
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Requisition Number"
+                    value={issueForm.requisition_number || ""}
+                    onChange={(e) =>
+                      handleIssueFormChange(
+                        "requisition_number",
+                        e.target.value
+                      )
+                    }
+                  />
+                  {errors.requisition_number && (
+                    <small className="text-danger">
+                      {errors.requisition_number}
+                    </small>
+                  )}
+                </Grid>
+
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    margin="normal"
+                    label="Remarks"
+                    multiline
+                    rows={3}
+                    value={issueForm.remarks || ""}
+                    onChange={(e) =>
+                      handleIssueFormChange("remarks", e.target.value)
+                    }
+                  />
+                  {errors.remarks && (
+                    <small className="text-danger">{errors.remarks}</small>
+                  )}
+                </Grid>
+              </>
+            )}
           </Grid>
 
           {/* Actions */}
@@ -828,7 +1052,7 @@ export default function StoreDashboard(props) {
               display: "flex",
               justifyContent: "flex-end",
               gap: 1,
-              mt: "auto", // push buttons to the bottom
+              mt: "auto",
             }}
           >
             <Button onClick={() => setIssueOpen(false)}>Cancel</Button>
