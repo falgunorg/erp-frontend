@@ -697,7 +697,7 @@ export default function StoreDashboard(props) {
                       </CardContent>
                     </Card>
                   ))}
-                  <Link to="#" className="btn btn-primary">
+                  <Link to="/store/issues" className="btn btn-primary">
                     See All Issues
                   </Link>
                 </>
