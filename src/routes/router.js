@@ -258,6 +258,7 @@ import BookingManager from "../pages/BookingManager";
 import StoreDashboard from "pages/store/StoreDashboard";
 import ReceiveItem from "../pages/store/receives/ReceiveItem";
 import Grns from "../pages/store/receives/Grns";
+import GrnReport from "pages/store/receives/GrnReport";
 
 import PurchaseContractsList from "../pages/PurchaseContractsList";
 import Tasks from "../pages/Tasks";
@@ -364,6 +365,11 @@ class PrivateRoutes extends Component {
             exact
             path="/store/receives"
             component={Grns}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/store/receives/report"
+            component={GrnReport}
           ></PrivateRoute>
           {/* end store routes */}
           <PrivateRoute
