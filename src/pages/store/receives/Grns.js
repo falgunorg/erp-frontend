@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "services/api";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import {
   Drawer,
   Card,
@@ -377,6 +377,11 @@ const Grns = (props) => {
           <Button variant="contained" color="primary" onClick={goBack}>
             Back
           </Button>
+        </Grid>
+        <Grid item xs={6} sm={1.2}>
+          <Link className="btn btn-success" to="store/receives/report">
+            Report
+          </Link>
         </Grid>
       </Grid>
 

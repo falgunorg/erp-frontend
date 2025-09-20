@@ -8,7 +8,7 @@ import CustomSelect from "../../../elements/CustomSelect";
 import html2canvas from "html2canvas";
 import moment from "moment";
 
-export default function GrnReport(props) {
+export default function IssueReport(props) {
   const [suppliers, setSuppliers] = useState([]);
   const [buyers, setBuyers] = useState([]);
   const [technicalPackages, setTechnicalPackages] = useState([]);
@@ -64,7 +64,7 @@ export default function GrnReport(props) {
   // fetch report
   const fetchReport = async () => {
     try {
-      const response = await api.get("/store/grn/report", {
+      const response = await api.get("/store/issue/report", {
         report_type: filters.report_type,
         year: filters.year,
         month: filters.month,
@@ -105,7 +105,7 @@ export default function GrnReport(props) {
     const data = new Blob([excelBuffer], {
       type: "application/octet-stream",
     });
-    saveAs(data, "GrnReport.xlsx");
+    saveAs(data, "IssueReport.xlsx");
   };
 
   // export pdf
@@ -139,7 +139,7 @@ export default function GrnReport(props) {
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-        const fileName = "GrnReport";
+        const fileName = "IssueReport";
         pdf.save(`${fileName}.pdf`);
       });
     }, 100); // Slight delay for DOM to reflow
@@ -151,7 +151,7 @@ export default function GrnReport(props) {
     printWindow.document.write(`
     <html>
       <head>
-        <title>GRN Report</title>
+        <title>ISSUE Report</title>
         <style>
           table { border-collapse: collapse; width: 100%; }
           table, th, td { border: 1px solid black; padding: 5px; }
@@ -169,7 +169,7 @@ export default function GrnReport(props) {
 
   useEffect(async () => {
     props.setHeaderData({
-      pageName: "GRN REPORT",
+      pageName: "ISSUE REPORT",
       isNewButton: false,
       newButtonLink: "",
       isInnerSearch: false,
@@ -461,15 +461,14 @@ export default function GrnReport(props) {
       >
         <thead>
           <tr>
-            <th>GRN</th>
+            <th>ISSUE</th>
+            <th>Issue Type</th>
+            <th>Issue To</th>
+            <th>Ref</th>
             <th>Buyer</th>
             <th>Techpack</th>
             <th>Item</th>
-            <th>Supplier</th>
-            <th>Invoice</th>
-            <th>Challan</th>
-            <th>Booking</th>
-            <th>Received Date</th>
+            <th>Issued Date</th>
             <th>Color</th>
             <th>Size</th>
             <th>Qty</th>
@@ -479,22 +478,24 @@ export default function GrnReport(props) {
           {rows.length > 0 ? (
             rows.map((row) => (
               <tr key={row.id}>
-                <td>{row.grn_number}</td>
-                <td>{row.buyer?.name}</td>
-                <td>{row.techpack?.techpack_number}</td>
+                <td>{row.issue_number}</td>
+                <td>{row.issue_type}</td>
                 <td>
-                  {row.item_type?.title} | {row.item?.title}
+                  {row.issue_type == "Self"
+                    ? row.issue_to_user?.full_name
+                    : row.issue_to_company.title}
+                  {}
                 </td>
-                <td>{row.supplier?.company_name}</td>
-                <td>{row.invoice_number}</td>
-                <td>{row.challan_number}</td>
+                <td>{row.ref}</td>
+                <td>{row.stock?.buyer?.name}</td>
+                <td>{row.stock?.techpack?.techpack_number}</td>
                 <td>
-                  {row.booking?.booking_number} |{" "}
-                  {row.booked_by_user?.full_name}
+                  {row.stock?.item_type?.title} | {row.stock?.item?.title}
                 </td>
-                <td> {moment(row.received_date).format("l")}</td>
-                <td>{row.item_color}</td>
-                <td>{row.item_size}</td>
+
+                <td> {moment(row.issue_date).format("l")}</td>
+                <td>{row.stock?.item_color}</td>
+                <td>{row.stock?.item_size}</td>
                 <td>
                   {row.qty} {row.unit}
                 </td>

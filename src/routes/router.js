@@ -128,6 +128,7 @@ import ReturnRequest from "../pages/store/return-request/ReturnRequest";
 // ISSUES
 import Issues from "../pages/store/issues/Issues";
 import IssueItem from "../pages/store/issues/IssueItem";
+import IssueReport from "../pages/store/issues/IssueReport";
 
 // LEFTOVERS STORE
 import LeftOverStores from "../pages/store/left-overs/LeftOverStores";
@@ -697,6 +698,11 @@ class PrivateRoutes extends Component {
             exact
             path="/store/issues-create"
             component={IssueItem}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/store/issue/report"
+            component={IssueReport}
           ></PrivateRoute>
           {/* RECEIVE RETURN ROUTES */}
           {/* CUTTING */}
