@@ -125,11 +125,6 @@ import Receives from "../pages/store/receives/Grns";
 
 import ReturnRequest from "../pages/store/return-request/ReturnRequest";
 
-// ISSUES
-import Issues from "../pages/store/issues/Issues";
-import IssueItem from "../pages/store/issues/IssueItem";
-import IssueReport from "../pages/store/issues/IssueReport";
-
 // LEFTOVERS STORE
 import LeftOverStores from "../pages/store/left-overs/LeftOverStores";
 import CreateLeftOverStore from "../pages/store/left-overs/CreateLeftOverStore";
@@ -260,6 +255,12 @@ import StoreDashboard from "pages/store/StoreDashboard";
 import ReceiveItem from "../pages/store/receives/ReceiveItem";
 import Grns from "../pages/store/receives/Grns";
 import GrnReport from "pages/store/receives/GrnReport";
+import StockReport from "pages/store/StockReport";
+
+// ISSUES
+import Issues from "../pages/store/issues/Issues";
+import IssueItem from "../pages/store/issues/IssueItem";
+import IssueReport from "../pages/store/issues/IssueReport";
 
 import PurchaseContractsList from "../pages/PurchaseContractsList";
 import Tasks from "../pages/Tasks";
@@ -356,6 +357,11 @@ class PrivateRoutes extends Component {
             exact
             path="/store/dashboard"
             component={StoreDashboard}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/store/stock/report"
+            component={StockReport}
           ></PrivateRoute>
           <PrivateRoute
             exact

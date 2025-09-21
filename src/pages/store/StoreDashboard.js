@@ -25,14 +25,9 @@ import {
   Pagination,
 } from "@mui/material";
 import PackageIcon from "@mui/icons-material/Inventory2";
-import InboxIcon from "@mui/icons-material/Inbox";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import DownloadIcon from "@mui/icons-material/Download";
 import SendIcon from "@mui/icons-material/Send";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import VerifiedIcon from "@mui/icons-material/Verified";
 import api from "services/api";
 import { Link } from "react-router-dom";
 
@@ -348,6 +343,26 @@ export default function StoreDashboard(props) {
                   onChange={(e) => handleFilterChange("search", e.target.value)}
                 />
               </Grid>
+              {/* 🔹 Buyer ID */}
+              <Grid item xs={6} md={2}>
+                <FormControl size="small" fullWidth>
+                  <InputLabel>BUYER</InputLabel>
+                  <Select
+                    value={filterData.buyer_id}
+                    label="BUYER"
+                    onChange={(e) =>
+                      handleFilterChange("buyer_id", e.target.value)
+                    }
+                  >
+                    <MenuItem value="all">All</MenuItem>
+                    {buyers.map((buyer) => (
+                      <MenuItem key={buyer.id} value={buyer.id}>
+                        {buyer.name}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
 
               {/* 🔹 Technical Package ID */}
               <Grid item xs={6} md={2}>
@@ -364,27 +379,6 @@ export default function StoreDashboard(props) {
                     {techpacks.map((pkg) => (
                       <MenuItem key={pkg.id} value={pkg.id}>
                         {pkg.techpack_number}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* 🔹 Buyer ID */}
-              <Grid item xs={6} md={2}>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>BUYER</InputLabel>
-                  <Select
-                    value={filterData.buyer_id}
-                    label="BUYER"
-                    onChange={(e) =>
-                      handleFilterChange("buyer_id", e.target.value)
-                    }
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {buyers.map((buyer) => (
-                      <MenuItem key={buyer.id} value={buyer.id}>
-                        {buyer.name}
                       </MenuItem>
                     ))}
                   </Select>
@@ -469,12 +463,16 @@ export default function StoreDashboard(props) {
               + Receive New
             </Link>
             <Button
+              className="me-2"
               size="small"
               variant="outlined"
               startIcon={<DownloadIcon />}
             >
               Export
             </Button>
+            <Link to="/store/stock/report" className="btn btn-success">
+              Report
+            </Link>
           </Grid>
           <Card variant="outlined" sx={{ maxHeight: 573, overflow: "auto" }}>
             <Table stickyHeader size="small">

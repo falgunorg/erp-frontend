@@ -250,8 +250,8 @@ const Grns = (props) => {
   return (
     <Box p={3}>
       {/* Filters */}
-      <Grid container spacing={2} mb={2}>
-        <Grid item xs={6} sm={1.2}>
+      <Grid className="create_tp_body" container spacing={2} mb={2}>
+        <Grid create_tp_body item xs={6} sm={1.2}>
           <Autocomplete
             options={buyers}
             getOptionLabel={(option) => option.name || ""}
@@ -368,18 +368,24 @@ const Grns = (props) => {
           />
         </Grid>
 
-        <Grid item xs={6} sm={1.2}>
-          <Button variant="contained" color="secondary" onClick={clearFilters}>
+        <Grid item xs={6}>
+          <Button
+            className="me-2"
+            variant="contained"
+            color="secondary"
+            onClick={clearFilters}
+          >
             Reset
           </Button>
-        </Grid>
-        <Grid item xs={6} sm={1.2}>
-          <Button variant="contained" color="primary" onClick={goBack}>
+          <Button
+            className="me-2"
+            variant="contained"
+            color="primary"
+            onClick={goBack}
+          >
             Back
           </Button>
-        </Grid>
-        <Grid item xs={6} sm={1.2}>
-          <Link className="btn btn-success" to="store/receives/report">
+          <Link className="btn btn-success" to="/store/receives/report">
             Report
           </Link>
         </Grid>

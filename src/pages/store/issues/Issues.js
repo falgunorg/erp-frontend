@@ -426,17 +426,23 @@ const Issues = (props) => {
           />
         </Grid>
 
-        <Grid item xs={6} sm={1.2}>
-          <Button variant="contained" color="secondary" onClick={clearFilters}>
+        <Grid item xs={6}>
+          <Button
+            className="me-2"
+            variant="contained"
+            color="secondary"
+            onClick={clearFilters}
+          >
             Reset
           </Button>
-        </Grid>
-        <Grid item xs={6} sm={1.2}>
-          <Button variant="contained" color="primary" onClick={goBack}>
+          <Button
+            className="me-2"
+            variant="contained"
+            color="primary"
+            onClick={goBack}
+          >
             Back
           </Button>
-        </Grid>
-        <Grid item xs={6} sm={1.2}>
           <Link to="/store/issue/report" className="btn btn-success">
             Report
           </Link>
