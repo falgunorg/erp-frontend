@@ -170,26 +170,6 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
     setSpinner(false);
   };
 
-  const [sizes, setSizes] = useState([]);
-  const getSizes = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/sizes");
-    if (response.status === 200 && response.data) {
-      setSizes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [colors, setColors] = useState([]);
-  const getColors = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/colors");
-    if (response.status === 200 && response.data) {
-      setColors(response.data.data);
-    }
-    setSpinner(false);
-  };
-
   const [pos, setPos] = useState([]);
   const getPos = async () => {
     const response = await api.post("/merchandising/pos-public");
@@ -210,8 +190,6 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
 
   useEffect(() => {
     getItems();
-    getSizes();
-    getColors();
     getUnits();
     getMaterialTypes();
     getPos();
@@ -430,7 +408,10 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
       });
 
       setSpinner(true);
-      const response = await api.post("/merchandising/technical-packages-create", data);
+      const response = await api.post(
+        "/merchandising/technical-packages-create",
+        data
+      );
 
       if (response.status === 200 && response.data) {
         history.push("/technical-packages/" + response.data.techpack.id);
@@ -439,6 +420,65 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
       } else {
         setErrors(response.data.errors);
       }
+    }
+  };
+
+  const [itemModal, setItemModal] = useState(false);
+  const [itemForm, setItemForm] = useState({
+    title: "",
+    item_type_id: "",
+    unit: "",
+  });
+
+  // ✅ Open modal and set item_type_id
+  const openItemModal = (item_type_id) => {
+    setItemForm((prev) => ({
+      ...prev,
+      item_type_id: item_type_id,
+    }));
+    setItemModal(true);
+  };
+
+  const [itemErrors, setItemErrors] = useState({});
+
+  const handleSaveItem = async () => {
+    let errors = {};
+
+    // ✅ Basic validation rules
+    if (!itemForm.title || itemForm.title.trim() === "") {
+      errors.title = "Title is required";
+    }
+    if (!itemForm.unit || itemForm.unit.trim() === "") {
+      errors.unit = "Unit is required";
+    }
+    if (!itemForm.item_type_id || itemForm.item_type_id === "") {
+      errors.item_type_id = "Item type is required";
+    }
+
+    // ✅ If validation fails, stop and show errors
+    if (Object.keys(errors).length > 0) {
+      setItemErrors(errors);
+      return;
+    }
+
+    try {
+      const response = await api.post("/common/items-create", itemForm);
+      if (response.status === 200 && response.data) {
+        getItems();
+        setItemModal(false);
+        setItemForm({
+          title: "",
+          item_type_id: "",
+          unit: "",
+        });
+        setItemErrors({});
+      } else {
+        setItemErrors(
+          response.data.errors || { general: "Something went wrong" }
+        );
+      }
+    } catch (err) {
+      setItemErrors({ general: "Failed to save item. Please try again." });
     }
   };
 
@@ -912,8 +952,8 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                 <th>Item Type</th>
                 <th>Item Name</th>
                 <th>Item Details</th>
-                <th>Color</th>
-                <th>Size</th>
+                <th>Color/Shade/Pantom</th>
+                <th>Size/Width/Dimension</th>
                 <th>Position</th>
                 <th>Unit</th>
                 <th>Consmp</th>
@@ -982,7 +1022,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                     (consumptionItems[materialType.id] || []).map(
                       (item, index) => (
                         <tr key={`${materialType.id}-${index}`}>
-                          <td>
+                          <td className="d-flex">
                             <CustomSelect
                               style={{ width: "100%" }}
                               className="select_wo"
@@ -1020,6 +1060,22 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                                 )
                               }
                             />
+                            <span
+                              style={{
+                                background: "green",
+                                cursor: "pointer",
+                                borderRadius: "0 3px 3px 0",
+                                height: "21px",
+                                width: "21px",
+                                textAlign: "center",
+                                lineHeight: "17px",
+                                fontSize: "14px",
+                                color: "white",
+                              }}
+                              onClick={() => openItemModal(materialType.id)}
+                            >
+                              +
+                            </span>
                           </td>
 
                           <td>
@@ -1052,50 +1108,32 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                           </td>
 
                           <td>
-                            <CustomSelect
-                              className="select_wo"
-                              placeholder="Color"
-                              options={colors.map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))}
-                              value={colors
-                                .map(({ title }) => ({
-                                  value: title,
-                                  label: title,
-                                }))
-                                .find((option) => option.value === item.color)}
-                              onChange={(selectedOption) =>
+                            <input
+                              style={{ width: "100px" }}
+                              type="text"
+                              value={item.color}
+                              onChange={(e) =>
                                 handleItemChange(
                                   materialType.id,
                                   index,
                                   "color",
-                                  selectedOption?.value
+                                  e.target.value.toUpperCase()
                                 )
                               }
                             />
                           </td>
 
                           <td>
-                            <CustomSelect
-                              className="select_wo"
-                              placeholder="Size"
-                              options={sizes.map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))}
-                              value={sizes
-                                .map(({ title }) => ({
-                                  value: title,
-                                  label: title,
-                                }))
-                                .find((option) => option.value === item.size)}
-                              onChange={(selectedOption) =>
+                            <input
+                              style={{ width: "100px" }}
+                              type="text"
+                              value={item.size}
+                              onChange={(e) =>
                                 handleItemChange(
                                   materialType.id,
                                   index,
                                   "size",
-                                  selectedOption?.value
+                                  e.target.value.toUpperCase()
                                 )
                               }
                             />
@@ -1212,6 +1250,102 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
         <Modal.Footer>
           <Button variant="secondary" onClick={closeImageModal}>
             Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal show={itemModal} onHide={() => setItemModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create An Item</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <div className="row">
+            {/* Title Input */}
+            <div className="col-12 mb-3">
+              <label>Title (Uppercase)</label>
+              <input
+                type="text"
+                name="title"
+                className="form-control"
+                placeholder="Item name"
+                value={itemForm.title}
+                onChange={(e) =>
+                  setItemForm((prev) => ({
+                    ...prev,
+                    title: e.target.value.toUpperCase(), // force uppercase
+                  }))
+                }
+              />
+              {itemErrors.title && (
+                <small className="text-danger">{itemErrors.title}</small>
+              )}
+            </div>
+
+            {/* Unit Select */}
+            <div className="col-6 mb-3">
+              <label>Unit</label>
+              <CustomSelect
+                className="select_wo"
+                placeholder="Unit"
+                options={units.map(({ title }) => ({
+                  value: title,
+                  label: title,
+                }))}
+                value={units
+                  .map(({ title }) => ({
+                    value: title,
+                    label: title,
+                  }))
+                  .find((option) => option.value === itemForm.unit)}
+                onChange={(selectedOption) =>
+                  setItemForm((prev) => ({
+                    ...prev,
+                    unit: selectedOption?.value || "",
+                  }))
+                }
+              />
+              {itemErrors.unit && (
+                <small className="text-danger">{itemErrors.unit}</small>
+              )}
+            </div>
+
+            {/* Item Type Select */}
+            <div className="col-6 mb-3">
+              <label>Item Type</label>
+              <CustomSelect
+                className="select_wo"
+                placeholder="Select Item Type"
+                options={materialTypes.map(({ id, title }) => ({
+                  value: id,
+                  label: title,
+                }))}
+                value={materialTypes
+                  .map(({ id, title }) => ({
+                    value: id,
+                    label: title,
+                  }))
+                  .find((option) => option.value === itemForm.item_type_id)}
+                onChange={(selectedOption) =>
+                  setItemForm((prev) => ({
+                    ...prev,
+                    item_type_id: selectedOption?.value || "",
+                  }))
+                }
+              />
+              {itemErrors.item_type_id && (
+                <small className="text-danger">{itemErrors.item_type_id}</small>
+              )}
+            </div>
+          </div>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setItemModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveItem}>
+            Save
           </Button>
         </Modal.Footer>
       </Modal>

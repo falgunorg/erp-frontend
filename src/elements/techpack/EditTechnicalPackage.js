@@ -185,26 +185,6 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
     setSpinner(false);
   };
 
-  const [sizes, setSizes] = useState([]);
-  const getSizes = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/sizes");
-    if (response.status === 200 && response.data) {
-      setSizes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [colors, setColors] = useState([]);
-  const getColors = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/colors");
-    if (response.status === 200 && response.data) {
-      setColors(response.data.data);
-    }
-    setSpinner(false);
-  };
-
   const [pos, setPos] = useState([]);
   const getPos = async () => {
     const response = await api.post("/merchandising/pos-public");
@@ -225,8 +205,6 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
 
   useEffect(() => {
     getItems();
-    getSizes();
-    getColors();
     getUnits();
     getMaterialTypes();
     getPos();
@@ -435,7 +413,10 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
 
       setSpinner(true);
 
-      const response = await api.post("/merchandising/technical-packages-update", data);
+      const response = await api.post(
+        "/merchandising/technical-packages-update",
+        data
+      );
 
       if (response.status === 200 && response.data) {
         history.push("/technical-packages/" + response.data.techpack.id);
@@ -1265,50 +1246,32 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
                           </td>
 
                           <td>
-                            <CustomSelect
-                              className="select_wo"
-                              placeholder="Color"
-                              options={colors.map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))}
-                              value={colors
-                                .map(({ title }) => ({
-                                  value: title,
-                                  label: title,
-                                }))
-                                .find((option) => option.value === item.color)}
-                              onChange={(selectedOption) =>
+                            <input
+                              style={{ width: "100px" }}
+                              type="text"
+                              value={item.color}
+                              onChange={(e) =>
                                 handleItemChange(
                                   materialType.id,
                                   index,
                                   "color",
-                                  selectedOption?.value
+                                  e.target.value.toUpperCase()
                                 )
                               }
                             />
                           </td>
 
                           <td>
-                            <CustomSelect
-                              className="select_wo"
-                              placeholder="Size"
-                              options={sizes.map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))}
-                              value={sizes
-                                .map(({ title }) => ({
-                                  value: title,
-                                  label: title,
-                                }))
-                                .find((option) => option.value === item.size)}
-                              onChange={(selectedOption) =>
+                            <input
+                              style={{ width: "100px" }}
+                              type="text"
+                              value={item.size}
+                              onChange={(e) =>
                                 handleItemChange(
                                   materialType.id,
                                   index,
                                   "size",
-                                  selectedOption?.value
+                                  e.target.value.toUpperCase()
                                 )
                               }
                             />

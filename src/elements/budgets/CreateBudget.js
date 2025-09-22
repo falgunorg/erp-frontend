@@ -42,26 +42,6 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
     setSpinner(false);
   };
 
-  const [sizes, setSizes] = useState([]);
-  const getSizes = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/sizes");
-    if (response.status === 200 && response.data) {
-      setSizes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [colors, setColors] = useState([]);
-  const getColors = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/colors");
-    if (response.status === 200 && response.data) {
-      setColors(response.data.data);
-    }
-    setSpinner(false);
-  };
-
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
@@ -84,8 +64,6 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
   };
 
   useEffect(() => {
-    getSizes();
-    getColors();
     getUnits();
     getItems();
     getItemTypes();
@@ -94,7 +72,6 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
   }, []);
 
   const [materials, setMaterials] = useState([]);
-
 
   const handleInputChange = (index, name, value) => {
     setMaterials((prevMaterials) => {
@@ -148,7 +125,9 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
       try {
         setSpinner(true);
 
-        const response = await api.post("/merchandising/costings-show", { id: value });
+        const response = await api.post("/merchandising/costings-show", {
+          id: value,
+        });
 
         if (response.status === 200 && response.data) {
           const data = response.data.data;
@@ -298,7 +277,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
       if (response.status === 200 && response.data) {
         history.push("/budget-sheets/" + response.data.data.id);
         setRenderArea("details");
-         window.location.reload();
+        window.location.reload();
       } else {
         setErrors(response.data.errors);
       }
@@ -640,19 +619,14 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                           />
                         </td>
                         <td>
-                          <CustomSelect
-                            isDisabled
-                            placeholder="Color"
-                            options={colors.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={colors
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find((option) => option.value === row.title)}
+                          <input
+                            readOnly
+                            style={{ width: "100px" }}
+                            type="text"
+                            value={row.color}
+                            onChange={(e) =>
+                              handleInputChange(index, "color", e.target.value)
+                            }
                           />
                         </td>
                         <td>
@@ -671,19 +645,14 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
                           />
                         </td>
                         <td>
-                          <CustomSelect
-                            isDisabled
-                            placeholder="Size"
-                            options={sizes.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={sizes
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find((option) => option.value === row.size)}
+                          <input
+                            readOnly
+                            style={{ width: "100px" }}
+                            type="text"
+                            value={row.size}
+                            onChange={(e) =>
+                              handleInputChange(index, "size", e.target.value)
+                            }
                           />
                         </td>
                         <td>

@@ -43,25 +43,6 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
     setSpinner(false);
   };
 
-  const [sizes, setSizes] = useState([]);
-  const getSizes = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/sizes");
-    if (response.status === 200 && response.data) {
-      setSizes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [colors, setColors] = useState([]);
-  const getColors = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/colors");
-    if (response.status === 200 && response.data) {
-      setColors(response.data.data);
-    }
-    setSpinner(false);
-  };
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
@@ -85,8 +66,6 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
 
   useEffect(() => {
     getItems();
-    getSizes();
-    getColors();
     getUnits();
     getItemTypes();
     getSuppliers();
@@ -240,9 +219,12 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
   const handleFormChange = async (name, value) => {
     if (name === "technical_package_id") {
       try {
-        const response = await api.post("/merchandising/technical-packages-show", {
-          id: value,
-        });
+        const response = await api.post(
+          "/merchandising/technical-packages-show",
+          {
+            id: value,
+          }
+        );
 
         if (response.status === 200 && response.data) {
           const data = response.data;
@@ -348,7 +330,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
       if (response.status === 200 && response.data) {
         history.push("/cost-sheets/" + response.data.data.id);
         setRenderArea("details");
-         window.location.reload();
+        window.location.reload();
       } else {
         setErrors(response.data.errors);
       }
@@ -656,6 +638,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
                             {/* item_id (always shown) */}
                             <td>
                               <CustomSelect
+                                isDisabled
                                 style={{ width: "100px" }}
                                 className="select_wo"
                                 placeholder="Item"
@@ -726,54 +709,32 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
                                 </td>
 
                                 <td>
-                                  <CustomSelect
-                                    className="select_wo"
-                                    placeholder="Color"
-                                    options={colors.map(({ title }) => ({
-                                      value: title,
-                                      label: title,
-                                    }))}
-                                    value={colors
-                                      .map(({ title }) => ({
-                                        value: title,
-                                        label: title,
-                                      }))
-                                      .find(
-                                        (option) => option.value === item.color
-                                      )}
-                                    onChange={(selectedOption) =>
+                                  <input
+                                    style={{ width: "150px" }}
+                                    type="text"
+                                    value={item.color}
+                                    onChange={(e) =>
                                       handleItemChange(
                                         itemType.id,
                                         index,
                                         "color",
-                                        selectedOption?.value
+                                        e.target.value.toUpperCase()
                                       )
                                     }
                                   />
                                 </td>
 
                                 <td>
-                                  <CustomSelect
-                                    className="select_wo"
-                                    placeholder="Size"
-                                    options={sizes.map(({ title }) => ({
-                                      value: title,
-                                      label: title,
-                                    }))}
-                                    value={sizes
-                                      .map(({ title }) => ({
-                                        value: title,
-                                        label: title,
-                                      }))
-                                      .find(
-                                        (option) => option.value === item.size
-                                      )}
-                                    onChange={(selectedOption) =>
+                                  <input
+                                    style={{ width: "150px" }}
+                                    type="text"
+                                    value={item.size}
+                                    onChange={(e) =>
                                       handleItemChange(
                                         itemType.id,
                                         index,
                                         "size",
-                                        selectedOption?.value
+                                        e.target.value.toUpperCase()
                                       )
                                     }
                                   />

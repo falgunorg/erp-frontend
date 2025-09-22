@@ -43,26 +43,6 @@ export default function EditBudget({ renderArea, setRenderArea }) {
     setSpinner(false);
   };
 
-  const [sizes, setSizes] = useState([]);
-  const getSizes = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/sizes");
-    if (response.status === 200 && response.data) {
-      setSizes(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  const [colors, setColors] = useState([]);
-  const getColors = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/colors");
-    if (response.status === 200 && response.data) {
-      setColors(response.data.data);
-    }
-    setSpinner(false);
-  };
-
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
     setSpinner(true);
@@ -74,8 +54,6 @@ export default function EditBudget({ renderArea, setRenderArea }) {
   };
 
   useEffect(() => {
-    getSizes();
-    getColors();
     getUnits();
     getItems();
     getItemTypes();
@@ -132,7 +110,9 @@ export default function EditBudget({ renderArea, setRenderArea }) {
 
   const getBudget = async () => {
     setSpinner(true);
-    const response = await api.post("/merchandising/budgets-show", { id: params.id });
+    const response = await api.post("/merchandising/budgets-show", {
+      id: params.id,
+    });
     if (response.status === 200 && response.data) {
       const data = response.data.data;
 
@@ -558,19 +538,14 @@ export default function EditBudget({ renderArea, setRenderArea }) {
                           />
                         </td>
                         <td>
-                          <CustomSelect
-                            isDisabled
-                            placeholder="Color"
-                            options={colors.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={colors
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find((option) => option.value === row.title)}
+                          <input
+                            readOnly
+                            style={{ width: "100px" }}
+                            type="text"
+                            value={row.color}
+                            onChange={(e) =>
+                              handleInputChange(index, "color", e.target.value)
+                            }
                           />
                         </td>
                         <td>
@@ -589,19 +564,14 @@ export default function EditBudget({ renderArea, setRenderArea }) {
                           />
                         </td>
                         <td>
-                          <CustomSelect
-                            isDisabled
-                            placeholder="Size"
-                            options={sizes.map(({ title }) => ({
-                              value: title,
-                              label: title,
-                            }))}
-                            value={sizes
-                              .map(({ title }) => ({
-                                value: title,
-                                label: title,
-                              }))
-                              .find((option) => option.value === row.size)}
+                          <input
+                            readOnly
+                            style={{ width: "100px" }}
+                            type="text"
+                            value={row.size}
+                            onChange={(e) =>
+                              handleInputChange(index, "size", e.target.value)
+                            }
                           />
                         </td>
                         <td>
