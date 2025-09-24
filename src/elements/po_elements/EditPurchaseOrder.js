@@ -99,9 +99,12 @@ export default function EditPurchaseOrder() {
   };
 
   const getTechpacks = async () => {
-    const response = await api.post("/merchandising/technical-packages-all-desc", {
-      // mode: "self",
-    });
+    const response = await api.post(
+      "/merchandising/technical-packages-all-desc",
+      {
+        // mode: "self",
+      }
+    );
     if (response.status === 200) setTechpacks(response.data.data);
   };
 
@@ -115,7 +118,9 @@ export default function EditPurchaseOrder() {
 
   const getPo = async () => {
     setSpinner(true);
-    const response = await api.post("/merchandising/pos-show", { id: params.id });
+    const response = await api.post("/merchandising/pos-show", {
+      id: params.id,
+    });
     if (response.status === 200 && response.data) {
       const po = response.data.po;
 
@@ -170,9 +175,12 @@ export default function EditPurchaseOrder() {
   const handleChange = async (name, value) => {
     if (name === "technical_package_id") {
       try {
-        const response = await api.post("/merchandising/technical-packages-show", {
-          id: value,
-        });
+        const response = await api.post(
+          "/merchandising/technical-packages-show",
+          {
+            id: value,
+          }
+        );
         if (response.status === 200 && response.data) {
           const data = response.data;
           setFormData((prev) => ({
@@ -744,36 +752,46 @@ export default function EditPurchaseOrder() {
             {poItems.map((item, index) => (
               <tr key={index}>
                 <td>
-                  <select
-                    style={{ width: "200px" }}
-                    value={item.color}
-                    onChange={(e) =>
-                      handleItemChange(index, "color", e.target.value)
+                  <CustomSelect
+                    className="select_wo"
+                    placeholder="COLOR"
+                    value={
+                      item.color
+                        ? { value: item.color, label: item.color }
+                        : null
                     }
-                  >
-                    <option value="">Select Color</option>
-                    {colors.map((it) => (
-                      <option key={it.id} value={it.title}>
-                        {it.title}
-                      </option>
-                    ))}
-                  </select>
+                    options={colors.map(({ title }) => ({
+                      value: title,
+                      label: title,
+                    }))}
+                    onChange={(selectedOption) =>
+                      handleItemChange(
+                        index,
+                        "color",
+                        selectedOption?.value || ""
+                      )
+                    }
+                  />
                 </td>
                 <td>
-                  <select
-                    style={{ width: "150px" }}
-                    value={item.size}
-                    onChange={(e) =>
-                      handleItemChange(index, "size", e.target.value)
+                  <CustomSelect
+                    className="select_wo"
+                    placeholder="SIZE"
+                    value={
+                      item.size ? { value: item.size, label: item.size } : null
                     }
-                  >
-                    <option value="">Select Size</option>
-                    {sizes.map((it) => (
-                      <option key={it.id} value={it.title}>
-                        {it.title}
-                      </option>
-                    ))}
-                  </select>
+                    options={sizes.map(({ title }) => ({
+                      value: title,
+                      label: title,
+                    }))}
+                    onChange={(selectedOption) =>
+                      handleItemChange(
+                        index,
+                        "size",
+                        selectedOption?.value || ""
+                      )
+                    }
+                  />
                 </td>
                 <td>
                   <input

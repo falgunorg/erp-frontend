@@ -15,7 +15,7 @@ export default function EditBudget({ renderArea, setRenderArea }) {
 
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/common/item-types");
+    var response = await api.post("/common/item-types",{ show_cm: true });
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }

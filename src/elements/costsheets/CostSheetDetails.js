@@ -13,7 +13,9 @@ export default function CreateCostSheet(props) {
   const [costing, setCosting] = useState([]);
   const getCosting = async () => {
     setSpinner(true);
-    const response = await api.post("/merchandising/costings-show", { id: params.id });
+    const response = await api.post("/merchandising/costings-show", {
+      id: params.id,
+    });
     if (response.status === 200 && response.data) {
       const costingData = response.data.data;
       setCosting(costingData);
@@ -41,7 +43,7 @@ export default function CreateCostSheet(props) {
   const [itemTypes, setItemTypes] = useState([]);
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/common/item-types");
+    var response = await api.post("/common/item-types", { show_cm: true });
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }

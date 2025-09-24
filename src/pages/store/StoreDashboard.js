@@ -20,6 +20,7 @@ import {
   Typography,
   Badge,
   Tabs,
+  Divider,
   Tab,
   Box,
   Pagination,
@@ -59,6 +60,15 @@ export default function StoreDashboard(props) {
   const [receives, setReceives] = useState([]);
   const [issues, setIssues] = useState([]);
   const [issueUsers, setIssueUsers] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const getBookings = async () => {
+    try {
+      const res = await api.post("/store/waiting-for-grn-items");
+      setBookings(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const getReceives = async () => {
     try {
@@ -106,6 +116,7 @@ export default function StoreDashboard(props) {
     fetchOptions();
     getReceives();
     getIssues();
+    getBookings();
   }, []);
 
   const [filterData, setFilterData] = useState({
@@ -158,7 +169,6 @@ export default function StoreDashboard(props) {
     getStocks();
   }, [filterData]);
 
-  const [bookings, setBookings] = useState([]);
   const [issueOpen, setIssueOpen] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
 
@@ -286,6 +296,74 @@ export default function StoreDashboard(props) {
   console.log("ISSUE FORM", issueForm);
 
   const [tab, setTab] = useState("receives");
+
+  // GRN FORM
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [currentItem, setCurrentItem] = useState({});
+
+  const [grnForm, setGrnForm] = useState({
+    invoice_number: "",
+    challan_number: "",
+    remarks: "",
+    consignment: "",
+    received_date: "",
+    qty: 0,
+  });
+
+  const handleReceiveClick = (item) => {
+    setCurrentItem(item);
+    setGrnForm({
+      invoice_number: "",
+      challan_number: "",
+      consignment: "",
+      received_date: new Date().toISOString().split("T")[0],
+      qty: item.balance_qty || 0,
+    });
+    setDrawerOpen(true);
+  };
+
+  const handleFormChange = (e) =>
+    setGrnForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmitGrn = async () => {
+    try {
+      const response = await api.post("/store/grns", {
+        ...grnForm,
+        batch_no: currentItem.batch_no ?? "",
+        booked_by: currentItem.booking?.user_id ?? "",
+        booking_id: currentItem.booking_id ?? "",
+        booking_item_id: currentItem.id ?? "",
+        buyer_id: currentItem.workorder?.techpack?.buyer_id ?? "",
+        company_id: currentItem.workorder?.techpack?.company_id ?? "",
+        garment_color: currentItem.garment_color ?? "",
+        item_brand: currentItem.item_brand ?? "",
+        item_color: currentItem.item_color ?? "",
+        item_description: currentItem.item_description ?? "",
+        item_id: currentItem.item_id ?? "",
+        item_size: currentItem.item_size ?? "",
+        item_type_id: currentItem.booking?.item_type_id ?? "",
+        size_range: currentItem.size_range ?? "",
+        supplier_id: currentItem.booking?.supplier_id ?? "",
+        technical_package_id: currentItem.workorder?.technical_package_id ?? "",
+        unit: currentItem.booking.unit ?? "",
+        warehouse_location: currentItem.warehouse_location ?? "",
+        wo_id: currentItem.wo_id ?? "",
+        position: currentItem.position ?? "",
+      });
+
+      if (response.status === 201) {
+        alert("GRN created successfully!");
+        setDrawerOpen(false);
+        getBookings();
+        setErrors({});
+      } else {
+        setErrors(response.data.errors);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(async () => {
     props.setHeaderData({
       pageName: "Store Dashboard",
@@ -634,6 +712,11 @@ export default function StoreDashboard(props) {
                               <strong>Received By:</strong> {r.user?.full_name}
                             </Typography>
                           </div>
+                          <div className="col-12">
+                            <Typography variant="caption">
+                              <strong>Consignment:</strong> {r.consignment}
+                            </Typography>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -703,43 +786,86 @@ export default function StoreDashboard(props) {
 
               {tab === "upcoming" && (
                 <>
-                  {bookings.map((b) => (
-                    <Card key={b.bookingNo} className="mb-2 border">
-                      <CardContent>
+                  {bookings.map((r) => (
+                    <Card key={r.id} className="mb-2 border">
+                      <CardContent className="p-2">
                         <div className="d-flex justify-content-between">
-                          <Typography fontWeight={500}>{b.itemName}</Typography>
+                          <Typography variant="caption" fontWeight={500}>
+                            {r.item.title}
+                          </Typography>
+                          <Badge bg="primary">{r.grn_number}</Badge>
                         </div>
-
                         <div className="row text-secondary small mt-1">
+                          <div className="col-12">
+                            <Typography variant="caption">
+                              <strong>
+                                {r.workorder?.techpack?.techpack_number} /{" "}
+                                {r.garment_color} /{r.size_range}
+                              </strong>
+                            </Typography>
+                          </div>
+
                           <div className="col-6">
-                            <small>
-                              <strong>Item:</strong> {b.itemId}
-                            </small>
+                            <Typography variant="caption">
+                              <strong>Item Color:</strong> {r.item_color}
+                            </Typography>
                           </div>
                           <div className="col-6">
-                            <small>
-                              <strong>Buyer:</strong> {b.buyer}
-                            </small>
+                            <Typography variant="caption">
+                              <strong>Item Size:</strong> {r.item_size}
+                            </Typography>
                           </div>
                           <div className="col-6">
-                            <small>
-                              <strong>Order:</strong> {b.orderRef}
-                            </small>
+                            <Typography variant="caption">
+                              <strong>Booking Qty:</strong> {r.booking_qty}{" "}
+                              {r.booking?.unit}
+                            </Typography>
                           </div>
                           <div className="col-6">
-                            <small>
-                              <strong>Delivery:</strong> {b.deliveryDate}
-                            </small>
+                            <Typography variant="caption">
+                              <strong>Received Qty:</strong>{" "}
+                              {r.allready_received_qty} {r.booking?.unit}
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>Left Qty:</strong>{" "}
+                              {r.booking_qty - r.allready_received_qty}{" "}
+                              {r.booking?.unit}
+                            </Typography>
+                          </div>
+
+                          <div className="col-12">
+                            <Typography variant="caption">
+                              <strong>Supplier:</strong>{" "}
+                              {r.booking?.supplier?.company_name}
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>ETA:</strong> {r.booking?.eta}
+                            </Typography>
+                          </div>
+                          <div className="col-6">
+                            <Typography variant="caption">
+                              <strong>EID:</strong> {r.booking?.eid}
+                            </Typography>
+                          </div>
+                          <div className="col-12">
+                            <Typography variant="caption">
+                              <strong>Booked By:</strong>{" "}
+                              {r.booking?.user?.full_name}
+                            </Typography>
                           </div>
                         </div>
-
-                        <Typography variant="body2" className="mt-1">
-                          <small>
-                            <strong>Required:</strong> {b.requiredQty} {b.uom}
-                          </small>
-                        </Typography>
-
-                        <hr />
+                        <Button
+                          size="small"
+                          sx={{ bgcolor: "green" }}
+                          variant="contained"
+                          onClick={() => handleReceiveClick(r)}
+                        >
+                          Receive
+                        </Button>
                       </CardContent>
                     </Card>
                   ))}
@@ -750,6 +876,177 @@ export default function StoreDashboard(props) {
         </div>
       </div>
 
+      {/* GRN DRAWER */}
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
+        <Box
+          width={500}
+          p={3}
+          display="flex"
+          flexDirection="column"
+          // height="100%"
+        >
+          {/* Header */}
+          <Typography variant="h6" gutterBottom>
+            📦 Receive GRN
+          </Typography>
+
+          {/* Item Info Section */}
+          <Card
+            variant="outlined"
+            sx={{ mb: 2, borderRadius: 2, boxShadow: 1 }}
+          >
+            <CardContent>
+              <Typography variant="subtitle1" gutterBottom>
+                {currentItem?.booking?.booking_number}
+              </Typography>
+              <Grid container spacing={1}>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Buyer:</strong>{" "}
+                    {currentItem?.workorder?.techpack?.buyer?.name || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Style/Techpack:</strong>{" "}
+                    {currentItem?.workorder?.techpack?.techpack_number || "-"} /{" "}
+                    {currentItem.garment_color} / {currentItem.size_range}
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Item Name:</strong>{" "}
+                    {currentItem?.item?.title || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Color:</strong> {currentItem?.item_color || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Item Size/Width/Dimention:</strong>{" "}
+                    {currentItem?.item_size || "-"}
+                  </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                  <Typography variant="body2">
+                    <strong>Booking QTY:</strong>{" "}
+                    {currentItem?.booking_qty || "0"} /{" "}
+                    {currentItem.booking?.unit}
+                  </Typography>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          <Divider sx={{ mb: 2 }} />
+          <Grid container spacing={1}>
+            <Grid item xs={6}>
+              {" "}
+              <TextField
+                label="Invoice Number"
+                name="invoice_number"
+                value={grnForm.invoice_number}
+                onChange={handleFormChange}
+                fullWidth
+                margin="normal"
+              />
+              {errors.invoice_number && (
+                <small className="text-danger">{errors.invoice_number}</small>
+              )}
+            </Grid>
+            <Grid item xs={6}>
+              {" "}
+              <TextField
+                label="Challan Number"
+                name="challan_number"
+                value={grnForm.challan_number}
+                onChange={handleFormChange}
+                fullWidth
+                margin="normal"
+              />
+              {errors.challan_number && (
+                <small className="text-danger">{errors.challan_number}</small>
+              )}
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Received Date"
+                name="received_date"
+                type="date"
+                value={grnForm.received_date}
+                onChange={handleFormChange}
+                fullWidth
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              {" "}
+              <TextField
+                label="Quantity"
+                name="qty"
+                type="number"
+                value={grnForm.qty}
+                onChange={handleFormChange}
+                fullWidth
+                margin="normal"
+              />
+              {errors.qty && (
+                <small className="text-danger">{errors.qty}</small>
+              )}
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Consignment"
+                name="consignment"
+                value={grnForm.consignment}
+                onChange={handleFormChange}
+                fullWidth
+                margin="normal"
+                multiline
+                rows={2}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Remarks"
+                name="remarks"
+                value={grnForm.remarks}
+                onChange={handleFormChange}
+                fullWidth
+                margin="normal"
+                multiline
+                rows={3}
+              />
+            </Grid>
+          </Grid>
+
+          {/* GRN Form Fields */}
+
+          {/* Submit Button */}
+          <Box mt="auto">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleSubmitGrn}
+              fullWidth
+              sx={{ py: 1.5, borderRadius: 2 }}
+            >
+              ✅ Submit GRN
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
+
+      {/* Issue Drawer */}
       <Drawer
         anchor="right"
         open={issueOpen}

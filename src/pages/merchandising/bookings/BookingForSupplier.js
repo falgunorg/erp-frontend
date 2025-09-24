@@ -48,6 +48,11 @@ export default function BookingForSupplier(props) {
     0
   );
 
+  const grandTotalAmount = variationItems.reduce(
+    (sum, row) => sum + (Number(row.total_price) || 0),
+    0
+  );
+
   const totalSampleRequiredQty = variationItems.reduce(
     (sum, row) => sum + (Number(row.sample_requirement) || 0),
     0
@@ -250,6 +255,8 @@ export default function BookingForSupplier(props) {
                 )}
 
                 <th>Booking QTY</th>
+                <th>Unit Price /{booking.unit}</th>
+                <th>Total Price</th>
                 <th>Sample Requirement</th>
                 <th>Comment / Remarks</th>
               </tr>
@@ -273,6 +280,8 @@ export default function BookingForSupplier(props) {
                   )}
 
                   <td className="text-end">{item.booking_qty}</td>
+                  <td className="text-end">{item.unit_price}</td>
+                  <td className="text-end">{item.total_price}</td>
                   <td className="text-end">{item.sample_requirement}</td>
                   <td>{item.comment}</td>
                 </tr>
@@ -293,6 +302,8 @@ export default function BookingForSupplier(props) {
                 <td className="text-end">
                   {totalBookingQty.toFixed(2)} {booking.unit}
                 </td>
+                <td></td>
+                <td className="text-end">{grandTotalAmount.toFixed(2)}</td>
                 <td className="text-end">
                   {totalSampleRequiredQty.toFixed(2)}
                 </td>

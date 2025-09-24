@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import Logo from "../../assets/images/logos/logo-short.png";
-import Select, { components } from "react-select";
 import api from "services/api";
 import CustomSelect from "elements/CustomSelect";
 import swal from "sweetalert";
@@ -14,7 +13,7 @@ export default function CreateBudget({ renderArea, setRenderArea }) {
 
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/common/item-types");
+    var response = await api.post("/common/item-types", { show_cm: true });
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }

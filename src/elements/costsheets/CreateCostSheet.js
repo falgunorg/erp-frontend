@@ -15,7 +15,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
 
   const getItemTypes = async () => {
     setSpinner(true);
-    var response = await api.post("/common/item-types");
+    var response = await api.post("/common/item-types", { show_cm: true });
     if (response.status === 200 && response.data) {
       setItemTypes(response.data.data);
     }
@@ -638,7 +638,7 @@ export default function CreateCostSheet({ renderArea, setRenderArea }) {
                             {/* item_id (always shown) */}
                             <td>
                               <CustomSelect
-                                isDisabled
+                                isDisabled={!isCMType}
                                 style={{ width: "100px" }}
                                 className="select_wo"
                                 placeholder="Item"

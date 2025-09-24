@@ -47,6 +47,10 @@ export default function BookingDetails(props) {
     (sum, row) => sum + (Number(row.booking_qty) || 0),
     0
   );
+  const grandTotalAmount = variationItems.reduce(
+    (sum, row) => sum + (Number(row.total_price) || 0),
+    0
+  );
 
   const totalSampleRequiredQty = variationItems.reduce(
     (sum, row) => sum + (Number(row.sample_requirement) || 0),
@@ -138,26 +142,12 @@ export default function BookingDetails(props) {
           <div className="col-lg-2">
             <div className="form-value">{totalActualAllow}%</div>
           </div>
-          <div className="col-lg-2">
-            <label className="form-label">Unit</label>
-          </div>
-          <div className="col-lg-2">
-            <div className="form-value">{booking.unit}</div>
-          </div>
-        </div>
 
-        <div className="row">
-          <div className="col-lg-2">
-            <label className="form-label">Unit Price</label>
-          </div>
-          <div className="col-lg-2">
-            <div className="form-value">{booking.unit_price}</div>
-          </div>
           <div className="col-lg-2">
             <label className="form-label">Total Amount</label>
           </div>
           <div className="col-lg-2">
-            <div className="form-value">${booking.total_price}</div>
+            <div className="form-value">${booking.total_amount}</div>
           </div>
           <div className="col-lg-2">
             <label className="form-label">Supplier</label>
@@ -244,6 +234,8 @@ export default function BookingDetails(props) {
                 <th>Allow %</th>
                 <th>Final</th>
                 <th>Booking QTY</th>
+                <th>Unit Price / {booking.unit}</th>
+                <th>Total Price</th>
                 <th>Sample Requirement</th>
                 <th>Comment/Remarks</th>
               </tr>
@@ -271,6 +263,8 @@ export default function BookingDetails(props) {
                   <td>{item.wastage}</td>
                   <td>{item.final_qty}</td>
                   <td>{item.booking_qty}</td>
+                  <td>{item.unit_price}</td>
+                  <td>{item.total_price}</td>
                   <td>{item.sample_requirement}</td>
                   <td>{item.comment}</td>
                 </tr>
@@ -295,6 +289,10 @@ export default function BookingDetails(props) {
                 </td>
                 <td>
                   <strong>{totalBookingQty.toFixed(2)}</strong>
+                </td>
+                <td></td>
+                <td>
+                  <strong>{grandTotalAmount.toFixed(2)}</strong>
                 </td>
                 <td>
                   <strong>{totalSampleRequiredQty.toFixed(2)}</strong>

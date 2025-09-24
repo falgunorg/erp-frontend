@@ -66,17 +66,19 @@ export default function CreateBookings(props) {
         techpack: data.techpack,
         consumption: filteredCostingItem?.consumption,
         item_details: filteredCostingItem?.item_details,
-        wastage: filteredCostingItem?.wastage || 0,
+        wastage: filteredCostingItem.wastage,
         costing_item_id: filteredCostingItem?.id,
-        costing_id: filteredCostingItem?.costing_id,
+        costing_id: filteredCostingItem.costing_id,
         wo_id: data.id,
         item_id: filteredCostingItem?.item_id,
         item_type_id: filteredCostingItem?.item_type_id,
-        item: filteredCostingItem?.item,
+        item: filteredCostingItem.item,
         unit: filteredCostingItem?.unit || "",
         unit_price: filteredCostingItem?.unit_price || 0,
-        supplier_id: filteredCostingItem?.supplier_id || "",
-        supplier: filteredCostingItem?.supplier || "",
+        supplier_id: filteredCostingItem.supplier_id || "",
+        supplier: filteredCostingItem.supplier || "",
+        item_details: filteredCostingItem.item_details,
+        total_price: "",
         lc_term: "",
         etd: "",
         eta: "",
@@ -121,36 +123,15 @@ export default function CreateBookings(props) {
   const handleFormDataChange = (name, value) => {
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      return updated;
-    });
-  };
 
-  const handleVariationInputChangeOrigin = (index, field, value) => {
-    setDisplayRows((prev) => {
-      const updated = [...prev];
-      updated[index][field] = value;
-
-      if (
-        field === "consumption" ||
-        field === "wastage" ||
-        field === "garment_qty" ||
-        field === "unit_price" ||
-        field === "booking_qty"
-      ) {
-        const qty = parseFloat(updated[index].garment_qty || 0);
-        const cons = parseFloat(updated[index].consumption || 0);
-        const allow = parseFloat(updated[index].wastage || 0);
-        const unitPrice = parseFloat(updated[index].unit_price || 0);
-        const bookingQty = parseFloat(updated[index].booking_qty || 0);
-
-        const total = qty * cons;
-        const actualTotal = total + (total * allow) / 100;
-
-        updated[index].total = total;
-        updated[index].actual_total = actualTotal;
-        updated[index].final_qty = actualTotal;
-        updated[index].booking_qty = actualTotal;
-        updated[index].total_price = bookingQty * unitPrice;
+      // Recalculate total_price when unit_price changes
+      if (name === "unit_price") {
+        const unitPrice = parseFloat(value) || 0;
+        updated.total_price = (unitPrice * totalBookingQty).toFixed(2);
+      } else {
+        // If other fields change, still ensure total_price is correct
+        const unitPrice = parseFloat(updated.unit_price) || 0;
+        updated.total_price = (unitPrice * totalBookingQty).toFixed(2);
       }
 
       return updated;
@@ -162,28 +143,23 @@ export default function CreateBookings(props) {
       const updated = [...prev];
       updated[index][field] = value;
 
-      const qty = parseFloat(updated[index].garment_qty || 0);
-      const cons = parseFloat(updated[index].consumption || 0);
-      const allow = parseFloat(updated[index].wastage || 0);
-      const unitPrice = parseFloat(updated[index].unit_price || 0);
+      if (
+        field === "consumption" ||
+        field === "wastage" ||
+        field === "garment_qty"
+      ) {
+        const qty = parseFloat(updated[index].garment_qty || 0);
+        const cons = parseFloat(updated[index].consumption || 0);
+        const allow = parseFloat(updated[index].wastage || 0);
 
-      // always recalc total and final
-      const total = qty * cons;
-      const finalQty = total + (total * allow) / 100;
+        const total = qty * cons;
+        const actualTotal = total + (total * allow) / 100;
 
-      updated[index].total = total;
-      updated[index].final_qty = finalQty;
-
-      // ✅ booking_qty is editable:
-      // if user is editing booking_qty → keep their input
-      // if user changes consumption or wastage → reset booking_qty = finalQty
-      if (field === "consumption" || field === "wastage") {
-        updated[index].booking_qty = finalQty;
+        updated[index].total = total;
+        updated[index].actual_total = actualTotal;
+        updated[index].final_qty = actualTotal;
+        updated[index].booking_qty = actualTotal;
       }
-
-      // always recalc total price
-      const bookingQty = parseFloat(updated[index].booking_qty || 0);
-      updated[index].total_price = bookingQty * unitPrice;
 
       return updated;
     });
@@ -209,8 +185,6 @@ export default function CreateBookings(props) {
           actual_total: parseFloat(item.actual_total),
           final_qty: parseFloat(item.final_qty),
           booking_qty: parseFloat(item.booking_qty),
-          unit_price: parseFloat(item.unit_price),
-          total_price: parseFloat(item.total_price),
           sample_requirement: parseFloat(item.sample_requirement),
           comment: item.comment,
         })),
@@ -250,15 +224,31 @@ export default function CreateBookings(props) {
     (sum, row) => sum + (Number(row.booking_qty) || 0),
     0
   );
-  const grandTotalPrice = displayRows.reduce(
-    (sum, row) => sum + (Number(row.total_price) || 0),
-    0
-  );
-
   const totalSampleRequiremnt = displayRows.reduce(
     (sum, row) => sum + (Number(row.sample_requirement) || 0),
     0
   );
+
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "Booking",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New WO",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
+  useEffect(() => {
+    setFormData((prev) => {
+      const unitPrice = parseFloat(prev.unit_price) || 0;
+      return {
+        ...prev,
+        total_price: (unitPrice * totalBookingQty).toFixed(2),
+      };
+    });
+  }, [totalBookingQty]);
 
   //NEW SIZE RANGE FORMULA
 
@@ -312,7 +302,6 @@ export default function CreateBookings(props) {
         const allow = parseFloat(formData?.wastage || 0);
         const total = qty * consumption;
         const actualTotal = total + (total * allow) / 100;
-        const unitPrice = parseFloat(formData?.unit_price || 0);
 
         // 🔑 Find if this row already exists in displayRows
         const existingRow = displayRows.find(
@@ -325,33 +314,30 @@ export default function CreateBookings(props) {
           sizes: uniq(sizeGroup),
           sizeRange: uniq(sizeGroup).join(", "),
           garment_qty: qty,
-          unit_price: unitPrice,
           item_type: existingRow?.item_type || "",
-          position: existingRow?.position || "",
-          item_size: existingRow?.item_size || "",
-          item_color: existingRow?.item_color || "",
+          position: existingRow?.position || "", // ✅ ensure not null
+          item_size: existingRow?.item_size || "", // ✅ ensure not null
+          item_color: existingRow?.item_color || "", // ✅ ensure not null
           item_material: existingRow?.item_material || "",
-          item_brand: existingRow?.item_brand || "",
+          item_brand: existingRow?.item_brand || "", // ✅ ensure not null
           item_description: existingRow?.item_description || item_details,
           consumption: existingRow?.consumption ?? consumption,
           total: qty * (existingRow?.consumption ?? consumption),
           wastage: existingRow?.wastage ?? allow,
-          final_qty:
+          actual_total:
             qty *
             (existingRow?.consumption ?? consumption) *
             (1 + (existingRow?.wastage ?? allow) / 100),
-          // ✅ booking_qty initially = final_qty, but keep old if user changed
+          final_qty:
+            existingRow?.final_qty ??
+            qty *
+              (existingRow?.consumption ?? consumption) *
+              (1 + (existingRow?.wastage ?? allow) / 100),
           booking_qty:
             existingRow?.booking_qty ??
             qty *
               (existingRow?.consumption ?? consumption) *
               (1 + (existingRow?.wastage ?? allow) / 100),
-          total_price:
-            (existingRow?.booking_qty ??
-              qty *
-                (existingRow?.consumption ?? consumption) *
-                (1 + (existingRow?.wastage ?? allow) / 100)) *
-            (existingRow?.unit_price ?? unitPrice),
           range: existingRow?.range || "",
           sample_requirement: existingRow?.sample_requirement || 0,
           comment: existingRow?.comment || "",
@@ -363,18 +349,7 @@ export default function CreateBookings(props) {
     setDisplayRows(rows);
   }, [expandedVariations, groups, formData]);
 
-  useEffect(async () => {
-    props.setHeaderData({
-      pageName: "Booking",
-      isNewButton: true,
-      newButtonLink: "",
-      newButtonText: "New WO",
-      isInnerSearch: true,
-      innerSearchValue: "",
-    });
-  }, []);
-
-  console.log("DISPLAY", displayRows);
+  console.log("displayROWS", displayRows);
 
   return (
     <div className="create_technical_pack">
@@ -435,11 +410,83 @@ export default function CreateBookings(props) {
 
         <div className="row">
           <div className="col-lg-2">
+            <label className="form-label">Garment QTY</label>
+          </div>
+          <div className="col-lg-2">
+            <div className="form-value">{totalGarmentQty}</div>
+          </div>
+          <div className="col-lg-2">
+            <label className="form-label">
+              WO Required Qty. (allow included){" "}
+            </label>
+          </div>
+          <div className="col-lg-2">
+            <div className="form-value">{totalFinalQty}</div>
+          </div>
+          <div className="col-lg-2">
+            <label className="form-label">Actual Booking</label>
+          </div>
+          <div className="col-lg-2">
+            <div className="form-value">{totalBookingQty}</div>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="col-lg-2">
+            <label className="form-label">Unit</label>
+          </div>
+          <div className="col-lg-2">
+            <CustomSelect
+              className="select_wo"
+              placeholder="Unit"
+              options={units.map(({ title }) => ({
+                value: title,
+                label: title,
+              }))}
+              value={units
+                .map(({ title }) => ({
+                  value: title,
+                  label: title,
+                }))
+                .find((option) => option.value === formData.unit)}
+              onChange={(selectedOption) =>
+                handleFormDataChange("unit", selectedOption?.value)
+              }
+            />
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="col-lg-2">
+            <label className="form-label">Unit Price</label>
+          </div>
+          <div className="col-lg-2">
+            <input
+              value={formData.unit_price}
+              name="unit_price"
+              onChange={(e) =>
+                handleFormDataChange("unit_price", e.target.value)
+              }
+              type="number"
+              min={0}
+              step={0.1}
+            />
+          </div>
+          <div className="col-lg-2">
+            <label className="form-label">Total Amount</label>
+          </div>
+          <div className="col-lg-2">
+            <div className="form-value">${formData.total_price}</div>
+          </div>
+          <div className="col-lg-2">
             <label className="form-label">Supplier</label>
           </div>
           <div className="col-lg-2">
             <div className="form-value">{formData.supplier?.company_name}</div>
           </div>
+        </div>
+
+        <div className="row">
           <div className="col-lg-2">
             <label className="form-label">LC Terms</label>
           </div>
@@ -486,7 +533,9 @@ export default function CreateBookings(props) {
               type="date"
             />
           </div>
+        </div>
 
+        <div className="row">
           <div className="col-lg-2">
             <label className="form-label">EID</label>
           </div>
@@ -528,8 +577,6 @@ export default function CreateBookings(props) {
         </div>
       </div>
 
-      <hr />
-      <h6>ITEMS</h6>
       <div className="row">
         <div className="table-responsive mt-3">
           <table className="table table-bordered create_tp_body">
@@ -556,8 +603,6 @@ export default function CreateBookings(props) {
                 <th>Allow %</th>
                 <th>Final</th>
                 <th>Booking QTY</th>
-                <th>Unit Price / {formData.unit}</th>
-                <th>Total Price</th>
                 <th>Sample Requirement</th>
                 <th>Comment/Remarks</th>
               </tr>
@@ -723,36 +768,6 @@ export default function CreateBookings(props) {
                         }
                       />
                     </td>
-
-                    <td style={{ width: "120px" }}>
-                      <input
-                        className="form-value"
-                        type="number"
-                        value={row.unit_price}
-                        onChange={(e) =>
-                          handleVariationInputChange(
-                            index,
-                            "unit_price",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
-                    <td style={{ width: "120px" }}>
-                      <input
-                        readOnly
-                        className="form-value"
-                        type="number"
-                        value={row.total_price}
-                        onChange={(e) =>
-                          handleVariationInputChange(
-                            index,
-                            "total_price",
-                            e.target.value
-                          )
-                        }
-                      />
-                    </td>
                     <td style={{ width: "80px" }}>
                       <input
                         value={row.sample_requirement}
@@ -807,10 +822,6 @@ export default function CreateBookings(props) {
                 </td>
                 <td>
                   <strong>{totalBookingQty.toFixed(2)}</strong>
-                </td>
-                <td></td>
-                <td>
-                  <strong>{grandTotalPrice.toFixed(2)}</strong>
                 </td>
                 <td>
                   <strong>{totalSampleRequiremnt.toFixed(2)}</strong>

@@ -59,6 +59,8 @@ export default function ReceiveItem({ setHeaderData }) {
   const [grnForm, setGrnForm] = useState({
     invoice_number: "",
     challan_number: "",
+    remarks: "",
+    consignment: "",
     received_date: "",
     qty: 0,
   });
@@ -513,6 +515,18 @@ export default function ReceiveItem({ setHeaderData }) {
               {errors.qty && (
                 <small className="text-danger">{errors.qty}</small>
               )}
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Consignment"
+                name="consignment"
+                value={grnForm.consignment}
+                onChange={handleFormChange}
+                fullWidth
+                margin="normal"
+                multiline
+                rows={2}
+              />
             </Grid>
             <Grid item xs={12}>
               <TextField

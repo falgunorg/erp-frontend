@@ -411,6 +411,7 @@ const Grns = (props) => {
             <TableCell>Color</TableCell>
             <TableCell>Size</TableCell>
             <TableCell>Receive QTY</TableCell>
+            <TableCell>Consignment</TableCell>
             <TableCell>Action</TableCell>
           </TableRow>
         </TableHead>
@@ -442,6 +443,7 @@ const Grns = (props) => {
                 <TableCell>
                   {grn.qty}/{grn.unit}
                 </TableCell>
+                <TableCell>{grn.consignment}</TableCell>
                 <TableCell>
                   <button
                     onClick={() => handleEdit(grn)}
