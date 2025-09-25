@@ -47,6 +47,9 @@
     }
     .purchase_list {
       width: 39.77%;
+      &.width_0 {
+        width: 0% !important;
+      }
     }
     .tp_details_area {
       width: 49.69%;
@@ -54,6 +57,9 @@
       overflow-y: auto;
       padding: 0 5px;
       transition: width 0.3s;
+      &.expanded {
+        width: 89.46% !important;
+      }
     }
   }
 
@@ -376,11 +382,11 @@
           }
         }
 
-        &.on_wo{
-           grid-template-columns: 25% 10% 10% 20% 15% 20%;
+        &.on_wo {
+          grid-template-columns: 25% 10% 10% 20% 15% 20%;
         }
-        &.on_po{
-           grid-template-columns: 19% 21% 12% 13% 15% 20%;
+        &.on_po {
+          grid-template-columns: 19% 21% 12% 13% 15% 20%;
         }
       }
 

@@ -10,13 +10,21 @@ import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 
 import { useHistory } from "react-router-dom";
 
-export default function CreateTechnicalPackage({ setRenderArea }) {
+export default function CreateTechnicalPackage({
+  setRenderArea,
+  toggleTechpackExpanded,
+}) {
   const history = useHistory();
-  const buyers = [
-    { id: 1, title: "NSLBD" },
-    { id: 2, title: "WALMART" },
-    { id: 3, title: "FIVE STAR LLC" },
-  ];
+
+  const [buyers, setBuyers] = useState([]);
+  const getBuyers = async () => {
+    var response = await api.post("/common/buyers");
+    if (response.status === 200 && response.data) {
+      setBuyers(response.data.data);
+    } else {
+      console.log(response.data);
+    }
+  };
 
   const brands = [
     { id: 1, title: "NEXT" },
@@ -194,6 +202,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
     getMaterialTypes();
     getPos();
     getWorkOrders();
+    getBuyers();
   }, []);
 
   const [collapsedMaterialTypes, setCollapsedMaterialTypes] = useState({});
@@ -488,6 +497,15 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
         <div className="col-lg-10">
           <div className="row align-items-baseline">
             <div className="col-lg-4">
+              <i
+                onClick={toggleTechpackExpanded}
+                style={{
+                  fontSize: "25px",
+                  marginRight: "15px",
+                  cursor: "pointer",
+                }}
+                className="fa fa-angle-left"
+              ></i>
               <img
                 style={{ width: "30px", marginRight: "8px" }}
                 src={Logo}
@@ -595,9 +613,9 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
               <CustomSelect
                 className="select_wo"
                 placeholder="Buyer"
-                options={buyers.map(({ id, title }) => ({
+                options={buyers.map(({ id, name }) => ({
                   value: id,
-                  label: title,
+                  label: name,
                 }))}
                 onChange={(selectedOption) =>
                   handleInputChange("buyer_id", selectedOption.value)
@@ -1024,7 +1042,6 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                         <tr key={`${materialType.id}-${index}`}>
                           <td className="d-flex">
                             <CustomSelect
-                              style={{ width: "100%" }}
                               className="select_wo"
                               placeholder="Select Item"
                               options={items
@@ -1081,6 +1098,7 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                           <td>
                             <input
                               type="text"
+                              style={{ minWidth: "150px" }}
                               value={item.item_name}
                               onChange={(e) =>
                                 handleItemChange(
@@ -1092,9 +1110,9 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                               }
                             />
                           </td>
-
                           <td>
                             <textarea
+                              style={{ minWidth: "150px" }}
                               value={item.item_details}
                               onChange={(e) =>
                                 handleItemChange(
@@ -1215,14 +1233,14 @@ export default function CreateTechnicalPackage({ setRenderArea }) {
                             />
                           </td>
 
-                          <td className="d-flex align-items-center">
+                          <td className="">
                             <input
                               style={{ width: "70px" }}
                               type="text"
                               min="0"
                               readOnly
                               value={item.total}
-                              className="me-1"
+                              className="me-2"
                             />
                             <i
                               style={{ cursor: "pointer" }}

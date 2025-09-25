@@ -31,7 +31,7 @@ export default function CustomSelect({ placeholder, ...restProps }) {
       minHeight: "21px",
       fontSize: "12px",
       height: "21px",
-      minWidth:"100px",
+      minWidth: "100px",
       background: "#ECECEC",
       lineHeight: "19px",
       boxShadow: "inset 0px 0px 6px rgba(0, 0, 0, 0.18)",

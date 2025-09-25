@@ -9,7 +9,11 @@ import CustomSelect from "elements/CustomSelect";
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
 import { useHistory, useParams } from "react-router-dom";
 
-export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
+export default function EditTechnicalPackage({
+  renderArea,
+  setRenderArea,
+  toggleTechpackExpanded,
+}) {
   const history = useHistory();
   const params = useParams();
   const [techpack, setTechpack] = useState({});
@@ -542,6 +546,15 @@ export default function EditTechnicalPackage({ renderArea, setRenderArea }) {
         <div className="col-lg-10">
           <div className="row align-items-baseline">
             <div className="col-lg-4">
+              <i
+                onClick={toggleTechpackExpanded}
+                style={{
+                  fontSize: "25px",
+                  marginRight: "15px",
+                  cursor: "pointer",
+                }}
+                className="fa fa-angle-left"
+              ></i>
               <img
                 style={{ width: "30px", marginRight: "8px" }}
                 src={Logo}

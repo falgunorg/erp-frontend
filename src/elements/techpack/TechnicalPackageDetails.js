@@ -6,7 +6,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import { useParams, useHistory } from "react-router-dom";
 import api from "services/api";
-export default function TechnicalPackageDetails() {
+export default function TechnicalPackageDetails({ toggleTechpackExpanded }) {
   const params = useParams();
   const history = useHistory();
 
@@ -102,6 +102,15 @@ export default function TechnicalPackageDetails() {
         <div className="col-lg-10">
           <div className="row align-items-center">
             <div className="col-lg-4">
+              <i
+                onClick={toggleTechpackExpanded}
+                style={{
+                  fontSize: "25px",
+                  marginRight: "15px",
+                  cursor: "pointer",
+                }}
+                className="fa fa-angle-left"
+              ></i>
               <img
                 style={{ width: "30px", marginRight: "8px" }}
                 src={Logo}

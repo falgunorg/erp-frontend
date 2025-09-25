@@ -119,7 +119,10 @@ export default function TechnicalPackages(props) {
 
     if (confirmed) {
       try {
-        const response = await api.post("/merchandising/technical-packages-delete", { id });
+        const response = await api.post(
+          "/merchandising/technical-packages-delete",
+          { id }
+        );
         if (response.status === 200 && response.data) {
           swal(
             "Deleted!",
@@ -156,9 +159,12 @@ export default function TechnicalPackages(props) {
 
     if (confirmed) {
       try {
-        const response = await api.post("/merchandising/technical-packages-delete-multiple", {
-          ids: selectedItems,
-        });
+        const response = await api.post(
+          "/merchandising/technical-packages-delete-multiple",
+          {
+            ids: selectedItems,
+          }
+        );
         if (response.status === 200 && response.data) {
           swal(
             "Deleted!",
@@ -177,6 +183,24 @@ export default function TechnicalPackages(props) {
       }
     }
   };
+
+  const [techpackExpandDetails, setTechpackExpandDetails] = useState(() => {
+    // load initial state from sessionStorage
+    const saved = sessionStorage.getItem("techpackExpandDetails");
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const toggleTechpackExpanded = () => {
+    setTechpackExpandDetails((prev) => !prev);
+  };
+
+  // keep sessionStorage in sync with state
+  useEffect(() => {
+    sessionStorage.setItem(
+      "techpackExpandDetails",
+      JSON.stringify(techpackExpandDetails)
+    );
+  }, [techpackExpandDetails]);
 
   return (
     <div className="purchase_order_page">
@@ -220,7 +244,11 @@ export default function TechnicalPackages(props) {
       <div className="technical_package_layout purchase_order_page_when_print">
         <FilterSidebar {...props} />
 
-        <div className="purchase_list">
+        <div
+          className={
+            techpackExpandDetails ? "purchase_list width_0" : "purchase_list"
+          }
+        >
           <div className="purchase_list_header d-flex justify-content-between">
             <div className="purchase_header_left">
               <div className="title">
@@ -400,23 +428,43 @@ export default function TechnicalPackages(props) {
 
         <div
           className={
-            renderArea === "details"
-              ? "tp_details_area"
-              : "tp_details_area non_printing_area"
+            techpackExpandDetails
+              ? "tp_details_area non_printing_area expanded"
+              : "tp_details_area "
           }
         >
           {renderArea === "blank" && (
             <div style={{ textAlign: "center", paddingTop: "250px" }}>
+              <i
+                onClick={toggleTechpackExpanded}
+                style={{
+                  fontSize: "25px",
+                  marginRight: "15px",
+                  cursor: "pointer",
+                }}
+                className="fa fa-angle-left"
+              ></i>
               <b>Select an Item For Details</b>
               <div className="text-muted">Nothing is selected</div>
             </div>
           )}
+
           {renderArea === "add" && (
-            <CreateTechnicalPackage setRenderArea={setRenderArea} />
+            <CreateTechnicalPackage
+              toggleTechpackExpanded={toggleTechpackExpanded}
+              setRenderArea={setRenderArea}
+            />
           )}
-          {renderArea === "details" && <TechnicalPackageDetails />}
+          {renderArea === "details" && (
+            <TechnicalPackageDetails
+              toggleTechpackExpanded={toggleTechpackExpanded}
+            />
+          )}
           {renderArea === "update" && (
-            <EditTechnicalPackage setRenderArea={setRenderArea} />
+            <EditTechnicalPackage
+              toggleTechpackExpanded={toggleTechpackExpanded}
+              setRenderArea={setRenderArea}
+            />
           )}
         </div>
       </div>
