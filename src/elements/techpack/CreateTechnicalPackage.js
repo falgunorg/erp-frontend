@@ -5,9 +5,7 @@ import MultipleFileInput from "./MultipleFileInput";
 import api from "services/api";
 import swal from "sweetalert";
 import CustomSelect from "elements/CustomSelect";
-
 import { ArrowRightIcon, ArrowDownIcon } from "../../elements/SvgIcons";
-
 import { useHistory } from "react-router-dom";
 
 export default function CreateTechnicalPackage({

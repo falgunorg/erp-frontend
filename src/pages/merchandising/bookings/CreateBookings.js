@@ -55,12 +55,11 @@ export default function CreateBookings(props) {
 
     if (response.status === 200 && response.data) {
       const data = response.data.workorder;
-
       // Filter specific costing item
       const filteredCostingItem = (data.costing?.items || []).find(
         (item) => item.id === parseInt(params.costing_item_id)
       );
-
+      console.log("filterItem", filteredCostingItem);
       setFormData({
         pos: data.pos || [],
         techpack: data.techpack,
@@ -69,6 +68,8 @@ export default function CreateBookings(props) {
         wastage: filteredCostingItem?.wastage || 0,
         costing_item_id: filteredCostingItem?.id,
         costing_id: filteredCostingItem?.costing_id,
+        item_color: filteredCostingItem?.color || "",
+        item_size: filteredCostingItem?.size || "",
         wo_id: data.id,
         item_id: filteredCostingItem?.item_id,
         item_type_id: filteredCostingItem?.item_type_id,
@@ -121,38 +122,6 @@ export default function CreateBookings(props) {
   const handleFormDataChange = (name, value) => {
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      return updated;
-    });
-  };
-
-  const handleVariationInputChangeOrigin = (index, field, value) => {
-    setDisplayRows((prev) => {
-      const updated = [...prev];
-      updated[index][field] = value;
-
-      if (
-        field === "consumption" ||
-        field === "wastage" ||
-        field === "garment_qty" ||
-        field === "unit_price" ||
-        field === "booking_qty"
-      ) {
-        const qty = parseFloat(updated[index].garment_qty || 0);
-        const cons = parseFloat(updated[index].consumption || 0);
-        const allow = parseFloat(updated[index].wastage || 0);
-        const unitPrice = parseFloat(updated[index].unit_price || 0);
-        const bookingQty = parseFloat(updated[index].booking_qty || 0);
-
-        const total = qty * cons;
-        const actualTotal = total + (total * allow) / 100;
-
-        updated[index].total = total;
-        updated[index].actual_total = actualTotal;
-        updated[index].final_qty = actualTotal;
-        updated[index].booking_qty = actualTotal;
-        updated[index].total_price = bookingQty * unitPrice;
-      }
-
       return updated;
     });
   };
@@ -261,7 +230,6 @@ export default function CreateBookings(props) {
   );
 
   //NEW SIZE RANGE FORMULA
-
   const handleGroupChange = (color, groupIndex, selected) => {
     const selectedSizes = uniq((selected || []).map((s) => norm(s)));
 
@@ -309,6 +277,8 @@ export default function CreateBookings(props) {
 
         const consumption = parseFloat(formData?.consumption || 0);
         const item_details = formData.item_details || "";
+        const itemColor = formData.item_color || "";
+        const itemSize = formData.item_size || "";
         const allow = parseFloat(formData?.wastage || 0);
         const total = qty * consumption;
         const actualTotal = total + (total * allow) / 100;
@@ -328,8 +298,8 @@ export default function CreateBookings(props) {
           unit_price: unitPrice,
           item_type: existingRow?.item_type || "",
           position: existingRow?.position || "",
-          item_size: existingRow?.item_size || "",
-          item_color: existingRow?.item_color || "",
+          item_size: itemSize,
+          item_color: itemColor,
           item_material: existingRow?.item_material || "",
           item_brand: existingRow?.item_brand || "",
           item_description: existingRow?.item_description || item_details,
@@ -597,7 +567,7 @@ export default function CreateBookings(props) {
                           handleVariationInputChange(
                             index,
                             "item_size",
-                            e.target.value
+                            e.target.value.toUpperCase()
                           )
                         }
                       />
@@ -623,7 +593,7 @@ export default function CreateBookings(props) {
                           handleVariationInputChange(
                             index,
                             "item_color",
-                            e.target.value
+                            e.target.value.toUpperCase()
                           )
                         }
                       />

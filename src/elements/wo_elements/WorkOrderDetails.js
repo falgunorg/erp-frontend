@@ -330,9 +330,6 @@ export default function WorkOrderDetails() {
       >
         <div className="d-flex justify-content-between">
           <h6>Color Wise Size Breakdown</h6>
-          <button onClick={openPopUp} className="btn btn-sm btn-warning">
-            <i className="fa fa-plus"></i>
-          </button>
         </div>
 
         {workorder.pos?.length > 0 ? (

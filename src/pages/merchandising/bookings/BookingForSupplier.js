@@ -95,6 +95,7 @@ export default function BookingForSupplier(props) {
           <h5 class="fw-bold text-uppercase border-bottom py-2">
             Booking Order
           </h5>
+          <h6>#{booking.booking_number}</h6>
         </div>
       </div>
 
