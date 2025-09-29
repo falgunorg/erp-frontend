@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "services/api";
+import CustomSelect from "elements/CustomSelect";
 import {
   Box,
   TextField,
@@ -187,147 +188,215 @@ const Bookings = (props) => {
     });
   }, []);
   return (
-    <Box p={3}>
-      <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>WO</InputLabel>
-          <Select
-            name="wo_id"
-            value={filters.wo_id}
+    <Box className="create_technical_pack" p={3}>
+      <div className="row align-items-end create_tp_body">
+        <div className="col create_tp_body">
+          <label className="form-label">WO</label>
+          <CustomSelect
+            options={[
+              { value: "", label: "All" },
+              ...woOptions.map((wo) => ({
+                value: wo.id,
+                label: wo.wo_number,
+              })),
+            ]}
+            value={
+              filters.wo_id
+                ? {
+                    value: filters.wo_id,
+                    label: woOptions.find((w) => w.id === filters.wo_id)
+                      ?.wo_number,
+                  }
+                : { value: "", label: "All" }
+            }
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { name: "wo_id", value: selected?.value || "" },
+              })
+            }
+          />
+        </div>
+
+        <div className="col create_tp_body">
+          <label className="form-label">Supplier</label>
+          <CustomSelect
+            options={[
+              { value: "", label: "All" },
+              ...supplierOptions.map((s) => ({
+                value: s.id,
+                label: s.company_name,
+              })),
+            ]}
+            value={
+              filters.supplier_id
+                ? {
+                    value: filters.supplier_id,
+                    label: supplierOptions.find(
+                      (so) => so.id === filters.supplier_id
+                    )?.company_name,
+                  }
+                : { value: "", label: "All" }
+            }
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { name: "supplier_id", value: selected?.value || "" },
+              })
+            }
+          />
+        </div>
+
+        {/* Buyer */}
+        <div className="col create_tp_body">
+          <label className="form-label">Buyer</label>
+          <CustomSelect
+            options={[
+              { value: "", label: "All" },
+              ...buyerOptions.map((b) => ({
+                value: b.id,
+                label: b.name,
+              })),
+            ]}
+            value={
+              filters.buyer_id
+                ? {
+                    value: filters.buyer_id,
+                    label: buyerOptions.find((bo) => bo.id === filters.buyer_id)
+                      ?.name,
+                  }
+                : { value: "", label: "All" }
+            }
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { name: "buyer_id", value: selected?.value || "" },
+              })
+            }
+          />
+        </div>
+
+        {/* Techpack */}
+        <div className="col create_tp_body">
+          <label className="form-label">Techpack</label>
+          <CustomSelect
+            options={[
+              { value: "", label: "All" },
+              ...techPackOptions.map((t) => ({
+                value: t.id,
+                label: t.techpack_number,
+              })),
+            ]}
+            value={
+              filters.technical_package_id
+                ? {
+                    value: filters.technical_package_id,
+                    label: techPackOptions.find(
+                      (tp) => tp.id === filters.technical_package_id
+                    )?.techpack_number,
+                  }
+                : { value: "", label: "All" }
+            }
+            onChange={(selected) =>
+              handleFilterChange({
+                target: {
+                  name: "technical_package_id",
+                  value: selected?.value || "",
+                },
+              })
+            }
+          />
+        </div>
+
+        {/* Item Type */}
+        <div className="col create_tp_body">
+          <label className="form-label">Item Type</label>
+          <CustomSelect
+            options={[
+              { value: "", label: "All" },
+              ...itemTypeOptions.map((it) => ({
+                value: it.id,
+                label: it.title,
+              })),
+            ]}
+            value={
+              filters.item_type_id
+                ? {
+                    value: filters.item_type_id,
+                    label: itemTypeOptions.find(
+                      (io) => io.id === filters.item_type_id
+                    )?.title,
+                  }
+                : { value: "", label: "All" }
+            }
+            onChange={(selected) =>
+              handleFilterChange({
+                target: { name: "item_type_id", value: selected?.value || "" },
+              })
+            }
+          />
+        </div>
+
+        {/* Search */}
+        <div className="col create_tp_body">
+          <label className="form-label">Search</label>
+          <input
+            type="text"
+            name="search"
+            value={filters.search}
             onChange={handleFilterChange}
-            label="WO"
-          >
-            <MenuItem value="">All</MenuItem>
-            {woOptions.map((wo) => (
-              <MenuItem key={wo.id} value={wo.id}>
-                {wo.wo_number}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            className="form-control"
+          />
+        </div>
 
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Supplier</InputLabel>
-          <Select
-            name="supplier_id"
-            value={filters.supplier_id}
-            onChange={handleFilterChange}
-            label="Supplier"
-          >
-            <MenuItem value="">All</MenuItem>
-            {supplierOptions.map((s) => (
-              <MenuItem key={s.id} value={s.id}>
-                {s.company_name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Buyer</InputLabel>
-          <Select
-            name="buyer_id"
-            value={filters.buyer_id}
-            onChange={handleFilterChange}
-            label="Buyer"
-          >
-            <MenuItem value="">All</MenuItem>
-            {buyerOptions.map((b) => (
-              <MenuItem key={b.id} value={b.id}>
-                {b.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Techpack</InputLabel>
-          <Select
-            name="technical_package_id"
-            value={filters.technical_package_id}
-            onChange={handleFilterChange}
-            label="Techpack"
-          >
-            <MenuItem value="">All</MenuItem>
-            {techPackOptions.map((t) => (
-              <MenuItem key={t.id} value={t.id}>
-                {t.techpack_number}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <FormControl size="small" sx={{ minWidth: 150 }}>
-          <InputLabel>Item Type</InputLabel>
-          <Select
-            name="item_type_id"
-            value={filters.item_type_id}
-            onChange={handleFilterChange}
-            label="Item Type"
-          >
-            <MenuItem value="">All</MenuItem>
-            {itemTypeOptions.map((it) => (
-              <MenuItem key={it.id} value={it.id}>
-                {it.title}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <TextField
-          label="Search"
-          name="search"
-          value={filters.search}
-          onChange={handleFilterChange}
-          size="small"
-        />
-
+        {/* Dates */}
         {["eta", "etd", "eid"].map((field) => (
-          <>
-            <TextField
-              key={`${field}_from`}
-              type="date"
-              label={`${field.toUpperCase()} From`}
-              name={`${field}_from`}
-              value={filters[`${field}_from`]}
-              onChange={handleFilterChange}
-              size="small"
-              InputLabelProps={{ shrink: true }}
-            />
-            <TextField
-              key={`${field}_to`}
-              type="date"
-              label={`${field.toUpperCase()} To`}
-              name={`${field}_to`}
-              value={filters[`${field}_to`]}
-              onChange={handleFilterChange}
-              size="small"
-              InputLabelProps={{ shrink: true }}
-            />
-          </>
+          <React.Fragment key={field}>
+            <div className="col create_tp_body">
+              <label className="form-label">{field.toUpperCase()} From</label>
+              <input
+                type="date"
+                name={`${field}_from`}
+                value={filters[`${field}_from`]}
+                onChange={handleFilterChange}
+                className="form-control"
+              />
+            </div>
+            <div className="col create_tp_body">
+              <label className="form-label">{field.toUpperCase()} To</label>
+              <input
+                type="date"
+                name={`${field}_to`}
+                value={filters[`${field}_to`]}
+                onChange={handleFilterChange}
+                className="form-control"
+              />
+            </div>
+          </React.Fragment>
         ))}
 
-        {/* Item-specific filters */}
-        <TextField
-          label="Garment Color"
-          name="garment_color"
-          value={filters.garment_color}
-          onChange={handleFilterChange}
-          size="small"
-        />
-        <Button
-          variant="contained"
-          sx={{
-            bgcolor: "#f6a33f",
-          }}
-          onClick={applyFilters}
-        >
-          Apply Filters
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={resetFilters}>
-          Reset Filters
-        </Button>
-      </Box>
+        {/* Garment Color */}
+        <div className="col create_tp_body">
+          <label className="form-label">Garment Color</label>
+          <input
+            type="text"
+            name="garment_color"
+            value={filters.garment_color}
+            onChange={handleFilterChange}
+            className="form-control"
+          />
+        </div>
+
+        <div className="col create_tp_body">
+          <button
+            className="btn btn-success btn-sm me-2"
+            onClick={applyFilters}
+          >
+            <i className="fa fa-search"></i>
+          </button>
+          <button className="btn btn-warning btn-sm" onClick={resetFilters}>
+            <i className="fa fa-times"></i>
+          </button>
+        </div>
+      </div>
+
       <hr />
       <Table>
         <TableHead>

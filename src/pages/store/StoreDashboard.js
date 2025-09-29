@@ -25,30 +25,11 @@ import {
   Box,
   Pagination,
 } from "@mui/material";
-import PackageIcon from "@mui/icons-material/Inventory2";
-import ArchiveIcon from "@mui/icons-material/Archive";
-import DownloadIcon from "@mui/icons-material/Download";
-import SendIcon from "@mui/icons-material/Send";
 import api from "services/api";
 import { Link } from "react-router-dom";
+import CustomSelect from "elements/CustomSelect";
 
 const departments = ["Cutting", "Sewing", "Finishing", "Washing", "QC"];
-
-const StatCard = ({ icon: Icon, title, value, hint }) => (
-  <Card variant="outlined">
-    <CardContent>
-      <Typography variant="subtitle2" color="textSecondary">
-        <Icon style={{ color: "#f6a33f" }} fontSize="small" /> {title}
-      </Typography>
-      <Typography variant="h5">{value}</Typography>
-      {hint && (
-        <Typography variant="caption" color="textSecondary">
-          {hint}
-        </Typography>
-      )}
-    </CardContent>
-  </Card>
-);
 
 export default function StoreDashboard(props) {
   //real stocks
@@ -380,122 +361,115 @@ export default function StoreDashboard(props) {
     <div className="">
       <div className="row">
         <div className="col-lg-10 col-xl-9">
-          {/* Stat Cards */}
-          <Grid container spacing={0.5} sx={{ mb: 1 }}>
-            <Grid item xs={4} md={2}>
-              <StatCard
-                icon={ArchiveIcon}
-                value={totals.totalReceived}
-                hint="Received"
-                sx={{ p: 0.5, fontSize: "0.75rem" }}
-              />
-            </Grid>
-            <Grid item xs={4} md={2}>
-              <StatCard
-                icon={PackageIcon}
-                value={totals.available}
-                hint="Balance"
-                sx={{ p: 0.5, fontSize: "0.75rem" }}
-              />
-            </Grid>
-            <Grid item xs={4} md={2}>
-              <StatCard
-                icon={SendIcon}
-                value={totals.totalIssued}
-                hint="Issued"
-                sx={{ p: 0.5, fontSize: "0.75rem" }}
-              />
-            </Grid>
-          </Grid>
-
           {/* Filters */}
-          <Card variant="outlined" sx={{ mb: 2, p: 1 }}>
-            <Grid container spacing={1} alignItems="flex-end">
-              {/* 🔹 WO ID */}
-              <Grid item xs={12} md={3}>
-                <TextField
-                  size="small"
-                  fullWidth
-                  label="Search SKU, Name, Color..."
+          <div className="create_technical_pack">
+            <div className="row align-items-end">
+              {/* 🔹 Search */}
+              <div className="col create_tp_body">
+                <label className="form-label">Search SKU, Name, Color...</label>
+                <input
+                  type="text"
+                  className="form-control"
                   value={filterData.search}
                   onChange={(e) => handleFilterChange("search", e.target.value)}
                 />
-              </Grid>
-              {/* 🔹 Buyer ID */}
-              <Grid item xs={6} md={2}>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>BUYER</InputLabel>
-                  <Select
-                    value={filterData.buyer_id}
-                    label="BUYER"
-                    onChange={(e) =>
-                      handleFilterChange("buyer_id", e.target.value)
-                    }
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {buyers.map((buyer) => (
-                      <MenuItem key={buyer.id} value={buyer.id}>
-                        {buyer.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+              </div>
 
-              {/* 🔹 Technical Package ID */}
-              <Grid item xs={6} md={2}>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>TECHPACK</InputLabel>
-                  <Select
-                    value={filterData.technical_package_id}
-                    onChange={(e) =>
-                      handleFilterChange("technical_package_id", e.target.value)
-                    }
-                    label="TECHPACK"
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {techpacks.map((pkg) => (
-                      <MenuItem key={pkg.id} value={pkg.id}>
-                        {pkg.techpack_number}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+              {/* 🔹 Buyer */}
+              <div className="col create_tp_body">
+                <label className="form-label">Buyer</label>
+                <CustomSelect
+                  className="form-value"
+                  options={[
+                    { value: "all", label: "All" },
+                    ...buyers.map((buyer) => ({
+                      value: buyer.id,
+                      label: buyer.name,
+                    })),
+                  ]}
+                  value={
+                    filterData.buyer_id !== "all"
+                      ? {
+                          value: filterData.buyer_id,
+                          label: buyers.find(
+                            (b) => b.id === filterData.buyer_id
+                          )?.name,
+                        }
+                      : { value: "all", label: "All" }
+                  }
+                  onChange={(selected) =>
+                    handleFilterChange("buyer_id", selected?.value || "all")
+                  }
+                />
+              </div>
 
-              <Grid item xs={6} md={2}>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>Category</InputLabel>
-                  <Select
-                    value={filterData.item_type_id}
-                    label="Category"
-                    onChange={(e) =>
-                      handleFilterChange("item_type_id", e.target.value)
-                    }
-                  >
-                    <MenuItem value="all">All</MenuItem>
-                    {itemTypes.map((c) => (
-                      <MenuItem key={c.id} value={c.id}>
-                        {c.title}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+              {/* 🔹 Techpack */}
+              <div className="col create_tp_body">
+                <label className="form-label">Techpack</label>
+                <CustomSelect
+                  className="form-value"
+                  options={[
+                    { value: "all", label: "All" },
+                    ...techpacks.map((pkg) => ({
+                      value: pkg.id,
+                      label: pkg.techpack_number,
+                    })),
+                  ]}
+                  value={
+                    filterData.technical_package_id !== "all"
+                      ? {
+                          value: filterData.technical_package_id,
+                          label: techpacks.find(
+                            (tp) => tp.id === filterData.technical_package_id
+                          )?.techpack_number,
+                        }
+                      : { value: "all", label: "All" }
+                  }
+                  onChange={(selected) =>
+                    handleFilterChange(
+                      "technical_package_id",
+                      selected?.value || "all"
+                    )
+                  }
+                />
+              </div>
 
-              <Grid item xs={6} md={1}>
+              {/* 🔹 Category */}
+              <div className="col create_tp_body">
+                <label className="form-label">Category</label>
+                <CustomSelect
+                  className="form-value"
+                  options={[
+                    { value: "all", label: "All" },
+                    ...itemTypes.map((c) => ({
+                      value: c.id,
+                      label: c.title,
+                    })),
+                  ]}
+                  value={
+                    filterData.item_type_id !== "all"
+                      ? {
+                          value: filterData.item_type_id,
+                          label: itemTypes.find(
+                            (c) => c.id === filterData.item_type_id
+                          )?.title,
+                        }
+                      : { value: "all", label: "All" }
+                  }
+                  onChange={(selected) =>
+                    handleFilterChange("item_type_id", selected?.value || "all")
+                  }
+                />
+              </div>
+
+              {/* 🔹 Stock Only (Switch stays same) */}
+              <div className="col create_tp_body">
                 <FormControlLabel
-                  sx={{
-                    marginLeft: "5px",
-                    display: "block",
-                    width: "100%",
-                    fontSize: "10px",
-                  }}
+                  className="form-label"
                   label="Stock Only"
                   control={
                     <Switch
                       size="small"
-                      style={{ fontSize: "10px" }}
                       checked={filterData.stock_only}
                       onChange={(e) =>
                         handleFilterChange("stock_only", e.target.checked)
@@ -503,173 +477,184 @@ export default function StoreDashboard(props) {
                     />
                   }
                 />
-              </Grid>
-              <Grid item xs={6} md={2}>
-                <FormControl size="small" fullWidth>
-                  <InputLabel>Sort By</InputLabel>
-                  <Select
-                    value={filterData.sort_by}
-                    label="Sort By"
-                    onChange={(e) =>
-                      handleFilterChange("sort_by", e.target.value)
-                    }
-                  >
-                    <MenuItem value="name-asc">Name ↑</MenuItem>
-                    <MenuItem value="name-desc">Name ↓</MenuItem>
-                    <MenuItem value="stock-asc">Stock ↑</MenuItem>
-                    <MenuItem value="stock-desc">Stock ↓</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </Card>
+              </div>
 
-          {/* Actions */}
-          <Grid
-            sx={{
-              display: "flex",
-              mb: 2,
-              justifyContent: { xs: "flex-start", md: "flex-end" },
-              gap: 1,
-            }}
-          >
-            <Link
-              to="/store/receives-create"
-              size="small"
-              className="btn btn-small btn-primary"
-            >
-              + Receive New
-            </Link>
-            <Button
-              className="me-2"
-              size="small"
-              variant="outlined"
-              startIcon={<DownloadIcon />}
-            >
-              Export
-            </Button>
-            <Link to="/store/stock/report" className="btn btn-success">
-              Report
-            </Link>
-          </Grid>
-          <Card variant="outlined" sx={{ maxHeight: 573, overflow: "auto" }}>
-            <Table stickyHeader size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>#BUYER</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>#STYLE</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>GARMENT COLOR</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>TYPE</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>ITEM</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>ITEM DETAILS</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>ITEM COLOR</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>ITEM SIZE</strong>
-                  </TableCell>
+              {/* 🔹 Sort By */}
+              <div className="col create_tp_body">
+                <label className="form-label">Sort By</label>
+                <CustomSelect
+                  className="form-value"
+                  options={[
+                    { value: "name-asc", label: "Name ↑" },
+                    { value: "name-desc", label: "Name ↓" },
+                    { value: "stock-asc", label: "Stock ↑" },
+                    { value: "stock-desc", label: "Stock ↓" },
+                  ]}
+                  value={
+                    filterData.sort_by
+                      ? {
+                          value: filterData.sort_by,
+                          label:
+                            filterData.sort_by === "name-asc"
+                              ? "Name ↑"
+                              : filterData.sort_by === "name-desc"
+                              ? "Name ↓"
+                              : filterData.sort_by === "stock-asc"
+                              ? "Stock ↑"
+                              : "Stock ↓",
+                        }
+                      : null
+                  }
+                  onChange={(selected) =>
+                    handleFilterChange("sort_by", selected?.value || "")
+                  }
+                />
+              </div>
+              <div className="col create_tp_body">
+                <Link
+                  to="/store/receives-create"
+                  size="small"
+                  className="btn btn-sm btn-primary me-2"
+                >
+                  + Receive
+                </Link>
+                <Link
+                  to="/store/stock/report"
+                  className="btn btn-sm btn-success"
+                >
+                  Report
+                </Link>
+              </div>
+            </div>
+            <br />
 
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>RECEIVED</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>STOCK</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>ISSUES</strong>
-                  </TableCell>
-                  <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
-                    <strong>ACTIONS</strong>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {stocks.map((item) => (
-                  <TableRow
-                    key={item.id}
-                    hover
-                    sx={{ "& td": { fontSize: "0.8rem", py: 0.5 } }}
-                  >
-                    <TableCell>{item.buyer?.name}</TableCell>
-                    <TableCell>{item.techpack?.techpack_number}</TableCell>
-                    <TableCell>{item.garment_color}</TableCell>
-                    <TableCell>{item.item_type?.title}</TableCell>
-                    <TableCell>{item.item?.title}</TableCell>
-                    <TableCell sx={{ maxWidth: "200px" }}>
-                      {item.item_description}
+            <Card variant="outlined" sx={{ maxHeight: 573, overflow: "auto" }}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>#BUYER</strong>
                     </TableCell>
-                    <TableCell>{item.item_color}</TableCell>
-                    <TableCell>{item.item_size}</TableCell>
-                    <TableCell>
-                      {(item.grns ?? [])
-                        .reduce((sum, grn) => sum + parseFloat(grn.qty ?? 0), 0)
-                        .toLocaleString()}
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>#STYLE</strong>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>GARMENT COLOR</strong>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>TYPE</strong>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>ITEM</strong>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>ITEM DETAILS</strong>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>ITEM COLOR</strong>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>ITEM SIZE</strong>
                     </TableCell>
 
-                    <TableCell>
-                      {item.balance_qty} {item.unit}
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>RECEIVED</strong>
                     </TableCell>
-                    <TableCell>
-                      {" "}
-                      {(item.issues ?? [])
-                        .reduce((sum, iss) => sum + parseFloat(iss.qty ?? 0), 0)
-                        .toLocaleString()}
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>STOCK</strong>
                     </TableCell>
-
-                    <TableCell>
-                      <Button
-                        size="small"
-                        sx={{ bgcolor: "#f6a33f" }}
-                        variant="contained"
-                        onClick={() => {
-                          setActiveItem(item);
-                          setIssueOpen(true);
-                        }}
-                      >
-                        Issue
-                      </Button>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>ISSUES</strong>
+                    </TableCell>
+                    <TableCell sx={{ fontSize: "0.8rem", py: 0.5 }}>
+                      <strong>ACTIONS</strong>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-            <Pagination
-              count={Math.ceil(pagination.total / pagination.per_page)}
-              page={pagination.current_page}
-              onChange={(e, value) => getStocks(value)}
-            />
-          </Card>
+                </TableHead>
+                <TableBody>
+                  {stocks.map((item) => (
+                    <TableRow
+                      key={item.id}
+                      hover
+                      sx={{ "& td": { fontSize: "0.8rem", py: 0.5 } }}
+                    >
+                      <TableCell>{item.buyer?.name}</TableCell>
+                      <TableCell>{item.techpack?.techpack_number}</TableCell>
+                      <TableCell>{item.garment_color}</TableCell>
+                      <TableCell>{item.item_type?.title}</TableCell>
+                      <TableCell>{item.item?.title}</TableCell>
+                      <TableCell sx={{ maxWidth: "200px" }}>
+                        {item.item_description}
+                      </TableCell>
+                      <TableCell>{item.item_color}</TableCell>
+                      <TableCell>{item.item_size}</TableCell>
+                      <TableCell>
+                        {(item.grns ?? [])
+                          .reduce(
+                            (sum, grn) => sum + parseFloat(grn.qty ?? 0),
+                            0
+                          )
+                          .toLocaleString()}
+                      </TableCell>
+
+                      <TableCell>
+                        {item.balance_qty} {item.unit}
+                      </TableCell>
+                      <TableCell>
+                        {" "}
+                        {(item.issues ?? [])
+                          .reduce(
+                            (sum, iss) => sum + parseFloat(iss.qty ?? 0),
+                            0
+                          )
+                          .toLocaleString()}
+                      </TableCell>
+
+                      <TableCell>
+                        <Button
+                          size="small"
+                          sx={{ bgcolor: "#f6a33f" }}
+                          variant="contained"
+                          onClick={() => {
+                            setActiveItem(item);
+                            setIssueOpen(true);
+                          }}
+                        >
+                          Issue
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              <Pagination
+                count={Math.ceil(pagination.total / pagination.per_page)}
+                page={pagination.current_page}
+                onChange={(e, value) => getStocks(value)}
+              />
+            </Card>
+          </div>
+
+          {/* Actions */}
         </div>
 
         <div className="col-lg-2 col-xl-3">
           {/* Tabs */}
-          <Tabs
-            value={tab}
-            onChange={(e, newValue) => setTab(newValue)}
-            variant="fullWidth"
-            className="mb-3"
-          >
-            <Tab label="RECEIVES" value="receives" />
-            <Tab label="ISSUES" value="issues" />
-            <Tab label="WAITING" value="upcoming" />
-          </Tabs>
 
           <Card
             style={{ height: "calc(100vh - 155px)", overflowY: "auto" }}
             className="mb-4"
           >
+            <Tabs
+              value={tab}
+              onChange={(e, newValue) => setTab(newValue)}
+              variant="fullWidth"
+              className="mb-3"
+            >
+              <Tab label="RECEIVES" value="receives" />
+              <Tab label="ISSUES" value="issues" />
+              <Tab label="WAITING" value="upcoming" />
+            </Tabs>
             <CardContent>
               {tab === "receives" && (
                 <>
