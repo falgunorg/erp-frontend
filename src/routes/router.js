@@ -6,29 +6,32 @@ import { BrowserRouter, Switch, Redirect } from "react-router-dom";
 // AUTH
 import Login from "pages/auth/Login";
 import Chat from "../pages/chat/Chat";
+import Profile from "pages/auth/Profile";
 
-//Parcel
+// Dashboard
+import Dashboard from "pages/Dashboard";
 
+// {External}
+import Mailbox from "../pages/mail/Mailbox";
+import Schedules from "../pages/schedule/Schedules";
+import Filemanager from "../pages/files/Filemanager";
+
+//Parcels
 import Parcels from "../pages/parcels/Parcels";
 import CreateParcel from "../pages/parcels/CreateParcel";
 import ParcelDetails from "../pages/parcels/ParcelDetails";
 
-import Dashboard from "pages/Dashboard";
-import Mailbox from "../pages/mail/Mailbox";
-
-import Schedules from "../pages/schedule/Schedules";
 import Test from "../pages/Test";
 
 // TERMS
 import Terms from "../pages/terms/Terms";
 
+// Administration
+
 // BUYERS
 import Buyers from "../pages/buyers/Buyers";
 
 // profile
-import Profile from "pages/auth/Profile";
-
-import Filemanager from "../pages/files/Filemanager";
 
 // ROLE PERMISSION (SETTINGS)
 import Roles from "pages/roles/Roles";
@@ -197,10 +200,8 @@ import PartRequests from "../pages/substores/part-request/PartRequests";
 import CreatePartRequest from "../pages/substores/part-request/CreatePartRequest";
 import EditPartRequest from "../pages/substores/part-request/EditPartRequest";
 import RevisePartRequest from "../pages/substores/part-request/RevisePartRequest";
-
 //Part
 import Parts from "../pages/substores/Parts";
-
 //POWER ROUTES
 import Power from "../pages/power/Power";
 //substore
@@ -265,6 +266,8 @@ import IssueReport from "../pages/store/issues/IssueReport";
 import PurchaseContractsList from "../pages/PurchaseContractsList";
 import Tasks from "../pages/Tasks";
 import TimeAndActions from "../pages/TimeAndActions";
+
+import Jobs from "pages/cnf/Jobs";
 
 function OpenRoutes() {
   return (
@@ -1206,6 +1209,7 @@ class PrivateRoutes extends Component {
             path="/admin/store/left-overs-details/:id?"
             component={AdminLeftOverStoreDetails}
           ></PrivateRoute>
+          <PrivateRoute exact path="/cnf/jobs" component={Jobs}></PrivateRoute>
           <Redirect path="*" to="/dashboard" />
         </Switch>
       </BrowserRouter>

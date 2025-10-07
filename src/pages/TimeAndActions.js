@@ -32,7 +32,6 @@ export default function TimeAndActions(props) {
 
   return (
     <div className="tna_page">
-      
       <div className="tna_page_topbar">
         <Link className="active" to="#">
           T&A View
@@ -65,7 +64,7 @@ export default function TimeAndActions(props) {
                 <div className="filter_area_right">
                   <span className="toggleSelect" style={{ cursor: "pointer" }}>
                     <img
-                      style={{ height: "22px", width: "22px" }} // Corrected 'widows' to 'width'
+                      style={{ height: "22px", width: "22px" }}
                       src={iconT1W}
                       alt="Logo"
                     />
