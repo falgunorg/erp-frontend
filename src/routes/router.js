@@ -268,6 +268,7 @@ import Tasks from "../pages/Tasks";
 import TimeAndActions from "../pages/TimeAndActions";
 
 import Jobs from "pages/cnf/Jobs";
+import JobDetails from "pages/cnf/JobDetails";
 
 function OpenRoutes() {
   return (
@@ -1210,6 +1211,11 @@ class PrivateRoutes extends Component {
             component={AdminLeftOverStoreDetails}
           ></PrivateRoute>
           <PrivateRoute exact path="/cnf/jobs" component={Jobs}></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/cnf/job-details/:jobId?"
+            component={JobDetails}
+          ></PrivateRoute>
           <Redirect path="*" to="/dashboard" />
         </Switch>
       </BrowserRouter>
