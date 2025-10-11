@@ -3,25 +3,39 @@ import { useParams, useHistory } from "react-router-dom";
 import CheckList from "./Checklist.json";
 import { PDFDocument } from "pdf-lib";
 import CustomSelect from "elements/CustomSelect";
+import api from "services/api";
 
 export default function JobDetails() {
   const { jobId } = useParams();
   const history = useHistory();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const [job, setJob] = useState({
-    id: 25,
-    type: "IMPORT",
-    pc_id: "2342",
-    lc_id: "4249",
-    booking_id: "5874",
-    bill_of_landing_no: "5874",
-    invoice_number: "8745221",
-    pi_number: "8745",
-    invoice_value: "58,740",
-    gross_weight: "600KG",
-    total_qty: "6000",
-    unit: "YDS",
-  });
+  const [job, setJob] = useState(null);
+
+  const getJob = async () => {
+    if (!jobId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/cnf/jobs/${jobId}`);
+      if (response.status === 200 && response.data) {
+        setJob(response.data);
+      } else {
+        setError(response.data?.errors || "Failed to fetch job");
+        console.error(response.data?.errors);
+      }
+    } catch (err) {
+      setError(err.response?.data?.errors || err.message);
+      console.error("Error fetching job:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getJob();
+  }, [jobId]);
 
   const [activeTab, setActiveTab] = useState("documents");
   const [documents, setDocuments] = useState([]);
@@ -36,7 +50,7 @@ export default function JobDetails() {
 
   const saveJob = (updatedJob) => setJob(updatedJob);
 
-  const docList = job.type === "IMPORT" ? importDocuments : exportDocuments;
+  const docList = job?.type === "IMPORT" ? importDocuments : exportDocuments;
 
   /* -------------------- Document Handling -------------------- */
   const handleDrop = (e, docTitle) => {
@@ -50,34 +64,94 @@ export default function JobDetails() {
     handleFileUpload(docTitle, files);
   };
 
-  const handleFileUpload = (docTitle, files) => {
-    const date = new Date();
-    const formattedDate = date.toLocaleDateString("en-GB"); // DD/MM/YYYY
-    const existing = documents.find((d) => d.title === docTitle);
-    const newFiles = existing ? [...existing.files, ...files] : files;
-    const updatedDocs = documents.filter((d) => d.title !== docTitle);
-    updatedDocs.push({ title: docTitle, files: newFiles });
-    setDocuments(updatedDocs);
-    saveJob({ ...job, documents: updatedDocs });
+  /* -------------------- Document Handling -------------------- */
+  const handleFileUpload = async (docTitle, files) => {
+    if (!jobId) return;
 
-    // Update timeline
-    const newEntries = files.map((f) => ({
-      date: formattedDate,
-      message: `Uploaded ${f.name} for ${docTitle}`,
-    }));
-    setTimeline((prev) => [...prev, ...newEntries]);
+    const date = new Date();
+    const formattedDate = date.toLocaleDateString("en-GB");
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("job_id", jobId);
+      formData.append("title", docTitle);
+      formData.append("file", file);
+
+      try {
+        const res = await api.post("/cnf/add-job-document", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        if (res.status === 200) {
+          // Append newly uploaded document to state
+          const uploadedDoc = res.data.data;
+          setDocuments((prevDocs) => {
+            const existing = prevDocs.find((d) => d.title === docTitle);
+            if (existing) {
+              existing.files.push({
+                id: uploadedDoc.id,
+                name: uploadedDoc.filename,
+                type: uploadedDoc.file_type,
+              });
+              return [...prevDocs];
+            } else {
+              return [
+                ...prevDocs,
+                {
+                  title: docTitle,
+                  files: [
+                    {
+                      id: uploadedDoc.id,
+                      name: uploadedDoc.filename,
+                      type: uploadedDoc.file_type,
+                    },
+                  ],
+                },
+              ];
+            }
+          });
+
+          // Update timeline
+          setTimeline((prev) => [
+            ...prev,
+            {
+              date: formattedDate,
+              message: `Uploaded ${file.name} for ${docTitle}`,
+            },
+          ]);
+        }
+      } catch (err) {
+        console.error("Upload failed:", err);
+        alert("Failed to upload file: " + file.name);
+      }
+    }
   };
 
-  const handleDeleteFile = (docTitle, index) => {
-    const updatedDocs = documents.map((d) => {
-      if (d.title === docTitle) {
-        const newFiles = d.files.filter((_, i) => i !== index);
-        return { ...d, files: newFiles };
+  const handleDeleteFile = async (docTitle, fileIndex) => {
+    const docData = documents.find((d) => d.title === docTitle);
+    if (!docData) return;
+
+    const file = docData.files[fileIndex];
+    if (!file?.id) return alert("File ID missing");
+
+    try {
+      const res = await api.post("/cnf/delete-job-document", { id: file.id });
+      if (res.status === 200) {
+        const updatedDocs = documents.map((d) => {
+          if (d.title === docTitle) {
+            const newFiles = d.files.filter((_, i) => i !== fileIndex);
+            return { ...d, files: newFiles };
+          }
+          return d;
+        });
+
+        // ✅ Update local state only
+        setDocuments(updatedDocs);
       }
-      return d;
-    });
-    setDocuments(updatedDocs);
-    saveJob({ ...job, documents: updatedDocs });
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete document");
+    }
   };
 
   const handlePreviewFile = (file) => {
@@ -86,46 +160,55 @@ export default function JobDetails() {
   };
 
   /* -------------------- Cost Handling -------------------- */
-  const handleAddCost = () => {
+  const handleAddCost = async () => {
     if (!newCost.name || !newCost.amount)
       return alert("Enter cost name and amount");
+    if (!jobId) return;
 
-    const date = new Date();
-    const formattedDate = date.toLocaleDateString("en-GB");
+    const formData = new FormData();
+    formData.append("job_id", jobId);
+    formData.append("title", newCost.name);
+    formData.append("amount", newCost.amount);
+    if (newCost.file) formData.append("files[]", newCost.file);
 
-    const newEntry = {
-      id: Date.now(),
-      name: newCost.name,
-      amount: newCost.amount,
-      file: newCost.file,
-      date: formattedDate,
-    };
+    try {
+      const res = await api.post("/cnf/add-job-cost", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    const updatedCosts = [...costs, newEntry];
-    setCosts(updatedCosts);
-    saveJob({ ...job, costs: updatedCosts });
-    setNewCost({ name: "", amount: "", file: null });
+      if (res.status === 200) {
+        const addedCost = res.data.data;
+        setCosts((prev) => [...prev, addedCost]);
+        setNewCost({ name: "", amount: "", file: null });
 
-    if (newCost.file) {
-      setTimeline((prev) => [
-        ...prev,
-        {
-          date: formattedDate,
-          message: `Added cost "${newCost.name}" with attachment`,
-        },
-      ]);
-    } else {
-      setTimeline((prev) => [
-        ...prev,
-        { date: formattedDate, message: `Added cost "${newCost.name}"` },
-      ]);
+        const date = new Date().toLocaleDateString("en-GB");
+        setTimeline((prev) => [
+          ...prev,
+          {
+            date,
+            message: `Added cost "${newCost.name}"${
+              newCost.file ? " with attachment" : ""
+            }`,
+          },
+        ]);
+      }
+    } catch (err) {
+      console.error("Add cost failed:", err);
+      alert("Failed to add cost");
     }
   };
 
-  const handleDeleteCost = (id) => {
-    const updatedCosts = costs.filter((c) => c.id !== id);
-    setCosts(updatedCosts);
-    saveJob({ ...job, costs: updatedCosts });
+  const handleDeleteCost = async (id) => {
+    if (!id) return;
+    try {
+      const res = await api.post("/cnf/delete-job-cost", { id });
+      if (res.status === 200) {
+        setCosts((prev) => prev.filter((c) => c.id !== id));
+      }
+    } catch (err) {
+      console.error("Delete cost failed:", err);
+      alert("Failed to delete cost");
+    }
   };
 
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -214,6 +297,32 @@ export default function JobDetails() {
 
   console.log("JOB", job);
 
+  useEffect(() => {
+    if (job?.documents) {
+      // Group documents by title
+      const groupedDocs = job.documents.reduce((acc, doc) => {
+        const existing = acc.find((d) => d.title === doc.title);
+        const fileObj = {
+          id: doc.id,
+          name: doc.filename,
+          type: doc.file_type,
+          url: doc.file_url,
+        };
+        if (existing) {
+          existing.files.push(fileObj);
+        } else {
+          acc.push({
+            title: doc.title,
+            files: [fileObj],
+          });
+        }
+        return acc;
+      }, []);
+
+      setDocuments(groupedDocs);
+    }
+  }, [job]);
+
   return (
     <div className="py-3">
       <button
@@ -226,13 +335,13 @@ export default function JobDetails() {
       {/* -------- Job Info -------- */}
       <div className="card shadow-sm mb-3">
         <div className="card-body">
-          <h5 className="mb-3">{job.type} Job Information</h5>
+          <h5 className="mb-3">{job?.type} Job Information</h5>
           <div className="row g-2">
             {[
               ["pc_id", "PC ID"],
               ["lc_id", "LC ID"],
               ["booking_id", "Booking ID"],
-              ["bill_of_landing_no", "BL No"],
+              ["bill_of_landing_number", "BL No"],
               ["invoice_number", "Invoice No"],
               ["pi_number", "PI No"],
               ["invoice_value", "Invoice Value"],
@@ -243,14 +352,14 @@ export default function JobDetails() {
             ].map(([key, label]) => (
               <div className="col-md-4" key={key}>
                 <div className="border p-2 rounded bg-light">
-                  <strong>{label}:</strong> {job[key] || "—"}
+                  <strong>{label}:</strong> {job?.[key] || "—"}
                 </div>
               </div>
             ))}
 
             <div className="col-md-4">
               <div className="border p-2 rounded bg-light">
-                <strong>Remarks:</strong> {job.remarks}
+                <strong>Remarks:</strong> {job?.remarks}
               </div>
             </div>
           </div>
@@ -296,7 +405,8 @@ export default function JobDetails() {
                     <div>
                       <strong>{title}</strong>
                       <div className="small text-muted">
-                        {docData && docData.files.length > 0
+                        {Array.isArray(docData?.files) &&
+                        docData.files.length > 0
                           ? `${docData.files.length} file(s)`
                           : "No files uploaded"}
                       </div>
@@ -315,34 +425,35 @@ export default function JobDetails() {
                     </div>
                   </div>
 
-                  {docData && docData.files.length > 0 && (
-                    <div className="mb-3">
-                      {docData.files.map((f, i) => (
-                        <div
-                          style={{
-                            float: "left",
-                            border: "1px solid grey",
-                            marginRight: "10px",
-                            padding: "5px",
-                          }}
-                          key={i}
-                          className="d-flex gap-2 mb-3 rounded bg-light"
-                        >
-                          <small>{f.name}</small>
-                          <div className="d-flex gap-2">
-                            <i
-                              onClick={() => handlePreviewFile(f)}
-                              className="fa fa-link text-success"
-                            ></i>
-                            <i
-                              onClick={() => handleDeleteFile(title, i)}
-                              className="fa fa-times text-danger"
-                            ></i>
+                  {Array.isArray(docData?.files) &&
+                    docData.files.length > 0 && (
+                      <div className="mb-3">
+                        {docData.files.map((f, i) => (
+                          <div
+                            key={i}
+                            style={{
+                              float: "left",
+                              border: "1px solid grey",
+                              marginRight: "10px",
+                              padding: "5px",
+                            }}
+                            className="d-flex gap-2 mb-3 rounded bg-light"
+                          >
+                            <small>{f.name}</small>
+                            <div className="d-flex gap-2">
+                              <i
+                                onClick={() => window.open(f.url, "_blank")}
+                                className="fa fa-link text-success"
+                              ></i>
+                              <i
+                                onClick={() => handleDeleteFile(title, i)}
+                                className="fa fa-times text-danger"
+                              ></i>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
                 </div>
               );
             })}
@@ -372,7 +483,7 @@ export default function JobDetails() {
                   ) : (
                     costs.map((c) => (
                       <tr key={c.id}>
-                        <td>{c.name}</td>
+                        <td>{c.title}</td>
                         <td>{c.amount}</td>
                         <td>
                           {c.file ? (
