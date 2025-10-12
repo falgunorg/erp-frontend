@@ -4,6 +4,7 @@ import CheckList from "./Checklist.json";
 import { PDFDocument } from "pdf-lib";
 import CustomSelect from "elements/CustomSelect";
 import api from "services/api";
+import moment from "moment";
 
 export default function JobDetails() {
   const { jobId } = useParams();
@@ -41,7 +42,6 @@ export default function JobDetails() {
   const [documents, setDocuments] = useState([]);
   const [costs, setCosts] = useState([]);
 
-  const [newCost, setNewCost] = useState({ name: "", amount: "", file: null });
   const [timeline, setTimeline] = useState([]);
 
   const importDocuments = CheckList["IMPORT"];
@@ -128,6 +128,7 @@ export default function JobDetails() {
   };
 
   const handleDeleteFile = async (docTitle, fileIndex) => {
+    if (!window.confirm("Delete this File?")) return;
     const docData = documents.find((d) => d.title === docTitle);
     if (!docData) return;
 
@@ -160,16 +161,30 @@ export default function JobDetails() {
   };
 
   /* -------------------- Cost Handling -------------------- */
+  const [newCost, setNewCost] = useState({
+    name: "",
+    amount: "",
+    files: [], // store multiple files
+  });
+
   const handleAddCost = async () => {
-    if (!newCost.name || !newCost.amount)
-      return alert("Enter cost name and amount");
+    if (!newCost.name || !newCost.amount) {
+      alert("Enter cost name and amount");
+      return;
+    }
     if (!jobId) return;
 
     const formData = new FormData();
     formData.append("job_id", jobId);
     formData.append("title", newCost.name);
     formData.append("amount", newCost.amount);
-    if (newCost.file) formData.append("files[]", newCost.file);
+
+    // ✅ Append multiple files
+    if (newCost.files && newCost.files.length > 0) {
+      newCost.files.forEach((file) => {
+        formData.append("files[]", file);
+      });
+    }
 
     try {
       const res = await api.post("/cnf/add-job-cost", formData, {
@@ -179,7 +194,7 @@ export default function JobDetails() {
       if (res.status === 200) {
         const addedCost = res.data.data;
         setCosts((prev) => [...prev, addedCost]);
-        setNewCost({ name: "", amount: "", file: null });
+        setNewCost({ name: "", amount: "", files: [] });
 
         const date = new Date().toLocaleDateString("en-GB");
         setTimeline((prev) => [
@@ -187,7 +202,7 @@ export default function JobDetails() {
           {
             date,
             message: `Added cost "${newCost.name}"${
-              newCost.file ? " with attachment" : ""
+              newCost.files?.length ? " with attachments" : ""
             }`,
           },
         ]);
@@ -199,6 +214,7 @@ export default function JobDetails() {
   };
 
   const handleDeleteCost = async (id) => {
+    if (!window.confirm("Delete this Cost?")) return;
     if (!id) return;
     try {
       const res = await api.post("/cnf/delete-job-cost", { id });
@@ -210,92 +226,6 @@ export default function JobDetails() {
       alert("Failed to delete cost");
     }
   };
-
-  const [previewUrl, setPreviewUrl] = useState(null);
-
-  /* -------------------- MERGE & PREVIEW (Document Overview) -------------------- */
-  // Generate a single merged PDF (images + pdfs) and set previewUrl
-
-  const generateMergedPdf = async () => {
-    try {
-      if (!documents || documents.length === 0) return;
-
-      // Create a new PDF document
-      const mergedPdf = await PDFDocument.create();
-
-      // Collect all files and sort by date
-      const allFiles = documents.flatMap((doc) =>
-        (doc.files || [])
-          .filter((f) => f && f.type)
-          .map((f) => ({
-            title: doc.title,
-            file: f,
-            date: f.lastModified || Date.now(),
-          }))
-      );
-
-      // allFiles.sort((a, b) => a.date - b.date);
-
-      for (const { file } of allFiles) {
-        const fileType = file.type || "";
-
-        // Handle image files
-        if (fileType.startsWith("image/")) {
-          const imgData = await readFileAsArrayBuffer(file); // helper function
-          let image;
-          if (fileType === "image/png") {
-            image = await mergedPdf.embedPng(imgData);
-          } else {
-            image = await mergedPdf.embedJpg(imgData);
-          }
-          const page = mergedPdf.addPage([image.width, image.height]);
-          page.drawImage(image, {
-            x: 0,
-            y: 0,
-            width: image.width,
-            height: image.height,
-          });
-        }
-
-        // Handle PDF files
-        else if (fileType === "application/pdf") {
-          const arrayBuffer = await file.arrayBuffer();
-          const pdfToMerge = await PDFDocument.load(arrayBuffer);
-          const copiedPages = await mergedPdf.copyPages(
-            pdfToMerge,
-            pdfToMerge.getPageIndices()
-          );
-          copiedPages.forEach((page) => mergedPdf.addPage(page));
-        }
-      }
-
-      const pdfBytes = await mergedPdf.save();
-      const blob = new Blob([pdfBytes], { type: "application/pdf" });
-      const url = URL.createObjectURL(blob);
-      setPreviewUrl(url);
-    } catch (err) {
-      console.error("Error generating merged PDF:", err);
-    }
-  };
-
-  // Helper function to read images as ArrayBuffer
-  const readFileAsArrayBuffer = (file) =>
-    new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsArrayBuffer(file);
-    });
-
-  // regenerate preview when user navigates to Document Overview or documents change
-  useEffect(() => {
-    if (activeTab === "document-overview") {
-      generateMergedPdf();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, documents]);
-
-  console.log("JOB", job);
 
   useEffect(() => {
     if (job?.documents) {
@@ -322,6 +252,147 @@ export default function JobDetails() {
       setDocuments(groupedDocs);
     }
   }, [job]);
+
+  useEffect(() => {
+    if (job?.costs) {
+      const formattedCosts = job.costs.map((cost) => ({
+        id: cost.id,
+        title: cost.title,
+        amount: cost.amount,
+        created_at: cost.created_at,
+        files:
+          cost.files?.map((f) => ({
+            id: f.id,
+            name: f.filename,
+            url: f.file_url,
+          })) || [],
+      }));
+      setCosts(formattedCosts);
+    }
+  }, [job]);
+
+  useEffect(() => {
+    if (!job) return;
+
+    const events = [];
+
+    // Include uploaded documents
+    if (job.documents && job.documents.length > 0) {
+      job.documents.forEach((doc) => {
+        events.push({
+          date: new Date(doc.created_at).toLocaleDateString("en-GB"),
+          message: `Uploaded ${doc.filename} for ${doc.title}`,
+        });
+      });
+    }
+
+    // Include added costs
+    if (job.costs && job.costs.length > 0) {
+      job.costs.forEach((cost) => {
+        events.push({
+          date: new Date(cost.created_at).toLocaleDateString("en-GB"),
+          message: `Added cost "${cost.title}" (${cost.amount} TK)${
+            cost.filename ? " with attachments" : ""
+          }`,
+        });
+      });
+    }
+
+    // Sort by date (latest first)
+    events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    setTimeline(events);
+  }, [job]);
+
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    let urlObject = null;
+
+    const generatePdf = async () => {
+      if (!documents?.length) {
+        setPreviewUrl(null);
+        return;
+      }
+
+      try {
+        const allFiles = documents.flatMap((doc) => doc.files || []);
+
+        if (!allFiles.length) {
+          setPreviewUrl(null);
+          return;
+        }
+
+        const pdfDoc = await PDFDocument.create();
+
+        for (const file of allFiles) {
+          try {
+            // 🟢 PDF Files
+            if (file.type === "application/pdf") {
+              const response = await api.get(
+                `/cnf/get-document-file/${file.name}`
+              );
+              const arrayBuffer = await response.arrayBuffer();
+              const existingPdf = await PDFDocument.load(arrayBuffer);
+
+              const copiedPages = await pdfDoc.copyPages(
+                existingPdf,
+                existingPdf.getPageIndices()
+              );
+              copiedPages.forEach((page) => pdfDoc.addPage(page));
+            }
+
+            // 🟢 Image Files
+            else if (file.type.startsWith("image/")) {
+              const response = await api.get(
+                `/cnf/get-document-file/${file.name}`
+              );
+              const imageBytes = await response.arrayBuffer();
+
+              const image =
+                file.type === "image/jpeg"
+                  ? await pdfDoc.embedJpg(imageBytes)
+                  : await pdfDoc.embedPng(imageBytes);
+
+              const page = pdfDoc.addPage([595, 842]); // A4 size
+
+              // Optional: Scale image to fit page
+              const scale = Math.min(595 / image.width, 842 / image.height, 1);
+              const width = image.width * scale;
+              const height = image.height * scale;
+
+              page.drawImage(image, {
+                x: (595 - width) / 2,
+                y: (842 - height) / 2,
+                width,
+                height,
+              });
+            }
+          } catch (err) {
+            console.error("File processing failed:", file.filename, err);
+          }
+        }
+
+        // 🟢 Save and create preview URL
+        const pdfBytes = await pdfDoc.save();
+        urlObject = URL.createObjectURL(
+          new Blob([pdfBytes], { type: "application/pdf" })
+        );
+        setPreviewUrl(urlObject);
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+        setPreviewUrl(null);
+      }
+    };
+
+    generatePdf();
+
+    return () => {
+      if (urlObject) URL.revokeObjectURL(urlObject);
+    };
+  }, [documents]);
+
+  console.log("previewUrl", previewUrl);
 
   return (
     <div className="py-3">
@@ -439,13 +510,20 @@ export default function JobDetails() {
                             }}
                             className="d-flex gap-2 mb-3 rounded bg-light"
                           >
-                            <small>{f.name}</small>
+                            <small
+                              style={{ cursor: "pointer" }}
+                              onClick={() => window.open(f.url, "_blank")}
+                            >
+                              {f.name}
+                            </small>
                             <div className="d-flex gap-2">
                               <i
+                                style={{ cursor: "pointer" }}
                                 onClick={() => window.open(f.url, "_blank")}
-                                className="fa fa-link text-success"
+                                className="fa fa-eye text-success"
                               ></i>
                               <i
+                                style={{ cursor: "pointer" }}
                                 onClick={() => handleDeleteFile(title, i)}
                                 className="fa fa-times text-danger"
                               ></i>
@@ -467,34 +545,58 @@ export default function JobDetails() {
               <table className="table table-sm table-bordered align-middle">
                 <thead className="table-light">
                   <tr>
+                    <th>Date</th>
                     <th>Cost Name</th>
                     <th>Amount</th>
-                    <th>File</th>
+                    <th>Files</th>
                     <th width="80">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {costs.length === 0 ? (
                     <tr>
-                      <td colSpan="4" className="text-center text-muted">
+                      <td colSpan="5" className="text-center text-muted">
                         No costs added yet.
                       </td>
                     </tr>
                   ) : (
                     costs.map((c) => (
                       <tr key={c.id}>
+                        <td>{moment(c.created_at).format("MMM Do YYYY")}</td>
                         <td>{c.title}</td>
                         <td>{c.amount}</td>
                         <td>
-                          {c.file ? (
-                            <button
-                              className="btn btn-sm btn-outline-primary"
-                              onClick={() => handlePreviewFile(c.file)}
-                            >
-                              Preview
-                            </button>
-                          ) : (
-                            "—"
+                          {Array.isArray(c?.files) && c.files.length > 0 && (
+                            <div className="mb-3">
+                              {c.files.map((f, i) => (
+                                <div
+                                  key={i}
+                                  style={{
+                                    float: "left",
+                                    border: "1px solid grey",
+                                    marginRight: "10px",
+                                    padding: "5px",
+                                  }}
+                                  className="d-flex gap-2 rounded bg-light align-items-center"
+                                >
+                                  <small
+                                    style={{ cursor: "pointer" }}
+                                    onClick={() => window.open(f.url, "_blank")}
+                                  >
+                                    {f.name}
+                                  </small>
+                                  <div className="d-flex gap-2">
+                                    <i
+                                      style={{ cursor: "pointer" }}
+                                      onClick={() =>
+                                        window.open(f.url, "_blank")
+                                      }
+                                      className="fa fa-eye text-success"
+                                    ></i>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           )}
                         </td>
                         <td>
@@ -529,6 +631,7 @@ export default function JobDetails() {
                   ))}
                 </select>
               </div>
+
               <div className="col-md-3">
                 <input
                   type="number"
@@ -541,15 +644,21 @@ export default function JobDetails() {
                   }
                 />
               </div>
+
               <div className="col-md-3">
                 <input
                   type="file"
                   className="form-control"
+                  multiple // ✅ allow multiple files
                   onChange={(e) =>
-                    setNewCost({ ...newCost, file: e.target.files[0] })
+                    setNewCost({
+                      ...newCost,
+                      files: Array.from(e.target.files),
+                    })
                   }
                 />
               </div>
+
               <div className="col-md-2 d-grid">
                 <button className="btn btn-primary" onClick={handleAddCost}>
                   Add
