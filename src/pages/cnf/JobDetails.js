@@ -148,6 +148,8 @@ export default function JobDetails() {
 
         // ✅ Update local state only
         setDocuments(updatedDocs);
+      } else {
+        alert(res.data.error);
       }
     } catch (err) {
       console.error("Delete failed:", err);
@@ -220,6 +222,8 @@ export default function JobDetails() {
       const res = await api.post("/cnf/delete-job-cost", { id });
       if (res.status === 200) {
         setCosts((prev) => prev.filter((c) => c.id !== id));
+      } else {
+        alert(res.data.error);
       }
     } catch (err) {
       console.error("Delete cost failed:", err);
@@ -227,58 +231,53 @@ export default function JobDetails() {
     }
   };
 
+  const handleDeleteCostFile = async (id) => {
+    if (!window.confirm("Delete this File?")) return;
+
+    try {
+      const res = await api.post("/cnf/delete-job-cost-file", { id });
+
+      // success case
+      if (res.status === 200) {
+        getJob();
+      } else {
+        alert(res.data.error);
+      }
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
+  };
+
   useEffect(() => {
-    if (job?.documents) {
-      // Group documents by title
-      const groupedDocs = job.documents.reduce((acc, doc) => {
-        const existing = acc.find((d) => d.title === doc.title);
+    if (!job) return;
+
+    const groupedDocs = [];
+    const formattedCosts = [];
+    const events = [];
+
+    // Handle documents
+    if (job.documents?.length) {
+      job.documents.forEach((doc) => {
+        // Group by title
+        const existing = groupedDocs.find((d) => d.title === doc.title);
         const fileObj = {
           id: doc.id,
           name: doc.filename,
           type: doc.file_type,
           url: doc.file_url,
+          user: doc.user,
         };
+
         if (existing) {
           existing.files.push(fileObj);
         } else {
-          acc.push({
+          groupedDocs.push({
             title: doc.title,
             files: [fileObj],
           });
         }
-        return acc;
-      }, []);
 
-      setDocuments(groupedDocs);
-    }
-  }, [job]);
-
-  useEffect(() => {
-    if (job?.costs) {
-      const formattedCosts = job.costs.map((cost) => ({
-        id: cost.id,
-        title: cost.title,
-        amount: cost.amount,
-        created_at: cost.created_at,
-        files:
-          cost.files?.map((f) => ({
-            id: f.id,
-            name: f.filename,
-            url: f.file_url,
-          })) || [],
-      }));
-      setCosts(formattedCosts);
-    }
-  }, [job]);
-
-  useEffect(() => {
-    if (!job) return;
-
-    const events = [];
-
-    // Include uploaded documents
-    if (job.documents && job.documents.length > 0) {
-      job.documents.forEach((doc) => {
+        // Add to timeline
         events.push({
           date: new Date(doc.created_at).toLocaleDateString("en-GB"),
           message: `Uploaded ${doc.filename} for ${doc.title}`,
@@ -286,23 +285,119 @@ export default function JobDetails() {
       });
     }
 
-    // Include added costs
-    if (job.costs && job.costs.length > 0) {
+    // Handle costs
+    if (job.costs?.length) {
       job.costs.forEach((cost) => {
+        const costFiles =
+          cost.files?.map((f) => ({
+            id: f.id,
+            name: f.filename,
+            url: f.file_url,
+          })) || [];
+
+        formattedCosts.push({
+          id: cost.id,
+          title: cost.title,
+          amount: cost.amount,
+          created_at: cost.created_at,
+          files: costFiles,
+        });
+
+        // Add to timeline
         events.push({
           date: new Date(cost.created_at).toLocaleDateString("en-GB"),
           message: `Added cost "${cost.title}" (${cost.amount} TK)${
-            cost.filename ? " with attachments" : ""
+            costFiles.length ? " with attachments" : ""
           }`,
         });
       });
     }
 
-    // Sort by date (latest first)
+    // Sort timeline (latest first)
     events.sort((a, b) => new Date(b.date) - new Date(a.date));
 
+    // Set all states at once
+    setDocuments(groupedDocs);
+    setCosts(formattedCosts);
     setTimeline(events);
   }, [job]);
+
+  // useEffect(() => {
+  //   if (job?.documents) {
+  //     // Group documents by title
+  //     const groupedDocs = job.documents.reduce((acc, doc) => {
+  //       const existing = acc.find((d) => d.title === doc.title);
+  //       const fileObj = {
+  //         id: doc.id,
+  //         name: doc.filename,
+  //         type: doc.file_type,
+  //         url: doc.file_url,
+  //       };
+  //       if (existing) {
+  //         existing.files.push(fileObj);
+  //       } else {
+  //         acc.push({
+  //           title: doc.title,
+  //           files: [fileObj],
+  //         });
+  //       }
+  //       return acc;
+  //     }, []);
+
+  //     setDocuments(groupedDocs);
+  //   }
+  // }, [job]);
+
+  // useEffect(() => {
+  //   if (job?.costs) {
+  //     const formattedCosts = job.costs.map((cost) => ({
+  //       id: cost.id,
+  //       title: cost.title,
+  //       amount: cost.amount,
+  //       created_at: cost.created_at,
+  //       files:
+  //         cost.files?.map((f) => ({
+  //           id: f.id,
+  //           name: f.filename,
+  //           url: f.file_url,
+  //         })) || [],
+  //     }));
+  //     setCosts(formattedCosts);
+  //   }
+  // }, [job]);
+
+  // useEffect(() => {
+  //   if (!job) return;
+
+  //   const events = [];
+
+  //   // Include uploaded documents
+  //   if (job.documents && job.documents.length > 0) {
+  //     job.documents.forEach((doc) => {
+  //       events.push({
+  //         date: new Date(doc.created_at).toLocaleDateString("en-GB"),
+  //         message: `Uploaded ${doc.filename} for ${doc.title}`,
+  //       });
+  //     });
+  //   }
+
+  //   // Include added costs
+  //   if (job.costs && job.costs.length > 0) {
+  //     job.costs.forEach((cost) => {
+  //       events.push({
+  //         date: new Date(cost.created_at).toLocaleDateString("en-GB"),
+  //         message: `Added cost "${cost.title}" (${cost.amount} TK)${
+  //           cost.filename ? " with attachments" : ""
+  //         }`,
+  //       });
+  //     });
+  //   }
+
+  //   // Sort by date (latest first)
+  //   events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  //   setTimeline(events);
+  // }, [job]);
 
   const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -514,7 +609,7 @@ export default function JobDetails() {
                               style={{ cursor: "pointer" }}
                               onClick={() => window.open(f.url, "_blank")}
                             >
-                              {f.name}
+                              {f.name} ({f.user?.full_name})
                             </small>
                             <div className="d-flex gap-2">
                               <i
@@ -592,6 +687,11 @@ export default function JobDetails() {
                                         window.open(f.url, "_blank")
                                       }
                                       className="fa fa-eye text-success"
+                                    ></i>
+                                    <i
+                                      style={{ cursor: "pointer" }}
+                                      onClick={() => handleDeleteCostFile(f.id)}
+                                      className="fa fa-times text-danger"
                                     ></i>
                                   </div>
                                 </div>
