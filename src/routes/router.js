@@ -270,6 +270,7 @@ import TimeAndActions from "../pages/TimeAndActions";
 import Jobs from "pages/cnf/Jobs";
 import JobDetails from "pages/cnf/JobDetails";
 import CreateContracts from "pages/commercial/contracts/CreateContracts";
+import ContractDetails from "pages/commercial/contracts/ContractDetails";
 
 function OpenRoutes() {
   return (
@@ -1221,6 +1222,11 @@ class PrivateRoutes extends Component {
             exact
             path="/commercial/contracts/create"
             component={CreateContracts}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/commercial/contracts/details/:id?"
+            component={ContractDetails}
           ></PrivateRoute>
           <Redirect path="*" to="/dashboard" />
         </Switch>
