@@ -46,7 +46,6 @@ import Instructions from "../pages/settings/Instructions";
 import SampleTypes from "../pages/samples/sample_types/SampleTypes";
 
 // ****MERCHENDISING DEPARTMENT ROUTES START HERE ******
-
 //Techpack
 
 import Techpacks from "../pages/merchandising/techpacks/Techpacks";
@@ -266,10 +265,13 @@ import IssueReport from "../pages/store/issues/IssueReport";
 import PurchaseContractsList from "../pages/PurchaseContractsList";
 import Tasks from "../pages/Tasks";
 import TimeAndActions from "../pages/TimeAndActions";
-
+// CNF Phases
 import Jobs from "pages/cnf/Jobs";
 import JobDetails from "pages/cnf/JobDetails";
+// Commercial Contract Phases
+import Contracts from "pages/commercial/contracts/Contracts";
 import CreateContracts from "pages/commercial/contracts/CreateContracts";
+import EditContracts from "pages/commercial/contracts/EditContracts";
 import ContractDetails from "pages/commercial/contracts/ContractDetails";
 
 function OpenRoutes() {
@@ -1220,6 +1222,11 @@ class PrivateRoutes extends Component {
           ></PrivateRoute>
           <PrivateRoute
             exact
+            path="/commercial/contracts"
+            component={Contracts}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
             path="/commercial/contracts/create"
             component={CreateContracts}
           ></PrivateRoute>
@@ -1227,6 +1234,11 @@ class PrivateRoutes extends Component {
             exact
             path="/commercial/contracts/details/:id?"
             component={ContractDetails}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/commercial/contracts/edit/:id?"
+            component={EditContracts}
           ></PrivateRoute>
           <Redirect path="*" to="/dashboard" />
         </Switch>

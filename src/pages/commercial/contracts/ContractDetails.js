@@ -1,313 +1,470 @@
-import React, { useState, useEffect } from "react";
-import api from "services/api";
+import React, { useEffect, useRef, useState } from "react";
 import Logo from "../../../assets/images/logos/logo-short.png";
-import { useHistory, useParams } from "react-router-dom";
+import { useHistory } from "react-router-dom";
+import html2pdf from "html2pdf.js";
 
 export default function ContractDetails() {
   const history = useHistory();
+  const goBack = () => history.goBack();
 
-  const goBack = () => {
-    history.goBack();
-  };
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const printRef = useRef();
 
   const [form, setForm] = useState({});
   const [goods, setGoods] = useState([]);
 
   useEffect(() => {
-    // 🔹 Demo dataset
-    const demoContract = {
-      contract_no: "PC-2025-001",
-      contract_date: "2025-10-22",
-      buyer_name: "Falgun Textiles Ltd.",
-      buyer_phone: "+880 1234 567890",
-      buyer_email: "buyer@example.com",
-      buyer_address: "House 12, Road 34, Dhaka, Bangladesh",
-      notify_party: "Falgun Logistics Ltd., Chittagong Port",
-      buyer_bank_name: "Dhaka Bank Ltd.",
-      buyer_bank_address: "123 Motijheel, Dhaka",
-      buyer_bank_phone: "+880 9876 543210",
-      buyer_bank_swift: "DBLBBDDH",
-      company_name: "Falgun Export Ltd.",
-      seller_address: "Plot 56, EPZ, Chittagong",
-      seller_bank_name: "Bangladesh Bank Ltd.",
-      seller_bank_address: "Head Office, Dhaka",
-      seller_bank_swift: "BBLBDDH",
-      payment_terms: "LC at sight",
-      mode_of_shipment: "Sea",
-      port_of_loading: "Chittagong",
-      port_of_discharge: "Hamburg",
+    setForm({
+      contract_no: "BASSPRO-MBL-FALL-25",
+      contract_date: "19 January 2025",
+      buyer_name: "BASS PRO INC.",
+      buyer_address:
+        "Sportsman’s Park Center, 2500 E. Kearney, Springfield, Missouri 65898, USA",
+      buyer_phone: "(417) 873-5000",
+      buyer_email: "chellappa@hot-source.net",
+      notify_party:
+        "1) BASS PRO INC., SPORTSMAN’S PARK CENTER, 2500 E. KEARNEY, SPRINGFIELD, MISSOURI 65898, USA & EXPEDITORS INTERNATIONAL FREIGHT SERVICE LTD.\n\n2) Cabela's Canada Calgary DC, 12290 18th Street NE, Calgary, ALBERTA T3K 0Y7 CANADA & BORDER BROKERS, 1063 SHERWIN ROAD, WINNIPEG MB R3H 0T8 CANADA",
+      buyer_bank:
+        "BANK OF AMERICA, 1 Fleetway, Scranton, PA 18507-1999, USA\nSWIFT: BOFAUS3N\nTEL: (570) 330-4573",
+      agent_name:
+        "SORCOM INVESTMENTS LTD, 4TH FLOOR, 299QRC, 287-299, QUEENS ROAD CENTRAL, HONG KONG\nTEL: 00 852 2218 2203",
+      agent_bank:
+        "STANDARD CHARTERED BANK, 4-4A DES VOEUX ROAD CENTRAL, HONG KONG\nACCOUNT NO: 447-2-060162-5\nSWIFT: SCBLHKHHXXX",
+      beneficiary_name:
+        "Modiste (BANGLADESH) Ltd.\n51/C (A) SAGORIKA ROAD, FOUZDERHAT HEAVY INDUSTRIAL AREA, CHITTAGONG 4102, BANGLADESH",
+      beneficiary_bank:
+        "DHAKA BANK LIMITED, AGRABAD BRANCH, WORLD TRADE CENTER, 102-103 AGRABAD C/A, CHITTAGONG 4100, BANGLADESH\nSWIFT: DHBLBDDH201",
+      payment_terms:
+        "1) DOCUMENTARY COLLECTIONS (DP)\n2) TT PAYMENT (FOR CANADA SHIPMENT)",
+      port_of_discharge:
+        "1) SEATTLE TACOMA (FINAL DESTINATION: PUYALLUP, WA – USA)\n2) VANCOUVER, CALGARY, CANADA",
+      port_of_loading: "CHITTAGONG, BANGLADESH",
+      mode_of_shipment: "SEA / AIR",
       documents_required:
-        "Invoice, Packing List, Bill of Lading, Certificate of Origin",
-      reimbursement_instructions: "All reimbursements should be made via LC",
-      amendment_clause: "Any amendment requires mutual consent",
-      agent_commission_clause: "Agent commission is 2% of FOB",
-    };
+        "a) INVOICE, \nb) PACKING LIST, \nc) CERTIFICATE OF ORIGIN, \nd) SUPPLEMENTARY INVOICE, \ne) BILL OF LADING, \nf) MULTIPLE COUNTRY OF DECLARATION, \ng) MANUFACTURER’S CERTIFICATE, \nh) GCC & BENEFICIARY STATEMENT",
+      transshipment: "ALLOWED",
+      tolerance: "+/-5% IS ACCEPTABLE",
+      defective_allowance:
+        "0.5% defective & 0.5% store allowance must be shown in invoice.",
+      expiry_date: "15 August 2025",
+      reimbursement_instructions:
+        "We hereby undertake on behalf of the buyer to honor all documents in compliance with the terms of this contract and remit full invoice payments as per instructions. Shipper will send bank-endorsed OBLs to customer upon receipt of payment.",
+      amendment_clause:
+        "Any amendment to this Purchase Contract must be signed and sealed by both parties.",
+      agent_commission_clause:
+        "Agent commission to be remitted to SORCOM INVESTMENTS LTD, 4th Floor, 299QRC, Queens Road Central, Hong Kong, Account No. 447-2-060162-5, Standard Chartered Bank, Hong Kong.",
+      buyer_signatory: "M. Chellappa, Director",
+      seller_signatory: "Aziz Uddin Ahammed, General Manager, Finance",
+    });
 
-    const demoGoods = [
+    setGoods([
       {
-        style: "ST-001",
-        po: "PO-1001",
-        description: "Men's T-Shirts, Cotton, Blue",
-        quantity: 1000,
-        unit_price: 5.5,
-        shipment_date: "2025-11-15",
+        style: "652NRF252481W",
+        description: "Plaid Jacket",
+        quantity: 4188,
+        unit_price: 15.5,
+        total_fob: 64914,
+        comm_pc: 1.07,
+        total_comm: 4481.16,
+        shipment_date: "30-Jul-25",
       },
       {
-        style: "ST-002",
-        po: "PO-1002",
-        description: "Women's Shirts, Silk, Red",
-        quantity: 500,
-        unit_price: 12,
-        shipment_date: "2025-11-20",
+        style: "652NRF252726K",
+        description: "Plaid Shirt Jac",
+        quantity: 6816,
+        unit_price: 21.95,
+        total_fob: 149611.2,
+        comm_pc: 1.51,
+        total_comm: 10292.16,
+        shipment_date: "30-Jul-25",
       },
-      {
-        style: "ST-003",
-        po: "PO-1003",
-        description: "Kids Shorts, Cotton, Green",
-        quantity: 800,
-        unit_price: 4.75,
-        shipment_date: "2025-11-25",
-      },
-    ];
-
-    setForm(demoContract);
-    setGoods(demoGoods);
+    ]);
   }, []);
 
+  const handlePrint = () => window.print();
+
+  const handleDownloadPDF = () => {
+    const element = printRef.current;
+    html2pdf()
+      .from(element)
+      .set({
+        margin: 0.3,
+        filename: `${form.contract_no}.pdf`,
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+      })
+      .save();
+  };
+
   return (
-    <div className="purchase_contract_details">
-      <div className="d-flex align-items-center mb-4">
-        <i
-          onClick={goBack}
-          className="fa fa-angle-left me-3"
-          style={{ fontSize: 25, cursor: "pointer" }}
-        />
-        <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
-        <h4 className="m-0">Purchase Contract Details</h4>
+    <div className="contract-page">
+      <div className="no-print">
+        <h5>{form.contract_no}</h5>
+      </div>
+      <hr />
+      <div className="mb-4 d-flex no-print">
+        {["overview", "backToBack", "documents", "pos"].map((tab) => (
+          <div
+            key={tab}
+            className={`flex-fill text-center py-2 ${
+              tab === activeTab ? "bg-primary text-white" : "bg-light"
+            }`}
+            onClick={() => setActiveTab(tab)}
+          >
+            {tab === "overview"
+              ? "Overview"
+              : tab === "backToBack"
+              ? "Back to Back LC"
+              : tab === "documents"
+              ? "Documents"
+              : "PO's"}
+          </div>
+        ))}
       </div>
 
-      <div className="row">
-        {/* Contract Details */}
-        <div className="col-md-12 col-lg-6">
-          <div className="card mb-3">
-            <div className="card-header fw-bold bg-light">Contract Details</div>
-            <div className="card-body row">
-              <div className="col-lg-6">
-                <strong>Contract No:</strong> {form.contract_no || "-"}
-              </div>
-              <div className="col-lg-6">
-                <strong>Contract Date:</strong> {form.contract_date || "-"}
-              </div>
-            </div>
+      {activeTab === "overview" && (
+        <>
+          <div className="contract-actions no-print">
+            <button onClick={goBack}>← Back</button>
+            <button onClick={handlePrint}>🖨️ Print</button>
+            <button onClick={handleDownloadPDF}>⬇️ Download PDF</button>
           </div>
 
-          {/* Buyer Information */}
-          <div className="card mb-3">
-            <div className="card-header fw-bold bg-light">
-              Buyer Information
-            </div>
-            <div className="card-body">
-              <p>
-                <strong>Buyer:</strong> {form.buyer_name || "-"}
-              </p>
-              <p>
-                <strong>Phone:</strong> {form.buyer_phone || "-"}
-              </p>
-              <p>
-                <strong>Email:</strong> {form.buyer_email || "-"}
-              </p>
-              <p>
-                <strong>Address:</strong> {form.buyer_address || "-"}
-              </p>
-              <p>
-                <strong>Notify Party:</strong> {form.notify_party || "-"}
-              </p>
-            </div>
-          </div>
+          <div className="contract-wrapper" ref={printRef}>
+            <p className="buyer-header">
+              {form.buyer_name},<br />
+              {form.buyer_address}
+              <br />
+              Ph: {form.buyer_phone}, Email: {form.buyer_email}
+            </p>
+            <h3 className="sub-title">PURCHASE CONTRACT</h3>
 
-          {/* Buyer Bank Information */}
-          <div className="card mb-3">
-            <div className="card-header fw-bold bg-light">
-              Buyer Bank Information
-            </div>
-            <div className="card-body">
-              <p>
-                <strong>Bank Name:</strong> {form.buyer_bank_name || "-"}
-              </p>
-              <p>
-                <strong>SWIFT:</strong> {form.buyer_bank_swift || "-"}
-              </p>
-              <p>
-                <strong>Address:</strong> {form.buyer_bank_address || "-"}
-              </p>
-              <p>
-                <strong>Phone:</strong> {form.buyer_bank_phone || "-"}
-              </p>
-            </div>
-          </div>
-        </div>
+            <div className="contract-body">
+              {[
+                ["Purchase Contract No", form.contract_no],
+                ["Date", form.contract_date],
+                ["Buyer", `${form.buyer_name}\n${form.buyer_address}`],
+                ["Notify Party", form.notify_party],
+                ["Buyer’s Bank", form.buyer_bank],
+                ["Agent Name", form.agent_name],
+                ["Agent’s Bank", form.agent_bank],
+                ["Beneficiary", form.beneficiary_name],
+                ["Beneficiary’s Bank", form.beneficiary_bank],
+                ["Payment Terms", form.payment_terms],
+                ["Port of Discharge", form.port_of_discharge],
+                ["Port of Loading", form.port_of_loading],
+                ["Mode of Shipment", form.mode_of_shipment],
+                ["Documents Required", form.documents_required],
+                ["Trans-shipment/Part Shipment", form.transshipment],
+                ["Tolerance", form.tolerance],
+                ["Defective Allowance", form.defective_allowance],
+                ["Expiry Date", form.expiry_date],
+              ].map(([label, value], i) => (
+                <div className="row mb-1" key={i}>
+                  <div className="col-4">
+                    <strong>
+                      {i + 1}. {label}:
+                    </strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{value}</p>
+                  </div>
+                </div>
+              ))}
 
-        <div className="col-md-12 col-lg-6">
-          {/* Seller Information */}
-          <div className="card mb-3">
-            <div className="card-header fw-bold bg-light">
-              Seller Information
-            </div>
-            <div className="card-body">
-              <p>
-                <strong>Company:</strong> {form.company_name || "-"}
-              </p>
-              <p>
-                <strong>Address:</strong> {form.seller_address || "-"}
-              </p>
-            </div>
-          </div>
-
-          {/* Seller Bank Information */}
-          <div className="card mb-3">
-            <div className="card-header fw-bold bg-light">
-              Seller Bank Information
-            </div>
-            <div className="card-body">
-              <p>
-                <strong>Bank Name:</strong> {form.seller_bank_name || "-"}
-              </p>
-              <p>
-                <strong>SWIFT:</strong> {form.seller_bank_swift || "-"}
-              </p>
-              <p>
-                <strong>Address:</strong> {form.seller_bank_address || "-"}
-              </p>
-            </div>
-          </div>
-
-          {/* Payment & Shipment Info */}
-          <div className="card mb-3">
-            <div className="card-header fw-bold bg-light">
-              Payment & Shipment Information
-            </div>
-            <div className="card-body">
-              <p>
-                <strong>Payment Terms:</strong> {form.payment_terms || "-"}
-              </p>
-              <p>
-                <strong>Mode of Shipment:</strong>{" "}
-                {form.mode_of_shipment || "-"}
-              </p>
-              <p>
-                <strong>Port of Loading:</strong> {form.port_of_loading || "-"}
-              </p>
-              <p>
-                <strong>Port of Discharge:</strong>{" "}
-                {form.port_of_discharge || "-"}
-              </p>
-              <p>
-                <strong>Documents Required:</strong>{" "}
-                {form.documents_required || "-"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Goods Table */}
-        <div className="col-12">
-          <div className="card mb-3">
-            <div className="card-header fw-bold bg-light">
-              Particulars of Goods / Services
-            </div>
-            <div className="card-body table-responsive">
-              <table className="table table-bordered align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>Style</th>
-                    <th>PO</th>
-                    <th>Description</th>
-                    <th>Qty (PCS)</th>
-                    <th>Unit Price</th>
-                    <th>Total FOB</th>
-                    <th>Shipment Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {goods.length > 0 ? (
-                    goods.map((row, i) => (
-                      <tr key={i}>
-                        <td>{row.style}</td>
-                        <td>{row.po}</td>
-                        <td>{row.description}</td>
-                        <td>{row.quantity}</td>
-                        <td>{row.unit_price}</td>
-                        <td>
-                          {(
-                            parseFloat(row.quantity || 0) *
-                            parseFloat(row.unit_price || 0)
-                          ).toFixed(2)}
-                        </td>
-                        <td>{row.shipment_date}</td>
-                      </tr>
-                    ))
-                  ) : (
+              <div className="mt-3">
+                <strong>19. Particulars of Goods / Services:</strong>
+                <table className="contract-table">
+                  <thead>
                     <tr>
-                      <td colSpan="7" className="text-center">
-                        No goods added
-                      </td>
+                      <th>Style</th>
+                      <th>Description</th>
+                      <th>Qty (PCS)</th>
+                      <th>FOB Value</th>
+                      <th>Agent Comm/PC</th>
+                      <th>Total Comm</th>
+                      <th>Ship Date</th>
                     </tr>
-                  )}
-                </tbody>
-                <tfoot className="table-light fw-bold">
-                  <tr>
-                    <td colSpan="3" className="text-end">
-                      Grand Total:
-                    </td>
-                    <td>
-                      {goods.reduce(
-                        (sum, row) => sum + (parseFloat(row.quantity) || 0),
-                        0
-                      )}
-                    </td>
-                    <td></td>
-                    <td>
-                      {goods
-                        .reduce(
-                          (sum, row) =>
-                            sum +
-                            (parseFloat(row.quantity) || 0) *
-                              (parseFloat(row.unit_price) || 0),
-                          0
-                        )
-                        .toFixed(2)}
-                    </td>
-                    <td></td>
-                  </tr>
-                </tfoot>
-              </table>
+                  </thead>
+                  <tbody>
+                    {goods.map((g, i) => (
+                      <tr key={i}>
+                        <td>{g.style}</td>
+                        <td>{g.description}</td>
+                        <td>{g.quantity}</td>
+                        <td>${g.total_fob.toLocaleString()}</td>
+                        <td>${g.comm_pc}</td>
+                        <td>${g.total_comm.toLocaleString()}</td>
+                        <td>{g.shipment_date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Clauses */}
-        <div className="col-12">
-          <div className="card mb-3">
-            <div className="card-header fw-bold bg-light">
-              Clauses & Conditions
-            </div>
-            <div className="card-body">
-              <p>
-                <strong>Reimbursement Instructions:</strong>{" "}
-                {form.reimbursement_instructions || "-"}
-              </p>
-              <p>
-                <strong>Amendment Clause:</strong>{" "}
-                {form.amendment_clause || "-"}
-              </p>
-              <p>
-                <strong>Agent Commission Clause:</strong>{" "}
-                {form.agent_commission_clause || "-"}
-              </p>
+            <p className="section-title">REIMBURSEMENT INSTRUCTIONS:</p>
+            {form.reimbursement_instructions}
+            <p>
+              <strong>21.</strong> {form.amendment_clause}
+            </p>
+            <p>
+              <strong>22.</strong> {form.agent_commission_clause}
+            </p>
+
+            <div className="signatures">
+              <div>
+                <p>
+                  <strong>For and on behalf of</strong>
+                  <br />
+                  BASS PRO INC.
+                </p>
+                <br />
+                <p>{form.buyer_signatory}</p>
+              </div>
+              <div>
+                <p>
+                  <strong>For and on behalf of</strong>
+                  <br />
+                  Modiste (BANGLADESH) Ltd.
+                </p>
+                <br />
+                <p>{form.seller_signatory}</p>
+              </div>
             </div>
           </div>
+        </>
+      )}
+      {activeTab === "backToBack" && (
+        <div className="mt-3">
+          <strong>BACK TO BACK LC'S</strong>
+          <hr />
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>LC</th>
+                <th>SUPPLIER</th>
+                <th>Commodity</th>
+                <th>PI'S</th>
+
+                <th>Created</th>
+                <th>Expiry</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>LC001</td>
+                <td>ABC Traders</td>
+                <td>Fabric</td>
+                <td>PI1001, PI2001</td>
+                <td>2025-10-01</td>
+                <td>2025-12-31</td>
+                <td>$15,000</td>
+              </tr>
+              <tr>
+                <td>LC002</td>
+                <td>XYZ Imports</td>
+                <td>Thread</td>
+                <td>PI1002</td>
+
+                <td>2025-09-15</td>
+                <td>2025-11-30</td>
+                <td>$20,500</td>
+              </tr>
+              <tr>
+                <td>LC003</td>
+                <td>Global Traders</td>
+                <td>Button</td>
+                <td>PI1003</td>
+
+                <td>2025-10-10</td>
+                <td>2026-01-15</td>
+                <td>$12,750</td>
+              </tr>
+              <tr>
+                <td className="text-center" colSpan={6}>
+                  <strong>TOTAL</strong>
+                </td>
+                <td>
+                  <strong>$4585.60</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
+      )}
+      {activeTab === "documents" && (
+        <>
+          <strong>DOCUMENTS</strong>
+          <hr />
+          <div>
+            {[
+              "INVOICE",
+              "PACKING LIST",
+              "CERTIFICATE OF ORIGIN",
+              "SUPPLEMENTARY INVOICE",
+              "BILL OF LADING",
+              "MULTIPLE COUNTRY OF DECLARATION",
+              "MANUFACTURER’S CERTIFICATE",
+              "GCC & BENEFICIARY STATEMENT",
+            ].map((title, index) => {
+              const docData = {
+                files:
+                  index % 2 === 0
+                    ? [
+                        {
+                          name: `${title}_file1.pdf`,
+                          url: "#",
+                          user: { full_name: "John Doe" },
+                        },
+                        {
+                          name: `${title}_file2.pdf`,
+                          url: "#",
+                          user: { full_name: "Jane Smith" },
+                        },
+                      ]
+                    : [],
+              };
+
+              return (
+                <div
+                  key={index}
+                  style={{ border: "1px dashed gray" }}
+                  className="list-group-item mb-3 rounded p-4"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => console.log(`Dropped on ${title}`)}
+                >
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{title}</strong>
+                      <div className="small text-muted">
+                        {docData.files.length > 0
+                          ? `${docData.files.length} file(s)`
+                          : "No files uploaded"}
+                      </div>
+                    </div>
+                    <div className="d-flex gap-2 align-items-center">
+                      <label className="btn btn-sm btn-outline-secondary mb-0">
+                        Upload
+                        <input
+                          type="file"
+                          accept="image/*,application/pdf"
+                          multiple
+                          hidden
+                          onChange={(e) =>
+                            console.log(`Upload for ${title}`, e.target.files)
+                          }
+                        />
+                      </label>
+                    </div>
+                  </div>
+
+                  {docData.files.length > 0 && (
+                    <div className="mb-3">
+                      {docData.files.map((f, i) => (
+                        <div
+                          key={i}
+                          style={{
+                            float: "left",
+                            border: "1px solid grey",
+                            marginRight: "10px",
+                            padding: "5px",
+                          }}
+                          className="d-flex gap-2 mb-3 rounded bg-light"
+                        >
+                          <small
+                            style={{ cursor: "pointer" }}
+                            onClick={() => window.open(f.url, "_blank")}
+                          >
+                            {f.name} ({f.user?.full_name})
+                          </small>
+                          <div className="d-flex gap-2">
+                            <i
+                              style={{ cursor: "pointer" }}
+                              onClick={() => window.open(f.url, "_blank")}
+                              className="fa fa-eye text-success"
+                            ></i>
+                            <i
+                              style={{ cursor: "pointer" }}
+                              onClick={() =>
+                                console.log(`Delete file ${i} from ${title}`)
+                              }
+                              className="fa fa-times text-danger"
+                            ></i>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {activeTab === "pos" && (
+        <div className="mt-3">
+          <strong>PO'S</strong>
+          <hr />
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>PO</th>
+                <th>STYLE</th>
+                <th>ISSUE Date</th>
+                <th>DELIVERY DATE</th>
+                <th>QTY</th>
+                <th>FOB</th>
+                <th>TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>PO001</td>
+                <td>Casual Shirt</td>
+                <td>2025-10-01</td>
+                <td>2025-12-01</td>
+                <td>500</td>
+                <td>$10</td>
+                <td>$5,000</td>
+              </tr>
+              <tr>
+                <td>PO002</td>
+                <td>Formal Pants</td>
+                <td>2025-09-15</td>
+                <td>2025-11-15</td>
+                <td>300</td>
+                <td>$15</td>
+                <td>$4,500</td>
+              </tr>
+              <tr>
+                <td>PO003</td>
+                <td>Denim Jacket</td>
+                <td>2025-10-10</td>
+                <td>2026-01-10</td>
+                <td>200</td>
+                <td>$20</td>
+                <td>$4,000</td>
+              </tr>
+              <tr>
+                <td className="text-center" colSpan={4}>
+                  <strong>TOTAL</strong>
+                </td>
+                <td>
+                  <strong>1000 PCS</strong>
+                </td>
+                <td></td>
+                <td>
+                  <strong>$13,500</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

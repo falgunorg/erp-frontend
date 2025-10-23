@@ -290,7 +290,7 @@ export default function Sidebar(props) {
                           ? "active"
                           : ""
                       }
-                      to="/purchase-contracts"
+                      to="/commercial/contracts"
                     >
                       PC
                     </Link>

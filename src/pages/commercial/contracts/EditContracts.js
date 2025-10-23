@@ -5,7 +5,7 @@ import Select from "react-select";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import { useHistory } from "react-router-dom";
 
-export default function CreateContracts({ toggleExpanded }) {
+export default function EditContracts({ toggleExpanded }) {
   const history = useHistory();
   const goBack = () => history.goBack();
 
@@ -710,7 +710,7 @@ export default function CreateContracts({ toggleExpanded }) {
           style={{ fontSize: 25, cursor: "pointer" }}
         />
         <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
-        <h4 className="m-0">Create Purchase Contract</h4>
+        <h4 className="m-0">Edit Purchase Contract</h4>
       </div>
 
       {/* Step Indicator */}

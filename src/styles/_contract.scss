@@ -1,0 +1,127 @@
+.contract-page {
+  //   font-family: "Times New Roman", serif;
+  background: #fff;
+  color: #000;
+  //   padding: 40px;
+
+  .contract-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    button {
+      background: #f3f3f3;
+      border: 1px solid #bbb;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 14px;
+
+      &:hover {
+        background: #e0e0e0;
+      }
+    }
+  }
+
+  .contract-wrapper {
+    max-width: 800px;
+    margin: auto;
+    line-height: 1.6;
+    font-size: 14px;
+    position: relative;
+
+    .contract-logo {
+      width: 60px;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .title,
+    .sub-title {
+      text-align: center;
+      text-transform: uppercase;
+      font-weight: bold;
+      border-bottom: 1px solid #000;
+      margin-bottom: 15px;
+      padding-bottom: 4px;
+    }
+
+    .buyer-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .contract-list {
+      list-style: decimal;
+      padding-left: 20px;
+
+      li {
+        margin-bottom: 10px;
+
+        pre {
+          white-space: pre-wrap; // keeps line breaks
+          word-break: break-word; // wraps long lines
+          overflow: visible; // removes scrollbar
+          margin: 5px 0 0 0;
+          font-family: inherit; // keeps consistent font
+          font-size: inherit;
+          background: none;
+          border: none;
+        }
+      }
+    }
+
+    .contract-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 6px;
+        text-align: left;
+      }
+
+      th {
+        background: #f4f4f4;
+        font-weight: bold;
+      }
+    }
+
+    .section-title {
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-top: 30px;
+      border-top: 1px solid #000;
+      padding-top: 10px;
+    }
+
+    .signatures {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 60px;
+
+      div {
+        text-align: center;
+
+        p {
+          margin: 5px 0;
+        }
+      }
+    }
+  }
+
+  .no-print {
+    display: flex;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+    body {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+}
