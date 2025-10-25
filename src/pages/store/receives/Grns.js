@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "services/api";
 import { useHistory, Link } from "react-router-dom";
+import CustomSelect from "elements/CustomSelect";
 import {
   Drawer,
   Card,
@@ -22,7 +23,6 @@ import {
   Pagination,
   Divider,
 } from "@mui/material";
-import Autocomplete from "@mui/material/Autocomplete";
 
 const Grns = (props) => {
   const history = useHistory();
@@ -57,56 +57,37 @@ const Grns = (props) => {
     last_page: 1,
   });
 
-  // helper to read id from Autocomplete option (or raw value)
+  // ✅ Helper: Extract ID or value safely
   const getId = (val) => {
     if (!val && val !== 0) return "";
     if (typeof val === "object") return val.id ?? val.value ?? "";
     return val;
   };
 
-  /** 🔹 Fetch Dropdown Data */
-  const fetchDropdownData = async () => {
-    try {
-      const [techRes, buyerRes, itemTypeRes, supplierRes] = await Promise.all([
-        api.post("/merchandising/technical-packages-all-desc"),
-        api.post("/common/buyers"),
-        api.post("/common/item-types"),
-        api.post("/admin/suppliers"),
-      ]);
-      setTechpacks(techRes.data?.data || []);
-      setBuyers(buyerRes.data?.data || []);
-      setItemTypes(itemTypeRes.data?.data || []);
-      setSuppliers(supplierRes.data.data || []);
-    } catch (err) {
-      console.error("Error fetching dropdown data", err);
-    }
-  };
-
-  /** 🔹 Fetch GRNs (uses filters state) */
+  // ✅ Fetch GRNs with current filters
   const fetchGrns = async (overridePage) => {
     setLoading(true);
     try {
       const page = Number(overridePage ?? filters.page) || 1;
       const per_page = Number(filters.per_page) || 10;
 
-      // <-- IMPORTANT: pass filters inside `params`
       const { data } = await api.get("/store/grns", {
-        technical_package_id: getId(filters.technical_package_id),
-        buyer_id: getId(filters.buyer_id),
-        item_type_id: getId(filters.item_type_id),
-        from_date: filters.from_date || "",
-        to_date: filters.to_date || "",
-        search: filters.search || "",
-        color: filters.color || "",
-        sort_by: filters.sort_by || "",
-        per_page,
-        page,
-        supplier_id: getId(filters.supplier_id),
+        params: {
+          technical_package_id: getId(filters.technical_package_id),
+          buyer_id: getId(filters.buyer_id),
+          item_type_id: getId(filters.item_type_id),
+          from_date: filters.from_date || "",
+          to_date: filters.to_date || "",
+          search: filters.search || "",
+          color: filters.color || "",
+          sort_by: filters.sort_by || "",
+          per_page,
+          page,
+          supplier_id: getId(filters.supplier_id),
+        },
       });
 
-      // normalize response
       setGrns(data.data || []);
-
       setPagination({
         total: data.total ?? 0,
         per_page: data.per_page ?? per_page,
@@ -125,34 +106,18 @@ const Grns = (props) => {
     }
   };
 
-  // initial dropdown fetch
+  // ✅ Fetch dropdowns once
   useEffect(() => {
     fetchDropdownData();
   }, []);
 
-  // re-fetch whenever relevant filters change
+  // ✅ Re-fetch on filter change
   useEffect(() => {
-    // call fetchGrns using the current filters state
     fetchGrns();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    filters.technical_package_id,
-    filters.buyer_id,
-    filters.item_type_id,
-    filters.from_date,
-    filters.to_date,
-    filters.search,
-    filters.color,
-    filters.sort_by,
-    filters.per_page,
-    filters.page,
-    filters.supplier_id,
-  ]);
+  }, [filters]);
 
-  /** 🔹 Handle filter change
-   *  - when changing page, keep page value
-   *  - otherwise reset to page 1
-   */
+  // ✅ Handle filter changes (resets page unless changing page)
   const handleChange = (name, value) => {
     setFilters((prev) => ({
       ...prev,
@@ -161,7 +126,7 @@ const Grns = (props) => {
     }));
   };
 
-  /** 🔹 Clear all filters */
+  // ✅ Reset all filters
   const clearFilters = () => {
     setFilters({
       technical_package_id: null,
@@ -174,8 +139,21 @@ const Grns = (props) => {
       to_date: "",
       per_page: 10,
       page: 1,
+      supplier_id: null,
     });
   };
+
+  // initial dropdown fetch
+  useEffect(() => {
+    fetchDropdownData();
+  }, []);
+
+  // re-fetch whenever relevant filters change
+  useEffect(() => {
+    // call fetchGrns using the current filters state
+    fetchGrns();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters]);
 
   useEffect(async () => {
     props.setHeaderData({
@@ -188,6 +166,24 @@ const Grns = (props) => {
       DropdownMenu: [],
     });
   }, []);
+
+  /** 🔹 Fetch Dropdown Data */
+  const fetchDropdownData = async () => {
+    try {
+      const [techRes, buyerRes, itemTypeRes, supplierRes] = await Promise.all([
+        api.post("/merchandising/technical-packages-all-desc"),
+        api.post("/common/buyers"),
+        api.post("/common/item-types"),
+        api.post("/admin/suppliers"),
+      ]);
+      setTechpacks(techRes.data?.data || []);
+      setBuyers(buyerRes.data?.data || []);
+      setItemTypes(itemTypeRes.data?.data || []);
+      setSuppliers(supplierRes.data.data || []);
+    } catch (err) {
+      console.error("Error fetching dropdown data", err);
+    }
+  };
 
   const goBack = () => {
     history.goBack();
@@ -248,126 +244,188 @@ const Grns = (props) => {
   };
 
   return (
-    <Box p={3}>
+    <Box className="create_technical_pack" p={3}>
       {/* Filters */}
+
       <Grid className="create_tp_body" container spacing={2} mb={2}>
-        <Grid create_tp_body item xs={6} sm={1.2}>
-          <Autocomplete
-            options={buyers}
-            getOptionLabel={(option) => option.name || ""}
-            value={filters.buyer_id}
-            onChange={(e, newValue) => handleChange("buyer_id", newValue)}
-            renderInput={(params) => (
-              <TextField {...params} label="Buyer" fullWidth />
-            )}
-          />
-        </Grid>
-
+        {/* Buyer */}
         <Grid item xs={6} sm={1.2}>
-          <Autocomplete
-            options={techpacks}
-            getOptionLabel={(option) => option.techpack_number || ""}
-            value={filters.technical_package_id}
-            onChange={(e, newValue) =>
-              handleChange("technical_package_id", newValue)
+          <label className="form-label">Buyer</label>
+          <CustomSelect
+            label="Buyer"
+            options={buyers.map((b) => ({
+              label: b.name,
+              value: b.id,
+            }))}
+            value={
+              buyers
+                .map((b) => ({ label: b.name, value: b.id }))
+                .find((opt) => opt.value === getId(filters.buyer_id)) || null
             }
-            renderInput={(params) => (
-              <TextField {...params} label="Technical Package" fullWidth />
-            )}
+            onChange={(selected) =>
+              handleChange("buyer_id", selected ? selected.value : null)
+            }
           />
         </Grid>
 
+        {/* Technical Package */}
         <Grid item xs={6} sm={1.2}>
-          <Autocomplete
-            options={itemTypes}
-            getOptionLabel={(option) => option.title || ""}
-            value={filters.item_type_id}
-            onChange={(e, newValue) => handleChange("item_type_id", newValue)}
-            renderInput={(params) => (
-              <TextField {...params} label="Item Type" fullWidth />
-            )}
-          />
-        </Grid>
-        <Grid item xs={6} sm={1.2}>
-          <Autocomplete
-            options={suppliers}
-            getOptionLabel={(option) => option.company_name || ""}
-            value={filters.supplier_id}
-            onChange={(e, newValue) => handleChange("supplier_id", newValue)}
-            renderInput={(params) => (
-              <TextField {...params} label="Supplier" fullWidth />
-            )}
+          <label className="form-label">Techpack/Style</label>
+          <CustomSelect
+            label="Technical Package"
+            options={techpacks.map((tp) => ({
+              label: tp.techpack_number,
+              value: tp.id,
+            }))}
+            value={
+              techpacks
+                .map((tp) => ({ label: tp.techpack_number, value: tp.id }))
+                .find(
+                  (opt) => opt.value === getId(filters.technical_package_id)
+                ) || null
+            }
+            onChange={(selected) =>
+              handleChange(
+                "technical_package_id",
+                selected ? selected.value : null
+              )
+            }
           />
         </Grid>
 
+        {/* Item Type */}
         <Grid item xs={6} sm={1.2}>
-          <TextField
+          <label className="form-label">Item Type</label>
+          <CustomSelect
+            label="Item Type"
+            options={itemTypes.map((i) => ({
+              label: i.title,
+              value: i.id,
+            }))}
+            value={
+              itemTypes
+                .map((i) => ({ label: i.title, value: i.id }))
+                .find((opt) => opt.value === getId(filters.item_type_id)) ||
+              null
+            }
+            onChange={(selected) =>
+              handleChange("item_type_id", selected ? selected.value : null)
+            }
+          />
+        </Grid>
+
+        {/* Supplier */}
+        <Grid item xs={6} sm={1.2}>
+          <label className="form-label">Supplier</label>
+          <CustomSelect
+            label="Supplier"
+            options={suppliers.map((s) => ({
+              label: s.company_name,
+              value: s.id,
+            }))}
+            value={
+              suppliers
+                .map((s) => ({ label: s.company_name, value: s.id }))
+                .find((opt) => opt.value === getId(filters.supplier_id)) || null
+            }
+            onChange={(selected) =>
+              handleChange("supplier_id", selected ? selected.value : null)
+            }
+          />
+        </Grid>
+
+        {/* From Date */}
+        <Grid item xs={6} sm={1.2}>
+          <label className="form-label">From Date</label>
+          <input
             type="date"
-            label="From Date"
-            InputLabelProps={{ shrink: true }}
+            className="form-control"
             value={filters.from_date}
             onChange={(e) => handleChange("from_date", e.target.value)}
-            fullWidth
           />
         </Grid>
 
+        {/* To Date */}
         <Grid item xs={6} sm={1.2}>
-          <TextField
+          <label className="form-label">To Date</label>
+          <input
             type="date"
-            label="To Date"
-            InputLabelProps={{ shrink: true }}
+            className="form-control"
             value={filters.to_date}
             onChange={(e) => handleChange("to_date", e.target.value)}
-            fullWidth
           />
         </Grid>
 
+        {/* Search */}
         <Grid item xs={6} sm={1.2}>
-          <TextField
-            label="Search"
+          <label className="form-label">Search</label>
+          <input
+            type="text"
+            className="form-control"
             value={filters.search}
             onChange={(e) => handleChange("search", e.target.value)}
-            fullWidth
           />
         </Grid>
 
+        {/* Color */}
         <Grid item xs={6} sm={1.2}>
-          <TextField
-            label="Color"
+          <label className="form-label">Color</label>
+          <input
+            type="text"
+            className="form-control"
             value={filters.color}
             onChange={(e) => handleChange("color", e.target.value)}
-            fullWidth
           />
         </Grid>
 
+        {/* Sort By */}
         <Grid item xs={6} sm={1.2}>
-          <FormControl fullWidth>
-            <InputLabel>Sort By</InputLabel>
-            <Select
-              value={filters.sort_by}
-              onChange={(e) => handleChange("sort_by", e.target.value)}
-            >
-              <MenuItem value="">Default</MenuItem>
-              <MenuItem value="name-asc">Name ASC</MenuItem>
-              <MenuItem value="name-desc">Name DESC</MenuItem>
-              <MenuItem value="stock-asc">QTY ASC</MenuItem>
-              <MenuItem value="stock-desc">QTY DESC</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={6} sm={1.2}>
-          <Autocomplete
-            options={perPageOptions}
-            getOptionLabel={(option) => option.toString()}
-            value={filters.per_page}
-            onChange={(e, newValue) => handleChange("per_page", newValue)}
-            renderInput={(params) => (
-              <TextField {...params} label="Per Page" fullWidth />
-            )}
+          <label className="form-label">Sort By</label>
+          <CustomSelect
+            label="Sort By"
+            options={[
+              { label: "Default", value: "" },
+              { label: "Name ASC", value: "name-asc" },
+              { label: "Name DESC", value: "name-desc" },
+              { label: "QTY ASC", value: "stock-asc" },
+              { label: "QTY DESC", value: "stock-desc" },
+            ]}
+            value={
+              [
+                { label: "Default", value: "" },
+                { label: "Name ASC", value: "name-asc" },
+                { label: "Name DESC", value: "name-desc" },
+                { label: "QTY ASC", value: "stock-asc" },
+                { label: "QTY DESC", value: "stock-desc" },
+              ].find((opt) => opt.value === filters.sort_by) || null
+            }
+            onChange={(selected) =>
+              handleChange("sort_by", selected?.value || "")
+            }
           />
         </Grid>
 
+        {/* Per Page */}
+        <Grid item xs={6} sm={1.2}>
+          <label className="form-label">Per page</label>
+          <CustomSelect
+            label="Per Page"
+            options={perPageOptions.map((p) => ({
+              label: p.toString(),
+              value: p,
+            }))}
+            value={
+              perPageOptions
+                .map((p) => ({ label: p.toString(), value: p }))
+                .find((opt) => opt.value === filters.per_page) || null
+            }
+            onChange={(selected) =>
+              handleChange("per_page", selected?.value || 10)
+            }
+          />
+        </Grid>
+
+        {/* Buttons */}
         <Grid item xs={6}>
           <Button
             className="me-2"
@@ -391,7 +449,7 @@ const Grns = (props) => {
         </Grid>
       </Grid>
 
-      <Divider />
+      <hr />
 
       {/* Table */}
       <Table>

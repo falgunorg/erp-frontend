@@ -1,8 +1,23 @@
 .contract-page {
-  //   font-family: "Times New Roman", serif;
-  background: #fff;
-  color: #000;
-  //   padding: 40px;
+  .summary_details_area {
+    .summary-table tr {
+      border-style: dotted;
+      border-color: #000;
+    }
+    .summary-table td {
+      border-style: dotted;
+      border-color: #000;
+    }
+    .summary-table th {
+      border-style: dotted;
+      border-color: #000;
+    }
+
+    .summary-table {
+      table-layout: fixed; 
+      // width: 100%;
+    }
+  }
 
   .contract-actions {
     display: flex;
