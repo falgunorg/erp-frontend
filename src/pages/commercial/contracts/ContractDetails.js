@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import { useHistory, Link } from "react-router-dom";
 import html2pdf from "html2pdf.js";
+import * as XLSX from "xlsx";
 
 export default function ContractDetails() {
   const history = useHistory();
@@ -84,6 +85,24 @@ export default function ContractDetails() {
 
   const handlePrint = () => window.print();
 
+  // ✅ Download Excel
+  const handleDownloadExcel = () => {
+    // Find the first table inside the printRef
+    const table = printRef.current.querySelector("table");
+    if (!table) {
+      alert("No table found to export.");
+      return;
+    }
+
+    // Convert table to worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.table_to_sheet(table);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+    // Save as Excel file
+    XLSX.writeFile(workbook, `${form.contract_no}.xlsx`);
+  };
+
   const handleDownloadPDF = () => {
     const element = printRef.current;
     html2pdf()
@@ -99,7 +118,7 @@ export default function ContractDetails() {
 
   const importDocs = [
     {
-      lc: "LC1",
+      lc: "LC24",
       documents: [
         {
           docNo: "505",
@@ -125,7 +144,7 @@ export default function ContractDetails() {
       ],
     },
     {
-      lc: "LC2",
+      lc: "LC25",
       documents: [
         {
           docNo: "509",
@@ -153,39 +172,50 @@ export default function ContractDetails() {
   ];
 
   return (
-    <div className="contract-page">
-      <div className="contract-actions no-print">
-        <button onClick={goBack}>← Back</button>
-        <button onClick={handlePrint}>🖨️ Print</button>
-        <button onClick={handleDownloadPDF}>⬇️ Download PDF</button>
-      </div>
+    <div className="contract-page tna_page">
+      <div className="contract-actions no-print"></div>
 
-      <ul className="nav nav-tabs no-print">
-        {[
-          "Summary",
-          "Export Lc",
-          "Export Bill",
-          "BBLC",
-          "BB Bill",
-          "Loan",
-          "DFC Transaction",
-          "Contract Overview",
-          "PO'S",
-          "Import Documents",
-          "Export Documents",
-        ].map((tab) => (
-          <li className="nav-item" key={tab}>
-            <button
-              className={`nav-link ${activeTab === tab ? "active" : ""}`}
+      <div className="no-print tna_page_topbar justify-content-between">
+        <div>
+          {[
+            "Summary",
+            "Export Lc",
+            "Export Bill",
+            "BBLC",
+            "BB Bill",
+            "Loan",
+            "DFC Transaction",
+            "Contract Overview",
+            "PO'S",
+            "Import Documents",
+            "Export Documents",
+          ].map((tab) => (
+            <Link
+              to="#"
+              className={`${activeTab === tab ? "active" : ""}`}
               onClick={() => setActiveTab(tab)}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          </li>
-        ))}
-      </ul>
+            </Link>
+          ))}
+        </div>
+        <div>
+          <Link to="#" onClick={goBack}>
+            Back
+          </Link>
+          <Link to="#" onClick={handlePrint}>
+            Print
+          </Link>
+          <Link to="#" onClick={handleDownloadPDF}>
+            Download PDF
+          </Link>
+          <Link to="#" onClick={handleDownloadExcel}>
+            Download Excel
+          </Link>
+        </div>
+      </div>
 
-      <div className="p-3 border border-top-0 rounded-bottom bg-white">
+      <div className="p-3 bg-white">
         {activeTab === "Summary" && (
           <div className="summary_details_area contract-wrapper" ref={printRef}>
             <div className="row">
@@ -195,11 +225,7 @@ export default function ContractDetails() {
                     Summary Position
                   </h5>
                   <div className="summary-info">
-                    <strong>Tag Number :</strong> MOD24008
-                    <br />
                     <strong>Contract :</strong> {form.contract_no}
-                    <br />
-                    <strong>Customer ID :</strong> 385493
                     <br />
                     <strong>Company :</strong> MODISTE ( CEPZ ) LTD
                   </div>
@@ -207,8 +233,8 @@ export default function ContractDetails() {
                 </div>
                 {/* Export Section */}
                 <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
+                  <table className="table table-bordered align-middle">
+                    <thead className="table-light">
                       <tr>
                         <th>Export</th>
                         <th>Currency</th>
@@ -247,8 +273,8 @@ export default function ContractDetails() {
 
                 {/* BB Import Section */}
                 <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
+                  <table className="table table-bordered align-middle">
+                    <thead className="table-light">
                       <tr>
                         <th>BB Import</th>
                         <th>Currency</th>
@@ -293,8 +319,8 @@ export default function ContractDetails() {
 
                 {/* Packing Credit Section */}
                 <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
+                  <table className="table table-bordered align-middle">
+                    <thead className="table-light">
                       <tr>
                         <th>Packing Credit ( PC )</th>
                         <th>Currency</th>
@@ -318,8 +344,8 @@ export default function ContractDetails() {
 
                 {/* EDF Loan Section */}
                 <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
+                  <table className="table table-bordered align-middle">
+                    <thead className="table-light">
                       <tr>
                         <th>EDF Loan</th>
                         <th>Currency</th>
@@ -343,8 +369,8 @@ export default function ContractDetails() {
 
                 {/* FDBP / FORCE Loan Section */}
                 <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
+                  <table className="table table-bordered align-middle">
+                    <thead className="table-light">
                       <tr>
                         <th>Force Loan</th>
                         <th>Currency</th>
@@ -368,8 +394,8 @@ export default function ContractDetails() {
 
                 {/* DFC Section */}
                 <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
+                  <table className="table table-bordered align-middle">
+                    <thead className="table-light">
                       <tr>
                         <th>DFC</th>
                         <th>Currency</th>
@@ -424,8 +450,6 @@ export default function ContractDetails() {
                     Export LC/Contract
                   </h5>
                   <div className="summary-info">
-                    <strong>Tag Number :</strong> MOD24008
-                    <br />
                     <strong>Contract :</strong> {form.contract_no}
                     <br />
                   </div>
@@ -433,8 +457,8 @@ export default function ContractDetails() {
                 </div>
                 {/* Export Section */}
                 <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
+                  <table className="table table-bordered align-middle">
+                    <thead className="table-light">
                       <tr>
                         <th>LC/Contract Ref. No.</th>
                         <th>Export LC/ Contract No</th>
@@ -524,8 +548,6 @@ export default function ContractDetails() {
                 <div className="text-center">
                   <h5 className="summary-title text-uppercase">Export Bill</h5>
                   <div className="summary-info">
-                    <strong>Tag Number :</strong> MOD24008
-                    <br />
                     <strong>Contract :</strong> {form.contract_no}
                     <br />
                   </div>
@@ -533,8 +555,8 @@ export default function ContractDetails() {
                 </div>
                 {/* Export Section */}
                 <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
+                  <table className="table table-bordered align-middle">
+                    <thead className="table-light">
                       <tr>
                         <th>Export Bill Contract</th>
                         <th>User Ref. No.</th>
@@ -632,17 +654,15 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">BBLC</h5>
               <div className="summary-info">
-                <strong>Tag Number :</strong> MOD24008
-                <br />
                 <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
             </div>
 
-            <div className="section">
-              <table className="summary-table table table-bordered">
-                <thead>
+            <div className="section  table-responsive">
+              <table className="table table-bordered align-middle">
+                <thead className="table-light">
                   <tr>
                     <th>Prod.</th>
                     <th>LC Number</th>
@@ -670,11 +690,11 @@ export default function ContractDetails() {
                     <td>3/23/2025</td>
                     <td>99.33</td>
                     <td>0.00</td>
-                    <td>BUTTON</td>
-                    <td>JINDAL POLY BUTTONS PVT. LTD.</td>
+                    <td>FABRIC</td>
+                    <td>Z&Z</td>
                   </tr>
                   <tr>
-                    <td>LC24</td>
+                    <td>LC25</td>
                     <td>140424250034</td>
                     <td>2/6/2025</td>
                     <td>USD</td>
@@ -688,7 +708,7 @@ export default function ContractDetails() {
                     <td>JINDAL POLY BUTTONS PVT. LTD.</td>
                   </tr>
                   <tr>
-                    <td>LC24</td>
+                    <td>LC26</td>
                     <td>140424250034</td>
                     <td>2/6/2025</td>
                     <td>USD</td>
@@ -698,8 +718,8 @@ export default function ContractDetails() {
                     <td>3/23/2025</td>
                     <td>99.33</td>
                     <td>0.00</td>
-                    <td>BUTTON</td>
-                    <td>JINDAL POLY BUTTONS PVT. LTD.</td>
+                    <td>THREAD</td>
+                    <td>A&E</td>
                   </tr>
 
                   <tr>
@@ -707,7 +727,7 @@ export default function ContractDetails() {
                       <strong>TOTAL</strong>
                     </td>
                     <td>
-                      <strong>2284572.54</strong>
+                      <strong>398,224.83</strong>
                     </td>
                     <td></td>
                     <td></td>
@@ -716,7 +736,7 @@ export default function ContractDetails() {
                       <strong>283206.66</strong>
                     </td>
                     <td>
-                      <strong>283206.66</strong>
+                      <strong>0.00</strong>
                     </td>
                     <td></td>
                     <td></td>
@@ -728,7 +748,7 @@ export default function ContractDetails() {
             <br />
             <div className="row">
               <div className="col-lg-5">
-                <table className="summary-table table table-bordered">
+                <table className="table table-bordered align-middle">
                   <tbody>
                     <tr>
                       <td>Total Closed Amount ( in Equivelent USD )</td>
@@ -738,57 +758,21 @@ export default function ContractDetails() {
                       <td>Total EDF LC Amount ( in Equivelent USD )</td>
                       <td>0.00</td>
                     </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <br />
-            <br />
-            <div className="row">
-              <div className="col-lg-4">
-                <table className="summary-table table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>
-                        Proudct Wise Amount Break-up ( in Equivelent USD )
-                      </th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>LC24</td>
-                      <td>6934.8</td>
-                    </tr>
-                    <tr>
-                      <td>LC25</td>
-                      <td>1484517.48</td>
-                    </tr>
-                    <tr>
-                      <td>LC27</td>
-                      <td>69065.1</td>
-                    </tr>
 
                     <tr>
-                      <td>
-                        <strong>TOTAL</strong>
-                      </td>
-                      <td>
-                        <strong>1560517.38</strong>
-                      </td>
+                      <td>Total Perchantage Used From Contract</td>
+                      <td>75%</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
-
             <br />
             <br />
             <div className="row">
               <div className="col-lg-4">
-                <table className="summary-table table table-bordered">
-                  <thead>
+                <table className="table table-bordered align-middle">
+                  <thead className="table-light">
                     <tr>
                       <th>COMMODITY CATEGORY</th>
                       <th>Amount</th>
@@ -798,13 +782,13 @@ export default function ContractDetails() {
                   <tbody>
                     <tr>
                       <td>ACCESSORI & OTHERS</td>
-                      <td>419943.17</td>
-                      <td>26.91</td>
+                      <td>265,483.22</td>
+                      <td>66.33</td>
                     </tr>
                     <tr>
                       <td>FABRIC</td>
-                      <td>1140574.21</td>
-                      <td>73.09</td>
+                      <td>132,741.61 </td>
+                      <td>33.33</td>
                     </tr>
 
                     <tr>
@@ -812,7 +796,7 @@ export default function ContractDetails() {
                         <strong>TOTAL</strong>
                       </td>
                       <td>
-                        <strong>1560517.38</strong>
+                        <strong>398,224.83</strong>
                       </td>
                       <td>
                         <strong>100.00</strong>
@@ -830,17 +814,15 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">BB Bill</h5>
               <div className="summary-info">
-                <strong>Tag Number :</strong> MOD24008
-                <br />
                 <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
             </div>
 
-            <div className="section">
-              <table className="summary-table table table-bordered">
-                <thead>
+            <div className="section  table-responsive">
+              <table className="table table-bordered align-middle">
+                <thead className="table-light">
                   <tr>
                     <th>LC No.</th>
                     <th>BC Contract No.</th>
@@ -948,8 +930,8 @@ export default function ContractDetails() {
             <br />
             <div className="row">
               <div className="col-lg-4">
-                <table className="summary-table table table-bordered">
-                  <thead>
+                <table className="table table-bordered align-middle">
+                  <thead className="table-light">
                     <tr>
                       <th>Particulars</th>
                       <th>Amount</th>
@@ -977,8 +959,8 @@ export default function ContractDetails() {
             <br />
             <div className="row">
               <div className="col-lg-4">
-                <table className="summary-table table table-bordered">
-                  <thead>
+                <table className="table table-bordered align-middle">
+                  <thead className="table-light">
                     <tr>
                       <th>Payment Details ( Liquidation Amount )</th>
                       <th>Amount</th>
@@ -1017,17 +999,15 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Loan</h5>
               <div className="summary-info">
-                <strong>Tag Number :</strong> MOD24008
-                <br />
                 <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
             </div>
 
-            <div className="section">
-              <table className="summary-table table table-bordered">
-                <thead>
+            <div className="section  table-responsive">
+              <table className="table table-bordered align-middle">
+                <thead className="table-light">
                   <tr>
                     <th>Contract Ref. No.</th>
                     <th>User Ref. No</th>
@@ -1142,17 +1122,15 @@ export default function ContractDetails() {
                 DFC A/C No: 0161300000107
               </h5>
               <div className="summary-info">
-                <strong>Tag Number :</strong> MOD24008
-                <br />
                 <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
             </div>
 
-            <div className="section">
-              <table className="summary-table table table-bordered">
-                <thead>
+            <div className="section  table-responsive">
+              <table className="table table-bordered align-middle">
+                <thead className="table-light">
                   <tr>
                     <th>Txn Date</th>
                     <th>Value Date</th>
@@ -1220,8 +1198,8 @@ export default function ContractDetails() {
             <br />
             <div className="row">
               <div className="col-lg-4">
-                <table className="summary-table table table-bordered">
-                  <thead>
+                <table className="table table-bordered align-middle">
+                  <thead className="table-light">
                     <tr>
                       <th>Particulars</th>
                       <th>Currency</th>
@@ -1298,7 +1276,7 @@ export default function ContractDetails() {
                 <div className="mt-3">
                   <strong>19. Particulars of Goods / Services:</strong>
                   <table className="contract-table">
-                    <thead>
+                    <thead className="table-light">
                       <tr>
                         <th>Style</th>
                         <th>Description</th>
@@ -1364,16 +1342,14 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">PO'S</h5>
               <div className="summary-info">
-                <strong>Tag Number :</strong> MOD24008
-                <br />
                 <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
             </div>
-            <div className="section">
-              <table className="summary-table table table-bordered">
-                <thead>
+            <div className="section  table-responsive">
+              <table className="table table-bordered align-middle">
+                <thead className="table-light">
                   <tr>
                     <th>PO</th>
                     <th>STYLE</th>
@@ -1435,16 +1411,14 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Import Documents</h5>
               <div className="summary-info">
-                <strong>Tag Number :</strong> MOD24008
-                <br />
                 <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
             </div>
-            <div className="section">
-              <table className="summary-table table table-bordered">
-                <thead>
+            <div className="section  table-responsive">
+              <table className="table table-bordered align-middle">
+                <thead className="table-light">
                   <tr>
                     <th>LC</th>
                     <th>Document No.</th>
@@ -1496,16 +1470,14 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Export Documents</h5>
               <div className="summary-info">
-                <strong>Tag Number :</strong> MOD24008
-                <br />
                 <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
             </div>
-            <div className="section">
-              <table className="summary-table table table-bordered">
-                <thead>
+            <div className="section  table-responsive">
+              <table className="table table-bordered align-middle">
+                <thead className="table-light">
                   <tr>
                     <th>INVOICE NO.</th>
                     <th>INVOICE VAL.</th>

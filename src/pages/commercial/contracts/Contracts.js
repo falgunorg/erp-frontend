@@ -143,7 +143,7 @@ export default function Contracts() {
               Clear
             </button>
             <Link to="/commercial/contracts/create" className="btn btn-success">
-              Create New
+              Add New
             </Link>
           </div>
         </div>

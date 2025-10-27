@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import api from "services/api";
 import swal from "sweetalert";
-import Select from "react-select";
 import Logo from "../../../assets/images/logos/logo-short.png";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
-export default function CreateContracts({ toggleExpanded }) {
+export default function CreateContracts() {
   const history = useHistory();
   const goBack = () => history.goBack();
 
@@ -43,32 +42,17 @@ export default function CreateContracts({ toggleExpanded }) {
     agent_commission_clause: "",
   });
 
-  const [goods, setGoods] = useState([
-    {
-      style: "",
-      po: "",
-      description: "",
-      quantity: "",
-      unit_price: "",
-      total_fob: "",
-      shipment_date: "",
-    },
-  ]);
-
   const steps = [
     "Contract Details",
     "Buyer Information",
-    "Buyer Bank Information",
     "Seller (Company) Information",
-    "Seller Bank Information",
     "Payment & Shipment Information",
-    "Particulars of Goods / Services",
     "Clauses & Conditions",
   ];
 
   const [activeStep, setActiveStep] = useState(0);
 
-  // Fetch common data
+  // Fetch dropdown data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,12 +62,12 @@ export default function CreateContracts({ toggleExpanded }) {
           api.post("/common/agents"),
           api.post("/common/banks"),
         ]);
-        setBuyers(b.data.data || []);
-        setCompanies(c.data.data || []);
-        setAgents(a.data.data || []);
-        setBanks(bk.data.data || []);
+        setBuyers(b.data?.data || []);
+        setCompanies(c.data?.data || []);
+        setAgents(a.data?.data || []);
+        setBanks(bk.data?.data || []);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching dropdown data:", err);
       }
     };
     fetchData();
@@ -92,70 +76,28 @@ export default function CreateContracts({ toggleExpanded }) {
   const handleChange = (name, value) =>
     setForm((prev) => ({ ...prev, [name]: value }));
 
-  const handleGoodsChange = (index, name, value) => {
-    setGoods((prevGoods) => {
-      const updated = [...prevGoods];
-      const row = { ...updated[index], [name]: value };
-      if (name === "quantity" || name === "unit_price") {
-        const quantity = parseFloat(row.quantity) || 0;
-        const unit_price = parseFloat(row.unit_price) || 0;
-        row.total_fob = (quantity * unit_price).toFixed(2);
-      }
-      updated[index] = row;
-      return updated;
-    });
-  };
-
-  const addGoodsRow = () =>
-    setGoods((prev) => [
-      ...prev,
-      {
-        style: "",
-        po: "",
-        description: "",
-        quantity: "",
-        unit_price: "",
-        total_fob: "",
-        shipment_date: "",
-      },
-    ]);
-
-  const removeGoodsRow = (index) =>
-    setGoods((prev) => prev.filter((_, i) => i !== index));
-
-  // Step validation
+  // Step validation logic
   const validateStep = () => {
     switch (activeStep) {
       case 0:
         return form.contract_no && form.contract_date && form.contract_type;
       case 1:
-        return form.buyer_id;
+        return form.buyer_id && form.buyer_bank_name && form.buyer_bank_swift;
       case 2:
-        return form.buyer_bank_name && form.buyer_bank_swift;
+        return (
+          form.company_id && form.seller_bank_name && form.seller_bank_swift
+        );
       case 3:
-        return form.company_id;
-      case 4:
-        return form.seller_bank_name && form.seller_bank_swift;
-      case 5:
         return (
           form.payment_terms &&
           form.mode_of_shipment &&
           form.port_of_loading &&
           form.port_of_discharge
         );
-      case 6:
-        return (
-          goods.length > 0 &&
-          goods.every((g) => g.description && g.quantity && g.unit_price)
-        );
-      case 7:
-        return (
-          form.reimbursement_instructions ||
-          form.amendment_clause ||
-          form.agent_commission_clause
-        );
+      case 4:
+        return true; // last step can be optional
       default:
-        return true;
+        return false;
     }
   };
 
@@ -171,34 +113,34 @@ export default function CreateContracts({ toggleExpanded }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    history.push("/commercial/contracts/details/4");
-    // try {
-    //   setSpinner(true);
-    //   const fd = new FormData();
-    //   Object.entries(form).forEach(([k, v]) => fd.append(k, v || ""));
-    //   fd.append("goods", JSON.stringify(goods));
-    //   const res = await api.post(
-    //     "/merchandising/purchase-contracts-create",
-    //     fd
-    //   );
-    //   if (res.status === 200)
-    //     swal("Success!", "Purchase contract saved.", "success");
-    // } catch (err) {
-    //   swal("Error!", "Failed to save purchase contract.", "error");
-    // } finally {
-    //   setSpinner(false);
-    // }
+    try {
+      setSpinner(true);
+      const fd = new FormData();
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v || ""));
+      const res = await api.post(
+        "/merchandising/purchase-contracts-create",
+        fd
+      );
+      if (res.status === 200) {
+        swal("Success!", "Purchase contract saved successfully.", "success");
+        history.push(`/commercial/contracts/details/${res.data?.id || 4}`);
+      }
+    } catch (err) {
+      console.error(err);
+      swal("Error!", "Failed to save purchase contract.", "error");
+    } finally {
+      setSpinner(false);
+    }
   };
 
-  // Step rendering
+  // Step render function
   const renderStep = () => {
     switch (activeStep) {
       case 0:
         return (
           <div className="card create_tp_body">
             <div className="card-header fw-bold bg-light">Contract Details</div>
-            <div className="card-body row">
+            <div className="card-body row g-3">
               <div className="col-lg-6">
                 <label className="form-label">
                   Contract No <span className="text-danger">*</span>
@@ -240,201 +182,215 @@ export default function CreateContracts({ toggleExpanded }) {
             </div>
           </div>
         );
+
       case 1:
         return (
           <div className="card create_tp_body">
             <div className="card-header fw-bold bg-light">
               Buyer Information
             </div>
-            <div className="card-body row g-3">
-              <div className="col-lg-4">
-                <label className="form-label">
-                  Buyer <span className="text-danger">*</span>
-                </label>
-                <select
-                  className="form-select"
-                  value={form.buyer_id || ""} // optional, if using controlled form state
-                  onChange={(e) => handleChange("buyer_id", e.target.value)}
-                >
-                  <option value="">Select Buyer</option>
-                  {buyers.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-lg-4">
-                <label className="form-label">Buyer Phone</label>
-                <input
-                  className="form-control"
-                  value={form.buyer_phone}
-                  onChange={(e) => handleChange("buyer_phone", e.target.value)}
-                />
-              </div>
-              <div className="col-lg-4">
-                <label className="form-label">Buyer Email</label>
-                <input
-                  className="form-control"
-                  value={form.buyer_email}
-                  onChange={(e) => handleChange("buyer_email", e.target.value)}
-                />
+
+            <div className="row">
+              <div className="col-lg-6">
+                <div className="card-body row">
+                  <div className="col-lg-4">
+                    <label className="form-label">
+                      Buyer <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select"
+                      value={form.buyer_id}
+                      onChange={(e) => handleChange("buyer_id", e.target.value)}
+                    >
+                      <option value="">Select Buyer</option>
+                      {buyers.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-lg-4">
+                    <label className="form-label">Buyer Phone</label>
+                    <input
+                      className="form-control"
+                      value={form.buyer_phone}
+                      onChange={(e) =>
+                        handleChange("buyer_phone", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-4">
+                    <label className="form-label">Buyer Email</label>
+                    <input
+                      className="form-control"
+                      value={form.buyer_email}
+                      onChange={(e) =>
+                        handleChange("buyer_email", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-6">
+                    <label className="form-label">Buyer Address</label>
+                    <textarea
+                      rows="2"
+                      className="form-control"
+                      value={form.buyer_address}
+                      onChange={(e) =>
+                        handleChange("buyer_address", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-6">
+                    <label className="form-label">Notify Party</label>
+                    <textarea
+                      rows="2"
+                      className="form-control"
+                      value={form.notify_party}
+                      onChange={(e) =>
+                        handleChange("notify_party", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
               </div>
               <div className="col-lg-6">
-                <label className="form-label">Buyer Address</label>
-                <textarea
-                  rows="2"
-                  className="form-control"
-                  value={form.buyer_address}
-                  onChange={(e) =>
-                    handleChange("buyer_address", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-lg-6">
-                <label className="form-label">Notify Party</label>
-                <textarea
-                  rows="2"
-                  className="form-control"
-                  value={form.notify_party}
-                  onChange={(e) => handleChange("notify_party", e.target.value)}
-                />
+                <div className="card-body row">
+                  <div className="col-lg-6">
+                    <label className="form-label">Bank Name</label>
+                    <input
+                      className="form-control"
+                      value={form.buyer_bank_name}
+                      onChange={(e) =>
+                        handleChange("buyer_bank_name", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-6">
+                    <label className="form-label">SWIFT Code</label>
+                    <input
+                      className="form-control"
+                      value={form.buyer_bank_swift}
+                      onChange={(e) =>
+                        handleChange("buyer_bank_swift", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-6">
+                    <label className="form-label">Bank Address</label>
+                    <textarea
+                      rows="2"
+                      className="form-control"
+                      value={form.buyer_bank_address}
+                      onChange={(e) =>
+                        handleChange("buyer_bank_address", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-6">
+                    <label className="form-label">Phone</label>
+                    <input
+                      className="form-control"
+                      value={form.buyer_bank_phone}
+                      onChange={(e) =>
+                        handleChange("buyer_bank_phone", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         );
+
       case 2:
-        return (
-          <div className="card create_tp_body">
-            <div className="card-header fw-bold bg-light">
-              Buyer Bank Information
-            </div>
-            <div className="card-body row g-3">
-              <div className="col-lg-6">
-                <label className="form-label">Bank Name</label>
-                <input
-                  className="form-control"
-                  value={form.buyer_bank_name}
-                  onChange={(e) =>
-                    handleChange("buyer_bank_name", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-lg-6">
-                <label className="form-label">SWIFT Code</label>
-                <input
-                  className="form-control"
-                  value={form.buyer_bank_swift}
-                  onChange={(e) =>
-                    handleChange("buyer_bank_swift", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-lg-6">
-                <label className="form-label">Bank Address</label>
-                <textarea
-                  rows="2"
-                  className="form-control"
-                  value={form.buyer_bank_address}
-                  onChange={(e) =>
-                    handleChange("buyer_bank_address", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-lg-6">
-                <label className="form-label">Phone</label>
-                <input
-                  className="form-control"
-                  value={form.buyer_bank_phone}
-                  onChange={(e) =>
-                    handleChange("buyer_bank_phone", e.target.value)
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 3:
         return (
           <div className="card create_tp_body">
             <div className="card-header fw-bold bg-light">
               Seller (Company) Information
             </div>
-            <div className="card-body row g-3">
-              <div className="col-lg-6">
-                <label className="form-label">
-                  Company <span className="text-danger">*</span>
-                </label>
 
-                <select
-                  className="form-select"
-                  value={form.company_id || ""} // optional, if using controlled form state
-                  onChange={(e) => handleChange("company_id", e.target.value)}
-                >
-                  <option value="2">Modiste CEPZ Ltd.</option>
-                  <option value="3">Modiste Bangladesh Ltd.</option>
-                </select>
+            <div className="row">
+              <div className="col-lg-6">
+                {" "}
+                <div className="card-body row">
+                  <div className="col-lg-6">
+                    <label className="form-label">
+                      Company <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-select"
+                      value={form.company_id}
+                      onChange={(e) =>
+                        handleChange("company_id", e.target.value)
+                      }
+                    >
+                      <option value="">Select Company</option>
+                      {companies.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="col-lg-6">
+                    <label className="form-label">Company Address</label>
+                    <textarea
+                      rows="2"
+                      className="form-control"
+                      value={form.seller_address}
+                      onChange={(e) =>
+                        handleChange("seller_address", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
               </div>
               <div className="col-lg-6">
-                <label className="form-label">Company Address</label>
-                <textarea
-                  rows="2"
-                  className="form-control"
-                  value={form.seller_address}
-                  onChange={(e) =>
-                    handleChange("seller_address", e.target.value)
-                  }
-                />
+                {" "}
+                <div className="card-body row">
+                  <div className="col-lg-6">
+                    <label className="form-label">
+                      Bank Name <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      className="form-control"
+                      value={form.seller_bank_name}
+                      onChange={(e) =>
+                        handleChange("seller_bank_name", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-6">
+                    <label className="form-label">
+                      SWIFT <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      className="form-control"
+                      value={form.seller_bank_swift}
+                      onChange={(e) =>
+                        handleChange("seller_bank_swift", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-12">
+                    <label className="form-label">Bank Address</label>
+                    <textarea
+                      rows="2"
+                      className="form-control"
+                      value={form.seller_bank_address}
+                      onChange={(e) =>
+                        handleChange("seller_bank_address", e.target.value)
+                      }
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         );
-      case 4:
-        return (
-          <div className="card create_tp_body">
-            <div className="card-header fw-bold bg-light">
-              Seller Bank Information
-            </div>
-            <div className="card-body row g-3">
-              <div className="col-lg-6">
-                <label className="form-label">
-                  Bank Name <span className="text-danger">*</span>
-                </label>
-                <input
-                  className="form-control"
-                  value={form.seller_bank_name}
-                  onChange={(e) =>
-                    handleChange("seller_bank_name", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-lg-6">
-                <label className="form-label">
-                  SWIFT <span className="text-danger">*</span>
-                </label>
-                <input
-                  className="form-control"
-                  value={form.seller_bank_swift}
-                  onChange={(e) =>
-                    handleChange("seller_bank_swift", e.target.value)
-                  }
-                />
-              </div>
-              <div className="col-12">
-                <label className="form-label">Bank Address</label>
-                <textarea
-                  rows="2"
-                  className="form-control"
-                  value={form.seller_bank_address}
-                  onChange={(e) =>
-                    handleChange("seller_bank_address", e.target.value)
-                  }
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 5:
+
+      case 3:
         return (
           <div className="card create_tp_body">
             <div className="card-header fw-bold bg-light">
@@ -489,171 +445,11 @@ export default function CreateContracts({ toggleExpanded }) {
                   }
                 />
               </div>
-              <div className="col-12">
-                <label className="form-label">Documents Required</label>
-                <textarea
-                  rows="2"
-                  className="form-control"
-                  value={form.documents_required}
-                  onChange={(e) =>
-                    handleChange("documents_required", e.target.value)
-                  }
-                />
-              </div>
             </div>
           </div>
         );
-      case 6:
-        return (
-          <div className="card create_tp_body">
-            <div className="card-header fw-bold bg-light">
-              Particulars of Goods / Services
-            </div>
-            <div className="card-body table-responsive">
-              <table className="table table-bordered align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>Style</th>
-                    <th>PO</th>
-                    <th>Description</th>
-                    <th>Qty (PCS)</th>
-                    <th>Unit Price</th>
-                    <th>Total FOB</th>
-                    <th>Shipment Date</th>
-                    <th style={{ width: "50px" }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {goods.map((row, i) => (
-                    <tr key={i}>
-                      <td>
-                        <input
-                          className="form-control"
-                          value={row.style}
-                          onChange={(e) =>
-                            handleGoodsChange(i, "style", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <input
-                          className="form-control"
-                          value={row.po}
-                          onChange={(e) =>
-                            handleGoodsChange(i, "po", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <input
-                          className="form-control"
-                          value={row.description}
-                          onChange={(e) =>
-                            handleGoodsChange(i, "description", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          min="0"
-                          className="form-control"
-                          value={row.quantity}
-                          onChange={(e) =>
-                            handleGoodsChange(i, "quantity", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          className="form-control"
-                          value={row.unit_price}
-                          onChange={(e) =>
-                            handleGoodsChange(i, "unit_price", e.target.value)
-                          }
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          className="form-control"
-                          value={row.total_fob}
-                          readOnly
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="date"
-                          className="form-control"
-                          value={row.shipment_date}
-                          onChange={(e) =>
-                            handleGoodsChange(
-                              i,
-                              "shipment_date",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="text-center">
-                        {i > 0 && (
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => removeGoodsRow(i)}
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                <tfoot className="table-light fw-bold">
-                  <tr>
-                    <td colSpan="3" className="text-end">
-                      Grand Total:
-                    </td>
-                    <td>
-                      {goods.reduce(
-                        (sum, r) => sum + (parseFloat(r.quantity) || 0),
-                        0
-                      )}
-                    </td>
-                    <td></td>
-                    <td>
-                      {goods
-                        .reduce(
-                          (sum, r) =>
-                            sum +
-                            (parseFloat(r.quantity) || 0) *
-                              (parseFloat(r.unit_price) || 0),
-                          0
-                        )
-                        .toFixed(2)}
-                    </td>
-                    <td colSpan="2"></td>
-                  </tr>
-                </tfoot>
-              </table>
-              <div className="text-end">
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  onClick={addGoodsRow}
-                >
-                  + Add Row
-                </button>
-              </div>
-            </div>
-          </div>
-        );
-      case 7:
+
+      case 4:
         return (
           <div className="card create_tp_body">
             <div className="card-header fw-bold bg-light">
@@ -696,13 +492,14 @@ export default function CreateContracts({ toggleExpanded }) {
             </div>
           </div>
         );
+
       default:
         return null;
     }
   };
 
   return (
-    <div className="">
+    <div className="tna_page">
       <div className="d-flex align-items-center mb-4">
         <i
           onClick={goBack}
@@ -713,23 +510,21 @@ export default function CreateContracts({ toggleExpanded }) {
         <h4 className="m-0">Create Purchase Contract</h4>
       </div>
 
-      {/* Step Indicator */}
-      <div style={{ fontSize: "12px" }} className="mb-4 d-flex">
+      <div className="tna_page_topbar mb-4">
         {steps.map((s, i) => (
-          <div
+          <Link
+            to="#"
             key={i}
-            className={`flex-fill text-center py-2 ${
-              i === activeStep ? "bg-primary text-white" : "bg-light"
-            }`}
+            className={`step-link ${i === activeStep ? "active" : ""}`}
           >
             {s}
-          </div>
+          </Link>
         ))}
       </div>
-      <hr />
 
       <form onSubmit={handleSubmit}>
-        <div className="d-flex justify-content-between mt-3">
+        {renderStep()}
+        <div className="d-flex justify-content-between mt-4">
           {activeStep > 0 && (
             <button
               type="button"
@@ -754,11 +549,10 @@ export default function CreateContracts({ toggleExpanded }) {
               className="btn btn-success ms-auto"
               disabled={spinner}
             >
-              {spinner ? "Saving..." : "Create Purchase Contract"}
+              {spinner ? "Saving..." : "Save"}
             </button>
           )}
         </div>
-        {renderStep()}
       </form>
     </div>
   );
