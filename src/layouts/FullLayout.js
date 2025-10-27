@@ -113,6 +113,8 @@ const FullLayout = ({ children, ...rest }) => {
     folderId: "",
   });
   const [emails, setEmails] = useState([]);
+  //add all mails into one flacks
+  const [unitedAllMails, setUnitedAllMails] = useState([]);
   const [selectedMailIds, setSelectedMailIds] = useState([]);
 
   const [mailSendType, setMailSendType] = useState("Send");
@@ -238,6 +240,8 @@ const FullLayout = ({ children, ...rest }) => {
     setMailFolder,
     emails,
     setEmails,
+    unitedAllMails,
+    setUnitedAllMails,
     selectedMailIds,
     setSelectedMailIds,
     selectedMail,

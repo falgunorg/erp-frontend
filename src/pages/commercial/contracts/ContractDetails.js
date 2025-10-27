@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import Logo from "../../../assets/images/logos/logo-short.png";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 
 export default function ContractDetails() {
   const history = useHistory();
   const goBack = () => history.goBack();
 
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState("Summary");
 
   const printRef = useRef();
 
@@ -97,27 +97,82 @@ export default function ContractDetails() {
       .save();
   };
 
+  const importDocs = [
+    {
+      lc: "LC1",
+      documents: [
+        {
+          docNo: "505",
+          value: 600,
+          issueDate: "20-10-2025",
+          expiryDate: "20-10-2025",
+          files: ["1.pdf", "4.pdf"],
+        },
+        {
+          docNo: "506",
+          value: 900,
+          issueDate: "20-10-2025",
+          expiryDate: "20-10-2025",
+          files: ["1.pdf", "4.pdf"],
+        },
+        {
+          docNo: "507",
+          value: 500,
+          issueDate: "20-10-2025",
+          expiryDate: "20-10-2025",
+          files: ["1.pdf", "4.pdf"],
+        },
+      ],
+    },
+    {
+      lc: "LC2",
+      documents: [
+        {
+          docNo: "509",
+          value: 200,
+          issueDate: "20-10-2025",
+          expiryDate: "20-10-2025",
+          files: ["1.pdf", "4.pdf"],
+        },
+        {
+          docNo: "510",
+          value: 200,
+          issueDate: "20-10-2025",
+          expiryDate: "20-10-2025",
+          files: ["1.pdf", "4.pdf"],
+        },
+        {
+          docNo: "511",
+          value: 1000,
+          issueDate: "20-10-2025",
+          expiryDate: "20-10-2025",
+          files: ["1.pdf", "4.pdf"],
+        },
+      ],
+    },
+  ];
+
   return (
     <div className="contract-page">
-      <div className="no-print">
-        <h5>{form.contract_no}</h5>
+      <div className="contract-actions no-print">
+        <button onClick={goBack}>← Back</button>
+        <button onClick={handlePrint}>🖨️ Print</button>
+        <button onClick={handleDownloadPDF}>⬇️ Download PDF</button>
       </div>
 
-      <hr />
-
-      <ul className="nav nav-tabs">
+      <ul className="nav nav-tabs no-print">
         {[
           "Summary",
           "Export Lc",
           "Export Bill",
           "BBLC",
-          "Advanced Payment",
           "BB Bill",
           "Loan",
           "DFC Transaction",
-          "Overview",
+          "Contract Overview",
           "PO'S",
-          "Documents",
+          "Import Documents",
+          "Export Documents",
         ].map((tab) => (
           <li className="nav-item" key={tab}>
             <button
@@ -132,17 +187,21 @@ export default function ContractDetails() {
 
       <div className="p-3 border border-top-0 rounded-bottom bg-white">
         {activeTab === "Summary" && (
-          <div className="summary_details_area">
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
             <div className="row">
               <div className="col-lg-6">
                 <div className="text-center">
-                  <h3 className="summary-title">Summary Position</h3>
+                  <h5 className="summary-title text-uppercase">
+                    Summary Position
+                  </h5>
                   <div className="summary-info">
                     <strong>Tag Number :</strong> MOD24008
                     <br />
+                    <strong>Contract :</strong> {form.contract_no}
+                    <br />
                     <strong>Customer ID :</strong> 385493
                     <br />
-                    <strong>Customer Name :</strong> MODISTE ( CEPZ ) LTD
+                    <strong>Company :</strong> MODISTE ( CEPZ ) LTD
                   </div>
                   <br />
                 </div>
@@ -178,11 +237,6 @@ export default function ContractDetails() {
                         <td>2,110,583.52</td>
                       </tr>
                       <tr>
-                        <td>Total Advance Payment Rec.</td>
-                        <td>USD</td>
-                        <td>0.00</td>
-                      </tr>
-                      <tr>
                         <td>Remaining Export</td>
                         <td>USD</td>
                         <td>165,575.03</td>
@@ -207,11 +261,7 @@ export default function ContractDetails() {
                         <td>USD</td>
                         <td>1,550,571.35</td>
                       </tr>
-                      <tr>
-                        <td>Total Advance Payment for Import</td>
-                        <td>USD</td>
-                        <td>0.00</td>
-                      </tr>
+
                       <tr>
                         <td>Total Bill</td>
                         <td>USD</td>
@@ -316,31 +366,6 @@ export default function ContractDetails() {
                   </table>
                 </div>
 
-                {/* Other Demand Loan Section */}
-                <div className="section">
-                  <table className="summary-table table table-bordered">
-                    <thead>
-                      <tr>
-                        <th>OTHERS DEMAND LOAN</th>
-                        <th>Currency</th>
-                        <th>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Total Other Loan Disbursed</td>
-                        <td>BDT</td>
-                        <td>0.00</td>
-                      </tr>
-                      <tr>
-                        <td>Total Other Loan Outstanding (F.R.-INT+CoA.)</td>
-                        <td>BDT</td>
-                        <td>0.00</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
                 {/* DFC Section */}
                 <div className="section">
                   <table className="summary-table table table-bordered">
@@ -378,11 +403,6 @@ export default function ContractDetails() {
                         <td>1,544,535.05</td>
                       </tr>
                       <tr>
-                        <td>Other Debit</td>
-                        <td>USD</td>
-                        <td>10.45</td>
-                      </tr>
-                      <tr>
                         <td>Current DFC Balance</td>
                         <td>USD</td>
                         <td>133,070.11</td>
@@ -396,13 +416,17 @@ export default function ContractDetails() {
         )}
 
         {activeTab === "Export Lc" && (
-          <div className="summary_details_area">
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
             <div className="row">
               <div className="col-lg-12">
                 <div className="text-center">
-                  <h3 className="summary-title">Export LC/Contract</h3>
+                  <h5 className="summary-title text-uppercase">
+                    Export LC/Contract
+                  </h5>
                   <div className="summary-info">
                     <strong>Tag Number :</strong> MOD24008
+                    <br />
+                    <strong>Contract :</strong> {form.contract_no}
                     <br />
                   </div>
                   <br />
@@ -445,19 +469,44 @@ export default function ContractDetails() {
                         <td>2,294,575.86</td>
                         <td>Next</td>
                       </tr>
+                      <tr>
+                        <td>016FCBC241890501</td>
+                        <td>BASSPRO-MCL-SP25</td>
+                        <td>6/1/2024</td>
+                        <td>USD</td>
+                        <td>2,294,575.86</td>
+                        <td>0%</td>
+                        <td>2,294,575.86</td>
+                        <td>2,294,575.86</td>
+                        <td>2,294,575.86</td>
+                        <td>3/15/2025</td>
+                        <td>3/25/2025</td>
+                        <td>2,294,575.86</td>
+                        <td>Next</td>
+                      </tr>
 
                       <tr>
                         <td className="text-end" colSpan={4}>
                           <strong>TOTAL</strong>
                         </td>
-                        <td>2284572.54</td>
+                        <td>
+                          <strong>2284572.54</strong>
+                        </td>
                         <td></td>
-                        <td>283206.66</td>
-                        <td>283206.66</td>
-                        <td>283206.66</td>
+                        <td>
+                          <strong>283206.66</strong>
+                        </td>
+                        <td>
+                          <strong>283206.66</strong>
+                        </td>
+                        <td>
+                          <strong>283206.66</strong>
+                        </td>
                         <td></td>
                         <td></td>
-                        <td>283206.66</td>
+                        <td>
+                          <strong>283206.66</strong>
+                        </td>
                         <td></td>
                       </tr>
                     </tbody>
@@ -469,13 +518,15 @@ export default function ContractDetails() {
         )}
 
         {activeTab === "Export Bill" && (
-          <div className="summary_details_area">
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
             <div className="row">
               <div className="col-lg-12">
                 <div className="text-center">
-                  <h3 className="summary-title">Export Bill</h3>
+                  <h5 className="summary-title text-uppercase">Export Bill</h5>
                   <div className="summary-info">
                     <strong>Tag Number :</strong> MOD24008
+                    <br />
+                    <strong>Contract :</strong> {form.contract_no}
                     <br />
                   </div>
                   <br />
@@ -577,11 +628,13 @@ export default function ContractDetails() {
         )}
 
         {activeTab === "BBLC" && (
-          <div className="summary_details_area">
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
             <div className="text-center">
-              <h3 className="summary-title">BBLC</h3>
+              <h5 className="summary-title text-uppercase">BBLC</h5>
               <div className="summary-info">
                 <strong>Tag Number :</strong> MOD24008
+                <br />
+                <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
@@ -772,83 +825,14 @@ export default function ContractDetails() {
           </div>
         )}
 
-        {activeTab === "Advanced Payment" && (
-          <div className="summary_details_area">
+        {activeTab === "BB Bill" && (
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
             <div className="text-center">
-              <h3 className="summary-title">Advanced Payment</h3>
+              <h5 className="summary-title text-uppercase">BB Bill</h5>
               <div className="summary-info">
                 <strong>Tag Number :</strong> MOD24008
                 <br />
-              </div>
-              <br />
-            </div>
-
-            <div className="section">
-              <table className="summary-table table table-bordered">
-                <thead>
-                  <tr>
-                    <th>Prod.</th>
-                    <th>User Ref No.</th>
-                    <th>Issue Date</th>
-                    <th>Currency</th>
-                    <th>Contract Amt.</th>
-                    <th>Contract Amt. in USD</th>
-                    <th>Import Amt.</th>
-                    <th>Commidity</th>
-                    <th>Source of fund</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>LC24</td>
-                    <td>140424250034</td>
-                    <td>2/6/2025</td>
-                    <td>USD</td>
-                    <td>132741.61</td>
-                    <td>132741.61</td>
-                    <td>132741.61</td>
-                    <td>FABRIC</td>
-                    <td>DFC</td>
-                  </tr>
-                  <tr>
-                    <td>LC24</td>
-                    <td>140424250034</td>
-                    <td>2/6/2025</td>
-                    <td>USD</td>
-                    <td>132741.61</td>
-                    <td>132741.61</td>
-                    <td>132741.61</td>
-                    <td>FABRIC</td>
-                    <td>DFC</td>
-                  </tr>
-
-                  <tr>
-                    <td className="text-end" colSpan={4}>
-                      <strong>TOTAL</strong>
-                    </td>
-                    <td>
-                      <strong>2284572.54</strong>
-                    </td>
-                    <td>
-                      <strong>2284572.54</strong>
-                    </td>
-                    <td>
-                      <strong>2284572.54</strong>
-                    </td>
-                    <td></td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-        {activeTab === "BB Bill" && (
-          <div className="summary_details_area">
-            <div className="text-center">
-              <h3 className="summary-title">BB Bill</h3>
-              <div className="summary-info">
-                <strong>Tag Number :</strong> MOD24008
+                <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
@@ -873,46 +857,248 @@ export default function ContractDetails() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>LC24</td>
-                    <td>140424250034</td>
-                    <td>2/6/2025</td>
+                    <td>140424250025</td>
+                    <td>016BC25242120501</td>
+                    <td>140424250025B01</td>
                     <td>USD</td>
-                    <td>132741.61</td>
-                    <td>0.00</td>
-                    <td>3/8/2025</td>
-                    <td>3/23/2025</td>
-                    <td>99.33</td>
-                    <td>0.00</td>
-                    <td>BUTTON</td>
-                    <td>JINDAL POLY BUTTONS PVT. LTD.</td>
+                    <td>7/30/2024</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                    <td></td>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>DFC</td>
                   </tr>
                   <tr>
-                    <td>LC24</td>
-                    <td>140424250034</td>
-                    <td>2/6/2025</td>
+                    <td>140424250025</td>
+                    <td>016BC25242120501</td>
+                    <td>140424250025B01</td>
                     <td>USD</td>
-                    <td>132741.61</td>
-                    <td>0.00</td>
-                    <td>3/8/2025</td>
-                    <td>3/23/2025</td>
-                    <td>99.33</td>
-                    <td>0.00</td>
-                    <td>BUTTON</td>
-                    <td>JINDAL POLY BUTTONS PVT. LTD.</td>
+                    <td>7/30/2024</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                    <td></td>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>DFC</td>
                   </tr>
                   <tr>
-                    <td>LC24</td>
-                    <td>140424250034</td>
-                    <td>2/6/2025</td>
+                    <td>140424250025</td>
+                    <td>016BC25242120501</td>
+                    <td>140424250025B01</td>
                     <td>USD</td>
-                    <td>132741.61</td>
+                    <td>7/30/2024</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                    <td></td>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>DFC</td>
+                  </tr>
+                  <tr>
+                    <td>140424250025</td>
+                    <td>016BC25242120501</td>
+                    <td>140424250025B01</td>
+                    <td>USD</td>
+                    <td>7/30/2024</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                    <td></td>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>DFC</td>
+                  </tr>
+                  <tr>
+                    <td>140424250025</td>
+                    <td>016BC25242120501</td>
+                    <td>140424250025B01</td>
+                    <td>USD</td>
+                    <td>7/30/2024</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                    <td></td>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>DFC</td>
+                  </tr>
+
+                  <tr>
+                    <td className="text-end" colSpan={5}>
+                      <strong>TOTAL</strong>
+                    </td>
+                    <td>
+                      <strong>2284572.54</strong>
+                    </td>
+                    <td>
+                      <strong>2284572.54</strong>
+                    </td>
+                    <td>
+                      <strong>0.00</strong>
+                    </td>
+                    <td></td>
+                    <td></td>
+
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <br />
+            <br />
+            <div className="row">
+              <div className="col-lg-4">
+                <table className="summary-table table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Particulars</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Total Bill Amount ( in Equivelent USD )</td>
+                      <td>1437189.22</td>
+                    </tr>
+                    <tr>
+                      <td>Total Bill liquidated ( in Equivelent USD )</td>
+                      <td>1399167.51</td>
+                    </tr>
+                    <tr>
+                      <td>Outstanding Accepted Bill ( in Equivelent USD )</td>
+                      <td>38021.71</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <br />
+            <br />
+            <div className="row">
+              <div className="col-lg-4">
+                <table className="summary-table table table-bordered">
+                  <thead>
+                    <tr>
+                      <th>Payment Details ( Liquidation Amount )</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Out of DFC</td>
+                      <td>419943.17</td>
+                    </tr>
+                    <tr>
+                      <td>Out of ERQ</td>
+                      <td>1140574.21</td>
+                    </tr>
+                    <tr>
+                      <td>EDF Loan</td>
+                      <td>1140574.21</td>
+                    </tr>
+                    <tr>
+                      <td>Other( Force Loan )</td>
+                      <td>1140574.21</td>
+                    </tr>
+                    <tr>
+                      <td>Multiple</td>
+                      <td>0.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "Loan" && (
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
+            <div className="text-center">
+              <h5 className="summary-title text-uppercase">Loan</h5>
+              <div className="summary-info">
+                <strong>Tag Number :</strong> MOD24008
+                <br />
+                <strong>Contract :</strong> {form.contract_no}
+                <br />
+              </div>
+              <br />
+            </div>
+
+            <div className="section">
+              <table className="summary-table table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Contract Ref. No.</th>
+                    <th>User Ref. No</th>
+                    <th>Disburs. Date</th>
+                    <th>Currency</th>
+                    <th>Contract Amt.</th>
+                    <th>Prin OS</th>
+                    <th>Accr Intt</th>
+                    <th>Calculated Amt</th>
+                    <th>Maturity Date</th>
+                    <th>Prin Adj.</th>
+                    <th>Intt. Adj.</th>
+                    <th>Total Due </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>016FLAB251530004</td>
+                    <td>140425270003</td>
+                    <td>6/2/2025</td>
+                    <td>BDT</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>9/12/2024</td>
                     <td>0.00</td>
-                    <td>3/8/2025</td>
-                    <td>3/23/2025</td>
-                    <td>99.33</td>
                     <td>0.00</td>
-                    <td>BUTTON</td>
-                    <td>JINDAL POLY BUTTONS PVT. LTD.</td>
+                    <td>13870032.20161</td>
+                  </tr>
+                  <tr>
+                    <td>016FLAB251530004</td>
+                    <td>140425270003</td>
+                    <td>6/2/2025</td>
+                    <td>BDT</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>9/12/2024</td>
+                    <td>0.00</td>
+                    <td>0.00</td>
+                    <td>13870032.20161</td>
+                  </tr>
+                  <tr>
+                    <td>016FLAB251530004</td>
+                    <td>140425270003</td>
+                    <td>6/2/2025</td>
+                    <td>BDT</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>9/12/2024</td>
+                    <td>0.00</td>
+                    <td>0.00</td>
+                    <td>13870032.20161</td>
+                  </tr>
+                  <tr>
+                    <td>016FLAB251530004</td>
+                    <td>140425270003</td>
+                    <td>6/2/2025</td>
+                    <td>BDT</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>13561024.14</td>
+                    <td>9/12/2024</td>
+                    <td>0.00</td>
+                    <td>0.00</td>
+                    <td>13870032.20161</td>
                   </tr>
 
                   <tr>
@@ -922,38 +1108,112 @@ export default function ContractDetails() {
                     <td>
                       <strong>2284572.54</strong>
                     </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
                     <td>
-                      <strong>283206.66</strong>
+                      <strong>2284572.54</strong>
                     </td>
                     <td>
-                      <strong>283206.66</strong>
+                      <strong>2284572.54</strong>
+                    </td>
+                    <td>
+                      <strong>2284572.54</strong>
                     </td>
                     <td></td>
-                    <td></td>
+                    <td>
+                      <strong>0.00</strong>
+                    </td>
+                    <td>
+                      <strong>0.00</strong>
+                    </td>
+                    <td>
+                      <strong>2284572.54</strong>
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <br />
-            <br />
-            <div className="row">
-              <div className="col-lg-5">
-                <table className="summary-table table table-bordered">
-                  <tbody>
-                    <tr>
-                      <td>Total Closed Amount ( in Equivelent USD )</td>
-                      <td>2637.6</td>
-                    </tr>
-                    <tr>
-                      <td>Total EDF LC Amount ( in Equivelent USD )</td>
-                      <td>0.00</td>
-                    </tr>
-                  </tbody>
-                </table>
+          </div>
+        )}
+
+        {activeTab === "DFC Transaction" && (
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
+            <div className="text-center">
+              <h5 className="summary-title text-uppercase">
+                {" "}
+                DFC A/C No: 0161300000107
+              </h5>
+              <div className="summary-info">
+                <strong>Tag Number :</strong> MOD24008
+                <br />
+                <strong>Contract :</strong> {form.contract_no}
+                <br />
               </div>
+              <br />
+            </div>
+
+            <div className="section">
+              <table className="summary-table table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Txn Date</th>
+                    <th>Value Date</th>
+                    <th>Txn Ref No.</th>
+                    <th>Txn Desc</th>
+                    <th>Currency</th>
+                    <th>Dr</th>
+                    <th>Cr</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>016BC25242120501</td>
+                    <td>IMPORT BILL LIQUIDATION</td>
+                    <td>USD</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                  </tr>
+                  <tr>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>016BC25242120501</td>
+                    <td>IMPORT BILL LIQUIDATION</td>
+                    <td>USD</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                  </tr>
+                  <tr>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>016BC25242120501</td>
+                    <td>IMPORT BILL LIQUIDATION</td>
+                    <td>USD</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                  </tr>
+                  <tr>
+                    <td>9/12/2024</td>
+                    <td>9/12/2024</td>
+                    <td>016BC25242120501</td>
+                    <td>IMPORT BILL LIQUIDATION</td>
+                    <td>USD</td>
+                    <td>13572</td>
+                    <td>13572</td>
+                  </tr>
+
+                  <tr>
+                    <td className="text-end" colSpan={5}>
+                      <strong>TOTAL</strong>
+                    </td>
+                    <td>
+                      <strong>2284572.54</strong>
+                    </td>
+                    <td>
+                      <strong>2284572.54</strong>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
 
             <br />
@@ -963,73 +1223,26 @@ export default function ContractDetails() {
                 <table className="summary-table table table-bordered">
                   <thead>
                     <tr>
-                      <th>
-                        Proudct Wise Amount Break-up ( in Equivelent USD )
-                      </th>
+                      <th>Particulars</th>
+                      <th>Currency</th>
                       <th>Amount</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr>
-                      <td>LC24</td>
-                      <td>6934.8</td>
+                      <td>Total Dr</td>
+                      <td>USD</td>
+                      <td>1297411.44</td>
                     </tr>
                     <tr>
-                      <td>LC25</td>
-                      <td>1484517.48</td>
+                      <td>Total Cr</td>
+                      <td>USD</td>
+                      <td>1290707.27</td>
                     </tr>
                     <tr>
-                      <td>LC27</td>
-                      <td>69065.1</td>
-                    </tr>
-
-                    <tr>
-                      <td>
-                        <strong>TOTAL</strong>
-                      </td>
-                      <td>
-                        <strong>1560517.38</strong>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <br />
-            <br />
-            <div className="row">
-              <div className="col-lg-4">
-                <table className="summary-table table table-bordered">
-                  <thead>
-                    <tr>
-                      <th>COMMODITY CATEGORY</th>
-                      <th>Amount</th>
-                      <th>%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>ACCESSORI & OTHERS</td>
-                      <td>419943.17</td>
-                      <td>26.91</td>
-                    </tr>
-                    <tr>
-                      <td>FABRIC</td>
-                      <td>1140574.21</td>
-                      <td>73.09</td>
-                    </tr>
-
-                    <tr>
-                      <td>
-                        <strong>TOTAL</strong>
-                      </td>
-                      <td>
-                        <strong>1560517.38</strong>
-                      </td>
-                      <td>
-                        <strong>100.00</strong>
-                      </td>
+                      <td>Net Balance</td>
+                      <td>USD</td>
+                      <td>6704.17</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1038,22 +1251,16 @@ export default function ContractDetails() {
           </div>
         )}
 
-        {activeTab === "Overview" && (
-          <>
-            <div className="contract-actions no-print">
-              <button onClick={goBack}>← Back</button>
-              <button onClick={handlePrint}>🖨️ Print</button>
-              <button onClick={handleDownloadPDF}>⬇️ Download PDF</button>
-            </div>
-
-            <div className="contract-wrapper" ref={printRef}>
+        {activeTab === "Contract Overview" && (
+          <div className="summary_details_area contract-wrapper">
+            <div className="">
               <p className="buyer-header">
                 {form.buyer_name},<br />
                 {form.buyer_address}
                 <br />
                 Ph: {form.buyer_phone}, Email: {form.buyer_email}
               </p>
-              <h3 className="sub-title">PURCHASE CONTRACT</h3>
+              <h5 className="sub-title">PURCHASE CONTRACT</h5>
 
               <div className="contract-body">
                 {[
@@ -1149,15 +1356,17 @@ export default function ContractDetails() {
                 </div>
               </div>
             </div>
-          </>
+          </div>
         )}
 
         {activeTab === "PO'S" && (
-          <div className="summary_details_area">
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
             <div className="text-center">
-              <h3 className="summary-title">PO'S</h3>
+              <h5 className="summary-title text-uppercase">PO'S</h5>
               <div className="summary-info">
                 <strong>Tag Number :</strong> MOD24008
+                <br />
+                <strong>Contract :</strong> {form.contract_no}
                 <br />
               </div>
               <br />
@@ -1214,6 +1423,124 @@ export default function ContractDetails() {
                     <td>
                       <strong>$13,500</strong>
                     </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "Import Documents" && (
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
+            <div className="text-center">
+              <h5 className="summary-title text-uppercase">Import Documents</h5>
+              <div className="summary-info">
+                <strong>Tag Number :</strong> MOD24008
+                <br />
+                <strong>Contract :</strong> {form.contract_no}
+                <br />
+              </div>
+              <br />
+            </div>
+            <div className="section">
+              <table className="summary-table table table-bordered">
+                <thead>
+                  <tr>
+                    <th>LC</th>
+                    <th>Document No.</th>
+                    <th>Document Value</th>
+                    <th>Issue Date</th>
+                    <th>Expiry Date</th>
+                    <th>Files</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {importDocs.map((group, groupIndex) => {
+                    const total = group.documents.reduce(
+                      (sum, doc) => sum + doc.value,
+                      0
+                    );
+                    return group.documents.map((doc, docIndex) => (
+                      <tr key={`${group.lc}-${doc.docNo}`}>
+                        {/* LC cell only shown on first document of the group */}
+                        {docIndex === 0 ? (
+                          <td rowSpan={group.documents.length}>
+                            <Link to="#">{group.lc}</Link>
+                          </td>
+                        ) : null}
+
+                        <td>{doc.docNo}</td>
+                        <td>{doc.value}</td>
+                        <td>{doc.issueDate}</td>
+                        <td>{doc.expiryDate}</td>
+                        <td>{doc.files.join(", ")}</td>
+
+                        {/* Total only shown on last document of the group */}
+                        {docIndex === group.documents.length - 1 ? (
+                          <td rowSpan={1}>{total}</td>
+                        ) : (
+                          <td></td>
+                        )}
+                      </tr>
+                    ));
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "Export Documents" && (
+          <div className="summary_details_area contract-wrapper" ref={printRef}>
+            <div className="text-center">
+              <h5 className="summary-title text-uppercase">Export Documents</h5>
+              <div className="summary-info">
+                <strong>Tag Number :</strong> MOD24008
+                <br />
+                <strong>Contract :</strong> {form.contract_no}
+                <br />
+              </div>
+              <br />
+            </div>
+            <div className="section">
+              <table className="summary-table table table-bordered">
+                <thead>
+                  <tr>
+                    <th>INVOICE NO.</th>
+                    <th>INVOICE VAL.</th>
+                    <th>SHIPMENT DATE</th>
+                    <th>G.QTY</th>
+                    <th>FILES</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <Link to="#">INV-001</Link>
+                    </td>
+                    <td>$56000</td>
+                    <td>25-10-2025</td>
+                    <td>800 PCS</td>
+                    <td>inv-1.pdf, inv-2.pdf</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <Link to="#">INV-002</Link>
+                    </td>
+                    <td>$56000</td>
+                    <td>25-10-2025</td>
+                    <td>800 PCS</td>
+                    <td>inv-1.pdf, inv-2.pdf</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <Link to="#">INV-003</Link>
+                    </td>
+                    <td>$56000</td>
+                    <td>25-10-2025</td>
+                    <td>800 PCS</td>
+                    <td>inv-1.pdf, inv-2.pdf</td>
                   </tr>
                 </tbody>
               </table>

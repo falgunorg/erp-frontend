@@ -58,6 +58,26 @@ export default function MailFolders(props) {
             const data = await foldersResponse.json();
             let allFolders = data.value;
 
+            // const fetchSubfolders = async (parentFolder) => {
+            //   const subfoldersResponse = await fetch(
+            //     `${process.env.REACT_APP_MICROSOFT_API_URL}/me/mailFolders/${parentFolder.id}/childFolders?$top=999&$select=displayName,unreadItemCount`,
+            //     {
+            //       method: "GET",
+            //       headers: {
+            //         Authorization: `Bearer ${accessToken}`,
+            //         "Content-Type": "application/json",
+            //       },
+            //     }
+            //   );
+
+            //   if (subfoldersResponse.ok) {
+            //     const subfolderData = await subfoldersResponse.json();
+            //     parentFolder.subfolders = subfolderData.value || [];
+            //   } else {
+            //     parentFolder.subfolders = [];
+            //   }
+            // };
+
             const fetchSubfolders = async (parentFolder) => {
               const subfoldersResponse = await fetch(
                 `${process.env.REACT_APP_MICROSOFT_API_URL}/me/mailFolders/${parentFolder.id}/childFolders?$top=999&$select=displayName,unreadItemCount`,
@@ -72,7 +92,13 @@ export default function MailFolders(props) {
 
               if (subfoldersResponse.ok) {
                 const subfolderData = await subfoldersResponse.json();
-                parentFolder.subfolders = subfolderData.value || [];
+                const subfolders = subfolderData.value || [];
+                parentFolder.subfolders = subfolders;
+
+                // ✅ recursively fetch sub-subfolders
+                for (const subfolder of subfolders) {
+                  await fetchSubfolders(subfolder);
+                }
               } else {
                 parentFolder.subfolders = [];
               }
@@ -319,7 +345,67 @@ export default function MailFolders(props) {
     return () => clearInterval(intervalId);
   }, [instance, accounts]); // Re-run when accounts or instance changes
 
+  const renderSubfolders = (subfolders) => (
+    <ul style={{ marginLeft: "15px" }}>
+      {subfolders.map((subfolder) => (
+        <li style={{ position: "relative" }} key={subfolder.id}>
+          <button
+            className={
+              props.mailFolder.folderId === subfolder.id ? "active" : ""
+            }
+            onContextMenu={(e) => handleContextMenu(e, subfolder)}
+            onClick={() => {
+              props.setSelectedMailIds([]);
+              props.setMailFolder({
+                folderName: subfolder.displayName,
+                folderId: subfolder.id,
+              });
+              props.setMailSearchData([]);
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <span>{subfolder.displayName}</span>
 
+            {subfolder.subfolders && subfolder.subfolders.length > 0 && (
+              <span
+                className="expand-arrow"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedFolders((prev) => ({
+                    ...prev,
+                    [subfolder.id]: !prev[subfolder.id],
+                  }));
+                }}
+                style={{ marginLeft: "8px", cursor: "pointer", width: "20px" }}
+              >
+                {expandedFolders[subfolder.id] ? (
+                  <ArrowDownIcon />
+                ) : (
+                  <ArrowRightIcon />
+                )}
+              </span>
+            )}
+
+            {subfolder.unreadItemCount > 0 && (
+              <span style={{ marginLeft: "8px" }}>
+                {subfolder.unreadItemCount}
+              </span>
+            )}
+          </button>
+
+          {/* 🔁 Recursively render child folders */}
+          {expandedFolders[subfolder.id] &&
+            subfolder.subfolders &&
+            subfolder.subfolders.length > 0 &&
+            renderSubfolders(subfolder.subfolders)}
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <div
@@ -510,12 +596,35 @@ export default function MailFolders(props) {
                               ? "active"
                               : ""
                           }
-                          onClick={() => toggleFolder(folder.id)}
                           onContextMenu={(e) => handleContextMenu(e, folder)}
+                          onClick={() => {
+                            // ✅ Only change folder (don’t toggle expand here)
+                            props.setSelectedMailIds([]);
+                            props.setMailSearchData([]);
+                            props.setMailFolder({
+                              folderName: folder.displayName,
+                              folderId: folder.id,
+                            });
+                          }}
                         >
                           {folder.displayName}
 
-                          <span>
+                          {/* 🔽 The arrow toggles subfolders only */}
+                          <span
+                            className="expand-arrow"
+                            onClick={(e) => {
+                              e.stopPropagation(); // 🛑 prevent button click from firing
+                              setExpandedFolders((prev) => ({
+                                ...prev,
+                                [folder.id]: !prev[folder.id],
+                              }));
+                            }}
+                            style={{
+                              marginLeft: "8px",
+                              cursor: "pointer",
+                              width: "20px",
+                            }}
+                          >
                             {expandedFolders[folder.id] ? (
                               <ArrowDownIcon />
                             ) : (
@@ -523,6 +632,7 @@ export default function MailFolders(props) {
                             )}
                           </span>
                         </button>
+
                         {contextMenu.visible &&
                           contextMenu.folder?.id === folder.id && (
                             <div
@@ -574,98 +684,9 @@ export default function MailFolders(props) {
                             </div>
                           )}
 
-                        {expandedFolders[folder.id] && folder.subfolders && (
-                          <ul style={{ marginLeft: "15px" }}>
-                            {folder.subfolders.map((subfolder) => (
-                              <li
-                                style={{ position: "relative" }}
-                                key={subfolder.id}
-                              >
-                                <button
-                                  className={
-                                    props.mailFolder.folderId === subfolder.id
-                                      ? "active"
-                                      : ""
-                                  }
-                                  onClick={() => {
-                                    props.setSelectedMailIds([]);
-                                    props.setMailFolder({
-                                      folderName: subfolder.displayName,
-                                      folderId: subfolder.id,
-                                    });
-                                    props.setMailSearchData([]);
-                                  }}
-                                  onContextMenu={(e) =>
-                                    handleContextMenu(e, subfolder)
-                                  }
-                                >
-                                  {subfolder.displayName}
-                                  {subfolder.unreadItemCount > 0 && (
-                                    <span>{subfolder.unreadItemCount}</span>
-                                  )}
-                                </button>
-                                {contextMenu.visible &&
-                                  contextMenu.folder?.id === subfolder.id && (
-                                    <div
-                                      style={{
-                                        background: "#fff",
-                                        border: "1px solid #ccc",
-                                        position: "absolute",
-                                        borderRadius: "5px",
-                                        top: "0px",
-                                        right: "0px",
-                                        zIndex: "9999",
-                                      }}
-                                      className="context_menu"
-                                    >
-                                      <ul
-                                        style={{
-                                          fontSize: "11px",
-                                          padding: "5px",
-                                        }}
-                                      >
-                                        <li>
-                                          <button
-                                            onClick={() =>
-                                              toggleFavoriteFolder(
-                                                contextMenu.folder
-                                              )
-                                            }
-                                          >
-                                            {favoriteFolders.some(
-                                              (fav) =>
-                                                fav.id === contextMenu.folder.id
-                                            )
-                                              ? "Remove from Favorites"
-                                              : "Add to Favorites"}
-                                          </button>
-                                        </li>
-
-                                        <li>
-                                          <button
-                                            onClick={() =>
-                                              console.log("Hide folder logic")
-                                            }
-                                          >
-                                            Mark All Read
-                                          </button>
-                                        </li>
-                                        <li>
-                                          <button
-                                            onClick={() =>
-                                              console.log("Hide folder logic")
-                                            }
-                                          >
-                                            Mark All Unread
-                                          </button>
-                                        </li>
-                                      </ul>
-                                    </div>
-                                  )}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                        {expandedFolders[folder.id] &&
+                          folder.subfolders &&
+                          renderSubfolders(folder.subfolders)}
                       </li>
                     );
                   })

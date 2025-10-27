@@ -38,7 +38,7 @@ export default function MailDetails(props) {
   const fetchEmailDetails = async (mailID, signal) => {
     try {
       const accessToken = await getAccessToken();
-      const email = props.emails.find((email) => email.id === mailID);
+      const email = props.unitedAllMails.find((email) => email.id === mailID);
 
       if (!email) throw new Error("Email not found.");
 

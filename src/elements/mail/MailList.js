@@ -797,6 +797,8 @@ export default function MailList(props) {
 
   const flatEmails = Object.values(groupedEmails).flat();
 
+  console.log("FLATEMAIL", flatEmails);
+
   const itemRefs = useRef([]);
 
   // Handle keydown events for ArrowUp and ArrowDown
@@ -865,6 +867,22 @@ export default function MailList(props) {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    // Flatten expandedChains into a single array
+    const chainMails = Object.values(expandedChains).flat().filter(Boolean);
+
+    // Combine emails + chain mails
+    const combined = [...props.emails, ...chainMails];
+
+    // Deduplicate by ID
+    const uniqueMails = combined.reduce((acc, mail) => {
+      if (!acc.some((m) => m.id === mail.id)) acc.push(mail);
+      return acc;
+    }, []);
+
+    props.setUnitedAllMails(uniqueMails);
+  }, [props.emails, expandedChains]);
 
   return (
     <div

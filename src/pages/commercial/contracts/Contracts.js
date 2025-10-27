@@ -169,7 +169,11 @@ export default function Contracts() {
               filtered.map((c, i) => (
                 <tr key={c.id}>
                   <td>{i + 1}</td>
-                  <td>{c.contract_no}</td>
+                  <td>
+                    <Link to={"/commercial/contracts/details/" + c.id}>
+                      {c.contract_no}
+                    </Link>
+                  </td>
                   <td>{c.date}</td>
                   <td>{c.buyer}</td>
                   <td>{c.port_of_loading}</td>

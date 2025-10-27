@@ -732,6 +732,7 @@ export default function MailActionHeader(props) {
               <DropdownButton
                 id="dropdown-basic-button"
                 title="Move to"
+                variant="info"
                 style={{ display: "inline-block" }}
                 disabled={
                   props.isComposing || props.selectedMailIds.length === 0
@@ -811,6 +812,7 @@ export default function MailActionHeader(props) {
                 title="Move to"
                 style={{ display: "inline-block" }}
                 disabled={!props.mailID}
+                variant="info"
               >
                 {folders.map((folder, index) => (
                   <Dropdown.Item
@@ -838,96 +840,6 @@ export default function MailActionHeader(props) {
             </>
           )}
         </>
-
-        {/* {props.isComposing ? null : props.selectedMailIds.length > 1 ? (
-          <>  
-            {props.mailFolder.folderName === "Deleted Items" ? (
-              <>
-                <button
-                  onClick={() => bulkRestore(props.selectedMailIds)}
-                  className="text-success"
-                >
-                  Restore All
-                </button>
-                <button
-                  onClick={() => bulkPermanentDelete(props.selectedMailIds)}
-                >
-                  Permanently Delete
-                </button>
-              </>
-            ) : (
-              <button onClick={() => bulkDelete(props.selectedMailIds)}>
-                Delete All
-              </button>
-            )}
-            {props.mailFolder.folderName !== "Archive" && (
-              <button onClick={() => bulkArchive(props.selectedMailIds)}>
-                Archive
-              </button>
-            )}
-            <DropdownButton
-              id="dropdown-basic-button"
-              title="Move to"
-              style={{ display: "inline-block" }}
-            >
-              {folders.map((folder, index) => (
-                <Dropdown.Item
-                  key={index}
-                  onClick={() => bulkMove(props.selectedMailIds, folder.id)}
-                >
-                  {folder.displayName}
-                </Dropdown.Item>
-              ))}
-            </DropdownButton>
-            <button onClick={() => bulkRead(props.selectedMailIds)}>
-              Read
-            </button>
-            <button onClick={() => bulkUnread(props.selectedMailIds)}>
-              Unread
-            </button>
-          </>
-        ) : props.mailID ? (
-          <>
-            {props.mailFolder.folderName === "Deleted Items" ? (
-              <>
-                <button
-                  onClick={() => mailMinimize.handleRestore(props.mailID)}
-                  className="text-success"
-                >
-                  Restore
-                </button>
-                <button onClick={() => handlePermanentDelete(props.mailID)}>
-                  Permanently Delete
-                </button>
-              </>
-            ) : (
-              <button onClick={() => handleDelete(props.mailID)}>Delete</button>
-            )}
-            {props.mailFolder.folderName !== "Archive" && (
-              <button onClick={() => mailMinimize.archiveMail(props.mailID)}>
-                Archive
-              </button>
-            )}
-            <DropdownButton
-              id="dropdown-basic-button"
-              title="Move to"
-              style={{ display: "inline-block" }}
-            >
-              {folders.map((folder, index) => (
-                <Dropdown.Item
-                  key={index}
-                  onClick={() => mailMinimize.moveMail(props.mailID, folder.id)}
-                >
-                  {folder.displayName}
-                </Dropdown.Item>
-              ))}
-            </DropdownButton>
-            <button onClick={() => mailMinimize.markAsRead(props.mailID)}>
-              Read
-            </button>
-            <button onClick={() => markAsUnread(props.mailID)}>Unread</button>
-          </>
-        ) : null} */}
       </div>
       <div className="actions_right">
         <div className="toolbar_area">
