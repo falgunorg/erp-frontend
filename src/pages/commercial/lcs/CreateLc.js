@@ -3,13 +3,17 @@ import { Link, useHistory } from "react-router-dom";
 import api from "services/api";
 import Spinner from "../../../elements/Spinner";
 import swal from "sweetalert";
-import Select from "react-select";
+import CustomSelect from "elements/CustomSelect";
 import moment from "moment";
+import Logo from "../../../assets/images/logos/logo-short.png";
+import MultipleFileInput from "elements/techpack/MultipleFileInput";
 
 export default function CreateLc(props) {
   const history = useHistory();
   const userInfo = props.userData;
   const [spinner, setSpinner] = useState(false);
+
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   // Contracts
   const [contracts, setContracts] = useState([]);
@@ -22,27 +26,6 @@ export default function CreateLc(props) {
       console.log(response.data);
     }
     setSpinner(false);
-  };
-
-  const [banks, setBanks] = useState([]);
-  const getBanks = async () => {
-    setSpinner(true);
-    var response = await api.get("/common/banks");
-    if (response.status === 200 && response.data) {
-      setBanks(response.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
-  // currencys
-  const [currencies, setCurrencies] = useState([]);
-  const getCurrencies = async () => {
-    var response = await api.get("/common/currencies");
-    if (response.status === 200 && response.data) {
-      setCurrencies(response.data);
-    }
   };
 
   // get all proformas
@@ -82,8 +65,6 @@ export default function CreateLc(props) {
     contract_id: "",
     supplier_id: "",
     proformas: [],
-    currency: "",
-    bank: "",
     lc_number: "",
     lc_validity: "",
     apply_date: "",
@@ -126,18 +107,10 @@ export default function CreateLc(props) {
     if (!formDataSet.lc_number) {
       formErrors.lc_number = "lc Number is required";
     }
-    if (!formDataSet.currency) {
-      formErrors.currency = "Currency is required";
-    }
-    if (!formDataSet.bank) {
-      formErrors.bank = "Please Inter a Valid Bank Name";
-    }
 
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
-
-
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -146,8 +119,6 @@ export default function CreateLc(props) {
       data.append("contract_id", formDataSet.contract_id);
       data.append("supplier_id", formDataSet.supplier_id);
       data.append("proformas", formDataSet.proformas);
-      data.append("bank", formDataSet.bank);
-      data.append("currency", formDataSet.currency);
       data.append("lc_number", formDataSet.lc_number);
       data.append("lc_validity", formDataSet.lc_validity);
       data.append("apply_date", formDataSet.apply_date);
@@ -171,8 +142,6 @@ export default function CreateLc(props) {
     getContracts();
     getSuppliers();
     getProformas();
-    getCurrencies();
-    getBanks();
   }, []);
 
   useEffect(async () => {
@@ -195,15 +164,18 @@ export default function CreateLc(props) {
   }, [props, history]);
 
   return (
-    <div className="create_edit_page">
+    <div className="create_edit_page create_technical_pack">
       {spinner && <Spinner />}
-      <form onSubmit={handleSubmit}>
-        <div className="create_page_heading">
-          <div className="page_name">Add New LC (Letter Of Credit)</div>
-          <div className="actions">
+      <form onSubmit={handleSubmit} className="create_tp_body">
+        <div className="d-flex align-items-end justify-content-between">
+          <div className="d-flex align-items-end">
+            <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
+            <h4 className="m-0">ADD NEW BBLC</h4>
+          </div>
+          <div className="d-flex align-items-end">
             <button
               type="supmit"
-              className="publish_btn btn btn-warning bg-falgun"
+              className="publish_btn btn btn-warning bg-falgun me-4"
             >
               Save
             </button>
@@ -215,15 +187,16 @@ export default function CreateLc(props) {
             </Link>
           </div>
         </div>
+        <hr />
         <div className="col-lg-12">
           <div className="personal_data">
             <div className="row">
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>
-                    Purchase Contract<sup>*</sup>
+                  <label className="form-label">
+                    Purchase Contract<span className="text-danger">*</span>
                   </label>
-                  <Select
+                  <CustomSelect
                     placeholder="Select or Search"
                     onChange={(selectedOption) =>
                       handleChange("contract_id", selectedOption.value)
@@ -256,10 +229,10 @@ export default function CreateLc(props) {
 
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>
-                    Supplier <sup>*</sup>
+                  <label className="form-label">
+                    Supplier <span className="text-danger">*</span>
                   </label>
-                  <Select
+                  <CustomSelect
                     placeholder="Select or Search"
                     onChange={(selectedOption) =>
                       handleChange("supplier_id", selectedOption.value)
@@ -287,10 +260,10 @@ export default function CreateLc(props) {
               </div>
               <div className="col-lg-6">
                 <div className="form-group">
-                  <label>
-                    Proforma Invoices<sup>*</sup>
+                  <label className="form-label">
+                    Proforma Invoices<span className="text-danger">*</span>
                   </label>
-                  <Select
+                  <CustomSelect
                     isMulti
                     name="proformas"
                     placeholder="Select or Search"
@@ -336,75 +309,8 @@ export default function CreateLc(props) {
 
               <div className="col-lg-3">
                 <div className="form-group">
-                  <br />
-                  <label>
-                    Currency<sup>*</sup>
-                  </label>
-
-                  <Select
-                    placeholder="Select or Search"
-                    onChange={(selectedOption) =>
-                      handleChange("currency", selectedOption.value)
-                    }
-                    value={
-                      currencies.find(
-                        (item) => item.code === formDataSet.currency
-                      )
-                        ? {
-                            value: formDataSet.currency,
-                            label:
-                              currencies.find(
-                                (item) => item.code === formDataSet.currency
-                              ).code || "",
-                          }
-                        : null
-                    }
-                    name="currency"
-                    options={currencies.map((item) => ({
-                      value: item.code,
-                      label: item.code,
-                    }))}
-                  />
-                  {errors.currency && (
-                    <div className="errorMsg">{errors.currency}</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <br />
-                  <label>
-                    Bank Name <sup>*</sup>
-                  </label>
-                  <select
-                    name="bank"
-                    value={formDataSet.bank}
-                    onChange={(event) =>
-                      handleChange("bank", event.target.value)
-                    }
-                    className="form-select"
-                  >
-                    <option value="">Select Bank</option>
-                    {banks.length > 0 ? (
-                      banks.map((item, index) => (
-                        <option key={index} value={item.id}>
-                          {item.title}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">No bank found</option>
-                    )}
-                  </select>
-                  {errors.bank && <div className="errorMsg">{errors.bank}</div>}
-                </div>
-              </div>
-
-              <div className="col-lg-3">
-                <br />
-                <div className="form-group">
-                  <label>
-                    LC Number <sup>*</sup>
+                  <label className="form-label">
+                    LC Number <span className="text-danger">*</span>
                   </label>
                   <input
                     type="text"
@@ -423,8 +329,7 @@ export default function CreateLc(props) {
 
               <div className="col-lg-3">
                 <div className="form-group">
-                  <br />
-                  <label>LC Validity</label>
+                  <label className="form-label">LC Validity</label>
                   <select
                     value={formDataSet.lc_validity}
                     onChange={(event) =>
@@ -444,7 +349,7 @@ export default function CreateLc(props) {
 
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Apply Date</label>
+                  <label className="form-label">Apply Date</label>
                   <input
                     type="date"
                     name="apply_date"
@@ -458,7 +363,7 @@ export default function CreateLc(props) {
               </div>
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Issued Date</label>
+                  <label className="form-label">Issued Date</label>
                   <input
                     type="date"
                     name="issued_date"
@@ -472,7 +377,7 @@ export default function CreateLc(props) {
               </div>
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Maturity Date</label>
+                  <label className="form-label">Maturity Date</label>
                   <input
                     type="date"
                     name="maturity_date"
@@ -486,7 +391,7 @@ export default function CreateLc(props) {
               </div>
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Paid Date</label>
+                  <label className="form-label">Paid Date</label>
                   <input
                     type="date"
                     name="paid_date"
@@ -500,7 +405,7 @@ export default function CreateLc(props) {
               </div>
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Commodity</label>
+                  <label className="form-label">Commodity</label>
                   <input
                     type="text"
                     onChange={(event) =>
@@ -515,7 +420,7 @@ export default function CreateLc(props) {
 
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>PCC Avail</label>
+                  <label className="form-label">PCC Avail</label>
                   <input
                     type="text"
                     name="pcc_avail"
@@ -524,6 +429,18 @@ export default function CreateLc(props) {
                       handleChange("pcc_avail", event.target.value)
                     }
                     className="form-control"
+                  />
+                </div>
+              </div>
+
+              <div className="col-lg-12">
+                <div className="create_tp_attatchment">
+                  <br />
+                  <MultipleFileInput
+                    label="Attatchments"
+                    inputId="Attatchments"
+                    selectedFiles={selectedFiles}
+                    setSelectedFiles={setSelectedFiles}
                   />
                 </div>
               </div>
@@ -568,21 +485,85 @@ export default function CreateLc(props) {
                       </td>
                     </tr>
                   ))}
-                  <br />
-                  <br />
-                  <tr className="text-center">
-                    <td colSpan={10}>
-                      <h5>Items Value</h5>
+
+                  <tr>
+                    <td colSpan={8}>
+                      <strong>TOTAL</strong>
                     </td>
                     <td>
-                      <h5>{netTotal}</h5>
+                      <strong>0.00</strong>
+                    </td>
+                    <td>
+                      <strong>0.00</strong>
+                    </td>
+                    <td>
+                      <strong>0.00</strong>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              <br />
-              <br />
-              <br />
+            </div>
+
+            <br />
+
+            <div className="card-body row g-3">
+              <div className="col-lg-3">
+                <label className="form-label">
+                  Payment Terms <span className="text-danger">*</span>
+                </label>
+                <input
+                  className="form-control"
+                  value={formDataSet.payment_terms}
+                  onChange={(e) =>
+                    handleChange("payment_terms", e.target.value)
+                  }
+                />
+              </div>
+              <div className="col-lg-3">
+                <label className="form-label">
+                  Mode of Shipment <span className="text-danger">*</span>
+                </label>
+                <input
+                  className="form-control"
+                  value={formDataSet.mode_of_shipment}
+                  onChange={(e) =>
+                    handleChange("mode_of_shipment", e.target.value)
+                  }
+                />
+              </div>
+              <div className="col-lg-3">
+                <label className="form-label">
+                  Port of Loading <span className="text-danger">*</span>
+                </label>
+                <input
+                  className="form-control"
+                  value={formDataSet.port_of_loading}
+                  onChange={(e) =>
+                    handleChange("port_of_loading", e.target.value)
+                  }
+                />
+              </div>
+              <div className="col-lg-3">
+                <label className="form-label">
+                  Port of Discharge <span className="text-danger">*</span>
+                </label>
+                <input
+                  className="form-control"
+                  value={formDataSet.port_of_discharge}
+                  onChange={(e) =>
+                    handleChange("port_of_discharge", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="col-lg-12">
+                <label className="form-label">Description</label>
+                <textarea
+                  className="form-control"
+                  value={formDataSet.description}
+                  onChange={(e) => handleChange("description", e.target.value)}
+                ></textarea>
+              </div>
             </div>
           </div>
         </div>

@@ -286,13 +286,23 @@ export default function Sidebar(props) {
                   <li>
                     <Link
                       className={
-                        location.pathname === "/purchase-contracts"
+                        location.pathname === "/commercial/contracts"
                           ? "active"
                           : ""
                       }
                       to="/commercial/contracts"
                     >
                       PC
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={
+                        location.pathname === "/commercial/lcs" ? "active" : ""
+                      }
+                      to="/commercial/lcs"
+                    >
+                      BB
                     </Link>
                   </li>
                   <li>

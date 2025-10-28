@@ -10,9 +10,21 @@ export default function CreateContracts() {
 
   const [buyers, setBuyers] = useState([]);
   const [companies, setCompanies] = useState([]);
-  const [banks, setBanks] = useState([]);
+
   const [agents, setAgents] = useState([]);
   const [spinner, setSpinner] = useState(false);
+
+  const [banks, setBanks] = useState([]);
+  const getBanks = async () => {
+    setSpinner(true);
+    var response = await api.get("/common/banks");
+    if (response.status === 200 && response.data) {
+      setBanks(response.data);
+    } else {
+      console.log(response.data);
+    }
+    setSpinner(false);
+  };
 
   const [form, setForm] = useState({
     contract_no: "",
@@ -499,16 +511,12 @@ export default function CreateContracts() {
   };
 
   return (
-    <div className="tna_page">
-      <div className="d-flex align-items-center mb-4">
-        <i
-          onClick={goBack}
-          className="fa fa-angle-left me-3"
-          style={{ fontSize: 25, cursor: "pointer" }}
-        />
+    <div className="tna_page create_technical_pack">
+      <div className="d-flex align-items-center">
         <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
         <h4 className="m-0">Create Purchase Contract</h4>
       </div>
+      <hr />
 
       <div className="tna_page_topbar mb-4">
         {steps.map((s, i) => (

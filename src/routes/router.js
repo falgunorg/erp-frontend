@@ -618,27 +618,6 @@ class PrivateRoutes extends Component {
             path="/commercial/hscodes-create"
             component={CreateHscode}
           ></PrivateRoute>
-          {/* LC */}
-          <PrivateRoute
-            exact
-            path="/commercial/lcs"
-            component={Lcs}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/commercial/lcs-create"
-            component={CreateLc}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/commercial/lcs-edit/:id?"
-            component={EditLc}
-          ></PrivateRoute>
-          <PrivateRoute
-            exact
-            path="/commercial/lcs-show/:id?"
-            component={LcDetails}
-          ></PrivateRoute>
           {/* Department of Finishing */}
           {/* LEFTOVERS */}
           <PrivateRoute
@@ -1239,6 +1218,27 @@ class PrivateRoutes extends Component {
             exact
             path="/commercial/contracts/edit/:id?"
             component={EditContracts}
+          ></PrivateRoute>
+          {/* LC */}
+          <PrivateRoute
+            exact
+            path="/commercial/lcs"
+            component={Lcs}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/commercial/lcs-create"
+            component={CreateLc}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/commercial/lcs-edit/:id?"
+            component={EditLc}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/commercial/lcs-show/:id?"
+            component={LcDetails}
           ></PrivateRoute>
           <Redirect path="*" to="/dashboard" />
         </Switch>

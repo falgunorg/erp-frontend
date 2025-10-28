@@ -4,6 +4,7 @@ import api from "../../../services/api";
 import Spinner from "../../../elements/Spinner";
 import swal from "sweetalert";
 import moment from "moment";
+import Logo from "../../../assets/images/logos/logo-short.png";
 
 export default function Lcs(props) {
   const [spinner, setSpinner] = useState(false);
@@ -87,66 +88,61 @@ export default function Lcs(props) {
   }, [props, history]);
 
   return (
-    <div className="create_edit_page">
-      {spinner && <Spinner />}
-      <div className="create_page_heading">
-        <div className="page_name">Lcs</div>
-        <div className="actions">
-          <input
-            type="search"
-            onChange={(e) => setSearchValue(e.target.value)}
-            value={searchValue}
-            className="form-control"
-            placeholder="Search"
-          />
-
-          {props.rolePermission?.Employee?.add_edit ? (
-            <Link
-              to="/commercial/lcs-create"
-              className="btn btn-warning bg-falgun rounded-circle"
-            >
-              <i className="fal fa-plus"></i>
-            </Link>
-          ) : (
-            ""
-          )}
-        </div>
+    <div className="create_edit_page create_technical_pack">
+      <div className="d-flex align-items-center">
+        <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
+        <h4 className="m-0">BBLC</h4>
       </div>
+      <hr />
+      {spinner && <Spinner />}
+
       <div className="employee_lists">
-        <div className="datrange_filter">
-          <div className="row">
-            <div className="col-lg-2">
+        <div className="datrange_filter create_tp_body">
+          <div className="row align-items-end">
+            <div className="col">
+              <div className="form-group">
+                <label>Search</label>
+                <input
+                  type="search"
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  value={searchValue}
+                  className="form-control margin_bottom_0"
+                  placeholder="Search By BBLC NO"
+                />
+              </div>
+            </div>
+            <div className="col">
               <div className="form-group">
                 <label>From Date</label>
                 <input
                   value={filterData.from_date}
                   onChange={filterChange}
                   name="from_date"
-                  className="form-control"
+                  className="form-control margin_bottom_0"
                   type="date"
                 />
               </div>
             </div>
-            <div className="col-lg-2">
+            <div className="col">
               <div className="form-group">
                 <label>To Date</label>
                 <input
                   onChange={filterChange}
                   value={filterData.to_date}
                   name="to_date"
-                  className="form-control"
+                  className="form-control margin_bottom_0"
                   type="date"
                 />
               </div>
             </div>
-            <div className="col-lg-2">
+            <div className="col">
               <div className="form-group">
                 <label>Supplier</label>
                 <select
                   onChange={filterChange}
                   value={filterData.supplier_id}
                   name="supplier_id"
-                  className="form-select"
+                  className="form-select margin_bottom_0"
                 >
                   <option value="">Select supplier</option>
                   {suppliers.map((item, index) => (
@@ -157,14 +153,14 @@ export default function Lcs(props) {
                 </select>
               </div>
             </div>
-            <div className="col-lg-2">
+            <div className="col">
               <div className="form-group">
                 <label>Status</label>
                 <select
                   onChange={filterChange}
                   name="status"
                   value={filterData.status}
-                  className="form-select"
+                  className="form-select margin_bottom_0"
                 >
                   <option value="">Select Status</option>
                   <option value="Pending">Pending</option>
@@ -176,40 +172,47 @@ export default function Lcs(props) {
                 </select>
               </div>
             </div>
-            <div className="col-lg-2">
+            <div className="col">
               <div className="form-group">
                 <label>NUM Of Rows</label>
-                <div className="d-flex gap_10">
-                  <select
-                    onChange={filterChange}
-                    value={filterData.num_of_row}
-                    name="num_of_row"
-                    className="form-select margin_bottom_0"
-                  >
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                    <option value="75">75</option>
-                    <option value="100">100</option>
-                  </select>
-                  <Link className="btn btn-warning" onClick={clearFields}>
-                    <i className="fas fa-retweet"></i>
-                  </Link>
-                </div>
+
+                <select
+                  onChange={filterChange}
+                  value={filterData.num_of_row}
+                  name="num_of_row"
+                  className="form-select margin_bottom_0"
+                >
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                  <option value="75">75</option>
+                  <option value="100">100</option>
+                </select>
               </div>
+            </div>
+            <div className="col">
+              <div className="form-group">
+                <Link className="btn btn-warning me-4" onClick={clearFields}>
+                  <i className="fas fa-retweet"></i>
+                </Link>
+                <Link to="/commercial/lcs-create" className="btn btn-primary">
+                  Create New
+                </Link>
+              </div>
+              <></>
             </div>
           </div>
         </div>
 
         <div className="table-responsive">
-          <table className="table text-start align-middle table-bordered table-hover mb-0">
-            <thead className="bg-dark text-white">
+          <table className="table table-bordered align-middle">
+            <thead className="table-light">
               <tr>
                 <th>SL</th>
                 <th>LC No</th>
                 <th>PC</th>
                 <th>Apply Date</th>
                 <th>Issued Date</th>
-                <th>Bank</th>
+
                 <th>Supplier</th>
                 <th>Validity</th>
                 <th>PI'S</th>
@@ -253,7 +256,6 @@ export default function Lcs(props) {
                             ? moment(item.issued_date).format("ll")
                             : "N/A"}
                         </td>
-                        <td>{item.bank_name}</td>
                         <td>{item.supplier}</td>
                         <td>{item.lc_validity}</td>
                         <td>

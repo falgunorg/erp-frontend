@@ -3,6 +3,7 @@ import Logo from "../../../assets/images/logos/logo-short.png";
 import { useHistory, Link } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import * as XLSX from "xlsx";
+import SummaryDashboard from "./parts/SummaryDashboard";
 
 export default function ContractDetails() {
   const history = useHistory();
@@ -14,6 +15,86 @@ export default function ContractDetails() {
 
   const [form, setForm] = useState({});
   const [goods, setGoods] = useState([]);
+
+  const summaryData = {
+    export: {
+      totalValue: 111078.92,
+      rows: [
+        {
+          desc: "TOTAL EXPORT LC/CONTRACT VALUE",
+          ccy: "USD",
+          amount: 111078.92,
+        },
+        { desc: "TOTAL EXPORT BILL SUBMITTED", ccy: "USD", amount: 70219.52 },
+        { desc: "TOTAL EXPORT BILL LIQUIDATED", ccy: "USD", amount: 70219.52 },
+        { desc: "LIQUIDATED AMOUNT", ccy: "USD", amount: 70174.52 },
+        { desc: "REMAINING EXPORT", ccy: "USD", amount: 40859.4 },
+      ],
+    },
+    import: {
+      totalImport: 77011.61,
+      rows: [
+        { desc: "TOTAL BBLC AMOUNT FOR IMPORT", ccy: "USD", amount: 77011.61 },
+        { desc: "TOTAL ADVANCE PAYMENT FOR IMPORT", ccy: "USD", amount: 0.0 },
+        { desc: "TOTAL BB BILL", ccy: "USD", amount: 77011.61 },
+        { desc: "TOTAL BB BILL SETTLED", ccy: "USD", amount: 77011.61 },
+        { desc: "BB BILL OUTSTANDING", ccy: "USD", amount: 0.0 },
+        { desc: "% BB IMPORT", ccy: "%", amount: 69.33 },
+        { desc: "TOTAL IMPORT", ccy: "USD", amount: 77011.61 },
+      ],
+    },
+    packingCredit: {
+      rows: [
+        { desc: "PC DISBURSED", ccy: "BDT", amount: 0.0 },
+        { desc: "PC OUTSTANDING (PR.+INT.+Cal.)", ccy: "BDT", amount: 0.0 },
+      ],
+    },
+    edfLoan: {
+      rows: [
+        { desc: "EDF LOAN DISBURSED", ccy: "USD", amount: 0.0 },
+        {
+          desc: "EDF LOAN OUTSTANDING (PR.+INT.+Cal.)",
+          ccy: "USD",
+          amount: 0.0,
+        },
+      ],
+    },
+    forceLoan: {
+      rows: [
+        { desc: "FORCE LOAN DISBURSED", ccy: "BDT", amount: 217372.28 },
+        {
+          desc: "FORCE LOAN OUTSTANDING (PR.+INT.+Cal.)",
+          ccy: "BDT",
+          amount: 0.0,
+        },
+      ],
+    },
+    otherLoan: {
+      rows: [
+        { desc: "TOTAL OTHER LOAN DISBURSED", ccy: "BDT", amount: 0.0 },
+        {
+          desc: "TOTAL OTHER LOAN OUTSTANDING (PR.+INT.+Cal.)",
+          ccy: "BDT",
+          amount: 0.0,
+        },
+      ],
+    },
+    dfc: {
+      rows: [
+        { desc: "TOTAL CREDIT TO DFC", ccy: "USD", amount: 68112.93 },
+        {
+          desc: "TOTAL CREDIT FROM EXP. PROCEED",
+          ccy: "USD",
+          amount: 68112.93,
+        },
+        { desc: "TOTAL CREDIT FROM OTHERS", ccy: "USD", amount: 0.0 },
+        { desc: "TOTAL DEBIT FROM DFC", ccy: "USD", amount: 78814.04 },
+        { desc: "TOTAL BB PAYMENT", ccy: "USD", amount: 77011.61 },
+        { desc: "OTHER DEBIT", ccy: "USD", amount: 1802.43 },
+        { desc: "CURRENT DFC BALANCE", ccy: "USD", amount: -10701.11 },
+      ],
+    },
+  };
 
   useEffect(() => {
     setForm({
@@ -173,7 +254,11 @@ export default function ContractDetails() {
 
   return (
     <div className="contract-page tna_page">
-      <div className="contract-actions no-print"></div>
+      <div className="d-flex align-items-center no-print">
+        <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
+        <h4 className="m-0">{form.contract_no}</h4>
+      </div>
+      <hr />
 
       <div className="no-print tna_page_topbar justify-content-between">
         <div>
@@ -218,7 +303,9 @@ export default function ContractDetails() {
       <div className="p-3 bg-white">
         {activeTab === "Summary" && (
           <div className="summary_details_area contract-wrapper" ref={printRef}>
-            <div className="row">
+            <SummaryDashboard data={summaryData} form={form} />
+
+            <div className="row d-none">
               <div className="col-lg-6">
                 <div className="text-center">
                   <h5 className="summary-title text-uppercase">
