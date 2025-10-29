@@ -260,6 +260,18 @@ export default function Sidebar(props) {
                       BK
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      className={
+                        location.pathname === "/merchandising/proformas"
+                          ? "active"
+                          : ""
+                      }
+                      to="/merchandising/proformas"
+                    >
+                      PI
+                    </Link>
+                  </li>
 
                   <li>
                     <Link

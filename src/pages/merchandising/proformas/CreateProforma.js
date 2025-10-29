@@ -3,8 +3,10 @@ import { Link, useHistory } from "react-router-dom";
 import api from "services/api";
 import Spinner from "../../../elements/Spinner";
 import swal from "sweetalert";
-import Quill from "quill";
-import Select from "react-select";
+import QuillEditor from "elements/QuailEditor";
+import CustomSelect from "elements/CustomSelect";
+import Logo from "../../../assets/images/logos/logo-short.png";
+import MultipleFileInput from "elements/techpack/MultipleFileInput";
 // modals
 
 export default function CreateProforma(props) {
@@ -13,89 +15,47 @@ export default function CreateProforma(props) {
 
   // retrive data
   const [selectedFiles, setSelectedFiles] = useState([]);
-  const handleFileSelection = (event) => {
-    const files = event.target.files;
-    setSelectedFiles([...selectedFiles, ...files]);
-  };
-  const handleFileDelete = (index) => {
-    const newSelectedFiles = [...selectedFiles];
-    newSelectedFiles.splice(index, 1);
-    setSelectedFiles(newSelectedFiles);
-  };
-  // Contracts
-  const [contracts, setContracts] = useState([]);
-  const getContracts = async () => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/purchase-contracts");
-    if (response.status === 200 && response.data) {
-      setContracts(response.data.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
   const [bookings, setBookings] = useState([]);
-  const getBookings = async (supplier_id) => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/bookings", {
-      supplier_id: supplier_id,
-      booking_user: props.userData.userId,
-      status: "Confirmed",
-    });
-    if (response.status === 200 && response.data) {
-      setBookings(response.data.data);
-    } else {
-      console.log(response.data);
+  const getBookings = async () => {
+    try {
+      setSpinner(true);
+      const response = await api.post("/merchandising/bookings-public");
+      if (response.status === 200 && response.data) {
+        setBookings(response.data.data);
+      } else {
+        console.log("Unexpected response:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    } finally {
+      setSpinner(false);
     }
-    setSpinner(false);
-  };
-
-  const [hscodes, setHscodes] = useState([]);
-  const getHscodes = async (searchValue) => {
-    setSpinner(true);
-    var response = await api.post("/hscodes", {
-      search: searchValue,
-    });
-    if (response.status === 200 && response.data) {
-      setHscodes(response.data.hscodes.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
-  // unit
-  const [units, setUnits] = useState([]);
-  const getUnits = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/units");
-    if (response.status === 200 && response.data) {
-      setUnits(response.data.data);
-    }
-    setSpinner(false);
   };
 
   // suppliers
   const [suppliers, setSuppliers] = useState([]);
   const getSuppliers = async () => {
-    setSpinner(true);
-    var response = await api.post("/admin/suppliers");
-    if (response.status === 200 && response.data) {
-      setSuppliers(response.data.data);
-    } else {
-      console.log(response.data);
+    try {
+      setSpinner(true);
+      const response = await api.post("/admin/suppliers");
+      if (response.status === 200 && response.data) {
+        setSuppliers(response.data.data);
+      } else {
+        console.log("Unexpected response:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching suppliers:", error);
+    } finally {
+      setSpinner(false);
     }
-    setSpinner(false);
   };
 
   const [errors, setErrors] = useState({});
   const [formDataSet, setFormDataSet] = useState({
-    purchase_contract_id: "",
+    booking_id: "",
     supplier_id: "",
-    company_id: "",
+    booking_item: "",
     title: "",
-    currency: "",
     issued_date: "",
     delivery_date: "",
     pi_validity: "",
@@ -108,38 +68,82 @@ export default function CreateProforma(props) {
     bank_brunch_name: "",
     bank_address: "",
     bank_swift_code: "",
+    payment_terms: "",
+    mode_of_shipment: "",
+    port_of_loading: "",
+    port_of_discharge: "",
+    description: "",
   });
 
-  console.log("FORMDATA", formDataSet);
+  const [piItems, setPiItems] = useState([]);
 
-  const handleChange = (name, value) => {
-    if (name === "supplier_id") {
-      getBookings(value);
+  console.log("PI-ITEMS", formDataSet);
+
+  const handleChange = async (name, value) => {
+    const updatedForm = { ...formDataSet, [name]: value };
+
+    if (name === "booking_id" && value) {
+      try {
+        const response = await api.get("/merchandising/bookings/" + value);
+        if (response.status === 200 && response.data) {
+          const data = response.data.data;
+          setPiItems(data.items || []);
+          updatedForm.supplier_id = data.supplier_id || "";
+          updatedForm.booking_item = data.item.title || "";
+        } else {
+          setPiItems([]);
+        }
+      } catch (error) {
+        console.error("Error fetching booking details:", error);
+        setPiItems([]);
+      }
     }
-    setFormDataSet({ ...formDataSet, [name]: value });
+
+    setFormDataSet(updatedForm);
   };
+
+  // ✅ Handle item field change (Qty, Unit Price, etc.)
+  const handleItemChange = (index, field, value) => {
+    const updatedItems = [...piItems];
+    const item = { ...updatedItems[index] };
+
+    item[field] = value;
+
+    // If qty or unit_price changes, recalc total
+    if (field === "booking_qty" || field === "unit_price") {
+      const qty = parseFloat(item.booking_qty || 0);
+      const price = parseFloat(item.unit_price || 0);
+      item.total_price = (qty * price).toFixed(2);
+    }
+
+    updatedItems[index] = item;
+    setPiItems(updatedItems);
+  };
+
+  // ✅ Totals
+  const netTotalAmount = piItems.reduce(
+    (total, item) => total + parseFloat(item.total_price || 0),
+    0
+  );
+  const netTotalQty = piItems.reduce(
+    (total, item) => total + parseFloat(item.booking_qty || 0),
+    0
+  );
 
   const validateForm = () => {
     let formErrors = {};
     // personal info
-    if (!formDataSet.purchase_contract_id) {
-      formErrors.purchase_contract_id = "Please Select A Contract";
+
+    if (!formDataSet.booking_id) {
+      formErrors.booking_id = "Please Select A Booking";
     }
     if (!formDataSet.supplier_id) {
       formErrors.supplier_id = "Please Select Supplier";
-    }
-    if (!formDataSet.company_id) {
-      formErrors.company_id = "Company is required";
     }
 
     if (!formDataSet.title) {
       formErrors.title = "PI Number is required";
     }
-
-    if (!formDataSet.currency) {
-      formErrors.currency = "Currency is required";
-    }
-
     if (!formDataSet.issued_date) {
       formErrors.issued_date = "Issued Date is required";
     }
@@ -156,9 +160,7 @@ export default function CreateProforma(props) {
     if (!formDataSet.gross_weight) {
       formErrors.gross_weight = "Gross Weight is required";
     }
-    if (!formDataSet.freight_charge) {
-      formErrors.freight_charge = "Freight charge is required";
-    }
+
     if (!formDataSet.bank_account_name) {
       formErrors.bank_account_name = "Bank Account is Required";
     }
@@ -174,162 +176,21 @@ export default function CreateProforma(props) {
     if (!formDataSet.bank_swift_code) {
       formErrors.bank_swift_code = "Bank Swift Code is Required";
     }
+
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
-  };
-
-  const [piItems, setPiItems] = useState([]);
-
-  const removeRow = (index) => {
-    const updatedItems = [...piItems];
-    updatedItems.splice(index, 1);
-    setPiItems(updatedItems);
-  };
-
-  const addRow = () => {
-    const newItem = {
-      booking_id: "",
-      bookingItems: [],
-      booking_item_id: "",
-      item_id: "",
-      description: "",
-      hs_code_id: "",
-      qty: 0,
-      unit: "",
-      unit_price: 0,
-      total: 0,
-      // for limitation
-      booking_qty: 0,
-      booking_unit_price: 0,
-      booking_total: 0,
-      already_added: 0,
-    };
-
-    setPiItems([...piItems, newItem]);
-  };
-
-  const handleItemChange = async (index, field, value) => {
-    const updatedItems = [...piItems];
-
-    if (field === "booking_id") {
-      setSpinner(true);
-      try {
-        const response = await api.post("/merchandising/bookings-show", { id: value });
-        if (response.status === 200 && response.data) {
-          updatedItems[index].bookingItems = response.data.data.booking_items;
-        } else {
-          updatedItems[index].bookingItems = [];
-        }
-      } catch (error) {
-        console.error("Error fetching bookings:", error);
-      } finally {
-        setSpinner(false);
-      }
-    }
-
-    if (field === "booking_item_id") {
-      setSpinner(true);
-      try {
-        const response = await api.post("/single-booking-item", { id: value });
-        if (response.status === 200 && response.data) {
-          const singleItem = response.data.data;
-
-          if (singleItem.total === singleItem.already_added_pi) {
-            swal({
-              title: "Already Finish Booking Balance",
-              text: "Item Already Finish Booking Balance",
-              icon: "warning",
-            }).then(() => {
-              const updatedItemsCopy = [...piItems];
-              updatedItemsCopy.splice(index, 1);
-              setPiItems(updatedItemsCopy);
-            });
-          } else {
-            updatedItems[index].booking_item_id = singleItem.id;
-            updatedItems[index].item_id = singleItem.item_id;
-            updatedItems[index].description = singleItem.description;
-            updatedItems[index].unit = singleItem.unit;
-            updatedItems[index].unit_price = singleItem.unit_price;
-            updatedItems[index].qty = singleItem.left_pi_qty;
-            updatedItems[index].total =
-              singleItem.unit_price * singleItem.left_pi_qty;
-
-            // for not exceedleft_pi_qty
-            updatedItems[index].booking_qty = parseInt(singleItem.left_pi_qty);
-            updatedItems[index].booking_unit_price = parseFloat(
-              singleItem.unit_price
-            );
-            updatedItems[index].booking_total = parseFloat(
-              singleItem.left_pi_total
-            );
-          }
-        } else {
-          updatedItems[index].item_id = "";
-          updatedItems[index].booking_item_id = "";
-          updatedItems[index].description = "";
-          updatedItems[index].unit = "";
-          updatedItems[index].unit_price = 0;
-          updatedItems[index].qty = 0;
-          updatedItems[index].total = 0;
-
-          // for not exceed
-          updatedItems[index].booking_qty = 0;
-          updatedItems[index].booking_unit_price = 0;
-          updatedItems[index].booking_total = 0;
-          updatedItems[index].already_added = 0;
-        }
-      } catch (error) {
-        console.error("Error fetching single booking item:", error);
-      } finally {
-        setSpinner(false);
-      }
-    }
-
-    if (field === "qty" || field === "unit_price" || field === "total") {
-      const limitField =
-        field === "qty"
-          ? "booking_qty"
-          : field === "unit_price"
-          ? "booking_unit_price"
-          : "booking_total";
-      const limit = updatedItems[index][limitField];
-      if (value > limit) {
-        return;
-      }
-    }
-
-    if (field === "hs_code_search") {
-      getHscodes(value);
-    }
-
-    // Update the specific field
-    updatedItems[index][field] = value;
-    // Calculate total for the row
-    const qty = parseFloat(updatedItems[index].qty) || 0;
-    const unitPrice = parseFloat(updatedItems[index].unit_price) || 0;
-    updatedItems[index].total = qty * unitPrice;
-
-    setPiItems(updatedItems);
-  };
-
-  const netTotalAmount = piItems.reduce(
-    (total, item) => total + parseFloat(item.total),
-    0
-  );
-
-  const netTotalQty = piItems.reduce(
-    (total, item) => total + parseFloat(item.qty),
-    0
-  );
-
-  const [message, setMessage] = useState("");
-  const handleMsgChange = (value) => {
-    setMessage(value);
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (validateForm()) {
+      if (selectedFiles.length === 0) {
+        swal({
+          title: "Please Upload PI copy (PDF)",
+          icon: "error",
+        });
+        return; // Prevent form submission
+      }
       if (piItems.length === 0) {
         swal({
           title:
@@ -340,18 +201,20 @@ export default function CreateProforma(props) {
       }
 
       var data = new FormData();
-      data.append("purchase_contract_id", formDataSet.purchase_contract_id);
+      data.append("booking_id", formDataSet.booking_id);
       data.append("supplier_id", formDataSet.supplier_id);
-      data.append("company_id", formDataSet.company_id);
       data.append("title", formDataSet.title);
-      data.append("currency", formDataSet.currency);
       data.append("issued_date", formDataSet.issued_date);
       data.append("delivery_date", formDataSet.delivery_date);
       data.append("pi_validity", formDataSet.pi_validity);
       data.append("net_weight", formDataSet.net_weight);
       data.append("gross_weight", formDataSet.gross_weight);
       data.append("freight_charge", formDataSet.freight_charge);
-      data.append("description", message);
+      data.append("payment_terms", formDataSet.payment_terms);
+      data.append("mode_of_shipment", formDataSet.mode_of_shipment);
+      data.append("port_of_loading", formDataSet.port_of_loading);
+      data.append("port_of_discharge", formDataSet.port_of_discharge);
+      data.append("description", formDataSet.description);
       data.append("bank_account_name", formDataSet.bank_account_name);
       data.append("bank_account_number", formDataSet.bank_account_number);
       data.append("bank_brunch_name", formDataSet.bank_brunch_name);
@@ -373,99 +236,24 @@ export default function CreateProforma(props) {
     }
   };
 
-  const [companies, setCompanies] = useState([]);
-  const getCompanies = async () => {
-    var response = await api.post("/common/companies", { type: "Own" });
-    if (response.status === 200 && response.data) {
-      setCompanies(response.data.data);
-    }
-  };
-  const [currencies, setCurrencies] = useState([]);
-  const getCurrencies = async () => {
-    var response = await api.get("/common/currencies");
-    if (response.status === 200 && response.data) {
-      setCurrencies(response.data);
-    }
-  };
-
   useEffect(async () => {
-    getContracts();
-    getCompanies();
-    getCurrencies();
-    getUnits();
+    getBookings();
     getSuppliers();
   }, []);
 
-  useEffect(async () => {
-    props.setSection("merchandising");
-  }, []);
-
-  useEffect(() => {
-    const validateDuplicatePiItem = () => {
-      const itemMap = new Map();
-      let isDuplicate = false;
-
-      piItems.forEach((item, index) => {
-        const { booking_item_id } = item;
-        const key = `${booking_item_id}`;
-
-        if (itemMap.has(key)) {
-          isDuplicate = true;
-          itemMap.get(key).push(index);
-        } else {
-          itemMap.set(key, [index]);
-        }
-      });
-
-      if (isDuplicate) {
-        itemMap.forEach((indices, key) => {
-          if (indices.length > 1) {
-            swal({
-              title: "Duplicate Booking item",
-              text: "Item Already Selected",
-              icon: "warning",
-            }).then(() => {
-              const updatedItems = [...piItems];
-              indices.reverse().forEach((index, i) => {
-                if (i !== 0) {
-                  updatedItems.splice(index, 1);
-                }
-              });
-              setPiItems(updatedItems);
-            });
-          }
-        });
-      }
-    };
-
-    validateDuplicatePiItem();
-  }, [piItems]);
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (props.userData?.department_title !== "Merchandising") {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props, history]);
-
   return (
-    <div className="create_edit_page">
+    <div className="create_edit_page create_technical_pack">
       {spinner && <Spinner />}
-      <form onSubmit={handleSubmit}>
-        <div className="create_page_heading">
-          <div className="page_name">Add Proforma Invoice</div>
-          <div className="actions">
+      <form onSubmit={handleSubmit} className="create_tp_body">
+        <div className="d-flex align-items-end justify-content-between">
+          <div className="d-flex align-items-end">
+            <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
+            <h4 className="m-0">ADD NEW PI</h4>
+          </div>
+          <div className="d-flex align-items-end">
             <button
               type="supmit"
-              className="publish_btn btn btn-warning bg-falgun"
+              className="publish_btn btn btn-warning bg-falgun me-4"
             >
               Save
             </button>
@@ -477,50 +265,54 @@ export default function CreateProforma(props) {
             </Link>
           </div>
         </div>
+        <hr />
         <div className="col-lg-12">
           <div className="personal_data">
             <div className="row">
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>
-                    JOB/TAG/PC<sup>*</sup>
+                  <label className="form-label">
+                    Booking Number <sup>*</sup>
                   </label>
-
-                  <select
-                    name="purchase_contract_id"
-                    value={formDataSet.purchase_contract_id}
-                    onChange={(event) =>
-                      handleChange("purchase_contract_id", event.target.value)
+                  <CustomSelect
+                    placeholder="Select"
+                    onChange={(selectedOption) =>
+                      handleChange("booking_id", selectedOption.value)
                     }
-                    className="form-select"
-                  >
-                    <option value="">Select</option>
-                    {contracts.length > 0 ? (
-                      contracts.map((item, index) => (
-                        <option key={index} value={item.id}>
-                          {item.tag_number} | {item.title}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">No Contract found</option>
-                    )}
-                  </select>
-                  {errors.purchase_contract_id && (
+                    value={
+                      bookings.find(
+                        (item) => item.id === formDataSet.booking_id
+                      )
+                        ? {
+                            value: formDataSet.booking_id,
+                            label:
+                              bookings.find(
+                                (item) => item.id === formDataSet.booking_id
+                              ).booking_number || "",
+                          }
+                        : null
+                    }
+                    name="booking_id"
+                    options={bookings.map((item) => ({
+                      value: item.id,
+                      label: item.booking_number,
+                    }))}
+                  />
+
+                  {errors.booking_id && (
                     <>
-                      <div className="errorMsg">
-                        {errors.purchase_contract_id}
-                      </div>
-                      <br />
+                      <div className="errorMsg">{errors.booking_id}</div>
                     </>
                   )}
                 </div>
               </div>
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>
+                  <label className="form-label">
                     Supplier <sup>*</sup>
                   </label>
-                  <Select
+                  <CustomSelect
+                    isDisabled
                     placeholder="Select"
                     onChange={(selectedOption) =>
                       handleChange("supplier_id", selectedOption.value)
@@ -548,46 +340,14 @@ export default function CreateProforma(props) {
                   {errors.supplier_id && (
                     <>
                       <div className="errorMsg">{errors.supplier_id}</div>
-                      <br />
                     </>
                   )}
                 </div>
               </div>
+
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>
-                    Company <sup>*</sup>
-                  </label>
-                  <select
-                    name="company_id"
-                    value={formDataSet.company_id}
-                    onChange={(event) =>
-                      handleChange("company_id", event.target.value)
-                    }
-                    className="form-select"
-                  >
-                    <option value="">Select Company</option>
-                    {companies.length > 0 ? (
-                      companies.map((item, index) => (
-                        <option key={index} value={item.id}>
-                          {item.title}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">No company found</option>
-                    )}
-                  </select>
-                  {errors.company_id && (
-                    <>
-                      <div className="errorMsg">{errors.company_id}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>
+                  <label className="form-label">
                     PI NO.<sup>*</sup>
                   </label>
                   <input
@@ -601,33 +361,6 @@ export default function CreateProforma(props) {
                   {errors.title && (
                     <>
                       <div className="errorMsg">{errors.title}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>Currency</label>
-                  <select
-                    onChange={(event) =>
-                      handleChange("currency", event.target.value)
-                    }
-                    value={formDataSet.currency}
-                    name="currency"
-                    className="form-select"
-                  >
-                    <option value="">Select currency</option>
-                    {currencies.map((item, index) => (
-                      <option key={index} value={item.code}>
-                        {item.code}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.currency && (
-                    <>
-                      <div className="errorMsg">{errors.currency}</div>
-                      <br />
                     </>
                   )}
                 </div>
@@ -635,7 +368,7 @@ export default function CreateProforma(props) {
 
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Issued Date</label>
+                  <label className="form-label">Issued Date</label>
                   <input
                     type="date"
                     name="issued_date"
@@ -648,14 +381,13 @@ export default function CreateProforma(props) {
                   {errors.issued_date && (
                     <>
                       <div className="errorMsg">{errors.issued_date}</div>
-                      <br />
                     </>
                   )}
                 </div>
               </div>
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Delivery Date</label>
+                  <label className="form-label">Delivery Date</label>
                   <input
                     type="date"
                     name="delivery_date"
@@ -668,7 +400,6 @@ export default function CreateProforma(props) {
                   {errors.delivery_date && (
                     <>
                       <div className="errorMsg">{errors.delivery_date}</div>
-                      <br />
                     </>
                   )}
                 </div>
@@ -676,7 +407,7 @@ export default function CreateProforma(props) {
 
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Validity</label>
+                  <label className="form-label">Validity</label>
                   <input
                     type="text"
                     name="pi_validity"
@@ -689,205 +420,52 @@ export default function CreateProforma(props) {
                   {errors.pi_validity && (
                     <>
                       <div className="errorMsg">{errors.pi_validity}</div>
-                      <br />
                     </>
                   )}
                 </div>
               </div>
-
-              <div className="col-lg-6">
-                <div className="form-group">
-                  <label htmlFor="attachments">SoftCopy From Supplier: </label>
-                  <small className="text-muted"> (PDF Only)</small>
-                  <div className="d-flex mb-10">
-                    <input
-                      type="file"
-                      className="form-control margin_bottom_0"
-                      multiple
-                      onChange={handleFileSelection}
-                      id="input_files"
-                      required
-                      accept="application/pdf,application/vnd.ms-excel"
-                    />
-                    <div className="d-flex margin_left_30">
-                      <label
-                        for="input_files"
-                        className="btn btn-warning bg-falgun rounded-circle btn-xs"
-                      >
-                        <i className="fal fa-plus"></i>
-                      </label>
-                    </div>
-                  </div>
-
-                  {selectedFiles.map((file, index) => (
-                    <div key={file.name} className="d-flex mb-10">
-                      <input
-                        className="form-control margin_bottom_0"
-                        disabled
-                        value={file.name}
-                      />
-                      <div className="d-flex">
-                        <Link
-                          to="#"
-                          onClick={() => handleFileDelete(index)}
-                          className="btn btn-danger rounded-circle margin_left_15 btn-xs"
-                        >
-                          <i className="fa fa-times"></i>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+              <div className="col-lg-6 ">
+                <label className="form-label">
+                  SoftCopy From Supplier (PDF Only)
+                </label>
+                <div className="create_tp_attatchment">
+                  <MultipleFileInput
+                    label="Attatchments"
+                    inputId="Attatchments"
+                    selectedFiles={selectedFiles}
+                    setSelectedFiles={setSelectedFiles}
+                  />
                 </div>
               </div>
             </div>
             <hr></hr>
             <h6>ITEM'S</h6>
             <div className="Import_booking_item_table">
-              <table className="table text-start align-middle table-bordered table-hover mb-0">
+              <table className="table text-start align-middle table-bordered">
                 <thead className="bg-dark text-white">
                   <tr className="text-center">
-                    <th>B.N</th>
-                    <th>Item | PO | BGD</th>
+                    <th>Item</th>
                     <th>Item Details</th>
-                    <th>HS</th>
+                    <th>Color</th>
                     <th>Unit</th>
+                    <th>Unit Price</th>
                     <th>QTY</th>
-                    <th>Unit Price/Unit</th>
                     <th>Total</th>
+                    <th>Hscodes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {piItems.map((item, index) => (
-                    <tr
-                      key={index}
-                      style={{
-                        verticalAlign: "top",
-                      }}
-                    >
-                      <td>
-                        <select
-                          value={item.booking_id}
-                          required
-                          onChange={(e) =>
-                            handleItemChange(
-                              index,
-                              "booking_id",
-                              e.target.value
-                            )
-                          }
-                          className="form-select"
-                        >
-                          <option value="">Select B.N</option>
-                          {bookings.map((item, index) => (
-                            <option key={index} value={item.id}>
-                              {item.booking_number}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      <td>
-                        <select
-                          required
-                          style={{ paddingLeft: "2px" }}
-                          value={item.booking_item_id}
-                          className="form-select"
-                          onChange={(e) =>
-                            handleItemChange(
-                              index,
-                              "booking_item_id",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option value="">Select</option>
-                          {item.bookingItems.map((item2, index2) => (
-                            <option key={index2} value={item2.id}>
-                              {item2.item_name} | {item2.po_number} |
-                              {item2.budget_number}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      <td>
-                        <textarea
-                          className="form-control"
-                          value={item.description}
-                          onChange={(e) =>
-                            handleItemChange(
-                              index,
-                              "description",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </td>
-
-                      <td>
-                        <select
-                          required
-                          style={{ paddingLeft: "2px" }}
-                          value={item.hs_code_id}
-                          className="form-select"
-                          onChange={(e) =>
-                            handleItemChange(
-                              index,
-                              "hs_code_id",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option value="">Select</option>
-                          {hscodes.map((item2, index2) => (
-                            <option key={index2} value={item2.id}>
-                              {item2.code_8} | {item2.code_10} |
-                              {item2.description}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      <td>
-                        <select
-                          value={item.unit}
-                          required
-                          onChange={(e) =>
-                            handleItemChange(index, "unit", e.target.value)
-                          }
-                          className="form-select"
-                        >
-                          <option value="">Select</option>
-                          {units.map((item, index) => (
-                            <option key={index} value={item.title}>
-                              {item.title}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
+                    <tr key={index} style={{ verticalAlign: "top" }}>
+                      <td>{formDataSet.booking_item || ""}</td>
+                      <td>{item.item_description || ""}</td>
+                      <td>{item.item_color || ""}</td>
+                      <td>{item.unit || ""}</td>
                       <td>
                         <input
-                          required
                           type="number"
-                          onWheel={(event) => event.target.blur()}
-                          min="0"
                           className="form-control"
-                          onChange={(e) =>
-                            handleItemChange(index, "qty", e.target.value)
-                          }
-                          value={item.qty}
-                        />
-                      </td>
-
-                      <td>
-                        <input
-                          required
-                          type="number"
-                          onWheel={(event) => event.target.blur()}
-                          min="0"
-                          step=".01"
-                          className="form-control"
+                          value={item.unit_price || ""}
                           onChange={(e) =>
                             handleItemChange(
                               index,
@@ -895,66 +473,49 @@ export default function CreateProforma(props) {
                               e.target.value
                             )
                           }
-                          value={item.unit_price}
                         />
                       </td>
                       <td>
-                        <div className="d-flex">
-                          <input
-                            required
-                            type="number"
-                            onWheel={(event) => event.target.blur()}
-                            min="0"
-                            readOnly
-                            className="form-control"
-                            onChange={(e) =>
-                              handleItemChange(index, "total", e.target.value)
-                            }
-                            value={item.total.toFixed(2)}
-                          />
-                          <Link to="#">
-                            <i
-                              style={{
-                                marginLeft: "10px",
-                                fontSize: "17px",
-                                marginTop: "5px",
-                              }}
-                              onClick={() => removeRow(index)}
-                              className="fa fa-times text-danger mr-10 ml-10"
-                            ></i>
-                          </Link>
-                        </div>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={item.booking_qty || ""}
+                          onChange={(e) =>
+                            handleItemChange(
+                              index,
+                              "booking_qty",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="text-end">
+                        {parseFloat(item.total_price || 0).toFixed(2)}
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={item.hscode || ""}
+                          onChange={(e) =>
+                            handleItemChange(index, "hscode", e.target.value)
+                          }
+                        />
                       </td>
                     </tr>
                   ))}
 
-                  <tr className="border_none">
-                    <td className="border_none" colSpan={7}></td>
-                    <td className="border_none">
-                      <div className="add_row text-end">
-                        <Link
-                          to="#"
-                          className="btn btn-info btn-sm"
-                          onClick={addRow}
-                        >
-                          Add Row
-                        </Link>
-                      </div>
+                  <tr>
+                    <td colSpan={5}>
+                      <strong>TOTAL</strong>
                     </td>
-                  </tr>
-                  <br />
-                  <tr className="text-center">
-                    <td colSpan={4}>
-                      <h6>Items Summary</h6>
+                    <td>
+                      <strong>{netTotalQty}</strong>
+                    </td>
+                    <td>
+                      <strong>{netTotalAmount}</strong>
                     </td>
                     <td></td>
-                    <td>
-                      <h6>{netTotalQty.toFixed(2)}</h6>
-                    </td>
-                    <td></td>
-                    <td>
-                      <h6>{netTotalAmount.toFixed(2)}</h6>
-                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -965,77 +526,142 @@ export default function CreateProforma(props) {
             <h5 className="text-center">Term & Beneficiery Details</h5>
             <hr />
             <div className="row">
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>Net Weight</label>
-                  <input
-                    type="text"
-                    onChange={(event) =>
-                      handleChange("net_weight", event.target.value)
-                    }
-                    value={formDataSet.net_weight}
-                    name="net_weight"
-                    className="form-control"
-                  />
-                  {errors.net_weight && (
-                    <>
-                      <div className="errorMsg">{errors.net_weight}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>Gross Weight</label>
-                  <input
-                    type="text"
-                    onChange={(event) =>
-                      handleChange("gross_weight", event.target.value)
-                    }
-                    value={formDataSet.gross_weight}
-                    name="gross_weight"
-                    className="form-control"
-                  />
-                  {errors.gross_weight && (
-                    <>
-                      <div className="errorMsg">{errors.gross_weight}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>Freight Charge</label>
-                  <input
-                    type="number"
-                    onWheel={(event) => event.target.blur()}
-                    min={0}
-                    onChange={(event) =>
-                      handleChange("freight_charge", event.target.value)
-                    }
-                    value={formDataSet.freight_charge}
-                    name="freight_charge"
-                    className="form-control"
-                  />
-                  {errors.freight_charge && (
-                    <>
-                      <div className="errorMsg">{errors.freight_charge}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
               <div className="col-lg-8">
-                <div className="form-group">
-                  <label>Description</label>
-                  <Quill className="text_area" onChange={handleMsgChange} />
+                <div className="row">
+                  <div className="col-lg-3">
+                    <div className="form-group">
+                      <label className="form-label">Net Weight</label>
+                      <input
+                        type="text"
+                        onChange={(event) =>
+                          handleChange("net_weight", event.target.value)
+                        }
+                        value={formDataSet.net_weight}
+                        name="net_weight"
+                        className="form-control"
+                      />
+                      {errors.net_weight && (
+                        <>
+                          <div className="errorMsg">{errors.net_weight}</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-lg-3">
+                    <div className="form-group">
+                      <label className="form-label">Gross Weight</label>
+                      <input
+                        type="text"
+                        onChange={(event) =>
+                          handleChange("gross_weight", event.target.value)
+                        }
+                        value={formDataSet.gross_weight}
+                        name="gross_weight"
+                        className="form-control"
+                      />
+                      {errors.gross_weight && (
+                        <>
+                          <div className="errorMsg">{errors.gross_weight}</div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-lg-3">
+                    <div className="form-group">
+                      <label className="form-label">Freight Charge</label>
+                      <input
+                        type="number"
+                        onWheel={(event) => event.target.blur()}
+                        min={0}
+                        onChange={(event) =>
+                          handleChange("freight_charge", event.target.value)
+                        }
+                        value={formDataSet.freight_charge}
+                        name="freight_charge"
+                        className="form-control"
+                      />
+                      {errors.freight_charge && (
+                        <>
+                          <div className="errorMsg">
+                            {errors.freight_charge}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="col-lg-3">
+                    <label className="form-label">
+                      Payment Terms <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      className="form-control"
+                      value={formDataSet.payment_terms}
+                      onChange={(e) =>
+                        handleChange("payment_terms", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-3">
+                    <label className="form-label">
+                      Mode of Shipment <span className="text-danger">*</span>
+                    </label>
+
+                    <select
+                      className="form-control"
+                      value={formDataSet.mode_of_shipment}
+                      onChange={(e) =>
+                        handleChange("mode_of_shipment", e.target.value)
+                      }
+                    >
+                      <option value="">Select One</option>
+                      <option value="Sea">Sea</option>
+                      <option value="Air">Air</option>
+                      <option value="Road">Road</option>
+                    </select>
+                  </div>
+                  <div className="col-lg-3">
+                    <label className="form-label">
+                      Port of Loading <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      className="form-control"
+                      value={formDataSet.port_of_loading}
+                      onChange={(e) =>
+                        handleChange("port_of_loading", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-3">
+                    <label className="form-label">
+                      Port of Discharge <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      className="form-control"
+                      value={formDataSet.port_of_discharge}
+                      onChange={(e) =>
+                        handleChange("port_of_discharge", e.target.value)
+                      }
+                    />
+                  </div>
+                  <div className="col-lg-12">
+                    <div className="form-group">
+                      <label className="form-label">Description</label>
+                      <textarea
+                        className="form-control"
+                        value={formDataSet.description}
+                        onChange={(e) =>
+                          handleChange("description", e.target.value)
+                        }
+                      ></textarea>
+                    </div>
+                  </div>
                 </div>
               </div>
+
               <div className="col-lg-4">
                 <div className="form-group">
-                  <label>Beneficiery Details</label>
+                  <label className="form-label">Beneficiery Details</label>
                   <input
                     type="text"
                     onChange={(event) =>
@@ -1049,6 +675,7 @@ export default function CreateProforma(props) {
                   {errors.bank_account_name && (
                     <div className="errorMsg">{errors.bank_account_name}</div>
                   )}
+                  <br />
                   <input
                     type="number"
                     onWheel={(event) => event.target.blur()}
@@ -1063,6 +690,7 @@ export default function CreateProforma(props) {
                   {errors.bank_account_number && (
                     <div className="errorMsg">{errors.bank_account_number}</div>
                   )}
+                  <br />
                   <input
                     type="text"
                     onChange={(event) =>
@@ -1076,6 +704,7 @@ export default function CreateProforma(props) {
                   {errors.bank_name && (
                     <div className="errorMsg">{errors.bank_name}</div>
                   )}
+                  <br />
                   <input
                     type="text"
                     onChange={(event) =>
@@ -1089,6 +718,7 @@ export default function CreateProforma(props) {
                   {errors.bank_brunch_name && (
                     <div className="errorMsg">{errors.bank_brunch_name}</div>
                   )}
+                  <br />
                   <input
                     type="text"
                     onChange={(event) =>
@@ -1102,6 +732,7 @@ export default function CreateProforma(props) {
                   {errors.bank_address && (
                     <div className="errorMsg">{errors.bank_address}</div>
                   )}
+                  <br />
                   <input
                     type="text"
                     onChange={(event) =>

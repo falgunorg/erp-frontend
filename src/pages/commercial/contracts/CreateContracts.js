@@ -425,13 +425,19 @@ export default function CreateContracts() {
                 <label className="form-label">
                   Mode of Shipment <span className="text-danger">*</span>
                 </label>
-                <input
+
+                <select
                   className="form-control"
                   value={form.mode_of_shipment}
                   onChange={(e) =>
                     handleChange("mode_of_shipment", e.target.value)
                   }
-                />
+                >
+                  <option value="">Select One</option>
+                  <option value="Sea">Sea</option>
+                  <option value="Air">Air</option>
+                  <option value="Road">Road</option>
+                </select>
               </div>
               <div className="col-lg-3">
                 <label className="form-label">

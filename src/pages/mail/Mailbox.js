@@ -72,7 +72,7 @@ export default function Mailbox(props) {
         </>
       ) : (
         <div
-          style={{ marginTop: "200px" }}
+          style={{ marginTop: "200px", paddingBottom: "20px" }}
           className="text-center col-md-4 offset-md-4"
         >
           <h5> Please Sign In Your Mail</h5>

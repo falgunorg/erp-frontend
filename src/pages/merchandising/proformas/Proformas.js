@@ -4,6 +4,7 @@ import api from "services/api";
 import Spinner from "../../../elements/Spinner";
 import moment from "moment/moment";
 import swal from "sweetalert";
+import Logo from "../../../assets/images/logos/logo-short.png";
 export default function Proformas(props) {
   const userInfo = props.userData;
   const history = useHistory();
@@ -80,38 +81,43 @@ export default function Proformas(props) {
   }, [props.userData?.department_title, history]);
 
   return (
-    <div className="create_edit_page">
+    <div className="create_edit_page create_technical_pack">
       {spinner && <Spinner />}
-      <div className="create_page_heading">
-        <div className="page_name">Proforma Invoices</div>
-        <div className="actions">
-          <input
-            type="search"
-            onChange={(e) => setSearchValue(e.target.value)}
-            value={searchValue}
-            className="form-control"
-            placeholder="Search"
-          />
 
-          {userInfo.department_title === "Merchandising" &&
-          userInfo.designation_title !== "Deputy General Manager" ? (
-            <Link
-              to="/merchandising/proformas-create"
-              className="btn btn-warning bg-falgun rounded-circle"
-            >
-              <i className="fal fa-plus"></i>
-            </Link>
-          ) : (
-            ""
-          )}
+      <div className="d-flex align-items-end justify-content-between">
+        <div className="d-flex align-items-end">
+          <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
+          <h4 className="m-0">PROFORMA INVOICES</h4>
+        </div>
+        <div className="d-flex align-items-end">
+          <Link
+            to="/merchandising/proformas-create"
+            className="publish_btn btn btn-warning bg-falgun me-4"
+          >
+            Create New
+          </Link>
         </div>
       </div>
+      <hr />
+
       <div className="employee_lists">
-        <div className="datrange_filter">
-          <div className="row">
+        <div className="datrange_filter ">
+          <div className="row create_tp_body">
             <div className="col-lg-2">
               <div className="form-group">
-                <label>From Date</label>
+                <label className="form-label">Search</label>
+                <input
+                  type="search"
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  value={searchValue}
+                  className="form-control"
+                  placeholder="Search"
+                />
+              </div>
+            </div>
+            <div className="col-lg-2">
+              <div className="form-group">
+                <label className="form-label">From Date</label>
                 <input
                   value={filterData.from_date}
                   onChange={filterChange}
@@ -123,7 +129,7 @@ export default function Proformas(props) {
             </div>
             <div className="col-lg-2">
               <div className="form-group">
-                <label>To Date</label>
+                <label className="form-label">To Date</label>
                 <input
                   onChange={filterChange}
                   value={filterData.to_date}
@@ -135,7 +141,7 @@ export default function Proformas(props) {
             </div>
             <div className="col-lg-2">
               <div className="form-group">
-                <label>Status</label>
+                <label className="form-label">Status</label>
                 <select
                   onChange={filterChange}
                   value={filterData.status}
@@ -151,7 +157,7 @@ export default function Proformas(props) {
             </div>
             <div className="col-lg-2">
               <div className="form-group">
-                <label>NUM Of Rows</label>
+                <label className="form-label">NUM Of Rows</label>
                 <select
                   onChange={filterChange}
                   value={filterData.num_of_row}
@@ -167,11 +173,11 @@ export default function Proformas(props) {
             </div>
             <div className="col-lg-2">
               <div className="form-group">
-                <label>Refresh</label>
+                <label className="form-label">Refresh</label>
                 <div>
                   <Link
                     to="#"
-                    className="btn btn-warning"
+                    className="btn btn-warning btn-sm"
                     onClick={clearFields}
                   >
                     <i className="fas fa-retweet"></i>
