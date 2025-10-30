@@ -56,14 +56,17 @@ export default function ProformaDetails(props) {
   const [proformaItems, setProformaItems] = useState([]);
   const getProforma = async () => {
     setSpinner(true);
-    var response = await api.post("/merchandising/proformas-show", { id: params.id });
+    var response = await api.post("/merchandising/proformas-show", {
+      id: params.id,
+    });
     if (response.status === 200 && response.data) {
       setProforma(response.data.data);
-      setProformaItems(response.data.data.proforma_items);
+      setProformaItems(response.data.data.items);
     }
     setSpinner(false);
   };
 
+  console.log("PROFORMA", proforma);
   const toggleStatus = async (status) => {
     setSpinner(true);
     var response = await api.post("/merchandising/proformas-toggle-status", {
@@ -84,6 +87,7 @@ export default function ProformaDetails(props) {
   useEffect(async () => {
     getProforma();
   }, []);
+
   useEffect(async () => {
     props.setSection("merchandising");
   }, []);
@@ -118,7 +122,11 @@ export default function ProformaDetails(props) {
           <Link to="#" onClick={PrintPdf} className="btn btn-info btn-sm">
             <i className="fas fa-print"></i>
           </Link>
-          <Link to="#" onClick={generatePdf} className="btn btn-warning bg-falgun ">
+          <Link
+            to="#"
+            onClick={generatePdf}
+            className="btn btn-warning bg-falgun "
+          >
             <i className="fas fa-download"></i>
           </Link>
 
@@ -281,7 +289,7 @@ export default function ProformaDetails(props) {
       <div className="preview_print page" id="pdf_container">
         <div className="container border ">
           <br />
-          <h4 className="text-center">{proforma.supplier}</h4>
+          <h4 className="text-center">{proforma.supplier?.company_name}</h4>
           <br />
           <h6 className="text-center text-underline">
             <u>PROFORMA INVOICE</u>
@@ -291,26 +299,23 @@ export default function ProformaDetails(props) {
             <div className="col">
               <table className="table table-bordered mb-0">
                 <tr>
-                  <td>SL</td>
-                  <td>{proforma.proforma_number}</td>
-                </tr>
-                <tr>
                   <td>PI</td>
                   <td>{proforma.title}</td>
                 </tr>
                 <tr>
                   <td>COMPANY</td>
                   <td>
-                    {proforma.company} <br />
-                    {proforma.company_address}
+                    {proforma.booking?.workorder?.techpack?.company?.title}{" "}
+                    <br />
+                    {proforma.booking?.workorder?.techpack?.company?.address}
                   </td>
                 </tr>
                 <tr>
                   <td>RESPONSIBLE</td>
 
                   <td>
-                    {proforma.user} <br />
-                    {proforma.user_staff_id}
+                    {proforma.user?.full_name} <br />
+                    {proforma.user?.employee_id}
                   </td>
                 </tr>
                 <tr>
@@ -329,10 +334,13 @@ export default function ProformaDetails(props) {
             <div className="col">
               <table className="table table-bordered mb-0">
                 <tr>
-                  <td>PC/MASTER</td>
+                  <td>Booking Ref</td>
                   <td>
-                    {proforma.tag_number} | {proforma.contract_number} | (
-                    {proforma.buyer})
+                    <Link
+                      to={"/merchandising/bookings/" + proforma.booking?.id}
+                    >
+                      {proforma.booking?.booking_number}
+                    </Link>
                   </td>
                 </tr>
                 <tr>
@@ -354,17 +362,17 @@ export default function ProformaDetails(props) {
                   <td>SUPPLIER</td>
 
                   <td>
-                    {proforma.supplier} <br />
-                    {proforma.supplier_address},{proforma.supplier_city},
-                    {proforma.supplier_country}
+                    {proforma.supplier?.company_name} <br />
+                    {proforma.supplier?.address},{proforma.supplier?.city},
+                    {proforma.supplier?.country}
                   </td>
                 </tr>
                 <tr>
                   <td>RESPONSIBLE</td>
 
                   <td>
-                    {proforma.supplier_attention} <br />
-                    {proforma.supplier_contact}
+                    {proforma.supplier?.attention_person} <br />
+                    {proforma.supplier?.mobile_number}
                   </td>
                 </tr>
                 <tr>
@@ -401,33 +409,39 @@ export default function ProformaDetails(props) {
                 {proformaItems.map((item, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
-                    <td>{item.title}</td>
+                    <td>{proforma.booking?.item?.title || "-"}</td>
                     <td>
-                      {item.description}
-                      <br/>
-                      Color: {item.color} | Size: {item.size} | Shade:{" "}
-                      {item.shade} | Tex: {item.tex}
-                      <div>HS:</div>
-                      <small>
-                        {item.code_8} | {item.code_10}
-                      </small>
+                      {item.item_description}
                       <br />
-                      <small>{item.hs_description}</small>
+                      <small>
+                        Color: {item.item_color || "-"} | Size:{" "}
+                        {item.item_size || "-"}
+                        <br />
+                        HS Code: {item.hscode || "-"}
+                      </small>
                     </td>
-                    <td>{item.unit}</td>
-                    <td>{item.qty}</td>
+                    <td>{item.unit || "-"}</td>
+                    <td>{item.booking_qty || 0}</td>
                     <td>{item.unit_price}</td>
-                    <td>{item.total}</td>
+                    <td>{(item.booking_qty * item.unit_price).toFixed(2)}</td>
                   </tr>
                 ))}
-                <tr className="">
-                  <td colSpan={6}>
-                    <h6>Items Summary</h6>
+
+                {/* ✅ Total Row */}
+                <tr>
+                  <td colSpan={6} className="text-end">
+                    <strong>Total</strong>
                   </td>
                   <td>
-                    <h6>
-                      {proforma.total} {proforma.currency}
-                    </h6>
+                    <strong>
+                      {proformaItems
+                        .reduce(
+                          (sum, item) =>
+                            sum + (item.booking_qty * item.unit_price || 0),
+                          0
+                        )
+                        .toFixed(2)}
+                    </strong>
                   </td>
                 </tr>
               </tbody>
@@ -487,7 +501,7 @@ export default function ProformaDetails(props) {
                 <h6>Soft Copy From Supplier </h6>
                 <hr />
                 <ol>
-                  {proforma?.attachments?.map((item, index) => (
+                  {proforma?.files?.map((item, index) => (
                     <li className="text-primary" key={index}>
                       <a
                         // className="text-muted"
@@ -512,6 +526,8 @@ export default function ProformaDetails(props) {
                   defalt
                 />
                 <div className="sign_time">
+                  {proforma.placed_by_name}
+                  <br />
                   {moment(proforma.placed_at).format("lll")}
                 </div>
               </div>
@@ -520,6 +536,8 @@ export default function ProformaDetails(props) {
               <div className="item">
                 <img className="signature" src={proforma.confirmed_by_sign} />
                 <div className="sign_time">
+                  {proforma.confirmed_by_name}
+                  <br />
                   {moment(proforma.confirmed_at).format("lll")}
                 </div>
               </div>
@@ -529,6 +547,8 @@ export default function ProformaDetails(props) {
               <div className="item">
                 <img className="signature" src={proforma.submitted_by_sign} />
                 <div className="sign_time">
+                  {proforma.submitted_by_name}
+                  <br />
                   {moment(proforma.submitted_at).format("lll")}
                 </div>
               </div>
@@ -538,6 +558,8 @@ export default function ProformaDetails(props) {
               <div className="item">
                 <img className="signature" src={proforma.checked_by_sign} />
                 <div className="sign_time">
+                  {proforma.checked_by_name}
+                  <br />
                   {moment(proforma.checked_at).format("lll")}
                 </div>
               </div>
@@ -550,6 +572,8 @@ export default function ProformaDetails(props) {
                   src={proforma.cost_approved_by_sign}
                 />
                 <div className="sign_time">
+                  {proforma.cost_approved_by_name}
+                  <br />
                   {moment(proforma.cost_approved_at).format("lll")}
                 </div>
               </div>
@@ -559,6 +583,8 @@ export default function ProformaDetails(props) {
               <div className="item">
                 <img className="signature" src={proforma.finalized_by_sign} />
                 <div className="sign_time">
+                  {proforma.finalized_by_name}
+                  <br />
                   {moment(proforma.finalized_at).format("lll")}
                 </div>
               </div>
@@ -568,6 +594,8 @@ export default function ProformaDetails(props) {
               <div className="item">
                 <img className="signature" src={proforma.approved_by_sign} />
                 <div className="sign_time">
+                  {proforma.approved_by_name}
+                  <br />
                   {moment(proforma.approved_at).format("lll")}
                 </div>
               </div>
@@ -577,6 +605,8 @@ export default function ProformaDetails(props) {
               <div className="item">
                 <img className="signature" src={proforma.received_by_sign} />
                 <div className="sign_time">
+                  {proforma.received_by_name}
+                  <br />
                   {moment(proforma.received_at).format("lll")}
                 </div>
               </div>

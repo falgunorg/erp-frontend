@@ -161,6 +161,13 @@ export default function CreateProforma(props) {
       formErrors.gross_weight = "Gross Weight is required";
     }
 
+    if (!formDataSet.payment_terms) {
+      formErrors.payment_terms = "Payment Terms is Required";
+    }
+    if (!formDataSet.mode_of_shipment) {
+      formErrors.mode_of_shipment = "Shipment mode is required";
+    }
+
     if (!formDataSet.bank_account_name) {
       formErrors.bank_account_name = "Bank Account is Required";
     }
@@ -601,6 +608,11 @@ export default function CreateProforma(props) {
                         handleChange("payment_terms", e.target.value)
                       }
                     />
+                    {errors.payment_terms && (
+                      <>
+                        <div className="errorMsg">{errors.payment_terms}</div>
+                      </>
+                    )}
                   </div>
                   <div className="col-lg-3">
                     <label className="form-label">
@@ -619,6 +631,13 @@ export default function CreateProforma(props) {
                       <option value="Air">Air</option>
                       <option value="Road">Road</option>
                     </select>
+                    {errors.mode_of_shipment && (
+                      <>
+                        <div className="errorMsg">
+                          {errors.mode_of_shipment}
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="col-lg-3">
                     <label className="form-label">
