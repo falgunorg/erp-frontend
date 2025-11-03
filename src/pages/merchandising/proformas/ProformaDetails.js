@@ -280,120 +280,157 @@ export default function ProformaDetails(props) {
             </Fragment>
           ) : null}
 
-          <Link to="#" onClick={goBack} className="btn btn-danger">
+          <Link to="/merchandising/proformas" className="btn btn-danger">
             <i className="fal fa-times"></i>
           </Link>
         </div>
       </div>
 
-      <div className="preview_print page" id="pdf_container">
-        <div className="container border ">
+      <div
+        className="preview_print page create_technical_pack "
+        id="pdf_container"
+      >
+        <div className="create_tp_body container-fluid">
           <br />
           <h4 className="text-center">{proforma.supplier?.company_name}</h4>
-          <br />
           <h6 className="text-center text-underline">
             <u>PROFORMA INVOICE</u>
           </h6>
+          <br />
 
           <div className="row">
-            <div className="col">
-              <table className="table table-bordered mb-0">
-                <tr>
-                  <td>PI</td>
-                  <td>{proforma.title}</td>
-                </tr>
-                <tr>
-                  <td>COMPANY</td>
-                  <td>
+            <div className="col-sm-6 col-md-6 col-lg-6">
+              <div className="row">
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">PI Number:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.title}</div>
+                </div>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Company:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
                     {proforma.booking?.workorder?.techpack?.company?.title}{" "}
                     <br />
                     {proforma.booking?.workorder?.techpack?.company?.address}
-                  </td>
-                </tr>
-                <tr>
-                  <td>RESPONSIBLE</td>
+                  </div>
+                </div>
 
-                  <td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Responsible MR:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
                     {proforma.user?.full_name} <br />
                     {proforma.user?.employee_id}
-                  </td>
-                </tr>
-                <tr>
-                  <td>NET WEIGHT</td>
+                  </div>
+                </div>
 
-                  <td>{proforma.net_weight}</td>
-                </tr>
-                <tr>
-                  <td>GROSS WEIGHT</td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Net Weight:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.net_weight}(KG)</div>
+                </div>
 
-                  <td>{proforma.gross_weight}</td>
-                </tr>
-              </table>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Gross Weight:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.gross_weight}(KG)</div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Freight Charge:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.freight_charge}</div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Total PI Value:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.total}</div>
+                </div>
+              </div>
             </div>
-
-            <div className="col">
-              <table className="table table-bordered mb-0">
-                <tr>
-                  <td>Booking Ref</td>
-                  <td>
+            <div className="col-sm-6 col-md-6 col-lg-6">
+              <div className="row">
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Booking Ref:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
                     <Link
                       to={"/merchandising/bookings/" + proforma.booking?.id}
                     >
                       {proforma.booking?.booking_number}
                     </Link>
-                  </td>
-                </tr>
-                <tr>
-                  <td>ISSUED DATE</td>
+                  </div>
+                </div>
 
-                  <td>{moment(proforma.issued_date).format("ll")}</td>
-                </tr>
-                <tr>
-                  <td>DELIVERY DATE</td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Issued date:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {moment(proforma.issued_date).format("ll")}
+                  </div>
+                </div>
 
-                  <td>{moment(proforma.delivery_date).format("ll")}</td>
-                </tr>
-                <tr>
-                  <td>PI VALIDITY</td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Delivery date:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {moment(proforma.delivery_date).format("ll")}
+                  </div>
+                </div>
 
-                  <td>{proforma.pi_validity}</td>
-                </tr>
-                <tr>
-                  <td>SUPPLIER</td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">PI Validity:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.pi_validity}</div>
+                </div>
 
-                  <td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Supplier:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
                     {proforma.supplier?.company_name} <br />
                     {proforma.supplier?.address},{proforma.supplier?.city},
                     {proforma.supplier?.country}
-                  </td>
-                </tr>
-                <tr>
-                  <td>RESPONSIBLE</td>
+                  </div>
+                </div>
 
-                  <td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Responsible:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
                     {proforma.supplier?.attention_person} <br />
                     {proforma.supplier?.mobile_number}
-                  </td>
-                </tr>
-                <tr>
-                  <td>TOTAL VALUE</td>
+                  </div>
+                </div>
 
-                  <td>
-                    {proforma.total} {proforma.currency}
-                  </td>
-                </tr>
-                <tr>
-                  <td>STATUS</td>
-
-                  <td>{proforma.status}</td>
-                </tr>
-              </table>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Status:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.status}</div>
+                </div>
+              </div>
             </div>
           </div>
           <br />
           <h6 className="text-center">ITEM'S</h6>
           <div className="Import_booking_item_table">
-            <table className="table text-start align-middle table-bordered table-hover mb-0">
+            <table className="table text-start align-middle table-bordered mb-0">
               <thead className="bg-dark text-white">
                 <tr>
                   <th>SL</th>
@@ -433,15 +470,7 @@ export default function ProformaDetails(props) {
                     <strong>Total</strong>
                   </td>
                   <td>
-                    <strong>
-                      {proformaItems
-                        .reduce(
-                          (sum, item) =>
-                            sum + (item.booking_qty * item.unit_price || 0),
-                          0
-                        )
-                        .toFixed(2)}
-                    </strong>
+                    <strong>{proforma.total}</strong>
                   </td>
                 </tr>
               </tbody>
@@ -452,7 +481,62 @@ export default function ProformaDetails(props) {
           <hr></hr>
           <div className="row">
             <div className="col-6">
-              <div dangerouslySetInnerHTML={{ __html: proforma.description }} />
+              <div className="row">
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Payment Terms:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.payment_terms}</div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Mode Of Shipment:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.mode_of_shipment}</div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Port of Loading:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.port_of_loading}</div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Port of Discharge:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{proforma.port_of_discharge}</div>
+                </div>
+
+                <br />
+                <div className="soft_copy_div">
+                  <h6>Soft Copy From Supplier </h6>
+                  <hr />
+                  <ul
+                    style={{
+                      padding: "0",
+                      margin: "0",
+                    }}
+                  >
+                    {proforma?.files?.map((f, i) => (
+                      <li
+                        key={i}
+                        onClick={() => window.open(f.file_source, "_blank")}
+                        style={{
+                          border: "1px solid grey",
+                          padding: "5px",
+                          cursor: "pointer",
+                        }}
+                        className="rounded bg-light"
+                      >
+                        <small>{f.filename}</small>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
             <div className="col-6">
               <table className="table table-bordered mb-0">
@@ -496,25 +580,14 @@ export default function ProformaDetails(props) {
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <div className="col-lg-12">
               <br />
-              <div className="soft_copy_div">
-                <h6>Soft Copy From Supplier </h6>
-                <hr />
-                <ol>
-                  {proforma?.files?.map((item, index) => (
-                    <li className="text-primary" key={index}>
-                      <a
-                        // className="text-muted"
-                        target="_blank"
-                        href={item.file_source}
-                        download
-                      >
-                        {item.filename}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
-              </div>
+              <div
+                dangerouslySetInnerHTML={{ __html: proforma.description }}
+                className="form-value"
+              ></div>
             </div>
           </div>
           <div className="signature_block">

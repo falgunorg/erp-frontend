@@ -8,12 +8,14 @@
       bottom: 0;
       transition: 0.5s;
     }
-    .falgun_app_content { 
+    .falgun_app_content {
       padding: 11px 11px 0 11px;
       margin-left: 73px;
       background: $white;
       transition: 0.5s;
-
+      height: calc(100vh - 56px);
+      // position: fixed;
+      overflow-x: hidden;
     }
   }
 }

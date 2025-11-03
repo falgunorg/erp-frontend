@@ -199,9 +199,9 @@ export default function Proformas(props) {
                 <th>Purchase Contract</th>
                 <th>Status</th>
                 <th>Supplier</th>
-                <th>Buyer</th>
-                <th>Net Weight</th>
-                <th>Gross Weight</th>
+                <th>Net Weight(KG)</th>
+                <th>Gross Weight(KG)</th>
+                <th>Freight Charge</th>
                 <th>Total Amount</th>
                 <th>Actions</th>
               </tr>
@@ -214,9 +214,6 @@ export default function Proformas(props) {
                       if (!searchValue) return false;
                       const lowerCaseSearchValue = searchValue.toLowerCase();
                       return (
-                        item.buyer
-                          .toLowerCase()
-                          .includes(lowerCaseSearchValue) ||
                         item.supplier
                           .toLowerCase()
                           .includes(lowerCaseSearchValue) ||
@@ -230,20 +227,25 @@ export default function Proformas(props) {
                     })
                     .map((item, index) => (
                       <tr key={index} className={item.status}>
-                        <td>{item.proforma_number}</td>
-                        <td>{item.title}</td>
+                        <td>{index + 1}</td>
+                        <td>
+                          <Link
+                            to={"/merchandising/proformas-details/" + item.id}
+                          >
+                            {item.title}
+                          </Link>{" "}
+                        </td>
                         <td>{item.user}</td>
                         <td>{moment(item.issued_date).format("ll")}</td>
                         <td>{item.pi_validity}</td>
                         <td>{item.contract_number}</td>
                         <td>{item.status}</td>
                         <td>{item.supplier}</td>
-                        <td>{item.buyer}</td>
+
                         <td>{item.net_weight}</td>
                         <td>{item.gross_weight}</td>
-                        <td>
-                          {item.total} {item.currency}
-                        </td>
+                        <td>{item.freight_charge}</td>
+                        <td>{item.total}</td>
                         <td>
                           <Link
                             to={"/merchandising/proformas-details/" + item.id}
@@ -267,20 +269,25 @@ export default function Proformas(props) {
                 <>
                   {proformas.map((item, index) => (
                     <tr key={index} className={item.status}>
-                      <td>{item.proforma_number}</td>
-                      <td>{item.title}</td>
+                      <td>{index + 1}</td>
+                      <td>
+                        <Link
+                          style={{ color: "white" }}
+                          to={"/merchandising/proformas-details/" + item.id}
+                        >
+                          {item.title}
+                        </Link>{" "}
+                      </td>
                       <td>{item.user}</td>
                       <td>{moment(item.issued_date).format("ll")}</td>
                       <td>{item.pi_validity}</td>
                       <td>{item.contract_number}</td>
                       <td>{item.status}</td>
                       <td>{item.supplier}</td>
-                      <td>{item.buyer}</td>
                       <td>{item.net_weight}</td>
                       <td>{item.gross_weight}</td>
-                      <td>
-                        {item.total} {item.currency}
-                      </td>
+                      <td>{item.freight_charge}</td>
+                      <td>{item.total}</td>
                       <td>
                         <Link
                           to={"/merchandising/proformas-details/" + item.id}

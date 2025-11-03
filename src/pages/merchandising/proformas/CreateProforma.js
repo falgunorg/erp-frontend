@@ -3,10 +3,11 @@ import { Link, useHistory } from "react-router-dom";
 import api from "services/api";
 import Spinner from "../../../elements/Spinner";
 import swal from "sweetalert";
-import QuillEditor from "elements/QuailEditor";
+import QuailEditor from "elements/QuailEditor";
 import CustomSelect from "elements/CustomSelect";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import MultipleFileInput from "elements/techpack/MultipleFileInput";
+
 // modals
 
 export default function CreateProforma(props) {
@@ -519,7 +520,7 @@ export default function CreateProforma(props) {
                     <td>
                       <strong>{netTotalQty}</strong>
                     </td>
-                    <td>
+                    <td className="text-end">
                       <strong>{netTotalAmount}</strong>
                     </td>
                     <td></td>
@@ -537,9 +538,9 @@ export default function CreateProforma(props) {
                 <div className="row">
                   <div className="col-lg-3">
                     <div className="form-group">
-                      <label className="form-label">Net Weight</label>
+                      <label className="form-label">Net Weight(KG)</label>
                       <input
-                        type="text"
+                        type="number"
                         onChange={(event) =>
                           handleChange("net_weight", event.target.value)
                         }
@@ -556,9 +557,9 @@ export default function CreateProforma(props) {
                   </div>
                   <div className="col-lg-3">
                     <div className="form-group">
-                      <label className="form-label">Gross Weight</label>
+                      <label className="form-label">Gross Weight(KG)</label>
                       <input
-                        type="text"
+                        type="number"
                         onChange={(event) =>
                           handleChange("gross_weight", event.target.value)
                         }
@@ -666,13 +667,12 @@ export default function CreateProforma(props) {
                   <div className="col-lg-12">
                     <div className="form-group">
                       <label className="form-label">Description</label>
-                      <textarea
-                        className="form-control"
-                        value={formDataSet.description}
-                        onChange={(e) =>
-                          handleChange("description", e.target.value)
+                      <QuailEditor
+                        content={formDataSet.description}
+                        onContentChange={(e) =>
+                          handleChange("description", e)
                         }
-                      ></textarea>
+                      />
                     </div>
                   </div>
                 </div>

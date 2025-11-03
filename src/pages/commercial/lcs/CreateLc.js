@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import api from "services/api";
 import Spinner from "../../../elements/Spinner";
@@ -7,60 +7,17 @@ import CustomSelect from "elements/CustomSelect";
 import moment from "moment";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import MultipleFileInput from "elements/techpack/MultipleFileInput";
+import QuailEditor from "elements/QuailEditor";
 
-export default function CreateLc(props) {
+export default function CreateLc({ userData }) {
   const history = useHistory();
-  const userInfo = props.userData;
   const [spinner, setSpinner] = useState(false);
-
   const [selectedFiles, setSelectedFiles] = useState([]);
-
-  // Contracts
   const [contracts, setContracts] = useState([]);
-  const getContracts = async () => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/purchase-contracts");
-    if (response.status === 200 && response.data) {
-      setContracts(response.data.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
-  // get all proformas
   const [proformas, setProformas] = useState([]);
-  const getProformas = async () => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/proformas", {
-      status: "Received",
-      department: userInfo.department_title,
-      designation: userInfo.designation_title,
-      contract_id: formDataSet.contract_id,
-      supplier_id: formDataSet.supplier_id,
-    });
-    if (response.status === 200 && response.data) {
-      setProformas(response.data.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
-  // get all suppliers
   const [suppliers, setSuppliers] = useState([]);
-  const getSuppliers = async () => {
-    setSpinner(true);
-    var response = await api.post("/admin/suppliers");
-    if (response.status === 200 && response.data) {
-      setSuppliers(response.data.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
   const [errors, setErrors] = useState({});
+
   const [formDataSet, setFormDataSet] = useState({
     contract_id: "",
     supplier_id: "",
@@ -73,95 +30,207 @@ export default function CreateLc(props) {
     paid_date: "",
     commodity: "",
     pcc_avail: "",
+    payment_terms: "",
+    mode_of_shipment: "",
+    port_of_loading: "",
+    port_of_discharge: "",
+    net_weight: "",
+    gross_weight: "",
+    freight_charge: "",
+    description: "",
   });
 
-  const handleProformaChange = (selectedOptions) => {
-    const selectedProformaIds = selectedOptions.map((option) => option.value);
-    setFormDataSet((prevData) => ({
-      ...prevData,
-      proformas: selectedProformaIds,
-    }));
-  };
-
-  const handleChange = (name, value) => {
-    setFormDataSet({ ...formDataSet, [name]: value });
-  };
-
-  const filteredProformas = proformas.filter((proforma) =>
-    formDataSet.proformas.includes(proforma.id)
-  );
-  const netTotal = filteredProformas.reduce(
-    (total, proforma) => total + parseFloat(proforma.total),
-    0
-  );
-
-  const validateForm = () => {
-    let formErrors = {};
-    // personal info
-    if (!formDataSet.contract_id) {
-      formErrors.contract_id = "Purchase Contract is required";
-    }
-    if (!formDataSet.supplier_id) {
-      formErrors.supplier_id = "Supplier is required";
-    }
-    if (!formDataSet.lc_number) {
-      formErrors.lc_number = "lc Number is required";
-    }
-
-    setErrors(formErrors);
-    return Object.keys(formErrors).length === 0;
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (validateForm()) {
-      var data = new FormData();
-      data.append("contract_id", formDataSet.contract_id);
-      data.append("supplier_id", formDataSet.supplier_id);
-      data.append("proformas", formDataSet.proformas);
-      data.append("lc_number", formDataSet.lc_number);
-      data.append("lc_validity", formDataSet.lc_validity);
-      data.append("apply_date", formDataSet.apply_date);
-      data.append("issued_date", formDataSet.issued_date);
-      data.append("maturity_date", formDataSet.maturity_date);
-      data.append("paid_date", formDataSet.paid_date);
-      data.append("commodity", formDataSet.commodity);
-      data.append("pcc_avail", formDataSet.pcc_avail);
-      setSpinner(true);
-      var response = await api.post("/lcs-create", data);
-      if (response.status === 200 && response.data) {
-        history.push("/commercial/lcs");
-      } else {
-        setErrors(response.data.errors);
-      }
+  // --- Fetchers ---
+  const getContracts = async () => {
+    setSpinner(true);
+    try {
+      const res = await api.post("/merchandising/purchase-contracts");
+      if (res.status === 200 && res.data) setContracts(res.data.data || []);
+    } catch (err) {
+      console.error("getContracts:", err);
+    } finally {
       setSpinner(false);
     }
   };
 
-  useEffect(async () => {
-    getContracts();
-    getSuppliers();
-    getProformas();
-  }, []);
+  const getSuppliers = async () => {
+    setSpinner(true);
+    try {
+      const res = await api.post("/admin/suppliers");
+      if (res.status === 200 && res.data) setSuppliers(res.data.data || []);
+    } catch (err) {
+      console.error("getSuppliers:", err);
+    } finally {
+      setSpinner(false);
+    }
+  };
 
-  useEffect(async () => {
-    getProformas();
-  }, [formDataSet.contract_id, formDataSet.supplier_id]);
+  // Only fetch proformas when both contract_id and supplier_id are set
+  const getProformas = async () => {
+    if (!formDataSet.contract_id || !formDataSet.supplier_id) {
+      setProformas([]);
+      return;
+    }
+    setSpinner(true);
+    try {
+      const res = await api.post("/merchandising/proformas", {
+        status: "Received",
+        department: userData?.department_title,
+        designation: userData?.designation_title,
+        contract_id: formDataSet.contract_id,
+        supplier_id: formDataSet.supplier_id,
+      });
+      if (res.status === 200 && res.data) setProformas(res.data.data || []);
+    } catch (err) {
+      console.error("getProformas:", err);
+    } finally {
+      setSpinner(false);
+    }
+  };
 
   useEffect(() => {
-    const checkAccess = async () => {
-      if (props.userData?.department_title !== "Commercial") {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
+    getContracts();
+    getSuppliers();
+    // do NOT call getProformas here — wait until contract & supplier selected
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-        history.push("/dashboard");
+  useEffect(() => {
+    // whenever contract_id or supplier_id changes, refresh proformas
+    getProformas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formDataSet.contract_id, formDataSet.supplier_id]);
+
+  // --- Handlers ---
+  const handleChange = (name, value) => {
+    setFormDataSet((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleProformaChange = (selectedOptions = []) => {
+    const selectedIds = selectedOptions.map((opt) => opt.value);
+    handleChange("proformas", selectedIds);
+  };
+
+  // --- Derived data ---
+  const filteredProformas = proformas.filter((p) =>
+    formDataSet.proformas.includes(p.id)
+  );
+
+  const totalNetWeight = filteredProformas.reduce((sum, p) => {
+    // normalize p.total to a number safely
+    const raw = p && p.net_weight != null ? String(p.net_weight) : "0";
+    const cleaned = raw.replace(/,/g, "").replace(/[^0-9.-]+/g, "");
+    const n = parseFloat(cleaned);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+
+  const totalGrossWeight = filteredProformas.reduce((sum, p) => {
+    // normalize p.total to a number safely
+    const raw = p && p.gross_weight != null ? String(p.gross_weight) : "0";
+    const cleaned = raw.replace(/,/g, "").replace(/[^0-9.-]+/g, "");
+    const n = parseFloat(cleaned);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+
+  const totalFreightCharge = filteredProformas.reduce((sum, p) => {
+    // normalize p.total to a number safely
+    const raw = p && p.freight_charge != null ? String(p.freight_charge) : "0";
+    const cleaned = raw.replace(/,/g, "").replace(/[^0-9.-]+/g, "");
+    const n = parseFloat(cleaned);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+
+  const totalAmount = filteredProformas.reduce((sum, p) => {
+    // normalize p.total to a number safely
+    const raw = p && p.total != null ? String(p.total) : "0";
+    const cleaned = raw.replace(/,/g, "").replace(/[^0-9.-]+/g, "");
+    const n = parseFloat(cleaned);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+
+  // --- Validation ---
+  const validateForm = () => {
+    const requiredFields = [
+      "contract_id",
+      "supplier_id",
+      "proformas",
+      "lc_number",
+      "commodity",
+      "payment_terms",
+      "mode_of_shipment",
+    ];
+
+    const newErrors = {};
+    requiredFields.forEach((f) => {
+      const val = formDataSet[f];
+      if (Array.isArray(val)) {
+        if (val.length === 0)
+          newErrors[f] = `${f.replace(/_/g, " ")} is required`;
+      } else if (!val && val !== 0) {
+        newErrors[f] = `${f.replace(/_/g, " ")} is required`;
       }
-    };
-    checkAccess();
-  }, [props, history]);
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // --- Submit ---
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    // require at least one attachment or not? original required softcopy — original Create required selectedFiles check earlier.
+    if ((selectedFiles?.length || 0) === 0) {
+      // If you want to enforce, uncomment below:
+      // swal("Please Upload LC copy (PDF)", { icon: "error" });
+      // return;
+    }
+
+    const formData = new FormData();
+    // append scalar fields
+    Object.keys(formDataSet).forEach((k) => {
+      const v = formDataSet[k];
+      if (Array.isArray(v)) {
+        // for arrays (proformas) send as JSON string
+        formData.append(k, JSON.stringify(v));
+      } else {
+        formData.append(k, v ?? "");
+      }
+    });
+
+    // attachments
+    for (let i = 0; i < selectedFiles.length; i++) {
+      formData.append("attatchments[]", selectedFiles[i]);
+    }
+
+    setSpinner(true);
+    try {
+      const res = await api.post("/commercial/lcs-create", formData);
+      if (res.status === 200 && res.data) {
+        swal("Success", "LC Created Successfully", "success");
+        history.push("/commercial/lcs");
+      } else {
+        setErrors(res.data?.errors || {});
+      }
+    } catch (err) {
+      console.error("handleSubmit:", err);
+      swal("Error", err.message || "Something went wrong", "error");
+    } finally {
+      setSpinner(false);
+    }
+  };
+
+  // --- Access control ---
+  useEffect(() => {
+    if (userData?.department_title !== "Commercial") {
+      swal({
+        icon: "error",
+        text: "You cannot access this section.",
+        closeOnClickOutside: false,
+      }).then(() => history.push("/dashboard"));
+    }
+  }, [userData, history]);
 
   return (
     <div className="create_edit_page create_technical_pack">
@@ -174,7 +243,7 @@ export default function CreateLc(props) {
           </div>
           <div className="d-flex align-items-end">
             <button
-              type="supmit"
+              type="submit"
               className="publish_btn btn btn-warning bg-falgun me-4"
             >
               Save
@@ -187,46 +256,47 @@ export default function CreateLc(props) {
             </Link>
           </div>
         </div>
+
         <hr />
+
         <div className="col-lg-12">
           <div className="personal_data">
             <div className="row">
+              {/* Purchase Contract */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">
-                    Purchase Contract<span className="text-danger">*</span>
+                    Purchase Contract <span className="text-danger">*</span>
                   </label>
                   <CustomSelect
                     placeholder="Select or Search"
-                    onChange={(selectedOption) =>
-                      handleChange("contract_id", selectedOption.value)
+                    onChange={(opt) =>
+                      handleChange("contract_id", opt?.value || "")
                     }
                     value={
-                      contracts.find(
-                        (item) => item.id === formDataSet.contract_id
-                      )
+                      contracts.find((c) => c.id === formDataSet.contract_id)
                         ? {
                             value: formDataSet.contract_id,
                             label:
                               contracts.find(
-                                (item) => item.id === formDataSet.contract_id
-                              ).tag_number || "",
+                                (c) => c.id === formDataSet.contract_id
+                              ).title || "",
                           }
                         : null
                     }
                     name="contract_id"
-                    options={contracts.map((item) => ({
-                      value: item.id,
-                      label: item.tag_number,
+                    options={contracts.map((c) => ({
+                      value: c.id,
+                      label: c.title,
                     }))}
                   />
-
                   {errors.contract_id && (
                     <div className="errorMsg">{errors.contract_id}</div>
                   )}
                 </div>
               </div>
 
+              {/* Supplier */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">
@@ -234,79 +304,62 @@ export default function CreateLc(props) {
                   </label>
                   <CustomSelect
                     placeholder="Select or Search"
-                    onChange={(selectedOption) =>
-                      handleChange("supplier_id", selectedOption.value)
+                    onChange={(opt) =>
+                      handleChange("supplier_id", opt?.value || "")
                     }
                     value={
-                      suppliers.find(
-                        (item) => item.id === formDataSet.supplier_id
-                      )
+                      suppliers.find((s) => s.id === formDataSet.supplier_id)
                         ? {
                             value: formDataSet.supplier_id,
                             label:
                               suppliers.find(
-                                (item) => item.id === formDataSet.supplier_id
+                                (s) => s.id === formDataSet.supplier_id
                               ).company_name || "",
                           }
                         : null
                     }
                     name="supplier_id"
-                    options={suppliers.map((item) => ({
-                      value: item.id,
-                      label: item.company_name,
+                    options={suppliers.map((s) => ({
+                      value: s.id,
+                      label: s.company_name,
                     }))}
                   />
+                  {errors.supplier_id && (
+                    <div className="errorMsg">{errors.supplier_id}</div>
+                  )}
                 </div>
               </div>
+
+              {/* Proformas (multi) */}
               <div className="col-lg-6">
                 <div className="form-group">
                   <label className="form-label">
-                    Proforma Invoices<span className="text-danger">*</span>
+                    Proforma Invoices <span className="text-danger">*</span>
                   </label>
                   <CustomSelect
                     isMulti
                     name="proformas"
                     placeholder="Select or Search"
-                    value={formDataSet.proformas.map((proformaId) => {
-                      const selectedProforma = proformas.find(
-                        (proforma) => proforma.id === proformaId
-                      );
+                    value={formDataSet.proformas.map((id) => {
+                      const pf = proformas.find((p) => p.id === id);
                       return {
-                        value: proformaId,
-                        label: selectedProforma
-                          ? selectedProforma.title +
-                            " | " +
-                            selectedProforma.proforma_number +
-                            " | " +
-                            selectedProforma.total +
-                            " | " +
-                            selectedProforma.currency
-                          : "",
+                        value: id,
+                        label: pf ? `${pf.title} | ${pf.total}` : id,
                       };
                     })}
                     onChange={handleProformaChange}
-                    options={proformas.map((proforma) => ({
-                      value: proforma.id,
-                      label:
-                        proforma.title +
-                        " | " +
-                        proforma.proforma_number +
-                        " | " +
-                        proforma.total +
-                        " | " +
-                        proforma.currency,
+                    options={proformas.map((p) => ({
+                      value: p.id,
+                      label: `${p.title} | ${p.total}`,
                     }))}
                   />
-
                   {errors.proformas && (
-                    <>
-                      <div className="errorMsg">{errors.proformas}</div>
-                      <br />
-                    </>
+                    <div className="errorMsg">{errors.proformas}</div>
                   )}
                 </div>
               </div>
 
+              {/* LC Number */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">
@@ -316,9 +369,7 @@ export default function CreateLc(props) {
                     type="text"
                     name="lc_number"
                     value={formDataSet.lc_number}
-                    onChange={(event) =>
-                      handleChange("lc_number", event.target.value)
-                    }
+                    onChange={(e) => handleChange("lc_number", e.target.value)}
                     className="form-control"
                   />
                   {errors.lc_number && (
@@ -327,13 +378,14 @@ export default function CreateLc(props) {
                 </div>
               </div>
 
+              {/* LC Validity */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">LC Validity</label>
                   <select
                     value={formDataSet.lc_validity}
-                    onChange={(event) =>
-                      handleChange("lc_validity", event.target.value)
+                    onChange={(e) =>
+                      handleChange("lc_validity", e.target.value)
                     }
                     name="lc_validity"
                     className="form-select"
@@ -347,6 +399,7 @@ export default function CreateLc(props) {
                 </div>
               </div>
 
+              {/* Apply Date */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">Apply Date</label>
@@ -354,13 +407,13 @@ export default function CreateLc(props) {
                     type="date"
                     name="apply_date"
                     value={formDataSet.apply_date}
-                    onChange={(event) =>
-                      handleChange("apply_date", event.target.value)
-                    }
+                    onChange={(e) => handleChange("apply_date", e.target.value)}
                     className="form-control"
                   />
                 </div>
               </div>
+
+              {/* Issued Date */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">Issued Date</label>
@@ -368,13 +421,15 @@ export default function CreateLc(props) {
                     type="date"
                     name="issued_date"
                     value={formDataSet.issued_date}
-                    onChange={(event) =>
-                      handleChange("issued_date", event.target.value)
+                    onChange={(e) =>
+                      handleChange("issued_date", e.target.value)
                     }
                     className="form-control"
                   />
                 </div>
               </div>
+
+              {/* Maturity Date */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">Maturity Date</label>
@@ -382,13 +437,15 @@ export default function CreateLc(props) {
                     type="date"
                     name="maturity_date"
                     value={formDataSet.maturity_date}
-                    onChange={(event) =>
-                      handleChange("maturity_date", event.target.value)
+                    onChange={(e) =>
+                      handleChange("maturity_date", e.target.value)
                     }
                     className="form-control"
                   />
                 </div>
               </div>
+
+              {/* Paid Date */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">Paid Date</label>
@@ -396,28 +453,37 @@ export default function CreateLc(props) {
                     type="date"
                     name="paid_date"
                     value={formDataSet.paid_date}
-                    onChange={(event) =>
-                      handleChange("paid_date", event.target.value)
-                    }
-                    className="form-control"
-                  />
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label className="form-label">Commodity</label>
-                  <input
-                    type="text"
-                    onChange={(event) =>
-                      handleChange("commodity", event.target.value)
-                    }
-                    name="commodity"
-                    value={formDataSet.commodity}
+                    onChange={(e) => handleChange("paid_date", e.target.value)}
                     className="form-control"
                   />
                 </div>
               </div>
 
+              {/* Commodity */}
+              <div className="col-lg-3">
+                <div className="form-group">
+                  <label className="form-label">
+                    Commodity <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    onChange={(e) => handleChange("commodity", e.target.value)}
+                    name="commodity"
+                    value={formDataSet.commodity}
+                    className="form-control"
+                  >
+                    <option value="">Select Commodity</option>
+                    <option value="Fabric">Fabric</option>
+                    <option value="Sewing Trims">Sewing Trims</option>
+                    <option value="Finishing Trims">Finishing Trims</option>
+                    <option value="Packing Trims">Packing Trims</option>
+                  </select>
+                  {errors.commodity && (
+                    <div className="errorMsg">{errors.commodity}</div>
+                  )}
+                </div>
+              </div>
+
+              {/* PCC Avail */}
               <div className="col-lg-3">
                 <div className="form-group">
                   <label className="form-label">PCC Avail</label>
@@ -425,31 +491,68 @@ export default function CreateLc(props) {
                     type="text"
                     name="pcc_avail"
                     value={formDataSet.pcc_avail}
-                    onChange={(event) =>
-                      handleChange("pcc_avail", event.target.value)
-                    }
+                    onChange={(e) => handleChange("pcc_avail", e.target.value)}
                     className="form-control"
                   />
                 </div>
               </div>
 
-              <div className="col-lg-12">
-                <div className="create_tp_attatchment">
-                  <br />
-                  <MultipleFileInput
-                    label="Attatchments"
-                    inputId="Attatchments"
-                    selectedFiles={selectedFiles}
-                    setSelectedFiles={setSelectedFiles}
+              {/* Net Weight */}
+              <div className="col-lg-3">
+                <div className="form-group">
+                  <label className="form-label">Net Weight(KG)</label>
+                  <input
+                    readOnly
+                    type="text"
+                    value={totalNetWeight.toFixed(2)}
+                    className="form-control"
+                  />
+                </div>
+              </div>
+
+              {/* Gross Weight */}
+              <div className="col-lg-3">
+                <div className="form-group">
+                  <label className="form-label">Gross Weight(KG)</label>
+                  <input
+                    readOnly
+                    type="text"
+                    value={totalGrossWeight.toFixed(2)}
+                    className="form-control"
+                  />
+                </div>
+              </div>
+
+              {/* Freight Charge */}
+              <div className="col-lg-3">
+                <div className="form-group">
+                  <label className="form-label">Freight Charge</label>
+                  <input
+                    readOnly
+                    value={totalFreightCharge.toFixed(2)}
+                    className="form-control"
+                  />
+                </div>
+              </div>
+              <div className="col-lg-3">
+                <div className="form-group">
+                  <label className="form-label">Total LC Value</label>
+                  <input
+                    readOnly
+                    type="number"
+                    value={totalAmount.toFixed(2)}
+                    className="form-control"
                   />
                 </div>
               </div>
             </div>
-            <hr></hr>
+
+            <hr />
+
+            {/* Proforma table */}
             <h6 className="text-center">
               <u>Proforma Invoices</u>
             </h6>
-            <hr />
             <div className="Import_booking_item_table">
               <table className="table text-start align-middle table-bordered table-hover mb-0">
                 <thead className="bg-dark text-white">
@@ -459,53 +562,61 @@ export default function CreateLc(props) {
                     <th>Responsible MR</th>
                     <th>Issued Date</th>
                     <th>Validity</th>
-                    <th>Purchase Contract</th>
                     <th>Status</th>
-                    <th>Buyer</th>
-                    <th>Net Weight</th>
-                    <th>Gross Weight</th>
+                    <th>Net Weight(KG)</th>
+                    <th>Gross Weight(KG)</th>
+                    <th>Freight Charge</th>
                     <th>Total Amount</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredProformas.map((item, index) => (
                     <tr key={index}>
-                      <td>{item.proforma_number}</td>
+                      <td>{index + 1}</td>
                       <td>{item.title}</td>
                       <td>{item.user}</td>
-                      <td>{moment(item.issued_date).format("ll")}</td>
+                      <td>
+                        {item.issued_date
+                          ? moment(item.issued_date).format("ll")
+                          : ""}
+                      </td>
                       <td>{item.pi_validity}</td>
-                      <td>{item.contract_number}</td>
                       <td>{item.status}</td>
-                      <td>{item.buyer}</td>
                       <td>{item.net_weight}</td>
                       <td>{item.gross_weight}</td>
-                      <td>
-                        {item.total} {item.currency}
-                      </td>
+                      <td>{item.freight_charge}</td>
+                      <td>{item.total}</td>
                     </tr>
                   ))}
 
                   <tr>
-                    <td colSpan={8}>
+                    <td colSpan={6}>
                       <strong>TOTAL</strong>
                     </td>
                     <td>
-                      <strong>0.00</strong>
+                      <strong>{Number(totalNetWeight).toFixed(2)} (KG)</strong>
                     </td>
                     <td>
-                      <strong>0.00</strong>
+                      <strong>
+                        {Number(totalGrossWeight).toFixed(2)} (KG)
+                      </strong>
                     </td>
                     <td>
-                      <strong>0.00</strong>
+                      <strong>
+                        {Number(totalFreightCharge).toFixed(2)} (USD)
+                      </strong>
+                    </td>
+                    <td>
+                      <strong>{Number(totalAmount).toFixed(2)} (USD)</strong>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <br />
+            <hr />
 
+            {/* Payment / Shipping / Ports / Description */}
             <div className="card-body row g-3">
               <div className="col-lg-3">
                 <label className="form-label">
@@ -518,23 +629,34 @@ export default function CreateLc(props) {
                     handleChange("payment_terms", e.target.value)
                   }
                 />
+                {errors.payment_terms && (
+                  <div className="errorMsg">{errors.payment_terms}</div>
+                )}
               </div>
+
               <div className="col-lg-3">
                 <label className="form-label">
                   Mode of Shipment <span className="text-danger">*</span>
                 </label>
-                <input
+                <select
                   className="form-control"
                   value={formDataSet.mode_of_shipment}
                   onChange={(e) =>
                     handleChange("mode_of_shipment", e.target.value)
                   }
-                />
+                >
+                  <option value="">Select One</option>
+                  <option value="Sea">Sea</option>
+                  <option value="Air">Air</option>
+                  <option value="Road">Road</option>
+                </select>
+                {errors.mode_of_shipment && (
+                  <div className="errorMsg">{errors.mode_of_shipment}</div>
+                )}
               </div>
+
               <div className="col-lg-3">
-                <label className="form-label">
-                  Port of Loading <span className="text-danger">*</span>
-                </label>
+                <label className="form-label">Port of Loading</label>
                 <input
                   className="form-control"
                   value={formDataSet.port_of_loading}
@@ -543,10 +665,9 @@ export default function CreateLc(props) {
                   }
                 />
               </div>
+
               <div className="col-lg-3">
-                <label className="form-label">
-                  Port of Discharge <span className="text-danger">*</span>
-                </label>
+                <label className="form-label">Port of Discharge</label>
                 <input
                   className="form-control"
                   value={formDataSet.port_of_discharge}
@@ -556,14 +677,22 @@ export default function CreateLc(props) {
                 />
               </div>
 
-              <div className="col-lg-12">
+              <div className="col-lg-12 mt-3">
                 <label className="form-label">Description</label>
-                <textarea
-                  className="form-control"
-                  value={formDataSet.description}
-                  onChange={(e) => handleChange("description", e.target.value)}
-                ></textarea>
+                <QuailEditor
+                  content={formDataSet.description}
+                  onContentChange={(val) => handleChange("description", val)}
+                />
               </div>
+            </div>
+
+            <div className="col-lg-12 mt-3">
+              <MultipleFileInput
+                label="Attatchments"
+                inputId="Attatchments"
+                selectedFiles={selectedFiles}
+                setSelectedFiles={setSelectedFiles}
+              />
             </div>
           </div>
         </div>

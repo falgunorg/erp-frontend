@@ -37,7 +37,7 @@ export default function Lcs(props) {
   const [lcs, setLcs] = useState([]);
   const getLcs = async () => {
     setSpinner(true);
-    var response = await api.post("/lcs", {
+    var response = await api.post("/commercial/lcs", {
       from_date: filterData.from_date,
       to_date: filterData.to_date,
       supplier_id: filterData.supplier_id,
@@ -212,7 +212,6 @@ export default function Lcs(props) {
                 <th>PC</th>
                 <th>Apply Date</th>
                 <th>Issued Date</th>
-
                 <th>Supplier</th>
                 <th>Validity</th>
                 <th>PI'S</th>
@@ -243,7 +242,7 @@ export default function Lcs(props) {
                     })
                     .map((item, index) => (
                       <tr key={index}>
-                        <td>{item.serial_number}</td>
+                        <td>{index + 1}</td>
                         <td>{item.lc_number}</td>
                         <td>{item.contract_number}</td>
                         <td>
@@ -256,7 +255,7 @@ export default function Lcs(props) {
                             ? moment(item.issued_date).format("ll")
                             : "N/A"}
                         </td>
-                        <td>{item.supplier}</td>
+                        <td>{item.supplier?.company_name}</td>
                         <td>{item.lc_validity}</td>
                         <td>
                           <ol>
@@ -305,7 +304,7 @@ export default function Lcs(props) {
                 <>
                   {lcs.map((item, index) => (
                     <tr key={index}>
-                      <td>{item.serial_number}</td>
+                      <td>{index + 1}</td>
                       <td>{item.lc_number}</td>
                       <td>{item.contract_number}</td>
                       <td>
@@ -318,8 +317,7 @@ export default function Lcs(props) {
                           ? moment(item.issued_date).format("ll")
                           : "N/A"}
                       </td>
-                      <td>{item.bank_name}</td>
-                      <td>{item.supplier}</td>
+                      <td>{item.supplier?.company_name}</td>
                       <td>{item.lc_validity}</td>
                       <td>
                         <ol>

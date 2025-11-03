@@ -1,84 +1,30 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useHistory, useParams } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useParams, useHistory } from "react-router-dom";
 import api from "services/api";
-import Spinner from "../../../elements/Spinner";
+import Spinner from "elements/Spinner";
 import swal from "sweetalert";
-import Quill from "quill";
-// modals
+import CustomSelect from "elements/CustomSelect";
+import Logo from "../../../assets/images/logos/logo-short.png";
+import MultipleFileInput from "elements/techpack/MultipleFileInput";
+import QuailEditor from "elements/QuailEditor";
 
-export default function EditProforma(props) {
+export default function EditProforma() {
   const params = useParams();
   const history = useHistory();
+
   const [spinner, setSpinner] = useState(false);
-
-  // retrive data
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const handleFileSelection = (event) => {
-    const files = event.target.files;
-    setSelectedFiles([...selectedFiles, ...files]);
-  };
-  const handleFileDelete = (index) => {
-    const newSelectedFiles = [...selectedFiles];
-    newSelectedFiles.splice(index, 1);
-    setSelectedFiles(newSelectedFiles);
-  };
-
-  // Contracts
-  const [contracts, setContracts] = useState([]);
-  const getContracts = async () => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/purchase-contracts");
-    if (response.status === 200 && response.data) {
-      setContracts(response.data.data);
-    } else {
-    }
-    setSpinner(false);
-  };
-
-  // bookings
-  const [bookings, setBookings] = useState([]);
-  const getBookings = async (supplier_id) => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/bookings", { supplier_id: supplier_id });
-    if (response.status === 200 && response.data) {
-      setBookings(response.data.data);
-    } else {
-    }
-    setSpinner(false);
-  };
-
-  // unit
-  const [units, setUnits] = useState([]);
-  const getUnits = async () => {
-    setSpinner(true);
-    var response = await api.post("/common/units");
-    if (response.status === 200 && response.data) {
-      setUnits(response.data.data);
-    }
-    setSpinner(false);
-  };
-
-  // suppliers
-  const [suppliers, setSuppliers] = useState([]);
-  const getSuppliers = async () => {
-    setSpinner(true);
-    var response = await api.post("/admin/suppliers");
-    if (response.status === 200 && response.data) {
-      setSuppliers(response.data.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
-
-  // item showing and adding
   const [errors, setErrors] = useState({});
+  const [bookings, setBookings] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]); // new uploads
+  const [existingFiles, setExistingFiles] = useState([]); // files already on server
+  const [piItems, setPiItems] = useState([]);
+
   const [formDataSet, setFormDataSet] = useState({
-    purchase_contract_id: "",
+    booking_id: "",
     supplier_id: "",
-    company_id: "",
+    booking_item: "",
     title: "",
-    currency: "",
     issued_date: "",
     delivery_date: "",
     pi_validity: "",
@@ -91,366 +37,271 @@ export default function EditProforma(props) {
     bank_brunch_name: "",
     bank_address: "",
     bank_swift_code: "",
+    payment_terms: "",
+    mode_of_shipment: "",
+    port_of_loading: "",
+    port_of_discharge: "",
+    description: "",
   });
 
-  const handleChange = (ev) => {
-    if (ev.target.name === "supplier_id") {
-      getBookings(ev.target.value);
+  // fetch bookings & suppliers
+  const getBookings = async () => {
+    try {
+      setSpinner(true);
+      const res = await api.post("/merchandising/bookings-public");
+      if (res.status === 200 && res.data) setBookings(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSpinner(false);
     }
-    setFormDataSet({
-      ...formDataSet,
-      [ev.target.name]: ev.target.value,
-    });
+  };
+
+  const getSuppliers = async () => {
+    try {
+      setSpinner(true);
+      const res = await api.post("/admin/suppliers");
+      if (res.status === 200 && res.data) setSuppliers(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSpinner(false);
+    }
+  };
+
+  // fetch proforma details
+  const fetchProformaDetails = async () => {
+    try {
+      setSpinner(true);
+      var res = await api.post("/merchandising/proformas-show", {
+        id: params.id,
+      });
+      if (res.status === 200 && res.data.data) {
+        const d = res.data.data;
+        setFormDataSet({
+          id: d.id || "",
+          booking_id: d.booking_id || "",
+          supplier_id: d.supplier_id || "",
+          booking_item: d.booking_item || d.item?.title || "",
+          title: d.title || "",
+          issued_date: d.issued_date || "",
+          delivery_date: d.delivery_date || "",
+          pi_validity: d.pi_validity || "",
+          net_weight: d.net_weight || "",
+          gross_weight: d.gross_weight || "",
+          freight_charge: d.freight_charge || "",
+          bank_account_name: d.bank_account_name || "",
+          bank_account_number: d.bank_account_number || "",
+          bank_name: d.bank_name || "",
+          bank_brunch_name: d.bank_brunch_name || "",
+          bank_address: d.bank_address || "",
+          bank_swift_code: d.bank_swift_code || "",
+          payment_terms: d.payment_terms || "",
+          mode_of_shipment: d.mode_of_shipment || "",
+          port_of_loading: d.port_of_loading || "",
+          port_of_discharge: d.port_of_discharge || "",
+          description: d.description || "",
+        });
+
+        // items expected as array of proforma items
+        const items = (d.items || []).map((it) => ({
+          id: it.id ?? null,
+          booking_id: it.booking_id ?? "",
+          item_id: it.item_id ?? "",
+          garment_color: it.garment_color ?? "",
+          size_range: it.size_range ?? "",
+          item_description: it.item_description ?? "",
+          item_size: it.item_size ?? "",
+          item_color: it.item_color ?? "",
+          garment_qty: it.garment_qty ?? "",
+          consumption: it.consumption ?? "",
+          wastage: it.wastage ?? "",
+          final_qty: it.final_qty ?? "",
+          booking_qty: it.booking_qty ?? "",
+          unit: it.unit ?? "",
+          unit_price: it.unit_price ?? "",
+          total_price: it.total_price ?? "0.00",
+          sample_requirement: it.sample_requirement ?? "",
+          comment: it.comment ?? "",
+          hscode: it.hscode ?? "",
+        }));
+        setPiItems(items);
+
+        // files
+        setExistingFiles(d.files || []);
+      } else {
+        swal("Error", "Proforma not found", "error");
+        history.push("/merchandising/proformas");
+      }
+    } catch (err) {
+      console.error(err);
+      swal("Error", "Failed to fetch proforma", "error");
+    } finally {
+      setSpinner(false);
+    }
+  };
+
+  useEffect(() => {
+    getBookings();
+    getSuppliers();
+    fetchProformaDetails();
+  }, []);
+
+  const handleChange = async (name, value) => {
+    setFormDataSet((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "booking_id" && value) {
+      try {
+        setSpinner(true);
+        const res = await api.get(`/merchandising/bookings/${value}`);
+        if (res.status === 200 && res.data.data) {
+          const data = res.data.data;
+          setPiItems(data.items || []);
+          setFormDataSet((prev) => ({
+            ...prev,
+            supplier_id: data.supplier_id || prev.supplier_id,
+            booking_item: data.item?.title || prev.booking_item,
+          }));
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setSpinner(false);
+      }
+    }
+  };
+
+  const handleItemChange = (index, field, value) => {
+    const updated = [...piItems];
+    const item = { ...updated[index] };
+    item[field] = value;
+
+    if (field === "booking_qty" || field === "unit_price") {
+      const qty = parseFloat(item.booking_qty || 0);
+      const price = parseFloat(item.unit_price || 0);
+      item.total_price = (qty * price || 0).toFixed(2);
+    }
+
+    updated[index] = item;
+    setPiItems(updated);
+  };
+
+  // totals
+  const netTotalAmount = piItems.reduce(
+    (total, itm) => total + parseFloat(itm.total_price || 0),
+    0
+  );
+  const netTotalQty = piItems.reduce(
+    (total, itm) => total + parseFloat(itm.booking_qty || 0),
+    0
+  );
+
+  // remove an existing file (mark for deletion)
+  const handleRemoveExistingFile = (fileId) => {
+    // optimistic UI remove: move from existingFiles to deleted list in state
+    setExistingFiles((prev) => prev.filter((f) => f.id !== fileId));
   };
 
   const validateForm = () => {
     let formErrors = {};
-    // personal info
-    if (!formDataSet.purchase_contract_id) {
-      formErrors.purchase_contract_id = "Please Select A Contract";
-    }
-    if (!formDataSet.supplier_id) {
+
+    if (!formDataSet.booking_id)
+      formErrors.booking_id = "Please Select A Booking";
+    if (!formDataSet.supplier_id)
       formErrors.supplier_id = "Please Select Supplier";
-    }
-    if (!formDataSet.company_id) {
-      formErrors.company_id = "Company is required";
-    }
-
-    if (!formDataSet.title) {
-      formErrors.title = "PI Number is required";
-    }
-
-    if (!formDataSet.currency) {
-      formErrors.currency = "Currency is required";
-    }
-
-    if (!formDataSet.issued_date) {
+    if (!formDataSet.title) formErrors.title = "PI Number is required";
+    if (!formDataSet.issued_date)
       formErrors.issued_date = "Issued Date is required";
-    }
-
-    if (!formDataSet.delivery_date) {
+    if (!formDataSet.delivery_date)
       formErrors.delivery_date = "Delivery Date is required";
-    }
-    if (!formDataSet.pi_validity) {
+    if (!formDataSet.pi_validity)
       formErrors.pi_validity = "PI Validity is required";
-    }
-    if (!formDataSet.net_weight) {
+    if (!formDataSet.net_weight)
       formErrors.net_weight = "Net Weight is required";
-    }
-    if (!formDataSet.gross_weight) {
+    if (!formDataSet.gross_weight)
       formErrors.gross_weight = "Gross Weight is required";
-    }
-    if (!formDataSet.freight_charge) {
-      formErrors.freight_charge = "Freight charge is required";
-    }
-    if (!formDataSet.bank_account_name) {
+    if (!formDataSet.payment_terms)
+      formErrors.payment_terms = "Payment Terms is Required";
+    if (!formDataSet.mode_of_shipment)
+      formErrors.mode_of_shipment = "Shipment mode is required";
+    if (!formDataSet.bank_account_name)
       formErrors.bank_account_name = "Bank Account is Required";
-    }
-    if (!formDataSet.bank_account_number) {
+    if (!formDataSet.bank_account_number)
       formErrors.bank_account_number = "Bank Account Number is Required";
-    }
-    if (!formDataSet.bank_name) {
-      formErrors.bank_name = "Bank Name is Required";
-    }
-    if (!formDataSet.bank_brunch_name) {
+    if (!formDataSet.bank_name) formErrors.bank_name = "Bank Name is Required";
+    if (!formDataSet.bank_brunch_name)
       formErrors.bank_brunch_name = "Bank Brunch Name is Required";
-    }
-    if (!formDataSet.bank_swift_code) {
+    if (!formDataSet.bank_swift_code)
       formErrors.bank_swift_code = "Bank Swift Code is Required";
-    }
+    if (!piItems || piItems.length === 0)
+      formErrors.piItems = "Please add at least one item";
+
     setErrors(formErrors);
     return Object.keys(formErrors).length === 0;
   };
 
-  const [piItems, setPiItems] = useState([]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
 
-  const removeRow = (index) => {
-    const updatedItems = [...piItems];
-    updatedItems.splice(index, 1);
-    setPiItems(updatedItems);
-  };
-
-  const addRow = () => {
-    const newItem = {
-      booking_id: "",
-      bookingItems: [],
-      booking_item_id: "",
-      item_id: "",
-      description: "",
-      qty: 0,
-      unit: "",
-      unit_price: 0,
-      total: 0,
-      // for limitation
-      booking_qty: 0,
-      booking_unit_price: 0,
-      booking_total: 0,
-      already_added: 0,
-    };
-
-    setPiItems([...piItems, newItem]);
-  };
-
-  const handleItemChange = async (index, field, value) => {
-    const updatedItems = [...piItems];
-
-    if (field === "booking_id") {
-      setSpinner(true);
-      var response = await api.post("/merchandising/bookings-show", { id: value });
-      if (response.status === 200 && response.data) {
-        updatedItems[index].bookingItems = response.data.data.booking_items;
-      } else {
-        updatedItems[index].bookingItems = [];
-      }
-      setSpinner(false);
-      updatedItems[index].booking_id = value;
-    } else if (field === "booking_item_id") {
-      setSpinner(true);
-      try {
-        const response = await api.post("/single-booking-item", { id: value });
-        if (response.status === 200 && response.data) {
-          const singleItem = response.data.data;
-
-          updatedItems[index].booking_item_id = singleItem.id;
-          updatedItems[index].item_id = singleItem.item_id;
-          updatedItems[index].description = singleItem.description;
-          updatedItems[index].unit = singleItem.unit;
-          updatedItems[index].unit_price = singleItem.unit_price;
-          updatedItems[index].qty = singleItem.qty;
-          updatedItems[index].total = singleItem.unit_price * singleItem.qty;
-          updatedItems[index].already_added = singleItem.already_added;
-
-          // for not excced
-          updatedItems[index].booking_qty = parseInt(singleItem.qty);
-          updatedItems[index].booking_unit_price = parseFloat(
-            singleItem.unit_price
-          );
-          updatedItems[index].booking_total = parseFloat(singleItem.total);
-        } else {
-          updatedItems[index].item_id = "";
-          updatedItems[index].booking_item_id = "";
-          updatedItems[index].description = "";
-          updatedItems[index].unit = "";
-          updatedItems[index].unit_price = 0;
-          updatedItems[index].qty = 0;
-          updatedItems[index].total = 0;
-
-          // for not excced
-          updatedItems[index].booking_qty = 0;
-          updatedItems[index].booking_unit_price = 0;
-          updatedItems[index].booking_total = 0;
-        }
-      } catch (error) {
-        console.error("Error fetching budget item:", error);
-      } finally {
-        setSpinner(false);
-      }
-    } else if (field === "qty") {
-      const qtyLimit = updatedItems[index].booking_qty;
-      if (value > qtyLimit) {
-        return;
-      } else {
-        updatedItems[index].qty = value;
-      }
-    } else if (field === "unit_price") {
-      const unitPriceLimit = updatedItems[index].booking_unit_price;
-      if (value > unitPriceLimit) {
-        return;
-      } else {
-        updatedItems[index].unit_price = value;
-      }
-    } else if (field === "total") {
-      const totalLimit = updatedItems[index].booking_total;
-
-      if (value > totalLimit) {
-        return;
-      } else {
-        updatedItems[index].total = value;
-      }
+    // At least one copy should exist (either existingFiles or selectedFiles)
+    if (existingFiles.length === 0 && selectedFiles.length === 0) {
+      swal("Please Upload PI copy (PDF)", { icon: "error" });
+      return;
     }
 
-    // Update items with value
-    updatedItems[index][field] = value;
+    // build form data
+    const formData = new FormData();
+    Object.keys(formDataSet).forEach((k) => {
+      formData.append(k, formDataSet[k] ?? "");
+    });
 
-    // Calculate total for the row
-    const qty = parseFloat(updatedItems[index].qty) || 0;
-    const unitPrice = parseFloat(updatedItems[index].unit_price) || 0;
-    updatedItems[index].total = qty * unitPrice;
+    // append items JSON
+    formData.append("proforma_items", JSON.stringify(piItems));
 
-    setPiItems(updatedItems);
-  };
+    // include IDs of files that remain (server should remove any not included) - we'll send remaining file ids
+    // If your backend expects file deletion separately, adjust accordingly.
+    const remainingFileIds = existingFiles.map((f) => f.id);
+    formData.append("existing_file_ids", JSON.stringify(remainingFileIds));
 
-  const netTotalAmount = piItems.reduce(
-    (total, item) => total + parseFloat(item.total),
-    0
-  );
-
-  const netTotalQty = piItems.reduce(
-    (total, item) => total + parseFloat(item.qty),
-    0
-  );
-
-  const [message, setMessage] = useState("");
-  const handleMsgChange = (value) => {
-    setMessage(value);
-  };
-
-  // Retrive PROFORMA INVOICE
-
-  const getPI = async () => {
-    setSpinner(true);
-    var response = await api.post("/merchandising/proformas-show", { id: params.id });
-    if (response.status === 200 && response.data) {
-      setFormDataSet(response.data.data);
-      getBookings(response.data.data.supplier_id);
-      setPiItems(response.data.data.proforma_items);
-      setMessage(response.data.data.description);
+    // new attachments
+    for (let i = 0; i < selectedFiles.length; i++) {
+      formData.append("attatchments[]", selectedFiles[i]);
     }
-    setSpinner(false);
-  };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (validateForm()) {
-      if (piItems.length === 0) {
-        swal({
-          title:
-            "There are no Items's in this PI, click on Add Row and fill the data",
-          icon: "error",
-        });
-        return; // Prevent form submission
-      }
-
-      var data = new FormData();
-      data.append("purchase_contract_id", formDataSet.purchase_contract_id);
-      data.append("supplier_id", formDataSet.supplier_id);
-      data.append("company_id", formDataSet.company_id);
-      data.append("title", formDataSet.title);
-      data.append("currency", formDataSet.currency);
-      data.append("issued_date", formDataSet.issued_date);
-      data.append("delivery_date", formDataSet.delivery_date);
-      data.append("pi_validity", formDataSet.pi_validity);
-      data.append("net_weight", formDataSet.net_weight);
-      data.append("gross_weight", formDataSet.gross_weight);
-      data.append("freight_charge", formDataSet.freight_charge);
-      data.append("description", message);
-      data.append("bank_account_name", formDataSet.bank_account_name);
-      data.append("bank_account_number", formDataSet.bank_account_number);
-      data.append("bank_brunch_name", formDataSet.bank_brunch_name);
-      data.append("bank_name", formDataSet.bank_name);
-      data.append("bank_address", formDataSet.bank_address);
-      data.append("bank_swift_code", formDataSet.bank_swift_code);
-      data.append("proforma_items", JSON.stringify(piItems));
-      data.append("id", formDataSet.id);
-      for (let i = 0; i < selectedFiles.length; i++) {
-        data.append("attatchments[]", selectedFiles[i]);
-      }
+    try {
       setSpinner(true);
-      var response = await api.post("/merchandising/proformas-update", data);
-      if (response.status === 200 && response.data) {
+      var res = await api.post("/merchandising/proformas-update", formData);
+
+      if (res.status === 200) {
+        swal("Success", "Proforma updated successfully", "success");
         history.push("/merchandising/proformas");
+      } else if (res.data && res.data.errors) {
+        setErrors(res.data.errors);
       } else {
-        setErrors(response.data.errors);
+        swal("Error", "Failed to update proforma", "error");
       }
+    } catch (err) {
+      console.error(err);
+      swal("Error", err.message || "Update failed", "error");
+    } finally {
       setSpinner(false);
     }
   };
-
-  const [companies, setCompanies] = useState([]);
-  const getCompanies = async () => {
-    var response = await api.post("/common/companies", { type: "Own" });
-    if (response.status === 200 && response.data) {
-      setCompanies(response.data.data);
-    }
-  };
-  const [currencies, setCurrencies] = useState([]);
-  const getCurrencies = async () => {
-    var response = await api.get("/common/currencies");
-    if (response.status === 200 && response.data) {
-      setCurrencies(response.data);
-    }
-  };
-
-  useEffect(async () => {
-    getContracts();
-    getCompanies();
-    getCurrencies();
-    getUnits();
-    getSuppliers();
-    getPI();
-    getBookings();
-  }, []);
-
-  useEffect(async () => {
-    props.setSection("merchandising");
-  }, []);
-
-  useEffect(() => {
-    const validateDuplicatePiItem = () => {
-      const itemMap = new Map();
-      let isDuplicate = false;
-
-      piItems.forEach((item, index) => {
-        const { booking_item_id } = item;
-        const key = `${booking_item_id}`;
-
-        if (itemMap.has(key)) {
-          isDuplicate = true;
-          itemMap.get(key).push(index);
-        } else {
-          itemMap.set(key, [index]);
-        }
-      });
-
-      if (isDuplicate) {
-        itemMap.forEach((indices, key) => {
-          if (indices.length > 1) {
-            swal({
-              title: "Duplicate Booking item",
-              text: "Item Already Selected",
-              icon: "warning",
-            }).then(() => {
-              const updatedItems = [...piItems];
-              indices.reverse().forEach((index, i) => {
-                if (i !== 0) {
-                  updatedItems.splice(index, 1);
-                }
-              });
-              setPiItems(updatedItems);
-            });
-          }
-        });
-      }
-    };
-
-    validateDuplicatePiItem();
-  }, [piItems]);
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (props.userData?.department_title !== "Merchandising") {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props, history]);
 
   return (
-    <div className="create_edit_page">
+    <div className="create_edit_page create_technical_pack">
       {spinner && <Spinner />}
-      <form onSubmit={handleSubmit}>
-        <div className="create_page_heading">
-          <div className="page_name">Update PI</div>
-          <div className="actions">
+      <form onSubmit={handleSubmit} className="create_tp_body">
+        <div className="d-flex align-items-end justify-content-between">
+          <div className="d-flex align-items-end">
+            <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
+            <h4 className="m-0">EDIT PI</h4>
+          </div>
+          <div className="d-flex align-items-end">
             <button
-              type="supmit"
-              className="publish_btn btn btn-warning bg-falgun"
+              type="submit"
+              className="publish_btn btn btn-warning bg-falgun me-4"
             >
               Update
             </button>
@@ -462,368 +313,207 @@ export default function EditProforma(props) {
             </Link>
           </div>
         </div>
+
+        <hr />
         <div className="col-lg-12">
           <div className="personal_data">
             <div className="row">
+              {/* Booking */}
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>
-                    Purchase Contract<sup>*</sup>
+                  <label className="form-label">
+                    Booking Number <sup>*</sup>
                   </label>
-
-                  <select
-                    name="purchase_contract_id"
-                    value={formDataSet.purchase_contract_id}
-                    onChange={handleChange}
-                    className="form-select"
-                  >
-                    <option value="">Select Contract</option>
-                    {contracts.length > 0 ? (
-                      contracts.map((item, index) => (
-                        <option key={index} value={item.id}>
-                          {item.title}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">No Contract found</option>
-                    )}
-                  </select>
-                  {errors.purchase_contract_id && (
-                    <>
-                      <div className="errorMsg">
-                        {errors.purchase_contract_id}
-                      </div>
-                      <br />
-                    </>
+                  <CustomSelect
+                    placeholder="Select"
+                    onChange={(selectedOption) =>
+                      handleChange("booking_id", selectedOption?.value || "")
+                    }
+                    value={
+                      bookings.find(
+                        (item) => item.id === formDataSet.booking_id
+                      )
+                        ? {
+                            value: formDataSet.booking_id,
+                            label:
+                              bookings.find(
+                                (item) => item.id === formDataSet.booking_id
+                              ).booking_number || "",
+                          }
+                        : null
+                    }
+                    name="booking_id"
+                    options={bookings.map((item) => ({
+                      value: item.id,
+                      label: item.booking_number,
+                    }))}
+                  />
+                  {errors.booking_id && (
+                    <div className="errorMsg">{errors.booking_id}</div>
                   )}
                 </div>
               </div>
+
+              {/* Supplier */}
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>
+                  <label className="form-label">
                     Supplier <sup>*</sup>
                   </label>
-
-                  <select
+                  <CustomSelect
+                    placeholder="Select"
+                    onChange={(selectedOption) =>
+                      handleChange("supplier_id", selectedOption?.value || "")
+                    }
+                    value={
+                      suppliers.find(
+                        (item) => item.id === formDataSet.supplier_id
+                      )
+                        ? {
+                            value: formDataSet.supplier_id,
+                            label:
+                              suppliers.find(
+                                (item) => item.id === formDataSet.supplier_id
+                              ).company_name || "",
+                          }
+                        : null
+                    }
                     name="supplier_id"
-                    value={formDataSet.supplier_id}
-                    onChange={handleChange}
-                    className="form-select"
-                  >
-                    <option value="">Select Supplier</option>
-                    {suppliers.length > 0 ? (
-                      suppliers.map((item, index) => (
-                        <option key={index} value={item.id}>
-                          {item.company_name}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">No Contract found</option>
-                    )}
-                  </select>
+                    options={suppliers.map((item) => ({
+                      value: item.id,
+                      label: item.company_name,
+                    }))}
+                    isDisabled
+                  />
                   {errors.supplier_id && (
-                    <>
-                      <div className="errorMsg">{errors.supplier_id}</div>
-                      <br />
-                    </>
+                    <div className="errorMsg">{errors.supplier_id}</div>
                   )}
                 </div>
               </div>
+
+              {/* PI No */}
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>
-                    Company <sup>*</sup>
-                  </label>
-                  <select
-                    name="company_id"
-                    value={formDataSet.company_id}
-                    onChange={handleChange}
-                    className="form-select"
-                  >
-                    <option value="">Select Company</option>
-                    {companies.length > 0 ? (
-                      companies.map((item, index) => (
-                        <option key={index} value={item.id}>
-                          {item.title}
-                        </option>
-                      ))
-                    ) : (
-                      <option value="">No company found</option>
-                    )}
-                  </select>
-                  {errors.company_id && (
-                    <>
-                      <div className="errorMsg">{errors.company_id}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>
+                  <label className="form-label">
                     PI NO.<sup>*</sup>
                   </label>
                   <input
                     className="form-control"
                     name="title"
                     value={formDataSet.title}
-                    onChange={handleChange}
+                    onChange={(e) => handleChange("title", e.target.value)}
                   />
                   {errors.title && (
-                    <>
-                      <div className="errorMsg">{errors.title}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>Currency</label>
-                  <select
-                    onChange={handleChange}
-                    value={formDataSet.currency}
-                    name="currency"
-                    className="form-select"
-                  >
-                    <option value="">Select currency</option>
-                    {currencies.map((item, index) => (
-                      <option key={index} value={item.code}>
-                        {item.code}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.currency && (
-                    <>
-                      <div className="errorMsg">{errors.currency}</div>
-                      <br />
-                    </>
+                    <div className="errorMsg">{errors.title}</div>
                   )}
                 </div>
               </div>
 
+              {/* Issued Date */}
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Issued Date</label>
+                  <label className="form-label">Issued Date</label>
                   <input
                     type="date"
                     name="issued_date"
                     value={formDataSet.issued_date}
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      handleChange("issued_date", e.target.value)
+                    }
                     className="form-control"
                   />
                   {errors.issued_date && (
-                    <>
-                      <div className="errorMsg">{errors.issued_date}</div>
-                      <br />
-                    </>
+                    <div className="errorMsg">{errors.issued_date}</div>
                   )}
                 </div>
               </div>
+
+              {/* Delivery Date */}
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Delivery Date</label>
+                  <label className="form-label">Delivery Date</label>
                   <input
                     type="date"
                     name="delivery_date"
                     value={formDataSet.delivery_date}
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      handleChange("delivery_date", e.target.value)
+                    }
                     className="form-control"
                   />
                   {errors.delivery_date && (
-                    <>
-                      <div className="errorMsg">{errors.delivery_date}</div>
-                      <br />
-                    </>
+                    <div className="errorMsg">{errors.delivery_date}</div>
                   )}
                 </div>
               </div>
 
+              {/* Validity */}
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label>Validity</label>
+                  <label className="form-label">Validity</label>
                   <input
                     type="text"
                     name="pi_validity"
                     value={formDataSet.pi_validity}
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      handleChange("pi_validity", e.target.value)
+                    }
                     className="form-control"
                   />
                   {errors.pi_validity && (
-                    <>
-                      <div className="errorMsg">{errors.pi_validity}</div>
-                      <br />
-                    </>
+                    <div className="errorMsg">{errors.pi_validity}</div>
                   )}
                 </div>
               </div>
 
-              <div className="col-lg-6">
-                <div className="form-group">
-                  <label htmlFor="attachments">SoftCopy From Supplier: </label>
-                  <small className="text-muted"> (PDF Only)</small>
-                  <div className="d-flex mb-10">
-                    <input
-                      type="file"
-                      className="form-control margin_bottom_0"
-                      multiple
-                      onChange={handleFileSelection}
-                      id="input_files"
-                    />
-                    <div className="d-flex margin_left_30">
-                      <label
-                        for="input_files"
-                        className="btn btn-warning bg-falgun rounded-circle btn-xs"
-                      >
-                        <i className="fal fa-plus"></i>
-                      </label>
-                    </div>
-                  </div>
-
-                  {selectedFiles.map((file, index) => (
-                    <div key={file.name} className="d-flex mb-10">
-                      <input
-                        className="form-control margin_bottom_0"
-                        disabled
-                        value={file.name}
-                      />
-                      <div className="d-flex">
-                        <Link
-                          to="#"
-                          onClick={() => handleFileDelete(index)}
-                          className="btn btn-danger rounded-circle margin_left_15 btn-xs"
-                        >
-                          <i className="fa fa-times"></i>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
+              {/* Attachments input area */}
+              <div className="col-lg-6 ">
+                <label className="form-label">
+                  SoftCopy From Supplier (PDF Only)
+                </label>
+                <div className="create_tp_attatchment">
+                  <MultipleFileInput
+                    label="Attatchments"
+                    inputId="Attatchments"
+                    selectedFiles={selectedFiles}
+                    setSelectedFiles={setSelectedFiles}
+                  />
                 </div>
               </div>
             </div>
-            <hr></hr>
+
+            <hr />
             <h6>ITEM'S</h6>
             <div className="Import_booking_item_table">
-              <table className="table text-start align-middle table-bordered table-hover mb-0">
+              <table className="table text-start align-middle table-bordered">
                 <thead className="bg-dark text-white">
                   <tr className="text-center">
-                    <th>B.N</th>
-                    <th>Item | PO | BGD</th>
+                    <th>Item</th>
                     <th>Item Details</th>
+                    <th>Color</th>
                     <th>Unit</th>
+                    <th>Unit Price</th>
                     <th>QTY</th>
-                    <th>Unit Price/Unit</th>
                     <th>Total</th>
+                    <th>Hscodes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {piItems.map((item, index) => (
-                    <tr
-                      key={index}
-                      style={{
-                        verticalAlign: "top",
-                      }}
-                    >
+                    <tr key={index} style={{ verticalAlign: "top" }}>
                       <td>
-                        <select
-                          value={item.booking_id}
-                          required
-                          onChange={(e) =>
-                            handleItemChange(
-                              index,
-                              "booking_id",
-                              e.target.value
-                            )
-                          }
-                          className="form-select"
-                        >
-                          <option value="">Select B.N</option>
-                          {bookings.map((item, index) => (
-                            <option key={index} value={item.id}>
-                              {item.booking_number}
-                            </option>
-                          ))}
-                        </select>
+                        {formDataSet.booking_item ||
+                          item.item_description ||
+                          ""}
                       </td>
-
-                      <td>
-                        <select
-                          required
-                          style={{ paddingLeft: "2px" }}
-                          value={item.booking_item_id}
-                          className="form-select"
-                          onChange={(e) =>
-                            handleItemChange(
-                              index,
-                              "booking_item_id",
-                              e.target.value
-                            )
-                          }
-                        >
-                          <option value="">Select</option>
-                          {item.bookingItems.map((item2, index2) => (
-                            <option key={index2} value={item2.id}>
-                              {item2.item_name} | {item2.po_number} |
-                              {item2.budget_number}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
-                      <td>
-                        <textarea
-                          className="form-control"
-                          value={item.description}
-                          onChange={(e) =>
-                            handleItemChange(
-                              index,
-                              "description",
-                              e.target.value
-                            )
-                          }
-                        />
-                      </td>
-                      <td>
-                        <select
-                          value={item.unit}
-                          required
-                          onChange={(e) =>
-                            handleItemChange(index, "unit", e.target.value)
-                          }
-                          className="form-select"
-                        >
-                          <option value="">Select</option>
-                          {units.map((item, index) => (
-                            <option key={index} value={item.title}>
-                              {item.title}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-
+                      <td>{item.item_description || ""}</td>
+                      <td>{item.item_color || ""}</td>
+                      <td>{item.unit || ""}</td>
                       <td>
                         <input
-                          required
                           type="number"
-                          onWheel={(event) => event.target.blur()}
-                          min="0"
                           className="form-control"
-                          onChange={(e) =>
-                            handleItemChange(index, "qty", e.target.value)
-                          }
-                          value={item.qty}
-                        />
-                      </td>
-
-                      <td>
-                        <input
-                          required
-                          type="number"
-                          onWheel={(event) => event.target.blur()}
-                          min="0"
-                          step=".01"
-                          className="form-control"
+                          value={item.unit_price || ""}
                           onChange={(e) =>
                             handleItemChange(
                               index,
@@ -831,148 +521,205 @@ export default function EditProforma(props) {
                               e.target.value
                             )
                           }
-                          value={item.unit_price}
                         />
                       </td>
                       <td>
-                        <div className="d-flex">
-                          <input
-                            required
-                            type="number"
-                            onWheel={(event) => event.target.blur()}
-                            min="0"
-                            readOnly
-                            className="form-control"
-                            onChange={(e) =>
-                              handleItemChange(index, "total", e.target.value)
-                            }
-                            value={item.total}
-                          />
-                          <Link to="#">
-                            <i
-                              style={{
-                                marginLeft: "10px",
-                                fontSize: "17px",
-                                marginTop: "5px",
-                              }}
-                              onClick={() => removeRow(index)}
-                              className="fa fa-times text-danger mr-10 ml-10"
-                            ></i>
-                          </Link>
-                        </div>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={item.booking_qty || ""}
+                          onChange={(e) =>
+                            handleItemChange(
+                              index,
+                              "booking_qty",
+                              e.target.value
+                            )
+                          }
+                        />
+                      </td>
+                      <td className="text-end">
+                        {parseFloat(item.total_price || 0).toFixed(2)}
+                      </td>
+                      <td>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={item.hscode || ""}
+                          onChange={(e) =>
+                            handleItemChange(index, "hscode", e.target.value)
+                          }
+                        />
                       </td>
                     </tr>
                   ))}
 
-                  <tr className="border_none">
-                    <td className="border_none" colSpan={6}></td>
-                    <td className="border_none">
-                      <div className="add_row text-end">
-                        <Link
-                          to="#"
-                          className="btn btn-info btn-sm"
-                          onClick={addRow}
-                        >
-                          Add Row
-                        </Link>
-                      </div>
+                  <tr>
+                    <td colSpan={5}>
+                      <strong>TOTAL</strong>
                     </td>
-                  </tr>
-                  <br />
-                  <tr className="text-center">
-                    <td colSpan={3}>
-                      <h6>Items Summary</h6>
+                    <td>
+                      <strong>{netTotalQty}</strong>
+                    </td>
+                    <td className="text-end">
+                      <strong>{netTotalAmount.toFixed(2)}</strong>
                     </td>
                     <td></td>
-                    <td>
-                      <h6>{netTotalQty.toFixed(2)}</h6>
-                    </td>
-                    <td></td>
-                    <td>
-                      <h6>{netTotalAmount.toFixed(2)}</h6>
-                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <br />
 
+            <br />
             <hr />
             <h5 className="text-center">Term & Beneficiery Details</h5>
             <hr />
             <div className="row">
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>Net Weight</label>
-                  <input
-                    type="text"
-                    onChange={handleChange}
-                    value={formDataSet.net_weight}
-                    name="net_weight"
-                    className="form-control"
-                  />
-                  {errors.net_weight && (
-                    <>
-                      <div className="errorMsg">{errors.net_weight}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>Gross Weight</label>
-                  <input
-                    type="text"
-                    onChange={handleChange}
-                    value={formDataSet.gross_weight}
-                    name="gross_weight"
-                    className="form-control"
-                  />
-                  {errors.gross_weight && (
-                    <>
-                      <div className="errorMsg">{errors.gross_weight}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label>Freight Charge</label>
-                  <input
-                    type="number"
-                    onWheel={(event) => event.target.blur()}
-                    min={0}
-                    onChange={handleChange}
-                    value={formDataSet.freight_charge}
-                    name="freight_charge"
-                    className="form-control"
-                  />
-                  {errors.freight_charge && (
-                    <>
-                      <div className="errorMsg">{errors.freight_charge}</div>
-                      <br />
-                    </>
-                  )}
-                </div>
-              </div>
               <div className="col-lg-8">
-                <div className="form-group">
-                  <label>Description</label>
-                  <Quill
-                    className="text_area"
-                    onChange={handleMsgChange}
-                    value={message}
-                  />
+                <div className="row">
+                  {/* Net weight */}
+                  <div className="col-lg-3">
+                    <div className="form-group">
+                      <label className="form-label">Net Weight(KG)</label>
+                      <input
+                        type="number"
+                        onChange={(e) =>
+                          handleChange("net_weight", e.target.value)
+                        }
+                        value={formDataSet.net_weight}
+                        name="net_weight"
+                        className="form-control"
+                      />
+                      {errors.net_weight && (
+                        <div className="errorMsg">{errors.net_weight}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Gross weight */}
+                  <div className="col-lg-3">
+                    <div className="form-group">
+                      <label className="form-label">Gross Weight(KG)</label>
+                      <input
+                        type="number"
+                        onChange={(e) =>
+                          handleChange("gross_weight", e.target.value)
+                        }
+                        value={formDataSet.gross_weight}
+                        name="gross_weight"
+                        className="form-control"
+                      />
+                      {errors.gross_weight && (
+                        <div className="errorMsg">{errors.gross_weight}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Freight */}
+                  <div className="col-lg-3">
+                    <div className="form-group">
+                      <label className="form-label">Freight Charge</label>
+                      <input
+                        type="number"
+                        onWheel={(event) => event.target.blur()}
+                        min={0}
+                        onChange={(e) =>
+                          handleChange("freight_charge", e.target.value)
+                        }
+                        value={formDataSet.freight_charge}
+                        name="freight_charge"
+                        className="form-control"
+                      />
+                      {errors.freight_charge && (
+                        <div className="errorMsg">{errors.freight_charge}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Payment terms */}
+                  <div className="col-lg-3">
+                    <label className="form-label">
+                      Payment Terms <span className="text-danger">*</span>
+                    </label>
+                    <input
+                      className="form-control"
+                      value={formDataSet.payment_terms}
+                      onChange={(e) =>
+                        handleChange("payment_terms", e.target.value)
+                      }
+                    />
+                    {errors.payment_terms && (
+                      <div className="errorMsg">{errors.payment_terms}</div>
+                    )}
+                  </div>
+
+                  {/* Mode of shipment */}
+                  <div className="col-lg-3">
+                    <label className="form-label">
+                      Mode of Shipment <span className="text-danger">*</span>
+                    </label>
+                    <select
+                      className="form-control"
+                      value={formDataSet.mode_of_shipment}
+                      onChange={(e) =>
+                        handleChange("mode_of_shipment", e.target.value)
+                      }
+                    >
+                      <option value="">Select One</option>
+                      <option value="Sea">Sea</option>
+                      <option value="Air">Air</option>
+                      <option value="Road">Road</option>
+                    </select>
+                    {errors.mode_of_shipment && (
+                      <div className="errorMsg">{errors.mode_of_shipment}</div>
+                    )}
+                  </div>
+
+                  {/* Port of loading */}
+                  <div className="col-lg-3">
+                    <label className="form-label">Port of Loading</label>
+                    <input
+                      className="form-control"
+                      value={formDataSet.port_of_loading}
+                      onChange={(e) =>
+                        handleChange("port_of_loading", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  {/* Port of discharge */}
+                  <div className="col-lg-3">
+                    <label className="form-label">Port of Discharge</label>
+                    <input
+                      className="form-control"
+                      value={formDataSet.port_of_discharge}
+                      onChange={(e) =>
+                        handleChange("port_of_discharge", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  {/* Description */}
+                  <div className="col-lg-12">
+                    <div className="form-group">
+                      <label className="form-label">Description</label>
+                      <QuailEditor
+                        content={formDataSet.description}
+                        onContentChange={(e) => handleChange("description", e)}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              {/* Beneficiary details */}
               <div className="col-lg-4">
                 <div className="form-group">
-                  <label>Beneficiery Details</label>
+                  <label className="form-label">Beneficiery Details</label>
                   <input
                     type="text"
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      handleChange("bank_account_name", e.target.value)
+                    }
                     value={formDataSet.bank_account_name}
                     name="bank_account_name"
                     className="form-control"
@@ -981,10 +728,13 @@ export default function EditProforma(props) {
                   {errors.bank_account_name && (
                     <div className="errorMsg">{errors.bank_account_name}</div>
                   )}
+                  <br />
                   <input
                     type="number"
                     onWheel={(event) => event.target.blur()}
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      handleChange("bank_account_number", e.target.value)
+                    }
                     value={formDataSet.bank_account_number}
                     name="bank_account_number"
                     className="form-control"
@@ -993,9 +743,10 @@ export default function EditProforma(props) {
                   {errors.bank_account_number && (
                     <div className="errorMsg">{errors.bank_account_number}</div>
                   )}
+                  <br />
                   <input
                     type="text"
-                    onChange={handleChange}
+                    onChange={(e) => handleChange("bank_name", e.target.value)}
                     value={formDataSet.bank_name}
                     name="bank_name"
                     className="form-control"
@@ -1004,9 +755,12 @@ export default function EditProforma(props) {
                   {errors.bank_name && (
                     <div className="errorMsg">{errors.bank_name}</div>
                   )}
+                  <br />
                   <input
                     type="text"
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      handleChange("bank_brunch_name", e.target.value)
+                    }
                     value={formDataSet.bank_brunch_name}
                     name="bank_brunch_name"
                     className="form-control"
@@ -1015,9 +769,12 @@ export default function EditProforma(props) {
                   {errors.bank_brunch_name && (
                     <div className="errorMsg">{errors.bank_brunch_name}</div>
                   )}
+                  <br />
                   <input
                     type="text"
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      handleChange("bank_address", e.target.value)
+                    }
                     value={formDataSet.bank_address}
                     name="bank_address"
                     className="form-control"
@@ -1026,9 +783,12 @@ export default function EditProforma(props) {
                   {errors.bank_address && (
                     <div className="errorMsg">{errors.bank_address}</div>
                   )}
+                  <br />
                   <input
                     type="text"
-                    onChange={handleChange}
+                    onChange={(e) =>
+                      handleChange("bank_swift_code", e.target.value)
+                    }
                     value={formDataSet.bank_swift_code}
                     name="bank_swift_code"
                     className="form-control"
@@ -1042,6 +802,39 @@ export default function EditProforma(props) {
             </div>
           </div>
         </div>
+
+        {/* Existing attachments list with remove option */}
+        {existingFiles.length > 0 && (
+          <>
+            <hr />
+            <h6>Existing Attachments</h6>
+            <ul>
+              {existingFiles.map((f) => (
+                <li key={f.id ?? f.filename} style={{ marginBottom: 6 }}>
+                  <a href={f.file_source} target="_blank" rel="noreferrer">
+                    {f.filename}
+                  </a>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-danger ms-2"
+                    onClick={() => handleRemoveExistingFile(f.id)}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+
+        <hr />
+        <h6>Upload New Attachments</h6>
+        <MultipleFileInput
+          label="Attachments"
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+        />
+
         <br />
         <br />
       </form>
