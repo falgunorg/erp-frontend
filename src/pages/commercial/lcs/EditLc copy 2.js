@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, useParams } from "react-router-dom";
 import api from "services/api";
 import Spinner from "../../../elements/Spinner";
 import swal from "sweetalert";
@@ -8,9 +8,13 @@ import moment from "moment";
 import MultipleFileInput from "elements/techpack/MultipleFileInput";
 import QuailEditor from "elements/QuailEditor";
 
-export default function CreateLc(props) {
-  const userData = props.userData;
+export default function EditLc(props) {
+  const params = useParams();
+
+  const id = params.id;
   const history = useHistory();
+  const userData = props.userData;
+
   const [spinner, setSpinner] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [contracts, setContracts] = useState([]);
@@ -42,47 +46,75 @@ export default function CreateLc(props) {
 
   // --- Fetchers ---
   const getContracts = async () => {
-    setSpinner(true);
     try {
       const res = await api.post("/merchandising/purchase-contracts");
       if (res.status === 200 && res.data) setContracts(res.data.data || []);
     } catch (err) {
       console.error("getContracts:", err);
-    } finally {
-      setSpinner(false);
     }
   };
 
   const getSuppliers = async () => {
-    setSpinner(true);
     try {
       const res = await api.post("/admin/suppliers");
       if (res.status === 200 && res.data) setSuppliers(res.data.data || []);
     } catch (err) {
       console.error("getSuppliers:", err);
-    } finally {
-      setSpinner(false);
     }
   };
 
-  // Only fetch proformas when both contract_id and supplier_id are set
-  const getProformas = async () => {
-    if (!formDataSet.contract_id || !formDataSet.supplier_id) {
-      setProformas([]);
-      return;
-    }
-    setSpinner(true);
+  const getProformas = async (contract_id, supplier_id) => {
+    if (!contract_id || !supplier_id) return setProformas([]);
     try {
       const res = await api.post("/merchandising/proformas", {
         status: "Received",
         department: userData?.department_title,
         designation: userData?.designation_title,
-        contract_id: formDataSet.contract_id,
-        supplier_id: formDataSet.supplier_id,
+        contract_id,
+        supplier_id,
       });
       if (res.status === 200 && res.data) setProformas(res.data.data || []);
     } catch (err) {
       console.error("getProformas:", err);
+    }
+  };
+
+  const getLcDetails = async () => {
+    setSpinner(true);
+    try {
+      var res = await api.post("/commercial/lcs-show", { id: id });
+      if (res.status === 200 && res.data?.data) {
+        const lc = res.data.data;
+        setFormDataSet({
+          contract_id: lc.contract_id || "",
+          supplier_id: lc.supplier_id || "",
+          proformas: lc.proformas ? lc.proformas.split(",").map(Number) : [],
+          lc_number: lc.lc_number || "",
+          lc_validity: lc.lc_validity || "",
+          apply_date: lc.apply_date || "",
+          issued_date: lc.issued_date || "",
+          maturity_date: lc.maturity_date || "",
+          paid_date: lc.paid_date || "",
+          commodity: lc.commodity || "",
+          pcc_avail: lc.pcc_avail || "",
+          payment_terms: lc.payment_terms || "",
+          mode_of_shipment: lc.mode_of_shipment || "",
+          port_of_loading: lc.port_of_loading || "",
+          port_of_discharge: lc.port_of_discharge || "",
+          net_weight: lc.net_weight || "",
+          gross_weight: lc.gross_weight || "",
+          freight_charge: lc.freight_charge || "",
+          description: lc.description || "",
+        });
+
+        if (lc.contract_id && lc.supplier_id)
+          await getProformas(lc.contract_id, lc.supplier_id);
+      } else {
+        swal("Error", "LC not found", "error");
+        history.push("/commercial/lcs");
+      }
+    } catch (err) {
+      console.error("getLcDetails:", err);
     } finally {
       setSpinner(false);
     }
@@ -91,14 +123,11 @@ export default function CreateLc(props) {
   useEffect(() => {
     getContracts();
     getSuppliers();
-    // do NOT call getProformas here — wait until contract & supplier selected
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    getLcDetails();
+  }, [id]);
 
   useEffect(() => {
-    // whenever contract_id or supplier_id changes, refresh proformas
-    getProformas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    getProformas(formDataSet.contract_id, formDataSet.supplier_id);
   }, [formDataSet.contract_id, formDataSet.supplier_id]);
 
   // --- Handlers ---
@@ -107,50 +136,14 @@ export default function CreateLc(props) {
   };
 
   const handleProformaChange = (selectedOptions = []) => {
-    const selectedIds = selectedOptions.map((opt) => opt.value);
-    handleChange("proformas", selectedIds);
+    handleChange(
+      "proformas",
+      selectedOptions.map((opt) => opt.value)
+    );
   };
 
-  // --- Derived data ---
-  const filteredProformas = proformas.filter((p) =>
-    formDataSet.proformas.includes(p.id)
-  );
-
-  const totalNetWeight = filteredProformas.reduce((sum, p) => {
-    // normalize p.total to a number safely
-    const raw = p && p.net_weight != null ? String(p.net_weight) : "0";
-    const cleaned = raw.replace(/,/g, "").replace(/[^0-9.-]+/g, "");
-    const n = parseFloat(cleaned);
-    return sum + (isNaN(n) ? 0 : n);
-  }, 0);
-
-  const totalGrossWeight = filteredProformas.reduce((sum, p) => {
-    // normalize p.total to a number safely
-    const raw = p && p.gross_weight != null ? String(p.gross_weight) : "0";
-    const cleaned = raw.replace(/,/g, "").replace(/[^0-9.-]+/g, "");
-    const n = parseFloat(cleaned);
-    return sum + (isNaN(n) ? 0 : n);
-  }, 0);
-
-  const totalFreightCharge = filteredProformas.reduce((sum, p) => {
-    // normalize p.total to a number safely
-    const raw = p && p.freight_charge != null ? String(p.freight_charge) : "0";
-    const cleaned = raw.replace(/,/g, "").replace(/[^0-9.-]+/g, "");
-    const n = parseFloat(cleaned);
-    return sum + (isNaN(n) ? 0 : n);
-  }, 0);
-
-  const totalAmount = filteredProformas.reduce((sum, p) => {
-    // normalize p.total to a number safely
-    const raw = p && p.total != null ? String(p.total) : "0";
-    const cleaned = raw.replace(/,/g, "").replace(/[^0-9.-]+/g, "");
-    const n = parseFloat(cleaned);
-    return sum + (isNaN(n) ? 0 : n);
-  }, 0);
-
-  // --- Validation ---
   const validateForm = () => {
-    const requiredFields = [
+    const required = [
       "contract_id",
       "supplier_id",
       "proformas",
@@ -159,18 +152,12 @@ export default function CreateLc(props) {
       "payment_terms",
       "mode_of_shipment",
     ];
-
     const newErrors = {};
-    requiredFields.forEach((f) => {
-      const val = formDataSet[f];
-      if (Array.isArray(val)) {
-        if (val.length === 0)
-          newErrors[f] = `${f.replace(/_/g, " ")} is required`;
-      } else if (!val && val !== 0) {
-        newErrors[f] = `${f.replace(/_/g, " ")} is required`;
-      }
+    required.forEach((key) => {
+      const val = formDataSet[key];
+      if (Array.isArray(val) ? val.length === 0 : !val)
+        newErrors[key] = `${key.replace(/_/g, " ")} is required`;
     });
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -180,35 +167,21 @@ export default function CreateLc(props) {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // require at least one attachment or not? original required softcopy — original Create required selectedFiles check earlier.
-    if ((selectedFiles?.length || 0) === 0) {
-      // If you want to enforce, uncomment below:
-      // swal("Please Upload LC copy (PDF)", { icon: "error" });
-      // return;
-    }
-
     const formData = new FormData();
-    // append scalar fields
     Object.keys(formDataSet).forEach((k) => {
       const v = formDataSet[k];
-      if (Array.isArray(v)) {
-        // for arrays (proformas) send as JSON string
-        formData.append(k, JSON.stringify(v));
-      } else {
-        formData.append(k, v ?? "");
-      }
+      formData.append(k, Array.isArray(v) ? JSON.stringify(v) : v ?? "");
     });
-
-    // attachments
     for (let i = 0; i < selectedFiles.length; i++) {
       formData.append("attatchments[]", selectedFiles[i]);
     }
+    formData.append("id", id);
 
     setSpinner(true);
     try {
-      const res = await api.post("/commercial/lcs-create", formData);
+      const res = await api.post("/commercial/lcs-update", formData);
       if (res.status === 200 && res.data) {
-        swal("Success", "LC Created Successfully", "success");
+        swal("Success", "LC Updated Successfully", "success");
         history.push("/commercial/lcs");
       } else {
         setErrors(res.data?.errors || {});
@@ -232,9 +205,10 @@ export default function CreateLc(props) {
     }
   }, [userData, history]);
 
-  useEffect(async () => {
+  // --- Header ---
+  useEffect(() => {
     props.setHeaderData({
-      pageName: "NEW BBLC",
+      pageName: "EDIT BBLC",
       isNewButton: true,
       newButtonLink: "",
       newButtonText: "New BB",
@@ -242,6 +216,28 @@ export default function CreateLc(props) {
       innerSearchValue: "",
     });
   }, []);
+
+  // --- Derived values ---
+  const filteredProformas = proformas.filter((p) =>
+    formDataSet.proformas.includes(p.id)
+  );
+
+  const totalNetWeight = filteredProformas.reduce(
+    (sum, p) => sum + (parseFloat(p.net_weight) || 0),
+    0
+  );
+  const totalGrossWeight = filteredProformas.reduce(
+    (sum, p) => sum + (parseFloat(p.gross_weight) || 0),
+    0
+  );
+  const totalFreightCharge = filteredProformas.reduce(
+    (sum, p) => sum + (parseFloat(p.freight_charge) || 0),
+    0
+  );
+  const totalAmount = filteredProformas.reduce(
+    (sum, p) => sum + (parseFloat(p.total) || 0),
+    0
+  );
 
   return (
     <div className="create_edit_page create_technical_pack">
@@ -252,13 +248,12 @@ export default function CreateLc(props) {
             type="submit"
             className="publish_btn btn btn-warning bg-falgun me-4"
           >
-            Save
+            Update
           </button>
           <Link to="/commercial/lcs" className="btn btn-danger rounded-circle">
             <i className="fal fa-times"></i>
           </Link>
         </div>
-
         <hr />
 
         <div className="col-lg-12">
@@ -342,19 +337,37 @@ export default function CreateLc(props) {
                     isMulti
                     name="proformas"
                     placeholder="Select or Search"
-                    value={formDataSet.proformas.map((id) => {
-                      const pf = proformas.find((p) => p.id === id);
+                    value={formDataSet.proformas.map((proformaId) => {
+                      const selectedProforma = proformas.find(
+                        (proforma) => proforma.id === proformaId
+                      );
                       return {
-                        value: id,
-                        label: pf ? `${pf.title} | ${pf.total}` : id,
+                        value: proformaId,
+                        label: selectedProforma
+                          ? selectedProforma.title +
+                            " | " +
+                            selectedProforma.proforma_number +
+                            " | " +
+                            selectedProforma.total +
+                            " | " +
+                            selectedProforma.currency
+                          : "",
                       };
                     })}
                     onChange={handleProformaChange}
-                    options={proformas.map((p) => ({
-                      value: p.id,
-                      label: `${p.title} | ${p.total}`,
+                    options={proformas.map((proforma) => ({
+                      value: proforma.id,
+                      label:
+                        proforma.title +
+                        " | " +
+                        proforma.proforma_number +
+                        " | " +
+                        proforma.total +
+                        " | " +
+                        proforma.currency,
                     }))}
                   />
+
                   {errors.proformas && (
                     <div className="errorMsg">{errors.proformas}</div>
                   )}
@@ -687,7 +700,6 @@ export default function CreateLc(props) {
                 />
               </div>
             </div>
-
             <div className="col-lg-12 mt-3">
               <MultipleFileInput
                 label="Attatchments"

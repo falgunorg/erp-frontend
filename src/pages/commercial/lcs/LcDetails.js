@@ -52,7 +52,7 @@ export default function LcDetails(props) {
   const [lcItems, setLcItems] = useState([]);
   const getLc = async () => {
     setSpinner(true);
-    var response = await api.post("/lcs-show", { id: params.id });
+    var response = await api.post("/commercial/lcs-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setLc(response.data.data);
       setLcItems(response.data.data.piList);
@@ -82,111 +82,170 @@ export default function LcDetails(props) {
     checkAccess();
   }, [props.userData?.department_title, history]);
 
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "BBLC DETAILS",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New BB",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
   return (
-    <div className="create_edit_page">
+    <div className="create_edit_page contract-page tna_page">
       {spinner && <Spinner />}
-      <div className="create_page_heading">
-        <div className="page_name">LC Details</div>
-        <div className="actions">
-          <Link onClick={PrintPdf} className="btn btn-info btn-sm">
-            <i className="fas fa-print"></i>
-          </Link>
-          <Link onClick={generatePdf} className="btn btn-warning bg-falgun ">
-            <i className="fas fa-download"></i>
-          </Link>
-          <Link to="/commercial/lcs" className="btn btn-danger">
-            <i className="fal fa-times"></i>
-          </Link>
-        </div>
+      <div className="d-flex justify-content-end no-print">
+        <Link onClick={PrintPdf} className="btn btn-info btn-sm me-2">
+          <i className="fas fa-print"></i>
+        </Link>
+        <Link onClick={generatePdf} className="btn btn-warning btn-sm me-2 ">
+          <i className="fas fa-download"></i>
+        </Link>
+        <Link to="/commercial/lcs" className="btn btn-danger btn-sm me-2">
+          <i className="fal fa-times"></i>
+        </Link>
       </div>
 
-      <div className="preview_print page" id="pdf_container">
-        <div className="container border ">
+      <div
+        className="preview_print page create_technical_pack"
+        id="pdf_container"
+      >
+        <div className="create_tp_body container-fluid">
           <br />
-          <h4 className="text-center">{lc.supplier}</h4>
-          <br />
+          <h4 className="text-center">BANK NAME </h4>
           <h6 className="text-center text-underline">
             <u>LETTER OF CREDIT</u>
           </h6>
+          <br />
 
           <div className="row">
-            <div className="col">
-              <table className="table table-bordered mb-0">
-                <tr>
-                  <td>SL</td>
-                  <td>{lc.serial_number}</td>
-                </tr>
-                <tr>
-                  <td>LC Number</td>
-                  <td>{lc.lc_number}</td>
-                </tr>
-                <tr>
-                  <td>APPLICANT</td>
-                  <td>
-                    {lc.company} <br />
-                    {lc.company_address}
-                  </td>
-                </tr>
-                <tr>
-                  <td>BANK</td>
-                  <td>
-                    {lc.bank_name}
-                    <br />
-                    {lc.bank_branch}, {lc.bank_address},{lc.bank_country}
-                  </td>
-                </tr>
-                <tr>
-                  <td>SUPPLIER</td>
+            <div className="col-sm-6 col-md-6 col-lg-6">
+              <div className="row">
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">LC Number:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{lc.lc_number}</div>
+                </div>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Applicant:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {lc.contract?.company?.title} <br />
+                    {lc.contract?.company?.address}
+                  </div>
+                </div>
 
-                  <td>
-                    {lc.supplier} <br />
-                    {lc.supplier_address},{lc.supplier_city},
-                    {lc.supplier_country}
-                  </td>
-                </tr>
-              </table>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Responsible:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {lc.user?.full_name} <br />
+                    {lc.user?.employee_id}
+                  </div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Net Weight:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{lc.net_weight}(KG)</div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Gross Weight:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{lc.gross_weight}(KG)</div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Freight Charge:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{lc.freight_charge}</div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Total LC Value:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{lc.total}</div>
+                </div>
+              </div>
             </div>
+            <div className="col-sm-6 col-md-6 col-lg-6">
+              <div className="row">
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">PC/MASTER:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    <Link
+                      to={"/commercial/contracts/details/" + lc.contract?.id}
+                    >
+                      {lc.contract?.title}
+                    </Link>
+                  </div>
+                </div>
 
-            <div className="col">
-              <table className="table table-bordered mb-0">
-                <tr>
-                  <td>PC/MASTER</td>
-                  <td>
-                    {lc.tag_number} | {lc.contract_number} | ({lc.buyer})
-                  </td>
-                </tr>
-                <tr>
-                  <td>ISSUED DATE</td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Issued date:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {moment(lc.issued_date).format("ll")}
+                  </div>
+                </div>
 
-                  <td>{moment(lc.issued_date).format("ll")}</td>
-                </tr>
-                <tr>
-                  <td>DELIVERY DATE</td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Delivery date:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {moment(lc.delivery_date).format("ll")}
+                  </div>
+                </div>
 
-                  <td>{moment(lc.delivery_date).format("ll")}</td>
-                </tr>
-                <tr>
-                  <td>PI VALIDITY</td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">LC Validity:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{lc.lc_validity}</div>
+                </div>
 
-                  <td>{lc.lc_validity}</td>
-                </tr>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Supplier:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {lc.supplier?.company_name} <br />
+                    {lc.supplier?.address},{lc.supplier?.city},
+                    {lc.supplier?.country}
+                  </div>
+                </div>
 
-                <tr>
-                  <td>RESPONSIBLE</td>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Responsible:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {lc.supplier?.attention_person} <br />
+                    {lc.supplier?.mobile_number}
+                  </div>
+                </div>
 
-                  <td>
-                    {lc.supplier_attention} <br />
-                    {lc.supplier_contact}
-                  </td>
-                </tr>
-                <tr>
-                  <td>TOTAL VALUE</td>
-
-                  <td>
-                    {lc.total_value} {lc.currency}
-                  </td>
-                </tr>
-              </table>
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Status:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">{lc.status}</div>
+                </div>
+              </div>
             </div>
           </div>
           <br />
@@ -202,17 +261,21 @@ export default function LcDetails(props) {
                   <th>Issued</th>
                   <th>Delivery</th>
                   <th>Validity</th>
-                  <th>Net Weight</th>
-                  <th>Gross Weight</th>
-                  <th>Freight Charge</th>
-                  <th>Total</th>
+                  <th>Net Weight(KG)</th>
+                  <th>Gross Weight(KG)</th>
+                  <th>Freight Charge(USD)</th>
+                  <th>Total(USD)</th>
                 </tr>
               </thead>
               <tbody>
                 {lcItems.map((item, index) => (
                   <tr key={index}>
-                    <td>{item.proforma_number}</td>
-                    <td>{item.title}</td>
+                    <td>{index + 1}</td>
+                    <td>
+                      <Link to={"/merchandising/lcs-details/" + item.id}>
+                        {item.title}
+                      </Link>
+                    </td>
                     <td> {moment(item.issued_date).format("ll")}</td>
                     <td> {moment(item.delivery_date).format("ll")}</td>
                     <td>{item.pi_validity}</td>
@@ -223,19 +286,61 @@ export default function LcDetails(props) {
                   </tr>
                 ))}
                 <tr className="">
-                  <td colSpan={8}>
-                    <h6>Items Summary</h6>
+                  <td colSpan={5}>
+                    <strong>Items Summary</strong>
                   </td>
                   <td>
-                    <h6>
-                      {lc.total_value} {lc.currency}
-                    </h6>
+                    <strong>{lc.net_weight}</strong>
+                  </td>
+                  <td>
+                    <strong>{lc.gross_weight}</strong>
+                  </td>
+                  <td>
+                    <strong>{lc.freight_charge}</strong>
+                  </td>
+                  <td>
+                    <strong>{lc.total}</strong>
                   </td>
                 </tr>
               </tbody>
             </table>
             <br />
           </div>
+
+          <div className="row">
+            <div className="col-sm-2 col-md-2 col-lg-2">
+              <div className="form-label">Payment Terms:</div>
+            </div>
+            <div className="col-sm-4 col-md-4 col-lg-4">
+              <div className="form-value">{lc.payment_terms}</div>
+            </div>
+
+            <div className="col-sm-2 col-md-2 col-lg-2">
+              <div className="form-label">Mode Of Shipment:</div>
+            </div>
+            <div className="col-sm-4 col-md-4 col-lg-4">
+              <div className="form-value">{lc.mode_of_shipment}</div>
+            </div>
+
+            <div className="col-sm-2 col-md-2 col-lg-2">
+              <div className="form-label">Port of Loading:</div>
+            </div>
+            <div className="col-sm-4 col-md-4 col-lg-4">
+              <div className="form-value">{lc.port_of_loading}</div>
+            </div>
+
+            <div className="col-sm-2 col-md-2 col-lg-2">
+              <div className="form-label">Port of Discharge:</div>
+            </div>
+            <div className="col-sm-4 col-md-4 col-lg-4">
+              <div className="form-value">{lc.port_of_discharge}</div>
+            </div>
+          </div>
+
+          <div
+            dangerouslySetInnerHTML={{ __html: lc.description }}
+            className="form-value"
+          ></div>
         </div>
       </div>
     </div>
