@@ -1,13 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import Logo from "../../../assets/images/logos/logo-short.png";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory, Link, useParams } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import * as XLSX from "xlsx";
 import SummaryDashboard from "./parts/SummaryDashboard";
+import api from "services/api";
+import swal from "sweetalert";
 
-export default function ContractDetails() {
+export default function ContractDetails(props) {
   const history = useHistory();
+  const params = useParams();
   const goBack = () => history.goBack();
+  const [spinner, setSpinner] = useState(false);
 
   const [activeTab, setActiveTab] = useState("Summary");
 
@@ -96,74 +100,6 @@ export default function ContractDetails() {
     },
   };
 
-  useEffect(() => {
-    setForm({
-      contract_no: "BASSPRO-MBL-FALL-25",
-      contract_date: "19 January 2025",
-      buyer_name: "BASS PRO INC.",
-      buyer_address:
-        "Sportsman’s Park Center, 2500 E. Kearney, Springfield, Missouri 65898, USA",
-      buyer_phone: "(417) 873-5000",
-      buyer_email: "chellappa@hot-source.net",
-      notify_party:
-        "1) BASS PRO INC., SPORTSMAN’S PARK CENTER, 2500 E. KEARNEY, SPRINGFIELD, MISSOURI 65898, USA & EXPEDITORS INTERNATIONAL FREIGHT SERVICE LTD.\n\n2) Cabela's Canada Calgary DC, 12290 18th Street NE, Calgary, ALBERTA T3K 0Y7 CANADA & BORDER BROKERS, 1063 SHERWIN ROAD, WINNIPEG MB R3H 0T8 CANADA",
-      buyer_bank:
-        "BANK OF AMERICA, 1 Fleetway, Scranton, PA 18507-1999, USA\nSWIFT: BOFAUS3N\nTEL: (570) 330-4573",
-      agent_name:
-        "SORCOM INVESTMENTS LTD, 4TH FLOOR, 299QRC, 287-299, QUEENS ROAD CENTRAL, HONG KONG\nTEL: 00 852 2218 2203",
-      agent_bank:
-        "STANDARD CHARTERED BANK, 4-4A DES VOEUX ROAD CENTRAL, HONG KONG\nACCOUNT NO: 447-2-060162-5\nSWIFT: SCBLHKHHXXX",
-      beneficiary_name:
-        "Modiste (BANGLADESH) Ltd.\n51/C (A) SAGORIKA ROAD, FOUZDERHAT HEAVY INDUSTRIAL AREA, CHITTAGONG 4102, BANGLADESH",
-      beneficiary_bank:
-        "DHAKA BANK LIMITED, AGRABAD BRANCH, WORLD TRADE CENTER, 102-103 AGRABAD C/A, CHITTAGONG 4100, BANGLADESH\nSWIFT: DHBLBDDH201",
-      payment_terms:
-        "1) DOCUMENTARY COLLECTIONS (DP)\n2) TT PAYMENT (FOR CANADA SHIPMENT)",
-      port_of_discharge:
-        "1) SEATTLE TACOMA (FINAL DESTINATION: PUYALLUP, WA – USA)\n2) VANCOUVER, CALGARY, CANADA",
-      port_of_loading: "CHITTAGONG, BANGLADESH",
-      mode_of_shipment: "SEA / AIR",
-      documents_required:
-        "a) INVOICE, \nb) PACKING LIST, \nc) CERTIFICATE OF ORIGIN, \nd) SUPPLEMENTARY INVOICE, \ne) BILL OF LADING, \nf) MULTIPLE COUNTRY OF DECLARATION, \ng) MANUFACTURER’S CERTIFICATE, \nh) GCC & BENEFICIARY STATEMENT",
-      transshipment: "ALLOWED",
-      tolerance: "+/-5% IS ACCEPTABLE",
-      defective_allowance:
-        "0.5% defective & 0.5% store allowance must be shown in invoice.",
-      expiry_date: "15 August 2025",
-      reimbursement_instructions:
-        "We hereby undertake on behalf of the buyer to honor all documents in compliance with the terms of this contract and remit full invoice payments as per instructions. Shipper will send bank-endorsed OBLs to customer upon receipt of payment.",
-      amendment_clause:
-        "Any amendment to this Purchase Contract must be signed and sealed by both parties.",
-      agent_commission_clause:
-        "Agent commission to be remitted to SORCOM INVESTMENTS LTD, 4th Floor, 299QRC, Queens Road Central, Hong Kong, Account No. 447-2-060162-5, Standard Chartered Bank, Hong Kong.",
-      buyer_signatory: "M. Chellappa, Director",
-      seller_signatory: "Aziz Uddin Ahammed, General Manager, Finance",
-    });
-
-    setGoods([
-      {
-        style: "652NRF252481W",
-        description: "Plaid Jacket",
-        quantity: 4188,
-        unit_price: 15.5,
-        total_fob: 64914,
-        comm_pc: 1.07,
-        total_comm: 4481.16,
-        shipment_date: "30-Jul-25",
-      },
-      {
-        style: "652NRF252726K",
-        description: "Plaid Shirt Jac",
-        quantity: 6816,
-        unit_price: 21.95,
-        total_fob: 149611.2,
-        comm_pc: 1.51,
-        total_comm: 10292.16,
-        shipment_date: "30-Jul-25",
-      },
-    ]);
-  }, []);
-
   const handlePrint = () => window.print();
 
   // ✅ Download Excel
@@ -181,7 +117,7 @@ export default function ContractDetails() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
     // Save as Excel file
-    XLSX.writeFile(workbook, `${form.contract_no}.xlsx`);
+    XLSX.writeFile(workbook, `${form.title}.xlsx`);
   };
 
   const handleDownloadPDF = () => {
@@ -190,7 +126,7 @@ export default function ContractDetails() {
       .from(element)
       .set({
         margin: 0.3,
-        filename: `${form.contract_no}.pdf`,
+        filename: `${form.title}.pdf`,
         html2canvas: { scale: 2 },
         jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
       })
@@ -252,14 +188,44 @@ export default function ContractDetails() {
     },
   ];
 
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "PC DETAILS",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New PC",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
+  useEffect(() => {
+    const fetchContract = async () => {
+      try {
+        setSpinner(true);
+        const res = await api.post("/commercial/contracts/show", {
+          id: params.id,
+        });
+        if (res.status === 200 && res.data?.data) {
+          setForm((prev) => ({
+            ...prev,
+            ...res.data.data,
+          }));
+        } else {
+          swal("Error", "Failed to load contract details.", "error");
+        }
+      } catch (err) {
+        console.error("Error loading contract:", err);
+        swal("Error", "Something went wrong while fetching contract.", "error");
+      } finally {
+        setSpinner(false);
+      }
+    };
+    if (params.id) fetchContract();
+  }, [params.id]);
+
   return (
     <div className="contract-page tna_page">
-      <div className="d-flex align-items-center no-print">
-        <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
-        <h4 className="m-0">{form.contract_no}</h4>
-      </div>
-      <hr />
-
       <div className="no-print tna_page_topbar justify-content-between">
         <div>
           {[
@@ -304,227 +270,6 @@ export default function ContractDetails() {
         {activeTab === "Summary" && (
           <div className="summary_details_area contract-wrapper" ref={printRef}>
             <SummaryDashboard data={summaryData} form={form} />
-
-            <div className="row d-none">
-              <div className="col-lg-6">
-                <div className="text-center">
-                  <h5 className="summary-title text-uppercase">
-                    Summary Position
-                  </h5>
-                  <div className="summary-info">
-                    <strong>Contract :</strong> {form.contract_no}
-                    <br />
-                    <strong>Company :</strong> MODISTE ( CEPZ ) LTD
-                  </div>
-                  <br />
-                </div>
-                {/* Export Section */}
-                <div className="section">
-                  <table className="table table-bordered align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Export</th>
-                        <th>Currency</th>
-                        <th>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Total Export L/C/Contract Value</td>
-                        <td>USD</td>
-                        <td>2,294,575.86</td>
-                      </tr>
-                      <tr>
-                        <td>Total Export Bill Submitted</td>
-                        <td>USD</td>
-                        <td>2,115,594.54</td>
-                      </tr>
-                      <tr>
-                        <td>Total Export Bill Liquidated</td>
-                        <td>USD</td>
-                        <td>2,110,583.52</td>
-                      </tr>
-                      <tr>
-                        <td>Liquidated Amount</td>
-                        <td>USD</td>
-                        <td>2,110,583.52</td>
-                      </tr>
-                      <tr>
-                        <td>Remaining Export</td>
-                        <td>USD</td>
-                        <td>165,575.03</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* BB Import Section */}
-                <div className="section">
-                  <table className="table table-bordered align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>BB Import</th>
-                        <th>Currency</th>
-                        <th>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Total Bill Amount for Import</td>
-                        <td>USD</td>
-                        <td>1,550,571.35</td>
-                      </tr>
-
-                      <tr>
-                        <td>Total Bill</td>
-                        <td>USD</td>
-                        <td>1,552,681.15</td>
-                      </tr>
-                      <tr>
-                        <td>Total Bill Settled</td>
-                        <td>USD</td>
-                        <td>1,544,535.05</td>
-                      </tr>
-                      <tr>
-                        <td>BB Bill Outstanding</td>
-                        <td>USD</td>
-                        <td>7,216.10</td>
-                      </tr>
-                      <tr>
-                        <td>2% Import</td>
-                        <td>USD</td>
-                        <td>8,145.00</td>
-                      </tr>
-                      <tr>
-                        <td>Total Import</td>
-                        <td>USD</td>
-                        <td>1,550,571.35</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* Packing Credit Section */}
-                <div className="section">
-                  <table className="table table-bordered align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Packing Credit ( PC )</th>
-                        <th>Currency</th>
-                        <th>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>PC Disbursed</td>
-                        <td>BDT</td>
-                        <td>0.00</td>
-                      </tr>
-                      <tr>
-                        <td>PC Outstanding (F.R.-INT+CoA.)</td>
-                        <td>BDT</td>
-                        <td>0.00</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* EDF Loan Section */}
-                <div className="section">
-                  <table className="table table-bordered align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>EDF Loan</th>
-                        <th>Currency</th>
-                        <th>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>EDF Loan Disbursed</td>
-                        <td>USD</td>
-                        <td>0.00</td>
-                      </tr>
-                      <tr>
-                        <td>EDF Loan Outstanding (F.R.-INT+CoA.)</td>
-                        <td>USD</td>
-                        <td>0.00</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* FDBP / FORCE Loan Section */}
-                <div className="section">
-                  <table className="table table-bordered align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Force Loan</th>
-                        <th>Currency</th>
-                        <th>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Force Loan Disbursed</td>
-                        <td>BDT</td>
-                        <td>0.00</td>
-                      </tr>
-                      <tr>
-                        <td>Force Loan Outstanding (F.R.-INT+CoA.)</td>
-                        <td>BDT</td>
-                        <td>0.00</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* DFC Section */}
-                <div className="section">
-                  <table className="table table-bordered align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>DFC</th>
-                        <th>Currency</th>
-                        <th>Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>Total Credit from DFC</td>
-                        <td>USD</td>
-                        <td>1,677,855.56</td>
-                      </tr>
-                      <tr>
-                        <td>Total Credit from EXP Proceed</td>
-                        <td>USD</td>
-                        <td>1,677,855.56</td>
-                      </tr>
-                      <tr>
-                        <td>Total Credit from Others</td>
-                        <td>USD</td>
-                        <td>0.00</td>
-                      </tr>
-                      <tr>
-                        <td>Total Debit from DFC</td>
-                        <td>USD</td>
-                        <td>1,544,535.05</td>
-                      </tr>
-                      <tr>
-                        <td>Total Bill Payment</td>
-                        <td>USD</td>
-                        <td>1,544,535.05</td>
-                      </tr>
-                      <tr>
-                        <td>Current DFC Balance</td>
-                        <td>USD</td>
-                        <td>133,070.11</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
@@ -537,7 +282,7 @@ export default function ContractDetails() {
                     Export LC/Contract
                   </h5>
                   <div className="summary-info">
-                    <strong>Contract :</strong> {form.contract_no}
+                    <strong>Contract :</strong> {form.title}
                     <br />
                   </div>
                   <br />
@@ -635,7 +380,7 @@ export default function ContractDetails() {
                 <div className="text-center">
                   <h5 className="summary-title text-uppercase">Export Bill</h5>
                   <div className="summary-info">
-                    <strong>Contract :</strong> {form.contract_no}
+                    <strong>Contract :</strong> {form.title}
                     <br />
                   </div>
                   <br />
@@ -741,7 +486,7 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">BBLC</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.contract_no}
+                <strong>Contract :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -901,7 +646,7 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">BB Bill</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.contract_no}
+                <strong>Contract :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -1086,7 +831,7 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Loan</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.contract_no}
+                <strong>Contract :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -1209,7 +954,7 @@ export default function ContractDetails() {
                 DFC A/C No: 0161300000107
               </h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.contract_no}
+                <strong>Contract :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -1320,45 +1065,185 @@ export default function ContractDetails() {
           <div className="summary_details_area contract-wrapper">
             <div className="">
               <p className="buyer-header">
-                {form.buyer_name},<br />
-                {form.buyer_address}
+                {form.buyer?.name}
+                <br />
+                {form.buyer?.address}
                 <br />
                 Ph: {form.buyer_phone}, Email: {form.buyer_email}
               </p>
               <h5 className="sub-title">PURCHASE CONTRACT</h5>
 
               <div className="contract-body">
-                {[
-                  ["Purchase Contract No", form.contract_no],
-                  ["Date", form.contract_date],
-                  ["Buyer", `${form.buyer_name}\n${form.buyer_address}`],
-                  ["Notify Party", form.notify_party],
-                  ["Buyer’s Bank", form.buyer_bank],
-                  ["Agent Name", form.agent_name],
-                  ["Agent’s Bank", form.agent_bank],
-                  ["Beneficiary", form.beneficiary_name],
-                  ["Beneficiary’s Bank", form.beneficiary_bank],
-                  ["Payment Terms", form.payment_terms],
-                  ["Port of Discharge", form.port_of_discharge],
-                  ["Port of Loading", form.port_of_loading],
-                  ["Mode of Shipment", form.mode_of_shipment],
-                  ["Documents Required", form.documents_required],
-                  ["Trans-shipment/Part Shipment", form.transshipment],
-                  ["Tolerance", form.tolerance],
-                  ["Defective Allowance", form.defective_allowance],
-                  ["Expiry Date", form.expiry_date],
-                ].map(([label, value], i) => (
-                  <div className="row mb-1" key={i}>
-                    <div className="col-4">
-                      <strong>
-                        {i + 1}. {label}:
-                      </strong>
-                    </div>
-                    <div className="col-8">
-                      <p>{value}</p>
-                    </div>
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>1. Purchase Contract No:</strong>
                   </div>
-                ))}
+                  <div className="col-8">
+                    <p>{form.title}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>2. Date:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.contract_date}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>3. Buyer:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>
+                      {form.buyer_name}
+                      <br />
+                      {form.buyer_address}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>4. Notify Party:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.notify_party}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>5. Buyer’s Bank:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>
+                      {form.buyer_bank_name}
+                      <br />
+                      {form.buyer_bank_address} <br />
+                      {form.buyer_bank_phone}, SWIFT: {form.buyer_bank_swift}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>6. Agent Name:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.agent_name}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>7. Agent’s Bank:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.agent_bank}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>8. Beneficiary:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.beneficiary_name}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>9. Beneficiary’s Bank:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.beneficiary_bank}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>10. Payment Terms:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.payment_terms}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>11. Port of Discharge:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.port_of_discharge}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>12. Port of Loading:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.port_of_loading}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>13. Mode of Shipment:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.mode_of_shipment}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>14. Documents Required:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.documents_required}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>15. Trans-shipment/Part Shipment:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.transshipment}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>16. Tolerance:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.tolerance}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>17. Defective Allowance:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.defective_allowance}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4">
+                    <strong>18. Expiry Date:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.expiry_date}</p>
+                  </div>
+                </div>
 
                 <div className="mt-3">
                   <strong>19. Particulars of Goods / Services:</strong>
@@ -1429,7 +1314,7 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">PO'S</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.contract_no}
+                <strong>Contract :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -1498,7 +1383,7 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Import Documents</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.contract_no}
+                <strong>Contract :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -1557,7 +1442,7 @@ export default function ContractDetails() {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Export Documents</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.contract_no}
+                <strong>Contract :</strong> {form.title}
                 <br />
               </div>
               <br />

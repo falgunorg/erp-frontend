@@ -249,29 +249,34 @@ export default function CreateProforma(props) {
     getSuppliers();
   }, []);
 
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "NEW PI",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New PC",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
   return (
     <div className="create_edit_page create_technical_pack">
       {spinner && <Spinner />}
       <form onSubmit={handleSubmit} className="create_tp_body">
-        <div className="d-flex align-items-end justify-content-between">
-          <div className="d-flex align-items-end">
-            <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
-            <h4 className="m-0">ADD NEW PI</h4>
-          </div>
-          <div className="d-flex align-items-end">
-            <button
-              type="supmit"
-              className="publish_btn btn btn-warning bg-falgun me-4"
-            >
-              Save
-            </button>
-            <Link
-              to="/merchandising/proformas"
-              className="btn btn-danger rounded-circle"
-            >
-              <i className="fal fa-times"></i>
-            </Link>
-          </div>
+        <div className="d-flex justify-content-end">
+          <button
+            type="supmit"
+            className="publish_btn btn btn-warning bg-falgun me-4"
+          >
+            Save
+          </button>
+          <Link
+            to="/merchandising/proformas"
+            className="btn btn-danger rounded-circle"
+          >
+            <i className="fal fa-times"></i>
+          </Link>
         </div>
         <hr />
         <div className="col-lg-12">
@@ -669,9 +674,7 @@ export default function CreateProforma(props) {
                       <label className="form-label">Description</label>
                       <QuailEditor
                         content={formDataSet.description}
-                        onContentChange={(e) =>
-                          handleChange("description", e)
-                        }
+                        onContentChange={(e) => handleChange("description", e)}
                       />
                     </div>
                   </div>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, Link } from "react-router-dom";
-import Logo from "../../../assets/images/logos/logo-short.png";
+import api from "services/api";
 
-export default function Contracts() {
+export default function Contracts(props) {
   const history = useHistory();
 
   const [contracts, setContracts] = useState([]);
@@ -13,88 +13,94 @@ export default function Contracts() {
     year: "",
   });
 
-  useEffect(() => {
-    // 🔹 Demo dataset until backend ready
-    const demoData = [
-      {
-        id: 1,
-        contract_no: "BASSPRO-MBL-FALL-25",
-        date: "2025-01-19",
-        buyer: "BASS PRO INC.",
-        port_of_loading: "Chittagong, Bangladesh",
-        port_of_discharge: "Seattle Tacoma",
-        amount: "$941,762.40",
-      },
-      {
-        id: 2,
-        contract_no: "FALCON-MBL-SPRING-25",
-        date: "2025-03-10",
-        buyer: "Falcon Garments Ltd.",
-        port_of_loading: "Chittagong, Bangladesh",
-        port_of_discharge: "New York, USA",
-        amount: "$522,400.00",
-      },
-      {
-        id: 3,
-        contract_no: "TARGET-MBL-SUMMER-25",
-        date: "2025-05-05",
-        buyer: "Target Corporation",
-        port_of_loading: "Chittagong, Bangladesh",
-        port_of_discharge: "Los Angeles, USA",
-        amount: "$780,125.00",
-      },
-    ];
+  // ✅ Fetch contracts
+  const getContracts = async () => {
+    try {
+      const response = await api.post("/commercial/contracts"); // ✅ use GET
+      if (response.data.status === "success") {
+        const data = response.data.data || [];
+        setContracts(data);
+        setFiltered(data); // ✅ show all by default
+      } else {
+        console.error("Unexpected response:", response.data);
+      }
+    } catch (error) {
+      console.error("Error fetching contracts:", error);
+    }
+  };
 
-    setContracts(demoData);
-    setFiltered(demoData);
+  useEffect(() => {
+    getContracts();
   }, []);
 
+  // ✅ Handle filter change
   const handleFilterChange = (name, value) => {
     setFilters({ ...filters, [name]: value });
   };
 
+  // ✅ Execute filters
   const handleSearch = () => {
-    let result = contracts;
+    let result = [...contracts];
 
     if (filters.search) {
       const s = filters.search.toLowerCase();
       result = result.filter(
         (c) =>
-          c.contract_no.toLowerCase().includes(s) ||
-          c.buyer.toLowerCase().includes(s)
+          c.contract_no?.toLowerCase().includes(s) ||
+          c.buyer?.name?.toLowerCase().includes(s)
       );
     }
 
     if (filters.buyer) {
-      result = result.filter((c) => c.buyer === filters.buyer);
+      result = result.filter(
+        (c) => String(c.buyer_id) === String(filters.buyer)
+      );
     }
 
     if (filters.year) {
-      result = result.filter((c) => c.date.startsWith(filters.year.toString()));
+      result = result.filter((c) =>
+        c.contract_date?.startsWith(filters.year.toString())
+      );
     }
 
     setFiltered(result);
   };
 
+  // ✅ Clear filters
   const clearFilters = () => {
     setFilters({ search: "", buyer: "", year: "" });
     setFiltered(contracts);
   };
 
-  const viewDetails = (id) => {
-    history.push(`/contracts/${id}`);
-  };
+  // ✅ Dropdown data
+  const buyers = [
+    ...new Map(
+      contracts.filter((c) => c.buyer).map((c) => [c.buyer.id, c.buyer])
+    ).values(),
+  ];
 
-  const buyers = [...new Set(contracts.map((c) => c.buyer))];
-  const years = [...new Set(contracts.map((c) => c.date.split("-")[0]))];
+  const years = [
+    ...new Set(
+      contracts
+        .filter((c) => c.contract_date)
+        .map((c) => c.contract_date.split("-")[0])
+    ),
+  ];
+
+  // ✅ Set header data
+  useEffect(() => {
+    props.setHeaderData({
+      pageName: "PC'S",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New PC",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
 
   return (
     <div className="contract-list-page">
-      <div className="header d-flex align-items-center mb-3">
-        <img src={Logo} alt="Logo" className="me-2" style={{ width: 35 }} />
-        <h4 className="m-0">Purchase Contracts</h4>
-      </div>
-
       {/* 🔍 Filter Section */}
       <div className="filter-section card p-3 mb-4">
         <div className="row">
@@ -107,6 +113,7 @@ export default function Contracts() {
               onChange={(e) => handleFilterChange("search", e.target.value)}
             />
           </div>
+
           <div className="col-md-3">
             <select
               className="form-select"
@@ -114,13 +121,14 @@ export default function Contracts() {
               onChange={(e) => handleFilterChange("buyer", e.target.value)}
             >
               <option value="">All Buyers</option>
-              {buyers.map((b, i) => (
-                <option key={i} value={b}>
-                  {b}
+              {buyers.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
                 </option>
               ))}
             </select>
           </div>
+
           <div className="col-md-2">
             <select
               className="form-select"
@@ -135,6 +143,7 @@ export default function Contracts() {
               ))}
             </select>
           </div>
+
           <div className="col-md-3">
             <button className="btn btn-primary me-2" onClick={handleSearch}>
               Search
@@ -149,7 +158,7 @@ export default function Contracts() {
         </div>
       </div>
 
-      {/* 📋 Contracts Table */}
+      {/* 📋 Table Section */}
       <div className="table-responsive">
         <table className="table table-bordered align-middle">
           <thead className="table-light">
@@ -170,24 +179,24 @@ export default function Contracts() {
                 <tr key={c.id}>
                   <td>{i + 1}</td>
                   <td>
-                    <Link to={"/commercial/contracts/details/" + c.id}>
-                      {c.contract_no}
+                    <Link to={`/commercial/contracts/details/${c.id}`}>
+                      {c.title}
                     </Link>
                   </td>
-                  <td>{c.date}</td>
-                  <td>{c.buyer}</td>
+                  <td>{c.contract_date}</td>
+                  <td>{c.buyer?.name}</td>
                   <td>{c.port_of_loading}</td>
                   <td>{c.port_of_discharge}</td>
                   <td>{c.amount}</td>
                   <td className="text-center">
                     <Link
-                      to={"/commercial/contracts/details/" + c.id}
+                      to={`/commercial/contracts/details/${c.id}`}
                       className="btn btn-sm btn-outline-primary me-2"
                     >
-                      View Details
+                      View
                     </Link>
                     <Link
-                      to={"/commercial/contracts/edit/" + c.id}
+                      to={`/commercial/contracts/edit/${c.id}`}
                       className="btn btn-sm btn-outline-warning"
                     >
                       Edit

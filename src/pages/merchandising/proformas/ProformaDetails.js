@@ -113,178 +113,190 @@ export default function ProformaDetails(props) {
     checkAccess();
   }, [props.userData?.department_title, history]);
 
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "PI DETAILS",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New PI",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
   return (
     <div className="create_edit_page">
       {spinner && <Spinner />}
-      <div className="create_page_heading">
-        <div className="page_name">Proforma Details</div>
-        <div className="actions">
-          <Link to="#" onClick={PrintPdf} className="btn btn-info btn-sm">
-            <i className="fas fa-print"></i>
-          </Link>
-          <Link
-            to="#"
-            onClick={generatePdf}
-            className="btn btn-warning bg-falgun "
-          >
-            <i className="fas fa-download"></i>
-          </Link>
+      <div className="d-flex justify-content-end">
+        <Link to="#" onClick={PrintPdf} className="btn btn-info btn-sm me-2">
+          <i className="fas fa-print"></i>
+        </Link>
+        <Link
+          to="#"
+          onClick={generatePdf}
+          className="btn btn-warning bg-falgun btn-sm me-2 "
+        >
+          <i className="fas fa-download"></i>
+        </Link>
 
-          {props.userData.userId === proforma.user_id &&
-          (proforma.status === "Pending" || proforma.status === "Rejected") ? (
-            <Fragment>
-              <Link
-                to={"/merchandising/proformas-edit/" + proforma.id}
-                className="btn btn-warning"
-              >
-                <i className="fal fa-pen"></i>
-              </Link>
-              <button
-                onClick={() => toggleStatus("Placed")}
-                className="btn btn-success"
-              >
-                Submit to Team Leader
-              </button>
-            </Fragment>
-          ) : null}
+        {props.userData.userId === proforma.user_id &&
+        (proforma.status === "Pending" || proforma.status === "Rejected") ? (
+          <Fragment>
+            <Link
+              to={"/merchandising/proformas-edit/" + proforma.id}
+              className="btn btn-warning btn-sm me-2"
+            >
+              <i className="fal fa-pen"></i>
+            </Link>
+            <button
+              onClick={() => toggleStatus("Placed")}
+              className="btn btn-success btn-sm me-2"
+            >
+              Submit to Team Leader
+            </button>
+          </Fragment>
+        ) : null}
 
-          {userInfo.department_title === "Merchandising" &&
-          userInfo.designation_title === "Assistant Manager" &&
-          proforma.status === "Placed" ? (
-            <Fragment>
-              <button
-                onClick={() => toggleStatus("Confirmed")}
-                className="btn btn-success"
-              >
-                Confirmed
-              </button>
-              <button
-                onClick={() => toggleStatus("Rejected")}
-                className="btn btn-danger"
-              >
-                Reject
-              </button>
-            </Fragment>
-          ) : null}
-          {userInfo.department_title === "Merchandising" &&
-          userInfo.designation_title === "Deputy General Manager" &&
-          proforma.status === "Confirmed" ? (
-            <Fragment>
-              <button
-                onClick={() => toggleStatus("Submitted")}
-                className="btn btn-success"
-              >
-                Submit To Audit
-              </button>
-              <button
-                onClick={() => toggleStatus("Rejected")}
-                className="btn btn-danger"
-              >
-                Reject
-              </button>
-            </Fragment>
-          ) : null}
+        {userInfo.department_title === "Merchandising" &&
+        userInfo.designation_title === "Assistant Manager" &&
+        proforma.status === "Placed" ? (
+          <Fragment>
+            <button
+              onClick={() => toggleStatus("Confirmed")}
+              className="btn btn-success btn-sm me-2"
+            >
+              Confirmed
+            </button>
+            <button
+              onClick={() => toggleStatus("Rejected")}
+              className="btn btn-danger btn-sm me-2"
+            >
+              Reject
+            </button>
+          </Fragment>
+        ) : null}
+        {userInfo.department_title === "Merchandising" &&
+        userInfo.designation_title === "Deputy General Manager" &&
+        proforma.status === "Confirmed" ? (
+          <Fragment>
+            <button
+              onClick={() => toggleStatus("Submitted")}
+              className="btn btn-success btn-sm me-2"
+            >
+              Submit To Audit
+            </button>
+            <button
+              onClick={() => toggleStatus("Rejected")}
+              className="btn btn-danger btn-sm me-2"
+            >
+              Reject
+            </button>
+          </Fragment>
+        ) : null}
 
-          {userInfo.department_title === "Audit" &&
-          userInfo.designation_title === "Manager" &&
-          proforma.status === "Submitted" ? (
-            <Fragment>
-              <button
-                onClick={() => toggleStatus("Checked")}
-                className="btn btn-success"
-              >
-                Checked
-              </button>
-              <button
-                onClick={() => toggleStatus("Rejected")}
-                className="btn btn-danger"
-              >
-                Reject
-              </button>
-            </Fragment>
-          ) : null}
+        {userInfo.department_title === "Audit" &&
+        userInfo.designation_title === "Manager" &&
+        proforma.status === "Submitted" ? (
+          <Fragment>
+            <button
+              onClick={() => toggleStatus("Checked")}
+              className="btn btn-success btn-sm me-2"
+            >
+              Checked
+            </button>
+            <button
+              onClick={() => toggleStatus("Rejected")}
+              className="btn btn-danger btn-sm me-2"
+            >
+              Reject
+            </button>
+          </Fragment>
+        ) : null}
 
-          {userInfo.department_title === "Accounts & Finance" &&
-          userInfo.designation_title === "Manager" &&
-          proforma.status === "Checked" ? (
-            <Fragment>
-              <button
-                onClick={() => toggleStatus("Cost-Approved")}
-                className="btn btn-success"
-              >
-                Cost-Approved
-              </button>
-              <button
-                onClick={() => toggleStatus("Rejected")}
-                className="btn btn-danger"
-              >
-                Reject
-              </button>
-            </Fragment>
-          ) : null}
+        {userInfo.department_title === "Accounts & Finance" &&
+        userInfo.designation_title === "Manager" &&
+        proforma.status === "Checked" ? (
+          <Fragment>
+            <button
+              onClick={() => toggleStatus("Cost-Approved")}
+              className="btn btn-success btn-sm me-2"
+            >
+              Cost-Approved
+            </button>
+            <button
+              onClick={() => toggleStatus("Rejected")}
+              className="btn btn-danger btn-sm me-2"
+            >
+              Reject
+            </button>
+          </Fragment>
+        ) : null}
 
-          {userInfo.department_title === "Accounts & Finance" &&
-          userInfo.designation_title === "General Manager" &&
-          proforma.status === "Cost-Approved" ? (
-            <Fragment>
-              <button
-                onClick={() => toggleStatus("Finalized")}
-                className="btn btn-success"
-              >
-                Finalized
-              </button>
-              <button
-                onClick={() => toggleStatus("Rejected")}
-                className="btn btn-danger"
-              >
-                Reject
-              </button>
-            </Fragment>
-          ) : null}
+        {userInfo.department_title === "Accounts & Finance" &&
+        userInfo.designation_title === "General Manager" &&
+        proforma.status === "Cost-Approved" ? (
+          <Fragment>
+            <button
+              onClick={() => toggleStatus("Finalized")}
+              className="btn btn-success btn-sm me-2"
+            >
+              Finalized
+            </button>
+            <button
+              onClick={() => toggleStatus("Rejected")}
+              className="btn btn-danger btn-sm me-2"
+            >
+              Reject
+            </button>
+          </Fragment>
+        ) : null}
 
-          {userInfo.department_title === "Management" &&
-          userInfo.designation_title === "Managing Director" &&
-          proforma.status === "Finalized" ? (
-            <Fragment>
-              <button
-                onClick={() => toggleStatus("Approved")}
-                className="btn btn-success"
-              >
-                Approved & Send For LC
-              </button>
-              <button
-                onClick={() => toggleStatus("Rejected")}
-                className="btn btn-danger"
-              >
-                Reject
-              </button>
-            </Fragment>
-          ) : null}
+        {userInfo.department_title === "Management" &&
+        userInfo.designation_title === "Managing Director" &&
+        proforma.status === "Finalized" ? (
+          <Fragment>
+            <button
+              onClick={() => toggleStatus("Approved")}
+              className="btn btn-success btn-sm me-2"
+            >
+              Approved & Send For LC
+            </button>
+            <button
+              onClick={() => toggleStatus("Rejected")}
+              className="btn btn-danger btn-sm me-2"
+            >
+              Reject
+            </button>
+          </Fragment>
+        ) : null}
 
-          {userInfo.department_title === "Commercial" &&
-          userInfo.designation_title === "Asst. General Manager" &&
-          proforma.status === "Approved" ? (
-            <Fragment>
-              <button
-                onClick={() => toggleStatus("Received")}
-                className="btn btn-success"
-              >
-                Receive
-              </button>
-              <button
-                onClick={() => toggleStatus("Rejected")}
-                className="btn btn-danger"
-              >
-                Reject
-              </button>
-            </Fragment>
-          ) : null}
+        {userInfo.department_title === "Commercial" &&
+        userInfo.designation_title === "Asst. General Manager" &&
+        proforma.status === "Approved" ? (
+          <Fragment>
+            <button
+              onClick={() => toggleStatus("Received")}
+              className="btn btn-success btn-sm me-2"
+            >
+              Receive
+            </button>
+            <button
+              onClick={() => toggleStatus("Rejected")}
+              className="btn btn-danger btn-sm me-2"
+            >
+              Reject
+            </button>
+          </Fragment>
+        ) : null}
 
-          <Link to="/merchandising/proformas" className="btn btn-danger">
-            <i className="fal fa-times"></i>
-          </Link>
-        </div>
+        <Link
+          to="/merchandising/proformas"
+          className="btn btn-danger btn-sm me-2"
+        >
+          <i className="fal fa-times"></i>
+        </Link>
       </div>
+      <br/>
 
       <div
         className="preview_print page create_technical_pack "

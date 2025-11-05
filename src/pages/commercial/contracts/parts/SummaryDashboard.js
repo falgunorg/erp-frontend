@@ -122,9 +122,9 @@ const SummaryDashboard = ({ data, form }) => {
       <div className="text-center">
         <h5 className="summary-title text-uppercase">Summary Position</h5>
         <div className="summary-info">
-          <strong>Contract :</strong> {form.contract_no}
+          <strong>Contract :</strong> {form.title}
           <br />
-          <strong>Company :</strong> MODISTE ( CEPZ ) LTD
+          <strong>Company :</strong> {form.company?.title}
         </div>
         <br />
       </div>
@@ -132,7 +132,7 @@ const SummaryDashboard = ({ data, form }) => {
 
       <Grid container spacing={3}>
         {/* LEFT SIDE: Tables */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={6} md={6}>
           {renderTable("Export", data.export.rows)}
           {renderTable("BB Import", data.import.rows)}
           {renderTable("Packing Credit (PC)", data.packingCredit.rows)}
@@ -143,7 +143,7 @@ const SummaryDashboard = ({ data, form }) => {
         </Grid>
 
         {/* RIGHT SIDE: Charts */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={6} md={6}>
           <div className="row">
             <div className="col-lg-3">
               {" "}

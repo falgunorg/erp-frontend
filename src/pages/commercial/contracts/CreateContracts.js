@@ -4,14 +4,11 @@ import swal from "sweetalert";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import { useHistory, Link } from "react-router-dom";
 
-export default function CreateContracts() {
+export default function CreateContracts(props) {
   const history = useHistory();
-  const goBack = () => history.goBack();
 
   const [buyers, setBuyers] = useState([]);
   const [companies, setCompanies] = useState([]);
-
-  const [agents, setAgents] = useState([]);
   const [spinner, setSpinner] = useState(false);
 
   const [banks, setBanks] = useState([]);
@@ -27,7 +24,7 @@ export default function CreateContracts() {
   };
 
   const [form, setForm] = useState({
-    contract_no: "",
+    title: "",
     contract_date: "",
     contract_type: "fob",
     buyer_id: "",
@@ -71,12 +68,10 @@ export default function CreateContracts() {
         const [b, c, a, bk] = await Promise.all([
           api.post("/common/buyers"),
           api.post("/common/companies"),
-          api.post("/common/agents"),
-          api.post("/common/banks"),
+          api.get("/common/banks"),
         ]);
         setBuyers(b.data?.data || []);
         setCompanies(c.data?.data || []);
-        setAgents(a.data?.data || []);
         setBanks(bk.data?.data || []);
       } catch (err) {
         console.error("Error fetching dropdown data:", err);
@@ -92,7 +87,7 @@ export default function CreateContracts() {
   const validateStep = () => {
     switch (activeStep) {
       case 0:
-        return form.contract_no && form.contract_date && form.contract_type;
+        return form.title && form.contract_date && form.contract_type;
       case 1:
         return form.buyer_id && form.buyer_bank_name && form.buyer_bank_swift;
       case 2:
@@ -129,13 +124,10 @@ export default function CreateContracts() {
       setSpinner(true);
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v || ""));
-      const res = await api.post(
-        "/merchandising/purchase-contracts-create",
-        fd
-      );
+      const res = await api.post("/commercial/contracts/create", fd);
       if (res.status === 200) {
         swal("Success!", "Purchase contract saved successfully.", "success");
-        history.push(`/commercial/contracts/details/${res.data?.id || 4}`);
+        history.push(`/commercial/contracts/details/${res.data?.id || 0}`);
       }
     } catch (err) {
       console.error(err);
@@ -159,8 +151,8 @@ export default function CreateContracts() {
                 </label>
                 <input
                   className="form-control"
-                  value={form.contract_no}
-                  onChange={(e) => handleChange("contract_no", e.target.value)}
+                  value={form.title}
+                  onChange={(e) => handleChange("title", e.target.value)}
                 />
               </div>
               <div className="col-lg-3">
@@ -516,14 +508,19 @@ export default function CreateContracts() {
     }
   };
 
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "NEW PC",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New PC",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
   return (
     <div className="tna_page create_technical_pack">
-      <div className="d-flex align-items-center">
-        <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
-        <h4 className="m-0">Create Purchase Contract</h4>
-      </div>
-      <hr />
-
       <div className="tna_page_topbar mb-4">
         {steps.map((s, i) => (
           <Link

@@ -80,25 +80,20 @@ export default function Proformas(props) {
     checkAccess();
   }, [props.userData?.department_title, history]);
 
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "PI'S",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New PI",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
   return (
     <div className="create_edit_page create_technical_pack">
       {spinner && <Spinner />}
-
-      <div className="d-flex align-items-end justify-content-between">
-        <div className="d-flex align-items-end">
-          <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
-          <h4 className="m-0">PROFORMA INVOICES</h4>
-        </div>
-        <div className="d-flex align-items-end">
-          <Link
-            to="/merchandising/proformas-create"
-            className="publish_btn btn btn-warning bg-falgun me-4"
-          >
-            Create New
-          </Link>
-        </div>
-      </div>
-      <hr />
 
       <div className="employee_lists">
         <div className="datrange_filter ">

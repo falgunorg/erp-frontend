@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from "react";
 import api from "services/api";
 import swal from "sweetalert";
-import Logo from "../../../assets/images/logos/logo-short.png";
-import { useHistory, Link } from "react-router-dom";
+import { useHistory, useParams, Link } from "react-router-dom";
 
-export default function EditContracts() {
+export default function EditContracts(props) {
   const history = useHistory();
-  const goBack = () => history.goBack();
+  const params = useParams(); // Get contract ID from URL
 
   const [buyers, setBuyers] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [banks, setBanks] = useState([]);
-  const [agents, setAgents] = useState([]);
   const [spinner, setSpinner] = useState(false);
 
   const [form, setForm] = useState({
-    contract_no: "",
+    title: "",
     contract_date: "",
     contract_type: "fob",
     buyer_id: "",
@@ -54,24 +52,48 @@ export default function EditContracts() {
 
   // Fetch dropdown data
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDropdownData = async () => {
       try {
-        const [b, c, a, bk] = await Promise.all([
+        const [b, c, bk] = await Promise.all([
           api.post("/common/buyers"),
           api.post("/common/companies"),
-          api.post("/common/agents"),
-          api.post("/common/banks"),
+          api.get("/common/banks"),
         ]);
         setBuyers(b.data?.data || []);
         setCompanies(c.data?.data || []);
-        setAgents(a.data?.data || []);
         setBanks(bk.data?.data || []);
       } catch (err) {
         console.error("Error fetching dropdown data:", err);
       }
     };
-    fetchData();
+    fetchDropdownData();
   }, []);
+
+  // Fetch existing contract details
+  useEffect(() => {
+    const fetchContract = async () => {
+      try {
+        setSpinner(true);
+        const res = await api.post("/commercial/contracts/show", {
+          id: params.id,
+        });
+        if (res.status === 200 && res.data?.data) {
+          setForm((prev) => ({
+            ...prev,
+            ...res.data.data,
+          }));
+        } else {
+          swal("Error", "Failed to load contract details.", "error");
+        }
+      } catch (err) {
+        console.error("Error loading contract:", err);
+        swal("Error", "Something went wrong while fetching contract.", "error");
+      } finally {
+        setSpinner(false);
+      }
+    };
+    if (params.id) fetchContract();
+  }, [params.id]);
 
   const handleChange = (name, value) =>
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -80,7 +102,7 @@ export default function EditContracts() {
   const validateStep = () => {
     switch (activeStep) {
       case 0:
-        return form.contract_no && form.contract_date && form.contract_type;
+        return form.title && form.contract_date && form.contract_type;
       case 1:
         return form.buyer_id && form.buyer_bank_name && form.buyer_bank_swift;
       case 2:
@@ -95,7 +117,7 @@ export default function EditContracts() {
           form.port_of_discharge
         );
       case 4:
-        return true; // last step can be optional
+        return true;
       default:
         return false;
     }
@@ -111,27 +133,38 @@ export default function EditContracts() {
 
   const prevStep = () => setActiveStep((prev) => Math.max(prev - 1, 0));
 
-  const handleSubmit = async (e) => {
+  const handleUpdate = async (e) => {
     e.preventDefault();
     try {
       setSpinner(true);
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v || ""));
-      const res = await api.post(
-        "/merchandising/purchase-contracts-create",
-        fd
-      );
+      const res = await api.post("/commercial/contracts/update", fd);
+
       if (res.status === 200) {
-        swal("Success!", "Purchase contract saved successfully.", "success");
-        history.push(`/commercial/contracts/details/${res.data?.id || 4}`);
+        swal("Success!", "Contract updated successfully.", "success");
+        history.push(`/commercial/contracts/details/${params.id}`);
+      } else {
+        swal("Error!", "Failed to update contract.", "error");
       }
     } catch (err) {
-      console.error(err);
-      swal("Error!", "Failed to save purchase contract.", "error");
+      console.error("Error updating:", err);
+      swal("Error!", "Something went wrong while updating.", "error");
     } finally {
       setSpinner(false);
     }
   };
+
+  useEffect(() => {
+    props.setHeaderData({
+      pageName: "EDIT PC",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New PC",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
 
   // Step render function
   const renderStep = () => {
@@ -147,8 +180,8 @@ export default function EditContracts() {
                 </label>
                 <input
                   className="form-control"
-                  value={form.contract_no}
-                  onChange={(e) => handleChange("contract_no", e.target.value)}
+                  value={form.title}
+                  onChange={(e) => handleChange("title", e.target.value)}
                 />
               </div>
               <div className="col-lg-3">
@@ -413,13 +446,19 @@ export default function EditContracts() {
                 <label className="form-label">
                   Mode of Shipment <span className="text-danger">*</span>
                 </label>
-                <input
+
+                <select
                   className="form-control"
                   value={form.mode_of_shipment}
                   onChange={(e) =>
                     handleChange("mode_of_shipment", e.target.value)
                   }
-                />
+                >
+                  <option value="">Select One</option>
+                  <option value="Sea">Sea</option>
+                  <option value="Air">Air</option>
+                  <option value="Road">Road</option>
+                </select>
               </div>
               <div className="col-lg-3">
                 <label className="form-label">
@@ -500,12 +539,6 @@ export default function EditContracts() {
 
   return (
     <div className="tna_page create_technical_pack">
-      <div className="d-flex align-items-center">
-        <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
-        <h4 className="m-0">Edit Purchase Contract</h4>
-      </div>
-      <hr />
-
       <div className="tna_page_topbar mb-4">
         {steps.map((s, i) => (
           <Link
@@ -518,7 +551,7 @@ export default function EditContracts() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleUpdate}>
         {renderStep()}
         <div className="d-flex justify-content-between mt-4">
           {activeStep > 0 && (
@@ -545,7 +578,7 @@ export default function EditContracts() {
               className="btn btn-success ms-auto"
               disabled={spinner}
             >
-              {spinner ? "Saving..." : "Save"}
+              {spinner ? "Updating..." : "Update"}
             </button>
           )}
         </div>

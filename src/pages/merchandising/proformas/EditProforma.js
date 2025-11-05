@@ -8,7 +8,7 @@ import Logo from "../../../assets/images/logos/logo-short.png";
 import MultipleFileInput from "elements/techpack/MultipleFileInput";
 import QuailEditor from "elements/QuailEditor";
 
-export default function EditProforma() {
+export default function EditProforma(props) {
   const params = useParams();
   const history = useHistory();
 
@@ -289,29 +289,34 @@ export default function EditProforma() {
     }
   };
 
+  useEffect(async () => {
+    props.setHeaderData({
+      pageName: "PI EDIT",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "New PI",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
   return (
     <div className="create_edit_page create_technical_pack">
       {spinner && <Spinner />}
       <form onSubmit={handleSubmit} className="create_tp_body">
-        <div className="d-flex align-items-end justify-content-between">
-          <div className="d-flex align-items-end">
-            <img src={Logo} alt="Logo" style={{ width: 35, marginRight: 10 }} />
-            <h4 className="m-0">EDIT PI</h4>
-          </div>
-          <div className="d-flex align-items-end">
-            <button
-              type="submit"
-              className="publish_btn btn btn-warning bg-falgun me-4"
-            >
-              Update
-            </button>
-            <Link
-              to="/merchandising/proformas"
-              className="btn btn-danger rounded-circle"
-            >
-              <i className="fal fa-times"></i>
-            </Link>
-          </div>
+        <div className="d-flex justify-content-end">
+          <button
+            type="submit"
+            className="publish_btn btn btn-warning bg-falgun me-4"
+          >
+            Update
+          </button>
+          <Link
+            to="/merchandising/proformas"
+            className="btn btn-danger rounded-circle"
+          >
+            <i className="fal fa-times"></i>
+          </Link>
         </div>
 
         <hr />

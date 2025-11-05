@@ -14,8 +14,15 @@
       background: $white;
       transition: 0.5s;
       height: calc(100vh - 56px);
-      // position: fixed;
       overflow-x: hidden;
+    }
+
+    /* Remove height and overflow when printing */
+    @media print {
+      .falgun_app_content {
+        height: auto !important;
+        overflow: visible !important;
+      }
     }
   }
 }
