@@ -172,10 +172,16 @@ export default function Proformas(props) {
                 <div>
                   <Link
                     to="#"
-                    className="btn btn-warning btn-sm"
+                    className="btn btn-warning btn-sm me-4"
                     onClick={clearFields}
                   >
                     <i className="fas fa-retweet"></i>
+                  </Link>
+                  <Link
+                    to="/merchandising/proformas-create"
+                    className="btn btn-success btn-sm me-2"
+                  >
+                    Create New PI
                   </Link>
                 </div>
               </div>

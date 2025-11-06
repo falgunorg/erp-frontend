@@ -3,7 +3,11 @@ import Logo from "../../../assets/images/logos/logo-short.png";
 import { useHistory, Link, useParams } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import * as XLSX from "xlsx";
+// import components
 import SummaryDashboard from "./parts/SummaryDashboard";
+import BackToBack from "./parts/BackToBack";
+import PurchaseOrders from "./parts/PurchaseOrders";
+
 import api from "services/api";
 import swal from "sweetalert";
 
@@ -483,161 +487,7 @@ export default function ContractDetails(props) {
 
         {activeTab === "BBLC" && (
           <div className="summary_details_area contract-wrapper" ref={printRef}>
-            <div className="text-center">
-              <h5 className="summary-title text-uppercase">BBLC</h5>
-              <div className="summary-info">
-                <strong>Contract :</strong> {form.title}
-                <br />
-              </div>
-              <br />
-            </div>
-
-            <div className="section  table-responsive">
-              <table className="table table-bordered align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>Prod.</th>
-                    <th>LC Number</th>
-                    <th>Issue Date</th>
-                    <th>Currency</th>
-                    <th>Contract Amt.</th>
-                    <th>Tole.(%)</th>
-                    <th>Ship Date</th>
-                    <th>Expire Date</th>
-                    <th>Closed Amt.</th>
-                    <th>Current Availabily</th>
-                    <th>Commidity</th>
-                    <th>Exporter Seller</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>LC24</td>
-                    <td>140424250034</td>
-                    <td>2/6/2025</td>
-                    <td>USD</td>
-                    <td>132741.61</td>
-                    <td>0.00</td>
-                    <td>3/8/2025</td>
-                    <td>3/23/2025</td>
-                    <td>99.33</td>
-                    <td>0.00</td>
-                    <td>FABRIC</td>
-                    <td>Z&Z</td>
-                  </tr>
-                  <tr>
-                    <td>LC25</td>
-                    <td>140424250034</td>
-                    <td>2/6/2025</td>
-                    <td>USD</td>
-                    <td>132741.61</td>
-                    <td>0.00</td>
-                    <td>3/8/2025</td>
-                    <td>3/23/2025</td>
-                    <td>99.33</td>
-                    <td>0.00</td>
-                    <td>BUTTON</td>
-                    <td>JINDAL POLY BUTTONS PVT. LTD.</td>
-                  </tr>
-                  <tr>
-                    <td>LC26</td>
-                    <td>140424250034</td>
-                    <td>2/6/2025</td>
-                    <td>USD</td>
-                    <td>132741.61</td>
-                    <td>0.00</td>
-                    <td>3/8/2025</td>
-                    <td>3/23/2025</td>
-                    <td>99.33</td>
-                    <td>0.00</td>
-                    <td>THREAD</td>
-                    <td>A&E</td>
-                  </tr>
-
-                  <tr>
-                    <td className="text-end" colSpan={4}>
-                      <strong>TOTAL</strong>
-                    </td>
-                    <td>
-                      <strong>398,224.83</strong>
-                    </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>
-                      <strong>283206.66</strong>
-                    </td>
-                    <td>
-                      <strong>0.00</strong>
-                    </td>
-                    <td></td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <br />
-            <br />
-            <div className="row">
-              <div className="col-lg-5">
-                <table className="table table-bordered align-middle">
-                  <tbody>
-                    <tr>
-                      <td>Total Closed Amount ( in Equivelent USD )</td>
-                      <td>2637.6</td>
-                    </tr>
-                    <tr>
-                      <td>Total EDF LC Amount ( in Equivelent USD )</td>
-                      <td>0.00</td>
-                    </tr>
-
-                    <tr>
-                      <td>Total Perchantage Used From Contract</td>
-                      <td>75%</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <br />
-            <br />
-            <div className="row">
-              <div className="col-lg-4">
-                <table className="table table-bordered align-middle">
-                  <thead className="table-light">
-                    <tr>
-                      <th>COMMODITY CATEGORY</th>
-                      <th>Amount</th>
-                      <th>%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>ACCESSORI & OTHERS</td>
-                      <td>265,483.22</td>
-                      <td>66.33</td>
-                    </tr>
-                    <tr>
-                      <td>FABRIC</td>
-                      <td>132,741.61 </td>
-                      <td>33.33</td>
-                    </tr>
-
-                    <tr>
-                      <td>
-                        <strong>TOTAL</strong>
-                      </td>
-                      <td>
-                        <strong>398,224.83</strong>
-                      </td>
-                      <td>
-                        <strong>100.00</strong>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <BackToBack form={form} />
           </div>
         )}
 
@@ -1098,9 +948,9 @@ export default function ContractDetails(props) {
                   </div>
                   <div className="col-8">
                     <p>
-                      {form.buyer_name}
+                      {form.buyer?.name}
                       <br />
-                      {form.buyer_address}
+                      {form.buyer?.address}
                     </p>
                   </div>
                 </div>
@@ -1311,70 +1161,7 @@ export default function ContractDetails(props) {
 
         {activeTab === "PO'S" && (
           <div className="summary_details_area contract-wrapper" ref={printRef}>
-            <div className="text-center">
-              <h5 className="summary-title text-uppercase">PO'S</h5>
-              <div className="summary-info">
-                <strong>Contract :</strong> {form.title}
-                <br />
-              </div>
-              <br />
-            </div>
-            <div className="section  table-responsive">
-              <table className="table table-bordered align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>PO</th>
-                    <th>STYLE</th>
-                    <th>ISSUE Date</th>
-                    <th>DELIVERY DATE</th>
-                    <th>QTY</th>
-                    <th>FOB</th>
-                    <th>TOTAL</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>PO001</td>
-                    <td>Casual Shirt</td>
-                    <td>2025-10-01</td>
-                    <td>2025-12-01</td>
-                    <td>500</td>
-                    <td>$10</td>
-                    <td>$5,000</td>
-                  </tr>
-                  <tr>
-                    <td>PO002</td>
-                    <td>Formal Pants</td>
-                    <td>2025-09-15</td>
-                    <td>2025-11-15</td>
-                    <td>300</td>
-                    <td>$15</td>
-                    <td>$4,500</td>
-                  </tr>
-                  <tr>
-                    <td>PO003</td>
-                    <td>Denim Jacket</td>
-                    <td>2025-10-10</td>
-                    <td>2026-01-10</td>
-                    <td>200</td>
-                    <td>$20</td>
-                    <td>$4,000</td>
-                  </tr>
-                  <tr>
-                    <td className="text-center" colSpan={4}>
-                      <strong>TOTAL</strong>
-                    </td>
-                    <td>
-                      <strong>1000 PCS</strong>
-                    </td>
-                    <td></td>
-                    <td>
-                      <strong>$13,500</strong>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <PurchaseOrders form={form} />
           </div>
         )}
 

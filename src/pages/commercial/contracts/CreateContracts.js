@@ -3,6 +3,7 @@ import api from "services/api";
 import swal from "sweetalert";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import { useHistory, Link } from "react-router-dom";
+import CustomSelect from "elements/CustomSelect";
 
 export default function CreateContracts(props) {
   const history = useHistory();
@@ -12,16 +13,48 @@ export default function CreateContracts(props) {
   const [spinner, setSpinner] = useState(false);
 
   const [banks, setBanks] = useState([]);
-  const getBanks = async () => {
-    setSpinner(true);
-    var response = await api.get("/common/banks");
-    if (response.status === 200 && response.data) {
-      setBanks(response.data);
-    } else {
-      console.log(response.data);
-    }
-    setSpinner(false);
-  };
+
+  const [docList, setDocList] = useState([
+    "COMMERCIAL INVOICE",
+    "PACKING LIST",
+    "CERTIFICATE OF ORIGIN",
+    "CERTIFICATE OF OEKO TEX",
+    "BILL OF LADING",
+    "AIR WAY BILL",
+    "INSPECTION CERTIFICATE",
+    "INSURANCE CERTIFICATE",
+    "GSP FORM A",
+    "FABRIC TEST REPORT",
+    "GARMENT TEST REPORT",
+    "SHIPPING INSTRUCTION",
+    "EXPORT LICENSE",
+    "LC COPY",
+    "BANK CERTIFICATE",
+    "SHIPPING ADVICE",
+    "BOOKING CONFIRMATION",
+    "PROFORMA INVOICE",
+    "DELIVERY CHALLAN",
+    "BUYER ORDER / PURCHASE ORDER",
+    "PACKING DECLARATION",
+    "PHYTOSANITARY CERTIFICATE",
+    "FUMIGATION CERTIFICATE",
+    "HEAT TREATMENT CERTIFICATE",
+    "EXPORT DECLARATION (EXP FORM)",
+    "QUOTA CERTIFICATE",
+    "CARGO MANIFEST",
+    "BENEFICIARY CERTIFICATE",
+    "WEIGHT CERTIFICATE",
+    "FABRIC COMPOSITION CERTIFICATE",
+    "QUALITY CERTIFICATE",
+    "SHIPPING BILL",
+    "EXPORT PERMIT",
+    "LAB TEST REPORT",
+    "MSDS (MATERIAL SAFETY DATA SHEET)",
+    "BUYER’S APPROVAL SHEET",
+    "SAMPLE APPROVAL SHEET",
+    "PI CONFIRMATION",
+    "PAYMENT ADVICE",
+  ]);
 
   const [form, setForm] = useState({
     title: "",
@@ -38,14 +71,14 @@ export default function CreateContracts(props) {
     buyer_bank_swift: "",
     company_id: "",
     seller_address: "",
-    seller_bank_name: "",
+    seller_bank_id: "",
     seller_bank_address: "",
     seller_bank_swift: "",
     payment_terms: "",
     port_of_loading: "",
     port_of_discharge: "",
     mode_of_shipment: "",
-    documents_required: "",
+    documents_required: [],
     reimbursement_instructions: "",
     amendment_clause: "",
     agent_commission_clause: "",
@@ -65,23 +98,80 @@ export default function CreateContracts(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [b, c, a, bk] = await Promise.all([
+        const [b, c, bk] = await Promise.all([
           api.post("/common/buyers"),
-          api.post("/common/companies"),
+          api.post("/common/companies", { type: "own" }),
           api.get("/common/banks"),
         ]);
         setBuyers(b.data?.data || []);
         setCompanies(c.data?.data || []);
-        setBanks(bk.data?.data || []);
+        setBanks(bk.data || []);
       } catch (err) {
         console.error("Error fetching dropdown data:", err);
       }
     };
     fetchData();
   }, []);
+  console.log("FORMDATA", form);
 
-  const handleChange = (name, value) =>
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const handleChange = async (name, value) => {
+    try {
+      let updatedFields = { [name]: value };
+
+      // ✅ Handle buyer selection
+      if (name === "buyer_id") {
+        const buyer = buyers.find((b) => b.id == value);
+        if (buyer) {
+          updatedFields = {
+            ...updatedFields,
+            buyer_id: buyer.id,
+            buyer_address: [buyer.address, buyer.city, buyer.country]
+              .filter(Boolean)
+              .join(", "),
+            buyer_phone: buyer.phone || "",
+            buyer_email: buyer.email || "",
+          };
+        }
+      }
+
+      // ✅ Handle company selection
+      if (name === "company_id") {
+        const company = companies.find((c) => c.id == value);
+        if (company) {
+          updatedFields = {
+            ...updatedFields,
+            company_id: company.id,
+            seller_address: [company.address, company.city, company.country]
+              .filter(Boolean)
+              .join(", "),
+          };
+        }
+      }
+
+      // ✅ Handle seller bank selection
+      if (name === "seller_bank_id") {
+        const bank = banks.find((b) => b.id == value);
+        if (bank) {
+          updatedFields = {
+            ...updatedFields,
+            seller_bank_id: bank.id,
+            seller_bank_address: [bank.branch, bank.address, bank.country]
+              .filter(Boolean)
+              .join(", "),
+            seller_bank_swift: bank.swift_code || "",
+          };
+        }
+      }
+
+      // ✅ Single efficient state update
+      setForm((prev) => ({
+        ...prev,
+        ...updatedFields,
+      }));
+    } catch (error) {
+      console.error("Error updating form:", error);
+    }
+  };
 
   // Step validation logic
   const validateStep = () => {
@@ -91,9 +181,7 @@ export default function CreateContracts(props) {
       case 1:
         return form.buyer_id && form.buyer_bank_name && form.buyer_bank_swift;
       case 2:
-        return (
-          form.company_id && form.seller_bank_name && form.seller_bank_swift
-        );
+        return form.company_id && form.seller_bank_id && form.seller_bank_swift;
       case 3:
         return (
           form.payment_terms &&
@@ -357,13 +445,21 @@ export default function CreateContracts(props) {
                     <label className="form-label">
                       Bank Name <span className="text-danger">*</span>
                     </label>
-                    <input
+
+                    <select
                       className="form-control"
-                      value={form.seller_bank_name}
+                      value={form.seller_bank_id || ""}
                       onChange={(e) =>
-                        handleChange("seller_bank_name", e.target.value)
+                        handleChange("seller_bank_id", e.target.value)
                       }
-                    />
+                    >
+                      <option value="">Select Bank</option>
+                      {banks.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.title}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                   <div className="col-lg-6">
                     <label className="form-label">
@@ -466,6 +562,30 @@ export default function CreateContracts(props) {
               Clauses & Conditions
             </div>
             <div className="card-body row g-3">
+              <div className="col-lg-12">
+                <div className="form-group">
+                  <label className="form-label">Documents Required</label>
+                  <CustomSelect
+                    isMulti
+                    name="documents_required"
+                    placeholder="Select or Search"
+                    value={(form.documents_required || []).map((d) => ({
+                      value: d,
+                      label: d,
+                    }))}
+                    onChange={(selected) =>
+                      handleChange(
+                        "documents_required",
+                        selected ? selected.map((s) => s.value) : []
+                      )
+                    }
+                    options={docList.map((doc) => ({
+                      value: doc,
+                      label: doc,
+                    }))}
+                  />
+                </div>
+              </div>
               <div className="col-12">
                 <label className="form-label">Reimbursement Instructions</label>
                 <textarea

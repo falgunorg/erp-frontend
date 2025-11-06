@@ -36,6 +36,7 @@ export default function TechnicalPackages(props) {
       innerSearchValue: "",
     });
   }, []);
+  
   const [viewTab, setViewTab] = useState("All");
   const [markAble, setMarkAble] = useState(false);
   const toggleMarkAble = () => {
