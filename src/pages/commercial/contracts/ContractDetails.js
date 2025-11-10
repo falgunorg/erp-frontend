@@ -10,6 +10,7 @@ import PurchaseOrders from "./parts/PurchaseOrders";
 
 import api from "services/api";
 import swal from "sweetalert";
+import formatMoney from "services/moneyFormatter";
 
 export default function ContractDetails(props) {
   const history = useHistory();
@@ -234,7 +235,7 @@ export default function ContractDetails(props) {
         <div>
           {[
             "Summary",
-            "Export Lc",
+
             "Export Bill",
             "BBLC",
             "BB Bill",
@@ -277,106 +278,6 @@ export default function ContractDetails(props) {
           </div>
         )}
 
-        {activeTab === "Export Lc" && (
-          <div className="summary_details_area contract-wrapper" ref={printRef}>
-            <div className="row">
-              <div className="col-lg-12">
-                <div className="text-center">
-                  <h5 className="summary-title text-uppercase">
-                    Export LC/Contract
-                  </h5>
-                  <div className="summary-info">
-                    <strong>Contract :</strong> {form.title}
-                    <br />
-                  </div>
-                  <br />
-                </div>
-                {/* Export Section */}
-                <div className="section">
-                  <table className="table table-bordered align-middle">
-                    <thead className="table-light">
-                      <tr>
-                        <th>LC/Contract Ref. No.</th>
-                        <th>Export LC/ Contract No</th>
-                        <th>Issue Date</th>
-                        <th>Currency</th>
-                        <th>Contract Amt.</th>
-                        <th>Tole. (%)</th>
-                        <th>Transferred Amt</th>
-                        <th>
-                          Available Amount <br /> (with Tolerance )
-                        </th>
-                        <th>Closed Amount</th>
-                        <th>Ship Date</th>
-                        <th>Expire Date</th>
-                        <th>Export Executed</th>
-                        <th>Buyer</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>016FCBC241890501</td>
-                        <td>BASSPRO-MCL-SP25</td>
-                        <td>6/1/2024</td>
-                        <td>USD</td>
-                        <td>2,294,575.86</td>
-                        <td>0%</td>
-                        <td>2,294,575.86</td>
-                        <td>2,294,575.86</td>
-                        <td>2,294,575.86</td>
-                        <td>3/15/2025</td>
-                        <td>3/25/2025</td>
-                        <td>2,294,575.86</td>
-                        <td>Next</td>
-                      </tr>
-                      <tr>
-                        <td>016FCBC241890501</td>
-                        <td>BASSPRO-MCL-SP25</td>
-                        <td>6/1/2024</td>
-                        <td>USD</td>
-                        <td>2,294,575.86</td>
-                        <td>0%</td>
-                        <td>2,294,575.86</td>
-                        <td>2,294,575.86</td>
-                        <td>2,294,575.86</td>
-                        <td>3/15/2025</td>
-                        <td>3/25/2025</td>
-                        <td>2,294,575.86</td>
-                        <td>Next</td>
-                      </tr>
-
-                      <tr>
-                        <td className="text-end" colSpan={4}>
-                          <strong>TOTAL</strong>
-                        </td>
-                        <td>
-                          <strong>2284572.54</strong>
-                        </td>
-                        <td></td>
-                        <td>
-                          <strong>283206.66</strong>
-                        </td>
-                        <td>
-                          <strong>283206.66</strong>
-                        </td>
-                        <td>
-                          <strong>283206.66</strong>
-                        </td>
-                        <td></td>
-                        <td></td>
-                        <td>
-                          <strong>283206.66</strong>
-                        </td>
-                        <td></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {activeTab === "Export Bill" && (
           <div className="summary_details_area contract-wrapper" ref={printRef}>
             <div className="row">
@@ -384,7 +285,7 @@ export default function ContractDetails(props) {
                 <div className="text-center">
                   <h5 className="summary-title text-uppercase">Export Bill</h5>
                   <div className="summary-info">
-                    <strong>Contract :</strong> {form.title}
+                    <strong>Contract/Export LC :</strong> {form.title}
                     <br />
                   </div>
                   <br />
@@ -496,7 +397,7 @@ export default function ContractDetails(props) {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">BB Bill</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.title}
+                <strong>Contract/Export LC :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -681,7 +582,7 @@ export default function ContractDetails(props) {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Loan</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.title}
+                <strong>Contract/Export LC :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -804,7 +705,7 @@ export default function ContractDetails(props) {
                 DFC A/C No: 0161300000107
               </h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.title}
+                <strong>Contract/Export LC :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -925,7 +826,7 @@ export default function ContractDetails(props) {
 
               <div className="contract-body">
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>1. Purchase Contract No:</strong>
                   </div>
                   <div className="col-8">
@@ -934,7 +835,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>2. Date:</strong>
                   </div>
                   <div className="col-8">
@@ -943,7 +844,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>3. Buyer:</strong>
                   </div>
                   <div className="col-8">
@@ -956,7 +857,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>4. Notify Party:</strong>
                   </div>
                   <div className="col-8">
@@ -965,7 +866,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>5. Buyer’s Bank:</strong>
                   </div>
                   <div className="col-8">
@@ -979,7 +880,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>6. Agent Name:</strong>
                   </div>
                   <div className="col-8">
@@ -988,7 +889,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>7. Agent’s Bank:</strong>
                   </div>
                   <div className="col-8">
@@ -997,7 +898,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>8. Beneficiary:</strong>
                   </div>
                   <div className="col-8">
@@ -1006,7 +907,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>9. Beneficiary’s Bank:</strong>
                   </div>
                   <div className="col-8">
@@ -1015,7 +916,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>10. Payment Terms:</strong>
                   </div>
                   <div className="col-8">
@@ -1024,7 +925,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>11. Port of Discharge:</strong>
                   </div>
                   <div className="col-8">
@@ -1033,7 +934,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>12. Port of Loading:</strong>
                   </div>
                   <div className="col-8">
@@ -1042,7 +943,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>13. Mode of Shipment:</strong>
                   </div>
                   <div className="col-8">
@@ -1051,7 +952,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>14. Documents Required:</strong>
                   </div>
                   <div className="col-8">
@@ -1060,7 +961,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>15. Trans-shipment/Part Shipment:</strong>
                   </div>
                   <div className="col-8">
@@ -1069,7 +970,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>16. Tolerance:</strong>
                   </div>
                   <div className="col-8">
@@ -1078,7 +979,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>17. Defective Allowance:</strong>
                   </div>
                   <div className="col-8">
@@ -1087,7 +988,7 @@ export default function ContractDetails(props) {
                 </div>
 
                 <div className="row mb-1">
-                  <div className="col-4">
+                  <div className="col-4 text-uppercase">
                     <strong>18. Expiry Date:</strong>
                   </div>
                   <div className="col-8">
@@ -1095,45 +996,33 @@ export default function ContractDetails(props) {
                   </div>
                 </div>
 
-                <div className="mt-3">
-                  <strong>19. Particulars of Goods / Services:</strong>
-                  <table className="contract-table">
-                    <thead className="table-light">
-                      <tr>
-                        <th>Style</th>
-                        <th>Description</th>
-                        <th>Qty (PCS)</th>
-                        <th>FOB Value</th>
-                        <th>Agent Comm/PC</th>
-                        <th>Total Comm</th>
-                        <th>Ship Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {goods.map((g, i) => (
-                        <tr key={i}>
-                          <td>{g.style}</td>
-                          <td>{g.description}</td>
-                          <td>{g.quantity}</td>
-                          <td>${g.total_fob.toLocaleString()}</td>
-                          <td>${g.comm_pc}</td>
-                          <td>${g.total_comm.toLocaleString()}</td>
-                          <td>{g.shipment_date}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="row mb-1">
+                  <div className="col-4 text-uppercase">
+                    <strong>19. REIMBURSEMENT INSTRUCTIONS:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.reimbursement_instructions}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4 text-uppercase">
+                    <strong>20. Amendment Clause:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.amendment_clause}</p>
+                  </div>
+                </div>
+
+                <div className="row mb-1">
+                  <div className="col-4 text-uppercase">
+                    <strong>20. Agent Commission Clause:</strong>
+                  </div>
+                  <div className="col-8">
+                    <p>{form.agent_commission_clause}</p>
+                  </div>
                 </div>
               </div>
-
-              <p className="section-title">REIMBURSEMENT INSTRUCTIONS:</p>
-              {form.reimbursement_instructions}
-              <p>
-                <strong>21.</strong> {form.amendment_clause}
-              </p>
-              <p>
-                <strong>22.</strong> {form.agent_commission_clause}
-              </p>
 
               <div className="signatures">
                 <div>
@@ -1170,7 +1059,7 @@ export default function ContractDetails(props) {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Import Documents</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.title}
+                <strong>Contract/Export LC :</strong> {form.title}
                 <br />
               </div>
               <br />
@@ -1229,7 +1118,7 @@ export default function ContractDetails(props) {
             <div className="text-center">
               <h5 className="summary-title text-uppercase">Export Documents</h5>
               <div className="summary-info">
-                <strong>Contract :</strong> {form.title}
+                <strong>Contract/Export LC :</strong> {form.title}
                 <br />
               </div>
               <br />

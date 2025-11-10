@@ -5,6 +5,7 @@ import Spinner from "../../../elements/Spinner";
 import moment from "moment/moment";
 import swal from "sweetalert";
 import Logo from "../../../assets/images/logos/logo-short.png";
+import formatMoney from "services/moneyFormatter";
 export default function Proformas(props) {
   const userInfo = props.userData;
   const history = useHistory();
@@ -197,13 +198,12 @@ export default function Proformas(props) {
                 <th>Responsible MR</th>
                 <th>Issued Date</th>
                 <th>Validity</th>
-                <th>Purchase Contract</th>
                 <th>Status</th>
                 <th>Supplier</th>
                 <th>Net Weight(KG)</th>
                 <th>Gross Weight(KG)</th>
                 <th>Freight Charge</th>
-                <th>Total Amount</th>
+                <th className="text-end">Total Amount</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -239,14 +239,14 @@ export default function Proformas(props) {
                         <td>{item.user}</td>
                         <td>{moment(item.issued_date).format("ll")}</td>
                         <td>{item.pi_validity}</td>
-                        <td>{item.contract_number}</td>
                         <td>{item.status}</td>
                         <td>{item.supplier}</td>
-
-                        <td>{item.net_weight}</td>
-                        <td>{item.gross_weight}</td>
-                        <td>{item.freight_charge}</td>
-                        <td>{item.total}</td>
+                        <td>{item.net_weight} KG</td>
+                        <td>{item.gross_weight} KG</td>
+                        <td>{item.freight_charge} USD</td>
+                        <td className="text-end">
+                          {formatMoney(item.total)} USD
+                        </td>
                         <td>
                           <Link
                             to={"/merchandising/proformas-details/" + item.id}
@@ -282,13 +282,15 @@ export default function Proformas(props) {
                       <td>{item.user}</td>
                       <td>{moment(item.issued_date).format("ll")}</td>
                       <td>{item.pi_validity}</td>
-                      <td>{item.contract_number}</td>
+
                       <td>{item.status}</td>
                       <td>{item.supplier}</td>
-                      <td>{item.net_weight}</td>
-                      <td>{item.gross_weight}</td>
-                      <td>{item.freight_charge}</td>
-                      <td>{item.total}</td>
+                      <td>{item.net_weight} KG</td>
+                      <td>{item.gross_weight} KG</td>
+                      <td>{item.freight_charge} USD</td>
+                      <td className="text-end">
+                        {formatMoney(item.total)} USD
+                      </td>
                       <td>
                         <Link
                           to={"/merchandising/proformas-details/" + item.id}

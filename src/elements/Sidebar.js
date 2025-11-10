@@ -304,7 +304,7 @@ export default function Sidebar(props) {
                       }
                       to="/commercial/contracts"
                     >
-                      PC
+                      PLC
                     </Link>
                   </li>
                   <li>
@@ -397,7 +397,7 @@ export default function Sidebar(props) {
                       }
                       to="/purchase-contracts"
                     >
-                      PC
+                      PLC
                     </Link>
                   </li>
                   <li>
@@ -480,7 +480,7 @@ export default function Sidebar(props) {
                       }
                       to="/purchase-contracts"
                     >
-                      PC
+                      PLC
                     </Link>
                   </li>
                   <li>
@@ -564,7 +564,7 @@ export default function Sidebar(props) {
                       }
                       to="/purchase-contracts"
                     >
-                      PC
+                      PLC
                     </Link>
                   </li>
                   <li>

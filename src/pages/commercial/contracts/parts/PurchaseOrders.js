@@ -1,4 +1,5 @@
 import React from "react";
+import formatMoney from "services/moneyFormatter";
 
 export default function PurchaseOrders({ form }) {
   return (
@@ -6,7 +7,7 @@ export default function PurchaseOrders({ form }) {
       <div className="text-center">
         <h5 className="summary-title text-uppercase">PO'S</h5>
         <div className="summary-info">
-          <strong>Contract :</strong> {form.title}
+          <strong>Contract/Export LC :</strong> {form.title}
           <br />
         </div>
         <br />
@@ -20,7 +21,7 @@ export default function PurchaseOrders({ form }) {
               <th>ISSUE Date</th>
               <th>DELIVERY DATE</th>
               <th>QTY (PCS)</th>
-              <th>TOTAL (USD)</th>
+              <th className="text-end">TOTAL (USD)</th>
             </tr>
           </thead>
           <tbody>
@@ -31,8 +32,8 @@ export default function PurchaseOrders({ form }) {
                   <td>{po.techpack?.techpack_number}</td>
                   <td>{po.issued_date}</td>
                   <td>{po.delivery_date}</td>
-                  <td>{po.total_qty}</td>
-                  <td>{po.total_value}</td>
+                  <td>{po.total_qty} PCS</td>
+                  <td className="text-end"> {formatMoney(po.total_value)}</td>
                 </tr>
               ))
             ) : (
@@ -44,7 +45,7 @@ export default function PurchaseOrders({ form }) {
             )}
 
             <tr>
-              <td className="text-center" colSpan={4}>
+              <td className="text-end" colSpan={4}>
                 <strong>TOTAL</strong>
               </td>
               <td>
@@ -52,17 +53,20 @@ export default function PurchaseOrders({ form }) {
                   {form?.pos?.reduce(
                     (sum, p) => sum + (parseFloat(p.total_qty) || 0),
                     0
-                  )}
+                  )} PCS
                 </strong>
               </td>
-              <td>
+              <td className="text-end">
                 <strong>
-                  {form?.pos
-                    ?.reduce(
-                      (sum, p) => sum + (parseFloat(p.total_value) || 0),
-                      0
-                    )
-                    .toFixed(2)}
+                  {formatMoney(
+                    Array.isArray(form?.pos)
+                      ? form.pos.reduce(
+                          (sum, p) => sum + (parseFloat(p.total_value) || 0),
+                          0
+                        )
+                      : 0
+                  )}{" "}
+                  USD
                 </strong>
               </td>
             </tr>

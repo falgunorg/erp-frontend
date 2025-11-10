@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useHistory, Link } from "react-router-dom";
 import api from "services/api";
+import formatMoney from "services/moneyFormatter";
 
 export default function Contracts(props) {
   const history = useHistory();
@@ -169,7 +170,10 @@ export default function Contracts(props) {
               <th>Buyer</th>
               <th>Port of Loading</th>
               <th>Port of Discharge</th>
-              <th>Total Value</th>
+              <th className="text-end">Contract Value</th>
+              <th className="text-end">PO Value</th>
+              <th className="text-end">BBLC Value</th>
+              <th className="text-end">EXP Value</th>
               <th className="text-center">Action</th>
             </tr>
           </thead>
@@ -187,7 +191,12 @@ export default function Contracts(props) {
                   <td>{c.buyer?.name}</td>
                   <td>{c.port_of_loading}</td>
                   <td>{c.port_of_discharge}</td>
-                  <td>{c.amount}</td>
+                  <td className="text-end">
+                    {formatMoney(c.contract_value)} USD
+                  </td>
+                  <td className="text-end">{formatMoney(c.po_value)} USD</td>
+                  <td className="text-end">{formatMoney(c.bblc_value)} USD</td>
+                  <td className="text-end">{formatMoney(c.exp_value)} USD</td>
                   <td className="text-center">
                     <Link
                       to={`/commercial/contracts/details/${c.id}`}

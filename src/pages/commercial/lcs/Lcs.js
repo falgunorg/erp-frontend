@@ -352,14 +352,13 @@ export default function Lcs(props) {
                 <th>Apply Date</th>
                 <th>Issued Date</th>
                 <th>Supplier</th>
-                <th>Validity</th>
+                <th>Draft AT</th>
                 <th>PI'S</th>
-                <th>Maturity Date</th>
-                <th>Paid Date</th>
+
                 <th>Net Weight(KG)</th>
                 <th>Gross Weight(KG)</th>
-                <th>Freight Charge(USD)</th>
-                <th>Total Value(USD)</th>
+                <th className="text-end">Freight Charge(USD)</th>
+                <th className="text-end">Total Value(USD)</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -390,7 +389,7 @@ export default function Lcs(props) {
                       : "N/A"}
                   </td>
                   <td>{item.supplier?.company_name}</td>
-                  <td>{item.lc_validity}</td>
+                  <td>{item.draft_at}</td>
                   <td>
                     <ol>
                       {item.piList?.map((item2, index2) => (
@@ -404,20 +403,11 @@ export default function Lcs(props) {
                       ))}
                     </ol>
                   </td>
-                  <td>
-                    {item.maturity_date
-                      ? moment(item.maturity_date).format("ll")
-                      : "N/A"}
-                  </td>
-                  <td>
-                    {item.paid_date
-                      ? moment(item.paid_date).format("ll")
-                      : "N/A"}
-                  </td>
-                  <td>{item.net_weight}</td>
-                  <td>{item.gross_weight}</td>
-                  <td>{item.freight_charge}</td>
-                  <td>{item.total}</td>
+
+                  <td>{item.net_weight} KG</td>
+                  <td>{item.gross_weight} KG</td>
+                  <td className="text-end">{item.freight_charge} USD</td>
+                  <td className="text-end">{item.total} USD</td>
                   <td>
                     <Link to={"/commercial/lcs-edit/" + item.id}>
                       <i className="fa fa-pen"></i>
@@ -433,7 +423,7 @@ export default function Lcs(props) {
               ))}
               {lcs.length === 0 && (
                 <tr>
-                  <td colSpan={12} className="text-center">
+                  <td colSpan={10} className="text-center">
                     No records found.
                   </td>
                 </tr>

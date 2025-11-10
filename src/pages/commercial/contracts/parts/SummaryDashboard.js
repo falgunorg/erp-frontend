@@ -122,7 +122,7 @@ const SummaryDashboard = ({ data, form }) => {
       <div className="text-center">
         <h5 className="summary-title text-uppercase">Summary Position</h5>
         <div className="summary-info">
-          <strong>Contract :</strong> {form.title}
+          <strong>Contract/Export LC :</strong> {form.title}
           <br />
           <strong>Company :</strong> {form.company?.title}
         </div>

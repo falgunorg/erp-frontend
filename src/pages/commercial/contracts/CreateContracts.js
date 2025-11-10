@@ -4,6 +4,8 @@ import swal from "sweetalert";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import { useHistory, Link } from "react-router-dom";
 import CustomSelect from "elements/CustomSelect";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 
 export default function CreateContracts(props) {
   const history = useHistory();
@@ -13,6 +15,85 @@ export default function CreateContracts(props) {
   const [spinner, setSpinner] = useState(false);
 
   const [banks, setBanks] = useState([]);
+
+  const bangladeshPorts = [
+    {
+      title: "Chittagong Port (Chattogram)",
+      type: "sea",
+      district: "Chattogram",
+    },
+    { title: "Mongla Port", type: "sea", district: "Bagerhat" },
+    { title: "Payra Port", type: "sea", district: "Patuakhali" },
+    { title: "Matarbari Deep Sea Port", type: "sea", district: "Cox’s Bazar" },
+
+    { title: "Dhaka River Port (Sadarghat)", type: "river", district: "Dhaka" },
+    { title: "Narayanganj River Port", type: "river", district: "Narayanganj" },
+    { title: "Barisal River Port", type: "river", district: "Barisal" },
+    { title: "Ashuganj River Port", type: "river", district: "Brahmanbaria" },
+    { title: "Khulna River Port", type: "river", district: "Khulna" },
+    { title: "Noapara River Port", type: "river", district: "Jashore" },
+    { title: "Chandpur River Port", type: "river", district: "Chandpur" },
+    { title: "Patuakhali River Port", type: "river", district: "Patuakhali" },
+    { title: "Bhola River Port", type: "river", district: "Bhola" },
+    { title: "Goalanda River Port", type: "river", district: "Rajbari" },
+    { title: "Baghabari River Port", type: "river", district: "Sirajganj" },
+    { title: "Sirajganj River Port", type: "river", district: "Sirajganj" },
+    { title: "Narsingdi River Port", type: "river", district: "Narsingdi" },
+    { title: "Kurigram River Port", type: "river", district: "Kurigram" },
+    { title: "Aricha River Port", type: "river", district: "Manikganj" },
+
+    { title: "Benapole Land Port", type: "land", district: "Jashore" },
+    { title: "Burimari Land Port", type: "land", district: "Lalmonirhat" },
+    { title: "Hilli Land Port", type: "land", district: "Dinajpur" },
+    { title: "Bhomra Land Port", type: "land", district: "Satkhira" },
+    { title: "Akhaura Land Port", type: "land", district: "Brahmanbaria" },
+    { title: "Tamabil Land Port", type: "land", district: "Sylhet" },
+    { title: "Sonahat Land Port", type: "land", district: "Kurigram" },
+    { title: "Darshana Land Port", type: "land", district: "Chuadanga" },
+    {
+      title: "Teknaf Land Port (with Myanmar)",
+      type: "land",
+      district: "Cox’s Bazar",
+    },
+    { title: "Banglabandha Land Port", type: "land", district: "Panchagarh" },
+    {
+      title: "Gobrakura–Karaitali Land Port",
+      type: "land",
+      district: "Mymensingh",
+    },
+    { title: "Bibir Bazar Land Port", type: "land", district: "Cumilla" },
+    { title: "Nangalkot Land Port", type: "land", district: "Cumilla" },
+    { title: "Kawkhali Land Port", type: "land", district: "Rangamati" },
+
+    {
+      title: "Hazrat Shahjalal International Airport",
+      type: "air",
+      district: "Dhaka",
+    },
+    {
+      title: "Shah Amanat International Airport",
+      type: "air",
+      district: "Chattogram",
+    },
+    { title: "Osmani International Airport", type: "air", district: "Sylhet" },
+    { title: "Barisal Airport", type: "air", district: "Barisal" },
+    { title: "Cox’s Bazar Airport", type: "air", district: "Cox’s Bazar" },
+    { title: "Jessore Airport (Jashore)", type: "air", district: "Jashore" },
+    { title: "Saidpur Airport", type: "air", district: "Nilphamari" },
+    { title: "Rajshahi Airport", type: "air", district: "Rajshahi" },
+    {
+      title: "Tejgaon Airport (Dhaka, military)",
+      type: "air",
+      district: "Dhaka",
+    },
+    {
+      title: "Thakurgaon Airport (non-operational)",
+      type: "air",
+      district: "Thakurgaon",
+    },
+    { title: "Ishurdi Airport", type: "air", district: "Pabna" },
+    { title: "Comilla Airport", type: "air", district: "Cumilla" },
+  ];
 
   const [docList, setDocList] = useState([
     "COMMERCIAL INVOICE",
@@ -59,6 +140,7 @@ export default function CreateContracts(props) {
   const [form, setForm] = useState({
     title: "",
     contract_date: "",
+    contract_value: "",
     contract_type: "fob",
     buyer_id: "",
     buyer_address: "",
@@ -173,11 +255,51 @@ export default function CreateContracts(props) {
     }
   };
 
+  const getFilteredPorts = () => {
+    const mode = form.mode_of_shipment;
+
+    if (!mode) return [];
+
+    switch (mode) {
+      case "Sea":
+        return bangladeshPorts.filter((p) => p.type === "sea");
+
+      case "Air":
+        return bangladeshPorts.filter((p) => p.type === "air");
+
+      case "Land":
+        return bangladeshPorts.filter((p) => p.type === "land");
+
+      case "River":
+        return bangladeshPorts.filter((p) => p.type === "river");
+
+      case "Sea/Air":
+        return bangladeshPorts.filter(
+          (p) => p.type === "sea" || p.type === "air"
+        );
+
+      case "Sea/Air/Road":
+        return bangladeshPorts.filter(
+          (p) => p.type === "sea" || p.type === "air" || p.type === "land"
+        );
+
+      default:
+        return [];
+    }
+  };
+
+  const filteredPorts = getFilteredPorts();
+
   // Step validation logic
   const validateStep = () => {
     switch (activeStep) {
       case 0:
-        return form.title && form.contract_date && form.contract_type;
+        return (
+          form.title &&
+          form.contract_date &&
+          form.contract_type &&
+          form.contract_value
+        );
       case 1:
         return form.buyer_id && form.buyer_bank_name && form.buyer_bank_swift;
       case 2:
@@ -215,7 +337,7 @@ export default function CreateContracts(props) {
       const res = await api.post("/commercial/contracts/create", fd);
       if (res.status === 200) {
         swal("Success!", "Purchase contract saved successfully.", "success");
-        history.push(`/commercial/contracts/details/${res.data?.id || 0}`);
+        history.push(`/commercial/contracts`);
       }
     } catch (err) {
       console.error(err);
@@ -235,7 +357,7 @@ export default function CreateContracts(props) {
             <div className="card-body row g-3">
               <div className="col-lg-6">
                 <label className="form-label">
-                  Contract No <span className="text-danger">*</span>
+                  Contract / Export Lc No <span className="text-danger">*</span>
                 </label>
                 <input
                   className="form-control"
@@ -243,7 +365,7 @@ export default function CreateContracts(props) {
                   onChange={(e) => handleChange("title", e.target.value)}
                 />
               </div>
-              <div className="col-lg-3">
+              <div className="col-lg-2">
                 <label className="form-label">
                   Contract Date <span className="text-danger">*</span>
                 </label>
@@ -256,7 +378,20 @@ export default function CreateContracts(props) {
                   }
                 />
               </div>
-              <div className="col-lg-3">
+              <div className="col-lg-2">
+                <label className="form-label">
+                  Contract Value <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={form.contract_value}
+                  onChange={(e) =>
+                    handleChange("contract_value", e.target.value)
+                  }
+                />
+              </div>
+              <div className="col-lg-2">
                 <label className="form-label">
                   Contract Type <span className="text-danger">*</span>
                 </label>
@@ -349,7 +484,7 @@ export default function CreateContracts(props) {
               <div className="col-lg-6">
                 <div className="card-body row">
                   <div className="col-lg-6">
-                    <label className="form-label">Bank Name</label>
+                    <label className="form-label">Buyer Bank Name</label>
                     <input
                       className="form-control"
                       value={form.buyer_bank_name}
@@ -501,19 +636,27 @@ export default function CreateContracts(props) {
                 <label className="form-label">
                   Payment Terms <span className="text-danger">*</span>
                 </label>
-                <input
-                  className="form-control"
+
+                <select
                   value={form.payment_terms}
                   onChange={(e) =>
                     handleChange("payment_terms", e.target.value)
                   }
-                />
+                  name="payment_terms"
+                  className="form-select"
+                >
+                  <option value="">Select One</option>
+                  <option value="AT SIGHT">AT SIGHT</option>
+                  <option value="60 DAYS">60 DAYS</option>
+                  <option value="90 DAYS">90 DAYS</option>
+                  <option value="120 DAYS">120 DAYS</option>
+                  <option value="160 DAYS">160 DAYS</option>
+                </select>
               </div>
               <div className="col-lg-3">
                 <label className="form-label">
                   Mode of Shipment <span className="text-danger">*</span>
                 </label>
-
                 <select
                   className="form-control"
                   value={form.mode_of_shipment}
@@ -524,31 +667,64 @@ export default function CreateContracts(props) {
                   <option value="">Select One</option>
                   <option value="Sea">Sea</option>
                   <option value="Air">Air</option>
-                  <option value="Road">Road</option>
+                  <option value="Land">Road</option>
+                  <option value="River">River</option>
+                  <option value="Sea/Air">Sea/Air</option>
+                  <option value="Sea/Air/Road">Sea/Air/Road</option>
                 </select>
               </div>
+
               <div className="col-lg-3">
-                <label className="form-label">
-                  Port of Loading <span className="text-danger">*</span>
-                </label>
-                <input
-                  className="form-control"
-                  value={form.port_of_loading}
-                  onChange={(e) =>
-                    handleChange("port_of_loading", e.target.value)
+                <label className="form-label">Port of Loading</label>
+                <CustomSelect
+                  placeholder="Select"
+                  onChange={(selectedOption) =>
+                    handleChange("port_of_loading", selectedOption.value)
                   }
+                  value={
+                    bangladeshPorts.find(
+                      (item) => item.title === form.port_of_loading
+                    )
+                      ? {
+                          value: form.port_of_loading,
+                          label:
+                            bangladeshPorts.find(
+                              (item) => item.title === form.port_of_loading
+                            ).title || "",
+                        }
+                      : null
+                  }
+                  name="port_of_loading"
+                  options={filteredPorts.map((item) => ({
+                    value: item.title,
+                    label: `${item.title} (${item.district})`,
+                  }))}
                 />
               </div>
+
               <div className="col-lg-3">
-                <label className="form-label">
-                  Port of Discharge <span className="text-danger">*</span>
-                </label>
-                <input
-                  className="form-control"
-                  value={form.port_of_discharge}
-                  onChange={(e) =>
-                    handleChange("port_of_discharge", e.target.value)
+                <label className="form-label">Port of Discharge</label>
+
+                <Autocomplete
+                  className="recepient_AutoComplete"
+                  multiple
+                  freeSolo
+                  options={filteredPorts.map((item) => item.title)} // list of port names
+                  value={form.port_of_discharge || []} // ensure array
+                  onChange={(event, newValue) =>
+                    handleChange("port_of_discharge", newValue)
                   }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Select ports"
+                      variant="outlined"
+                      InputLabelProps={{
+                        shrink: true,
+                        className: "custom-label",
+                      }}
+                    />
+                  )}
                 />
               </div>
             </div>
@@ -565,24 +741,27 @@ export default function CreateContracts(props) {
               <div className="col-lg-12">
                 <div className="form-group">
                   <label className="form-label">Documents Required</label>
-                  <CustomSelect
-                    isMulti
-                    name="documents_required"
-                    placeholder="Select or Search"
-                    value={(form.documents_required || []).map((d) => ({
-                      value: d,
-                      label: d,
-                    }))}
-                    onChange={(selected) =>
-                      handleChange(
-                        "documents_required",
-                        selected ? selected.map((s) => s.value) : []
-                      )
+
+                  <Autocomplete
+                    className="recepient_AutoComplete"
+                    multiple
+                    freeSolo
+                    options={docList.map((item) => item)} // list of port names
+                    value={form.documents_required || []} // ensure array
+                    onChange={(event, newValue) =>
+                      handleChange("documents_required", newValue)
                     }
-                    options={docList.map((doc) => ({
-                      value: doc,
-                      label: doc,
-                    }))}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Select Doc"
+                        variant="outlined"
+                        InputLabelProps={{
+                          shrink: true,
+                          className: "custom-label",
+                        }}
+                      />
+                    )}
                   />
                 </div>
               </div>

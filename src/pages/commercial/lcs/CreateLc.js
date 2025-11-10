@@ -18,19 +18,94 @@ export default function CreateLc(props) {
   const [suppliers, setSuppliers] = useState([]);
   const [errors, setErrors] = useState({});
 
+  const bangladeshPorts = [
+    {
+      title: "Chittagong Port (Chattogram)",
+      type: "sea",
+      district: "Chattogram",
+    },
+    { title: "Mongla Port", type: "sea", district: "Bagerhat" },
+    { title: "Payra Port", type: "sea", district: "Patuakhali" },
+    { title: "Matarbari Deep Sea Port", type: "sea", district: "Cox’s Bazar" },
+
+    { title: "Dhaka River Port (Sadarghat)", type: "river", district: "Dhaka" },
+    { title: "Narayanganj River Port", type: "river", district: "Narayanganj" },
+    { title: "Barisal River Port", type: "river", district: "Barisal" },
+    { title: "Ashuganj River Port", type: "river", district: "Brahmanbaria" },
+    { title: "Khulna River Port", type: "river", district: "Khulna" },
+    { title: "Noapara River Port", type: "river", district: "Jashore" },
+    { title: "Chandpur River Port", type: "river", district: "Chandpur" },
+    { title: "Patuakhali River Port", type: "river", district: "Patuakhali" },
+    { title: "Bhola River Port", type: "river", district: "Bhola" },
+    { title: "Goalanda River Port", type: "river", district: "Rajbari" },
+    { title: "Baghabari River Port", type: "river", district: "Sirajganj" },
+    { title: "Sirajganj River Port", type: "river", district: "Sirajganj" },
+    { title: "Narsingdi River Port", type: "river", district: "Narsingdi" },
+    { title: "Kurigram River Port", type: "river", district: "Kurigram" },
+    { title: "Aricha River Port", type: "river", district: "Manikganj" },
+
+    { title: "Benapole Land Port", type: "land", district: "Jashore" },
+    { title: "Burimari Land Port", type: "land", district: "Lalmonirhat" },
+    { title: "Hilli Land Port", type: "land", district: "Dinajpur" },
+    { title: "Bhomra Land Port", type: "land", district: "Satkhira" },
+    { title: "Akhaura Land Port", type: "land", district: "Brahmanbaria" },
+    { title: "Tamabil Land Port", type: "land", district: "Sylhet" },
+    { title: "Sonahat Land Port", type: "land", district: "Kurigram" },
+    { title: "Darshana Land Port", type: "land", district: "Chuadanga" },
+    {
+      title: "Teknaf Land Port (with Myanmar)",
+      type: "land",
+      district: "Cox’s Bazar",
+    },
+    { title: "Banglabandha Land Port", type: "land", district: "Panchagarh" },
+    {
+      title: "Gobrakura–Karaitali Land Port",
+      type: "land",
+      district: "Mymensingh",
+    },
+    { title: "Bibir Bazar Land Port", type: "land", district: "Cumilla" },
+    { title: "Nangalkot Land Port", type: "land", district: "Cumilla" },
+    { title: "Kawkhali Land Port", type: "land", district: "Rangamati" },
+
+    {
+      title: "Hazrat Shahjalal International Airport",
+      type: "air",
+      district: "Dhaka",
+    },
+    {
+      title: "Shah Amanat International Airport",
+      type: "air",
+      district: "Chattogram",
+    },
+    { title: "Osmani International Airport", type: "air", district: "Sylhet" },
+    { title: "Barisal Airport", type: "air", district: "Barisal" },
+    { title: "Cox’s Bazar Airport", type: "air", district: "Cox’s Bazar" },
+    { title: "Jessore Airport (Jashore)", type: "air", district: "Jashore" },
+    { title: "Saidpur Airport", type: "air", district: "Nilphamari" },
+    { title: "Rajshahi Airport", type: "air", district: "Rajshahi" },
+    {
+      title: "Tejgaon Airport (Dhaka, military)",
+      type: "air",
+      district: "Dhaka",
+    },
+    {
+      title: "Thakurgaon Airport (non-operational)",
+      type: "air",
+      district: "Thakurgaon",
+    },
+    { title: "Ishurdi Airport", type: "air", district: "Pabna" },
+    { title: "Comilla Airport", type: "air", district: "Cumilla" },
+  ];
+
   const [formDataSet, setFormDataSet] = useState({
     contract_id: "",
     supplier_id: "",
     proformas: [],
     lc_number: "",
-    lc_validity: "",
+    draft_at: "",
     apply_date: "",
     issued_date: "",
-    maturity_date: "",
-    paid_date: "",
     commodity: "",
-    pcc_avail: "",
-    payment_terms: "",
     mode_of_shipment: "",
     port_of_loading: "",
     port_of_discharge: "",
@@ -116,6 +191,41 @@ export default function CreateLc(props) {
     formDataSet.proformas.includes(p.id)
   );
 
+  const getFilteredPorts = () => {
+    const mode = formDataSet.mode_of_shipment;
+
+    if (!mode) return [];
+
+    switch (mode) {
+      case "Sea":
+        return bangladeshPorts.filter((p) => p.type === "sea");
+
+      case "Air":
+        return bangladeshPorts.filter((p) => p.type === "air");
+
+      case "Land":
+        return bangladeshPorts.filter((p) => p.type === "land");
+
+      case "River":
+        return bangladeshPorts.filter((p) => p.type === "river");
+
+      case "Sea/Air":
+        return bangladeshPorts.filter(
+          (p) => p.type === "sea" || p.type === "air"
+        );
+
+      case "Sea/Air/Road":
+        return bangladeshPorts.filter(
+          (p) => p.type === "sea" || p.type === "air" || p.type === "land"
+        );
+
+      default:
+        return [];
+    }
+  };
+
+  const filteredPorts = getFilteredPorts();
+
   const totalNetWeight = filteredProformas.reduce((sum, p) => {
     // normalize p.total to a number safely
     const raw = p && p.net_weight != null ? String(p.net_weight) : "0";
@@ -156,7 +266,6 @@ export default function CreateLc(props) {
       "proformas",
       "lc_number",
       "commodity",
-      "payment_terms",
       "mode_of_shipment",
     ];
 
@@ -383,16 +492,15 @@ export default function CreateLc(props) {
               {/* LC Validity */}
               <div className="col-lg-3">
                 <div className="form-group">
-                  <label className="form-label">LC Validity</label>
+                  <label className="form-label">Drafts At</label>
                   <select
-                    value={formDataSet.lc_validity}
-                    onChange={(e) =>
-                      handleChange("lc_validity", e.target.value)
-                    }
-                    name="lc_validity"
+                    value={formDataSet.draft_at}
+                    onChange={(e) => handleChange("draft_at", e.target.value)}
+                    name="draft_at"
                     className="form-select"
                   >
                     <option value="">Select One</option>
+                    <option value="AT SIGHT">AT SIGHT</option>
                     <option value="60 DAYS">60 DAYS</option>
                     <option value="90 DAYS">90 DAYS</option>
                     <option value="120 DAYS">120 DAYS</option>
@@ -430,37 +538,6 @@ export default function CreateLc(props) {
                   />
                 </div>
               </div>
-
-              {/* Maturity Date */}
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label className="form-label">Maturity Date</label>
-                  <input
-                    type="date"
-                    name="maturity_date"
-                    value={formDataSet.maturity_date}
-                    onChange={(e) =>
-                      handleChange("maturity_date", e.target.value)
-                    }
-                    className="form-control"
-                  />
-                </div>
-              </div>
-
-              {/* Paid Date */}
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label className="form-label">Paid Date</label>
-                  <input
-                    type="date"
-                    name="paid_date"
-                    value={formDataSet.paid_date}
-                    onChange={(e) => handleChange("paid_date", e.target.value)}
-                    className="form-control"
-                  />
-                </div>
-              </div>
-
               {/* Commodity */}
               <div className="col-lg-3">
                 <div className="form-group">
@@ -482,20 +559,6 @@ export default function CreateLc(props) {
                   {errors.commodity && (
                     <div className="errorMsg">{errors.commodity}</div>
                   )}
-                </div>
-              </div>
-
-              {/* PCC Avail */}
-              <div className="col-lg-3">
-                <div className="form-group">
-                  <label className="form-label">PCC Avail</label>
-                  <input
-                    type="text"
-                    name="pcc_avail"
-                    value={formDataSet.pcc_avail}
-                    onChange={(e) => handleChange("pcc_avail", e.target.value)}
-                    className="form-control"
-                  />
                 </div>
               </div>
 
@@ -622,22 +685,6 @@ export default function CreateLc(props) {
             <div className="card-body row g-3">
               <div className="col-lg-3">
                 <label className="form-label">
-                  Payment Terms <span className="text-danger">*</span>
-                </label>
-                <input
-                  className="form-control"
-                  value={formDataSet.payment_terms}
-                  onChange={(e) =>
-                    handleChange("payment_terms", e.target.value)
-                  }
-                />
-                {errors.payment_terms && (
-                  <div className="errorMsg">{errors.payment_terms}</div>
-                )}
-              </div>
-
-              <div className="col-lg-3">
-                <label className="form-label">
                   Mode of Shipment <span className="text-danger">*</span>
                 </label>
                 <select
@@ -650,7 +697,10 @@ export default function CreateLc(props) {
                   <option value="">Select One</option>
                   <option value="Sea">Sea</option>
                   <option value="Air">Air</option>
-                  <option value="Road">Road</option>
+                  <option value="Land">Road</option>
+                  <option value="River">River</option>
+                  <option value="Sea/Air">Sea/Air</option>
+                  <option value="Sea/Air/Road">Sea/Air/Road</option>
                 </select>
                 {errors.mode_of_shipment && (
                   <div className="errorMsg">{errors.mode_of_shipment}</div>
@@ -670,12 +720,31 @@ export default function CreateLc(props) {
 
               <div className="col-lg-3">
                 <label className="form-label">Port of Discharge</label>
-                <input
-                  className="form-control"
-                  value={formDataSet.port_of_discharge}
-                  onChange={(e) =>
-                    handleChange("port_of_discharge", e.target.value)
+
+                <CustomSelect
+                  placeholder="Select"
+                  onChange={(selectedOption) =>
+                    handleChange("port_of_discharge", selectedOption.value)
                   }
+                  value={
+                    bangladeshPorts.find(
+                      (item) => item.title === formDataSet.port_of_discharge
+                    )
+                      ? {
+                          value: formDataSet.port_of_discharge,
+                          label:
+                            bangladeshPorts.find(
+                              (item) =>
+                                item.title === formDataSet.port_of_discharge
+                            ).title || "",
+                        }
+                      : null
+                  }
+                  name="port_of_discharge"
+                  options={filteredPorts.map((item) => ({
+                    value: item.title,
+                    label: `${item.title} (${item.district})`,
+                  }))}
                 />
               </div>
 

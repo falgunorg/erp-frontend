@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import formatMoney from "services/moneyFormatter";
 
 export default function BackToBack({ form }) {
   const groupedByCategory = form?.lcs?.reduce((acc, item) => {
@@ -22,7 +23,7 @@ export default function BackToBack({ form }) {
 
   // Step 4: Calculate % of total contract value used
   const totalPercentageUsed = (
-    (totalAmount / totalContractValue) *
+    (form.contract_value / totalContractValue) *
     100
   ).toFixed(2);
 
@@ -40,7 +41,7 @@ export default function BackToBack({ form }) {
       <div className="text-center">
         <h5 className="summary-title text-uppercase">BBLC</h5>
         <div className="summary-info">
-          <strong>Contract :</strong> {form.title}
+          <strong>Contract/Export LC :</strong> {form.title}
           <br />
         </div>
         <br />
@@ -52,10 +53,8 @@ export default function BackToBack({ form }) {
             <tr>
               <th>LC Number</th>
               <th>Issue Date</th>
-              <th>Contract Amt.</th>
+              <th className="text-end">Contract Amt.</th>
               <th>Tole.(%)</th>
-              <th>Maturity Date</th>
-              <th>Paid Date</th>
               <th>Closed Amt.</th>
               <th>Current Availabily</th>
               <th>Commidity</th>
@@ -73,10 +72,9 @@ export default function BackToBack({ form }) {
                     </Link>
                   </td>
                   <td>{lc.issued_date}</td>
-                  <td>{lc.total}</td>
+                  <td className="text-end">{formatMoney(lc.total)} USD</td>
                   <td>0.00</td>
-                  <td>{lc.maturity_date}</td>
-                  <td>{lc.paid_date}</td>
+
                   <td>0.00</td>
                   <td>0.00</td>
                   <td>{lc.commodity}</td>
@@ -108,17 +106,21 @@ export default function BackToBack({ form }) {
               <td className="text-end" colSpan={2}>
                 <strong>TOTAL</strong>
               </td>
-              <td>
+              <td className="text-end">
                 <strong>
-                  {form?.lcs?.reduce(
-                    (sum, p) => sum + (parseFloat(p.total) || 0),
-                    0
-                  )}
+                  {formatMoney(
+                    Array.isArray(form?.lcs)
+                      ? form.lcs.reduce(
+                          (sum, p) => sum + (parseFloat(p.total) || 0),
+                          0
+                        )
+                      : 0
+                  )}{" "}
+                  USD
                 </strong>
               </td>
               <td></td>
-              <td></td>
-              <td></td>
+
               <td>
                 <strong>0.00</strong>
               </td>
@@ -154,28 +156,28 @@ export default function BackToBack({ form }) {
             <thead className="table-light">
               <tr>
                 <th>COMMODITY CATEGORY</th>
-                <th>Amount</th>
-                <th>%</th>
+                <th className="text-end">Amount</th>
+                <th className="text-end">%</th>
               </tr>
             </thead>
             <tbody>
               {categoryRows.map((row) => (
                 <tr key={row.category}>
                   <td>{row.category}</td>
-                  <td>{Number(row.amount).toLocaleString()}</td>
-                  <td>{row.percent}</td>
+                  <td className="text-end">{formatMoney(row.amount)}</td>
+                  <td className="text-end">{row.percent}</td>
                 </tr>
               ))}
 
               {/* TOTAL ROW */}
               <tr>
-                <td>
+                <td className="text-end">
                   <strong>TOTAL</strong>
                 </td>
-                <td>
+                <td className="text-end">
                   <strong>{Number(totalAmount).toLocaleString()}</strong>
                 </td>
-                <td>
+                <td className="text-end">
                   <strong>100.00</strong>
                 </td>
               </tr>
