@@ -273,6 +273,10 @@ import Contracts from "pages/commercial/contracts/Contracts";
 import CreateContracts from "pages/commercial/contracts/CreateContracts";
 import EditContracts from "pages/commercial/contracts/EditContracts";
 import ContractDetails from "pages/commercial/contracts/ContractDetails";
+import BackToBackBills from "pages/accounts/backtobackbills/BackToBackBills";
+import CreateBackToBackBill from "pages/accounts/backtobackbills/CreateBackToBackBill";
+
+//Back to Back Bills
 
 function OpenRoutes() {
   return (
@@ -1239,6 +1243,17 @@ class PrivateRoutes extends Component {
             exact
             path="/commercial/lcs-show/:id?"
             component={LcDetails}
+          ></PrivateRoute>
+          //bbbills
+          <PrivateRoute
+            exact
+            path="/accounts/bb-bills"
+            component={BackToBackBills}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/accounts/bb-bills-create"
+            component={CreateBackToBackBill}
           ></PrivateRoute>
           <Redirect path="*" to="/dashboard" />
         </Switch>

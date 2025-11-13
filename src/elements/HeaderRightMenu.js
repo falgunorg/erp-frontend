@@ -166,22 +166,20 @@ export default function HeaderRightMenu(props) {
           <HeaderBarIcon />
         </Link>
         <div className="dropdown-menu">
-          <li className="dropdown-item">
-            <Link to="#">Admin</Link>
-          </li>
-        
-          <li className="dropdown-item">
-            <Link to="#">Settings</Link>
-          </li>
-          <li className="dropdown-item">
-            <Link to="/profile">Profile</Link>
-          </li>
-          <li className="dropdown-item">
-            <Link to="#" onClick={logout}>
-              Log Out
-            </Link>
-          </li>
-          <hr/>
+          <Link className="dropdown-item" to="#">
+            Admin
+          </Link>
+          <Link className="dropdown-item" to="#">
+            Settings
+          </Link>
+          <Link className="dropdown-item" to="/profile">
+            Profile
+          </Link>
+          <Link className="dropdown-item" to="#" onClick={logout}>
+            Log Out
+          </Link>
+
+          <hr />
 
           {isAuthenticated ? <SignOutButton /> : <SignInButton />}
         </div>

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-
 import Dropdown from "react-bootstrap/Dropdown";
-import Logo from "../assets/images/logos/logo-short.png";
 import CreateWorkOrder from "elements/wo_elements/CreateWorkOrder";
 import WorkOrderDetails from "elements/wo_elements/WorkOrderDetails";
 import EditWorkOrder from "elements/wo_elements/EditWorkOrder";
@@ -76,7 +74,9 @@ export default function WorkOrders(props) {
 
     if (confirmed) {
       try {
-        var response = await api.post("/merchandising/workorders-delete", { id: id });
+        var response = await api.post("/merchandising/workorders-delete", {
+          id: id,
+        });
         if (response.status === 200 && response.data) {
           swal("Deleted!", "The work order has been deleted.", "success").then(
             () => {

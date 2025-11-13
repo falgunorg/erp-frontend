@@ -3,6 +3,13 @@ import { Link } from "react-router-dom";
 import formatMoney from "services/moneyFormatter";
 
 export default function BackToBack({ form }) {
+  const allCategories = [
+    "FABRIC",
+    "SEWING TRIMS",
+    "FINISHING TRIMS",
+    "PACKING TRIMS",
+  ];
+
   const groupedByCategory = form?.lcs?.reduce((acc, item) => {
     const category = item.commodity?.toUpperCase() || "UNKNOWN";
     const amount = parseFloat(item.total || 0);
@@ -17,24 +24,25 @@ export default function BackToBack({ form }) {
     0
   );
 
-  const totalContractValue = form?.pos
-    ?.reduce((sum, p) => sum + (parseFloat(p.total_value) || 0), 0)
+  const totalLcValue = form?.lcs
+    ?.reduce((sum, l) => sum + (parseFloat(l.total) || 0), 0)
     .toFixed(2);
 
-  // Step 4: Calculate % of total contract value used
-  const totalPercentageUsed = (
-    (form.contract_value / totalContractValue) *
-    100
-  ).toFixed(2);
+  const totalPercentageUsed =
+    form.contract_value && form.contract_value !== 0
+      ? (
+          (parseFloat(totalLcValue) / parseFloat(form.contract_value)) *
+          100
+        ).toFixed(2)
+      : "0.00";
 
   // Step 3: Prepare category rows with percentage
-  const categoryRows = Object.entries(groupedByCategory).map(
-    ([category, amount]) => ({
-      category,
-      amount,
-      percent: ((amount / totalAmount) * 100).toFixed(2),
-    })
-  );
+  const categoryRows = allCategories.map((cat) => {
+    const amount = groupedByCategory[cat] || 0;
+    const percent =
+      totalAmount > 0 ? ((amount / totalAmount) * 100).toFixed(2) : "0.00";
+    return { category: cat, amount, percent };
+  });
 
   return (
     <div className="bb">
@@ -54,9 +62,11 @@ export default function BackToBack({ form }) {
               <th>LC Number</th>
               <th>Issue Date</th>
               <th className="text-end">Contract Amt.</th>
-              <th>Tole.(%)</th>
-              <th>Closed Amt.</th>
-              <th>Current Availabily</th>
+              <th className="text-end">Tole.(%)</th>
+              <th className="text-end">Closed Amt.</th>
+              <th className="text-end">BB Bill Submitted</th>
+              <th className="text-end">BB Bill LIQD</th>
+              <th className="text-end">Current Availabily</th>
               <th>Commidity</th>
               <th>PI'S</th>
               <th>Exporter Seller</th>
@@ -67,23 +77,50 @@ export default function BackToBack({ form }) {
               form?.lcs?.map((lc, i) => (
                 <tr key={i}>
                   <td>
-                    <Link to={"/commercial/lcs-show/" + lc.id}>
+                    <Link to={`/commercial/lcs-show/${lc.id}`}>
                       {lc.lc_number}
                     </Link>
                   </td>
                   <td>{lc.issued_date}</td>
                   <td className="text-end">{formatMoney(lc.total)} USD</td>
                   <td>0.00</td>
-
                   <td>0.00</td>
-                  <td>0.00</td>
+                  <td className="text-end">
+                    {formatMoney(
+                      lc.bills.reduce(
+                        (sum, b) => sum + parseFloat(b.contract_amount || 0),
+                        0
+                      )
+                    )}
+                  </td>
+                  <td className="text-end">
+                    {formatMoney(
+                      lc.bills.reduce(
+                        (sum, b) => sum + parseFloat(b.bill_amount_liqd || 0),
+                        0
+                      )
+                    )}
+                  </td>
+                  <td className="text-end">
+                    {formatMoney(
+                      lc.bills.reduce(
+                        (sum, b) => sum + parseFloat(b.contract_amount || 0),
+                        0
+                      ) -
+                        lc.bills.reduce(
+                          (sum, b) => sum + parseFloat(b.bill_amount_liqd || 0),
+                          0
+                        )
+                    )}
+                  </td>
                   <td>{lc.commodity}</td>
+
                   <td>
                     <ol>
                       {lc.lc_items?.map((item2, index2) => (
                         <li key={index2}>
                           <Link
-                            to={"/merchandising/proformas-details/" + item2.id}
+                            to={`/merchandising/proformas-details/${item2.id}`}
                           >
                             {item2.title}
                           </Link>
@@ -102,34 +139,83 @@ export default function BackToBack({ form }) {
               </tr>
             )}
 
+            {/* ✅ TOTAL ROW */}
             <tr>
               <td className="text-end" colSpan={2}>
                 <strong>TOTAL</strong>
               </td>
+
+              {/* Total LC amount */}
               <td className="text-end">
                 <strong>
                   {formatMoney(
-                    Array.isArray(form?.lcs)
-                      ? form.lcs.reduce(
-                          (sum, p) => sum + (parseFloat(p.total) || 0),
-                          0
-                        )
-                      : 0
+                    form?.lcs?.reduce(
+                      (sum, lc) => sum + parseFloat(lc.total || 0),
+                      0
+                    )
                   )}{" "}
                   USD
                 </strong>
               </td>
+
+              {/* Optional empty columns */}
+              <td></td>
               <td></td>
 
-              <td>
-                <strong>0.00</strong>
+              {/* ✅ Total Contract Amount */}
+              <td className="text-end">
+                <strong>
+                  {formatMoney(
+                    form?.lcs?.reduce(
+                      (sum, lc) =>
+                        sum +
+                        lc.bills.reduce(
+                          (sub, b) => sub + parseFloat(b.contract_amount || 0),
+                          0
+                        ),
+                      0
+                    )
+                  )}
+                </strong>
               </td>
-              <td>
-                <strong>0.00</strong>
+
+              {/* ✅ Total Bill Liquidation Amount */}
+              <td className="text-end">
+                <strong>
+                  {formatMoney(
+                    form?.lcs?.reduce(
+                      (sum, lc) =>
+                        sum +
+                        lc.bills.reduce(
+                          (sub, b) => sub + parseFloat(b.bill_amount_liqd || 0),
+                          0
+                        ),
+                      0
+                    )
+                  )}
+                </strong>
               </td>
-              <td></td>
-              <td></td>
-              <td></td>
+
+              {/* ✅ Total Remaining (Contract - Bill Liquidation) */}
+              <td className="text-end">
+                <strong>
+                  {formatMoney(
+                    form?.lcs?.reduce((sum, lc) => {
+                      const totalContract = lc.bills.reduce(
+                        (sub, b) => sub + parseFloat(b.contract_amount || 0),
+                        0
+                      );
+                      const totalLiquidated = lc.bills.reduce(
+                        (sub, b) => sub + parseFloat(b.bill_amount_liqd || 0),
+                        0
+                      );
+                      return sum + (totalContract - totalLiquidated);
+                    }, 0)
+                  )}
+                </strong>
+              </td>
+
+              <td colSpan={3}></td>
             </tr>
           </tbody>
         </table>
