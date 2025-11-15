@@ -367,9 +367,7 @@ export default function CreateLc(props) {
             <i className="fal fa-times"></i>
           </Link>
         </div>
-
         <hr />
-
         <div className="col-lg-12">
           <div className="personal_data">
             <div className="row">
@@ -420,21 +418,26 @@ export default function CreateLc(props) {
                     }
                     value={
                       suppliers.find((s) => s.id === formDataSet.supplier_id)
-                        ? {
-                            value: formDataSet.supplier_id,
-                            label:
-                              suppliers.find(
-                                (s) => s.id === formDataSet.supplier_id
-                              ).company_name || "",
-                          }
+                        ? (() => {
+                            const selected = suppliers.find(
+                              (s) => s.id === formDataSet.supplier_id
+                            );
+                            return {
+                              value: selected.id,
+                              label: `${selected.company_name || ""} — ${
+                                selected.country || ""
+                              }`,
+                            };
+                          })()
                         : null
                     }
                     name="supplier_id"
                     options={suppliers.map((s) => ({
                       value: s.id,
-                      label: s.company_name,
+                      label: `${s.company_name || ""} — ${s.country || ""}`,
                     }))}
                   />
+
                   {errors.supplier_id && (
                     <div className="errorMsg">{errors.supplier_id}</div>
                   )}
@@ -494,6 +497,7 @@ export default function CreateLc(props) {
                 <div className="form-group">
                   <label className="form-label">Drafts At</label>
                   <select
+                    tabIndex={0}
                     value={formDataSet.draft_at}
                     onChange={(e) => handleChange("draft_at", e.target.value)}
                     name="draft_at"
@@ -545,10 +549,11 @@ export default function CreateLc(props) {
                     Commodity <span className="text-danger">*</span>
                   </label>
                   <select
+                    tabIndex={0}
                     onChange={(e) => handleChange("commodity", e.target.value)}
                     name="commodity"
                     value={formDataSet.commodity}
-                    className="form-control"
+                    className="form-select"
                   >
                     <option value="">Select Commodity</option>
                     <option value="Fabric">Fabric</option>
@@ -560,6 +565,71 @@ export default function CreateLc(props) {
                     <div className="errorMsg">{errors.commodity}</div>
                   )}
                 </div>
+              </div>
+              <div className="col-lg-3">
+                <label className="form-label">
+                  Mode of Shipment <span className="text-danger">*</span>
+                </label>
+                <select
+                  tabIndex={0}
+                  className="form-select"
+                  value={formDataSet.mode_of_shipment}
+                  onChange={(e) =>
+                    handleChange("mode_of_shipment", e.target.value)
+                  }
+                >
+                  <option value="">Select One</option>
+                  <option value="Sea">Sea</option>
+                  <option value="Air">Air</option>
+                  <option value="Land">Road</option>
+                  <option value="River">River</option>
+                  <option value="Sea/Air">Sea/Air</option>
+                  <option value="Sea/Air/Road">Sea/Air/Road</option>
+                </select>
+                {errors.mode_of_shipment && (
+                  <div className="errorMsg">{errors.mode_of_shipment}</div>
+                )}
+              </div>
+
+              <div className="col-lg-3">
+                <label className="form-label">Port of Loading</label>
+                <input
+                  className="form-control"
+                  value={formDataSet.port_of_loading}
+                  onChange={(e) =>
+                    handleChange("port_of_loading", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="col-lg-3">
+                <label className="form-label">Port of Discharge</label>
+
+                <CustomSelect
+                  placeholder="Select"
+                  onChange={(selectedOption) =>
+                    handleChange("port_of_discharge", selectedOption.value)
+                  }
+                  value={
+                    bangladeshPorts.find(
+                      (item) => item.title === formDataSet.port_of_discharge
+                    )
+                      ? {
+                          value: formDataSet.port_of_discharge,
+                          label:
+                            bangladeshPorts.find(
+                              (item) =>
+                                item.title === formDataSet.port_of_discharge
+                            ).title || "",
+                        }
+                      : null
+                  }
+                  name="port_of_discharge"
+                  options={filteredPorts.map((item) => ({
+                    value: item.title,
+                    label: `${item.title} (${item.district})`,
+                  }))}
+                />
               </div>
 
               {/* Net Weight */}
@@ -611,9 +681,7 @@ export default function CreateLc(props) {
                 </div>
               </div>
             </div>
-
             <hr />
-
             {/* Proforma table */}
             <h6 className="text-center">
               <u>Proforma Invoices</u>
@@ -678,76 +746,9 @@ export default function CreateLc(props) {
                 </tbody>
               </table>
             </div>
-
             <hr />
-
             {/* Payment / Shipping / Ports / Description */}
             <div className="card-body row g-3">
-              <div className="col-lg-3">
-                <label className="form-label">
-                  Mode of Shipment <span className="text-danger">*</span>
-                </label>
-                <select
-                  className="form-control"
-                  value={formDataSet.mode_of_shipment}
-                  onChange={(e) =>
-                    handleChange("mode_of_shipment", e.target.value)
-                  }
-                >
-                  <option value="">Select One</option>
-                  <option value="Sea">Sea</option>
-                  <option value="Air">Air</option>
-                  <option value="Land">Road</option>
-                  <option value="River">River</option>
-                  <option value="Sea/Air">Sea/Air</option>
-                  <option value="Sea/Air/Road">Sea/Air/Road</option>
-                </select>
-                {errors.mode_of_shipment && (
-                  <div className="errorMsg">{errors.mode_of_shipment}</div>
-                )}
-              </div>
-
-              <div className="col-lg-3">
-                <label className="form-label">Port of Loading</label>
-                <input
-                  className="form-control"
-                  value={formDataSet.port_of_loading}
-                  onChange={(e) =>
-                    handleChange("port_of_loading", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="col-lg-3">
-                <label className="form-label">Port of Discharge</label>
-
-                <CustomSelect
-                  placeholder="Select"
-                  onChange={(selectedOption) =>
-                    handleChange("port_of_discharge", selectedOption.value)
-                  }
-                  value={
-                    bangladeshPorts.find(
-                      (item) => item.title === formDataSet.port_of_discharge
-                    )
-                      ? {
-                          value: formDataSet.port_of_discharge,
-                          label:
-                            bangladeshPorts.find(
-                              (item) =>
-                                item.title === formDataSet.port_of_discharge
-                            ).title || "",
-                        }
-                      : null
-                  }
-                  name="port_of_discharge"
-                  options={filteredPorts.map((item) => ({
-                    value: item.title,
-                    label: `${item.title} (${item.district})`,
-                  }))}
-                />
-              </div>
-
               <div className="col-lg-12 mt-3">
                 <label className="form-label">Description</label>
                 <QuailEditor
@@ -756,7 +757,6 @@ export default function CreateLc(props) {
                 />
               </div>
             </div>
-
             <div className="col-lg-12 mt-3">
               <MultipleFileInput
                 label="Attatchments"

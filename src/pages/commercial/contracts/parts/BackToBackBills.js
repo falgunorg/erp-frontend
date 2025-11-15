@@ -62,6 +62,12 @@ export default function BackToBackBills({ form }) {
         </div>
         <br />
       </div>
+      <div className="text-end">
+        <Link className="btn btn-info btn-sm" to="/accounts/bb-bills-create">
+          Add New
+        </Link>
+      </div>
+      <br />
 
       <div className="section table-responsive">
         <table className="table table-bordered align-middle">
@@ -70,7 +76,6 @@ export default function BackToBackBills({ form }) {
               <th>LC No.</th>
               <th>BC Contract No.</th>
               <th>User Ref. No</th>
-
               <th>Issue Date</th>
               <th className="text-end">Contract Amt.</th>
               <th className="text-end"> Bill Amt. LIQD.</th>
@@ -93,9 +98,15 @@ export default function BackToBackBills({ form }) {
                     <td>{bill.bc_contract_no}</td>
                     <td>{bill.user_ref_no}</td>
                     <td>{bill.issued_date}</td>
-                    <td className="text-end">{formatMoney(bill.contract_amount)}</td>
-                    <td className="text-end">{formatMoney(bill.bill_amount_liqd)}</td>
-                    <td className="text-end">{formatMoney(bill.charge_amount)}</td>
+                    <td className="text-end">
+                      {formatMoney(bill.contract_amount)}
+                    </td>
+                    <td className="text-end">
+                      {formatMoney(bill.bill_amount_liqd)}
+                    </td>
+                    <td className="text-end">
+                      {formatMoney(bill.charge_amount)}
+                    </td>
                     <td>{bill.maturity_date}</td>
                     <td>{bill.paid_date}</td>
                     <td>{bill.source_of_fund}</td>

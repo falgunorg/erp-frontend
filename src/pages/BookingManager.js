@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Select, { components } from "react-select";
 import Dropdown from "react-bootstrap/Dropdown";
-import Accordion from "react-bootstrap/Accordion";
 import Logo from "../assets/images/logos/logo-short.png";
 import iconSettingW from "../assets/images/icons/Settings-W.png";
 import iconT1w from "../assets/images/icons/T1-W.png";
@@ -22,6 +21,7 @@ export default function BookingManager(props) {
       ],
     });
   }, []);
+
   const DropdownIndicator = (props) => {
     return (
       <components.DropdownIndicator {...props}>

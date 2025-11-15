@@ -7,7 +7,6 @@
   background-color: $theme_color !important;
   border-color: $theme_color !important;
 }
-
 .purchase_order_page {
   table thead tr th,
   table thead tr td,
@@ -15,7 +14,6 @@
     border: 0.5px solid #707070 !important;
   }
 }
-
 //layouts part
 .ql-editor {
   padding: 15px 0 !important;
@@ -676,9 +674,9 @@ a,
       padding: 0 5px;
 
       &:focus {
-        outline: none;
-        box-shadow: none;
-        border: none;
+        // outline: none;
+        // box-shadow: none;
+        // border: none;
       }
     }
     .form-label {
@@ -712,9 +710,9 @@ a,
       margin-bottom: 5px !important;
 
       &:focus {
-        outline: none;
-        box-shadow: none;
-        border: none;
+        // outline: none;
+        // box-shadow: none;
+        // border: none;
       }
     }
     .form-label {
@@ -769,7 +767,6 @@ a,
       }
     }
   }
-
   .create_tp_attatchment {
     .show_attatchment_area {
       display: flex;

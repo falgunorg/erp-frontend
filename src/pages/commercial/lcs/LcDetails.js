@@ -63,6 +63,7 @@ export default function LcDetails(props) {
   useEffect(async () => {
     getLc();
   }, []);
+
   useEffect(async () => {
     props.setSection("merchandising");
   }, []);
@@ -194,6 +195,27 @@ export default function LcDetails(props) {
                 </div>
 
                 <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Supplier:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {lc.supplier?.company_name} <br />
+                    {lc.supplier?.address},{lc.supplier?.city},
+                    {lc.supplier?.country}
+                  </div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Attention Person:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {lc.supplier?.attention_person} <br />
+                    {lc.supplier?.mobile_number}
+                  </div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
                   <div className="form-label">Issued date:</div>
                 </div>
                 <div className="col-sm-8 col-md-8 col-lg-8">
@@ -216,27 +238,6 @@ export default function LcDetails(props) {
                 </div>
                 <div className="col-sm-8 col-md-8 col-lg-8">
                   <div className="form-value">{lc.lc_validity}</div>
-                </div>
-
-                <div className="col-sm-4 col-md-4 col-lg-4">
-                  <div className="form-label">Supplier:</div>
-                </div>
-                <div className="col-sm-8 col-md-8 col-lg-8">
-                  <div className="form-value">
-                    {lc.supplier?.company_name} <br />
-                    {lc.supplier?.address},{lc.supplier?.city},
-                    {lc.supplier?.country}
-                  </div>
-                </div>
-
-                <div className="col-sm-4 col-md-4 col-lg-4">
-                  <div className="form-label">Responsible:</div>
-                </div>
-                <div className="col-sm-8 col-md-8 col-lg-8">
-                  <div className="form-value">
-                    {lc.supplier?.attention_person} <br />
-                    {lc.supplier?.mobile_number}
-                  </div>
                 </div>
 
                 <div className="col-sm-4 col-md-4 col-lg-4">

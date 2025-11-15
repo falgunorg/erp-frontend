@@ -10,26 +10,25 @@ export default function BackToBack({ form }) {
     "PACKING TRIMS",
   ];
 
-  const groupedByCategory = form?.lcs?.reduce((acc, item) => {
-    const category = item.commodity?.toUpperCase() || "UNKNOWN";
-    const amount = parseFloat(item.total || 0);
-    if (!acc[category]) acc[category] = 0;
-    acc[category] += amount;
-    return acc;
-  }, {});
+  const groupedByCategory =
+    form?.lcs?.reduce((acc, item) => {
+      const category = item?.commodity?.toUpperCase() || "UNKNOWN";
+      const amount = parseFloat(item?.total || 0);
+      acc[category] = (acc[category] || 0) + amount;
+      return acc;
+    }, {}) || {};
 
-  // Step 2: Calculate total amount
   const totalAmount = Object.values(groupedByCategory).reduce(
     (a, b) => a + b,
     0
   );
 
-  const totalLcValue = form?.lcs
-    ?.reduce((sum, l) => sum + (parseFloat(l.total) || 0), 0)
-    .toFixed(2);
+  const totalLcValue = (
+    form?.lcs?.reduce((sum, l) => sum + (parseFloat(l?.total) || 0), 0) || 0
+  ).toFixed(2);
 
   const totalPercentageUsed =
-    form.contract_value && form.contract_value !== 0
+    form?.contract_value && parseFloat(form.contract_value) > 0
       ? (
           (parseFloat(totalLcValue) / parseFloat(form.contract_value)) *
           100
@@ -49,12 +48,17 @@ export default function BackToBack({ form }) {
       <div className="text-center">
         <h5 className="summary-title text-uppercase">BBLC</h5>
         <div className="summary-info">
-          <strong>Contract/Export LC :</strong> {form.title}
+          <strong>Contract/Export LC :</strong> {form?.title}
           <br />
         </div>
         <br />
       </div>
-
+      <div className="text-end">
+        <Link className="btn btn-info btn-sm" to="/commercial/lcs-create">
+          Add New
+        </Link>
+      </div>
+      <br />
       <div className="section  table-responsive">
         <table className="table table-bordered align-middle">
           <thead className="table-light">

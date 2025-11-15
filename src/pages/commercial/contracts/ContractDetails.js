@@ -8,7 +8,6 @@ import SummaryDashboard from "./parts/SummaryDashboard";
 import BackToBack from "./parts/BackToBack";
 import PurchaseOrders from "./parts/PurchaseOrders";
 import BackToBackBills from "./parts/BackToBackBills";
-
 import api from "services/api";
 import swal from "sweetalert";
 
@@ -18,12 +17,17 @@ export default function ContractDetails(props) {
   const goBack = () => history.goBack();
   const [spinner, setSpinner] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("Summary");
+  const [activeTab, setActiveTab] = useState(
+    sessionStorage.getItem("activeTab") || "Summary"
+  );
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    sessionStorage.setItem("activeTab", tab);
+  };
 
   const printRef = useRef();
-
   const [form, setForm] = useState({});
-  const [goods, setGoods] = useState([]);
 
   const summaryData = {
     export: {
@@ -235,7 +239,6 @@ export default function ContractDetails(props) {
         <div>
           {[
             "Summary",
-
             "Export Bill",
             "BBLC",
             "BB Bill",
@@ -247,18 +250,16 @@ export default function ContractDetails(props) {
             "Export Documents",
           ].map((tab) => (
             <Link
+              key={tab}
               to="#"
-              className={`${activeTab === tab ? "active" : ""}`}
-              onClick={() => setActiveTab(tab)}
+              className={activeTab === tab ? "active" : ""}
+              onClick={() => handleTabClick(tab)}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab}
             </Link>
           ))}
         </div>
         <div>
-          <Link to="#" onClick={goBack}>
-            Back
-          </Link>
           <Link to="#" onClick={handlePrint}>
             Print
           </Link>

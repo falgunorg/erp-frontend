@@ -1,5 +1,6 @@
 import React from "react";
 import formatMoney from "services/moneyFormatter";
+import { Link } from "react-router-dom";
 
 export default function PurchaseOrders({ form }) {
   return (
@@ -28,8 +29,14 @@ export default function PurchaseOrders({ form }) {
             {form?.pos?.length > 0 ? (
               form?.pos?.map((po, i) => (
                 <tr key={i}>
-                  <td>{po.po_number}</td>
-                  <td>{po.techpack?.techpack_number}</td>
+                  <td>
+                    <Link to={"/purchase-orders/" + po.id}>{po.po_number}</Link>
+                  </td>
+                  <td>
+                    <Link to={"/technical-packages/" + po.techpack?.id}>
+                      {po.techpack?.techpack_number}
+                    </Link>
+                  </td>
                   <td>{po.issued_date}</td>
                   <td>{po.delivery_date}</td>
                   <td>{po.total_qty} PCS</td>
@@ -53,7 +60,8 @@ export default function PurchaseOrders({ form }) {
                   {form?.pos?.reduce(
                     (sum, p) => sum + (parseFloat(p.total_qty) || 0),
                     0
-                  )} PCS
+                  )}{" "}
+                  PCS
                 </strong>
               </td>
               <td className="text-end">
