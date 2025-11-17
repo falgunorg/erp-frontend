@@ -212,6 +212,11 @@ export default function CreateContracts(props) {
               .join(", "),
             buyer_phone: buyer.phone || "",
             buyer_email: buyer.email || "",
+            notify_party: buyer.notify_parties.map((p) => ({
+              id: p.id,
+              title: p.title,
+              address: p.address,
+            })),
           };
         }
       }
@@ -254,6 +259,8 @@ export default function CreateContracts(props) {
       console.error("Error updating form:", error);
     }
   };
+
+  console.log("NOTIFY PARTY", form.notify_party);
 
   const getFilteredPorts = () => {
     const mode = form.mode_of_shipment;
@@ -470,14 +477,35 @@ export default function CreateContracts(props) {
                   </div>
                   <div className="col-lg-6">
                     <label className="form-label">Notify Party</label>
+
                     <textarea
+                      rows="4"
+                      className="form-control"
+                      value={
+                        form.notify_party
+                          ? form.notify_party
+                              .map(
+                                (p, i) =>
+                                  `${i + 1}\n${p.title || ""}\n${
+                                    p.address || ""
+                                  }`
+                              )
+                              .join("\n\n")
+                          : ""
+                      }
+                      onChange={(e) =>
+                        handleChange("notify_party", e.target.value)
+                      }
+                    />
+
+                    {/* <textarea
                       rows="2"
                       className="form-control"
                       value={form.notify_party}
                       onChange={(e) =>
                         handleChange("notify_party", e.target.value)
                       }
-                    />
+                    /> */}
                   </div>
                 </div>
               </div>

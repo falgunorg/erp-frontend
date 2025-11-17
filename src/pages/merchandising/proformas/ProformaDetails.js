@@ -296,7 +296,7 @@ export default function ProformaDetails(props) {
           <i className="fal fa-times"></i>
         </Link>
       </div>
-      <br/>
+      <br />
 
       <div
         className="preview_print page create_technical_pack "
@@ -385,6 +385,27 @@ export default function ProformaDetails(props) {
                 </div>
 
                 <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Supplier:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {proforma.supplier?.company_name} <br />
+                    {proforma.supplier?.address},{proforma.supplier?.city},
+                    {proforma.supplier?.country}
+                  </div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
+                  <div className="form-label">Attention Person:</div>
+                </div>
+                <div className="col-sm-8 col-md-8 col-lg-8">
+                  <div className="form-value">
+                    {proforma.supplier?.attention_person} <br />
+                    {proforma.supplier?.mobile_number}
+                  </div>
+                </div>
+
+                <div className="col-sm-4 col-md-4 col-lg-4">
                   <div className="form-label">Issued date:</div>
                 </div>
                 <div className="col-sm-8 col-md-8 col-lg-8">
@@ -407,27 +428,6 @@ export default function ProformaDetails(props) {
                 </div>
                 <div className="col-sm-8 col-md-8 col-lg-8">
                   <div className="form-value">{proforma.pi_validity}</div>
-                </div>
-
-                <div className="col-sm-4 col-md-4 col-lg-4">
-                  <div className="form-label">Supplier:</div>
-                </div>
-                <div className="col-sm-8 col-md-8 col-lg-8">
-                  <div className="form-value">
-                    {proforma.supplier?.company_name} <br />
-                    {proforma.supplier?.address},{proforma.supplier?.city},
-                    {proforma.supplier?.country}
-                  </div>
-                </div>
-
-                <div className="col-sm-4 col-md-4 col-lg-4">
-                  <div className="form-label">Responsible:</div>
-                </div>
-                <div className="col-sm-8 col-md-8 col-lg-8">
-                  <div className="form-value">
-                    {proforma.supplier?.attention_person} <br />
-                    {proforma.supplier?.mobile_number}
-                  </div>
                 </div>
 
                 <div className="col-sm-4 col-md-4 col-lg-4">

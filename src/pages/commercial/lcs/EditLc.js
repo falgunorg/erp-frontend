@@ -569,6 +569,71 @@ export default function EditLc({ userData, setHeaderData }) {
                 </div>
               </div>
 
+              <div className="col-lg-3">
+                <label className="form-label">
+                  Mode of Shipment <span className="text-danger">*</span>
+                </label>
+                <select
+                  className="form-control"
+                  value={formDataSet.mode_of_shipment}
+                  onChange={(e) =>
+                    handleChange("mode_of_shipment", e.target.value)
+                  }
+                >
+                  <option value="">Select One</option>
+                  <option value="Sea">Sea</option>
+                  <option value="Air">Air</option>
+                  <option value="Land">Road</option>
+                  <option value="River">River</option>
+                  <option value="Sea/Air">Sea/Air</option>
+                  <option value="Sea/Air/Road">Sea/Air/Road</option>
+                </select>
+                {errors.mode_of_shipment && (
+                  <div className="errorMsg">{errors.mode_of_shipment}</div>
+                )}
+              </div>
+
+              <div className="col-lg-3">
+                <label className="form-label">Port of Loading</label>
+                <input
+                  className="form-control"
+                  value={formDataSet.port_of_loading}
+                  onChange={(e) =>
+                    handleChange("port_of_loading", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="col-lg-3">
+                <label className="form-label">Port of Discharge</label>
+
+                <CustomSelect
+                  placeholder="Select"
+                  onChange={(selectedOption) =>
+                    handleChange("port_of_discharge", selectedOption.value)
+                  }
+                  value={
+                    bangladeshPorts.find(
+                      (item) => item.title === formDataSet.port_of_discharge
+                    )
+                      ? {
+                          value: formDataSet.port_of_discharge,
+                          label:
+                            bangladeshPorts.find(
+                              (item) =>
+                                item.title === formDataSet.port_of_discharge
+                            ).title || "",
+                        }
+                      : null
+                  }
+                  name="port_of_discharge"
+                  options={filteredPorts.map((item) => ({
+                    value: item.title,
+                    label: `${item.title} (${item.district})`,
+                  }))}
+                />
+              </div>
+
               {/* Net Weight */}
               <div className="col-lg-3">
                 <div className="form-group">
@@ -690,71 +755,6 @@ export default function EditLc({ userData, setHeaderData }) {
 
             {/* Payment / Shipping / Ports / Description */}
             <div className="card-body row g-3">
-              <div className="col-lg-3">
-                <label className="form-label">
-                  Mode of Shipment <span className="text-danger">*</span>
-                </label>
-                <select
-                  className="form-control"
-                  value={formDataSet.mode_of_shipment}
-                  onChange={(e) =>
-                    handleChange("mode_of_shipment", e.target.value)
-                  }
-                >
-                  <option value="">Select One</option>
-                  <option value="Sea">Sea</option>
-                  <option value="Air">Air</option>
-                  <option value="Land">Road</option>
-                  <option value="River">River</option>
-                  <option value="Sea/Air">Sea/Air</option>
-                  <option value="Sea/Air/Road">Sea/Air/Road</option>
-                </select>
-                {errors.mode_of_shipment && (
-                  <div className="errorMsg">{errors.mode_of_shipment}</div>
-                )}
-              </div>
-
-              <div className="col-lg-3">
-                <label className="form-label">Port of Loading</label>
-                <input
-                  className="form-control"
-                  value={formDataSet.port_of_loading}
-                  onChange={(e) =>
-                    handleChange("port_of_loading", e.target.value)
-                  }
-                />
-              </div>
-
-              <div className="col-lg-3">
-                <label className="form-label">Port of Discharge</label>
-
-                <CustomSelect
-                  placeholder="Select"
-                  onChange={(selectedOption) =>
-                    handleChange("port_of_discharge", selectedOption.value)
-                  }
-                  value={
-                    bangladeshPorts.find(
-                      (item) => item.title === formDataSet.port_of_discharge
-                    )
-                      ? {
-                          value: formDataSet.port_of_discharge,
-                          label:
-                            bangladeshPorts.find(
-                              (item) =>
-                                item.title === formDataSet.port_of_discharge
-                            ).title || "",
-                        }
-                      : null
-                  }
-                  name="port_of_discharge"
-                  options={filteredPorts.map((item) => ({
-                    value: item.title,
-                    label: `${item.title} (${item.district})`,
-                  }))}
-                />
-              </div>
-
               <div className="col-lg-12 mt-3">
                 <label className="form-label">Description</label>
                 <QuailEditor
