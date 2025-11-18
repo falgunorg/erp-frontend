@@ -269,14 +269,21 @@ import TimeAndActions from "../pages/TimeAndActions";
 import Jobs from "pages/cnf/Jobs";
 import JobDetails from "pages/cnf/JobDetails";
 // Commercial Contract Phases
+
 import Contracts from "pages/commercial/contracts/Contracts";
 import CreateContracts from "pages/commercial/contracts/CreateContracts";
 import EditContracts from "pages/commercial/contracts/EditContracts";
 import ContractDetails from "pages/commercial/contracts/ContractDetails";
+
+//Back to Back Bills
 import BackToBackBills from "pages/accounts/backtobackbills/BackToBackBills";
 import CreateBackToBackBill from "pages/accounts/backtobackbills/CreateBackToBackBill";
 
-//Back to Back Bills
+// Commercial Invoices
+import CommercialInvoices from "pages/commercial/invoices/CommercialInvoices";
+import CommercialInvoiceCreate from "pages/commercial/invoices/CommercialInvoiceCreate";
+import CommercialInvoiceDetails from "pages/commercial/invoices/CommercialInvoiceDetails";
+import CommercialInvoiceEdit from "pages/commercial/invoices/CommercialInvoiceEdit";
 
 function OpenRoutes() {
   return (
@@ -1254,6 +1261,27 @@ class PrivateRoutes extends Component {
             exact
             path="/accounts/bb-bills-create"
             component={CreateBackToBackBill}
+          ></PrivateRoute>
+          //commercial Invoices
+          <PrivateRoute
+            exact
+            path="/commercial/invoices"
+            component={CommercialInvoices}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/commercial/invoices-create"
+            component={CommercialInvoiceCreate}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/commercial/invoices-edit/:id?"
+            component={CommercialInvoiceEdit}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/commercial/invoices-show/:id?"
+            component={CommercialInvoiceDetails}
           ></PrivateRoute>
           <Redirect path="*" to="/dashboard" />
         </Switch>
