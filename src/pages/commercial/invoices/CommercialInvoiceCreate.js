@@ -141,6 +141,43 @@ const CommercialInvoiceCreate = (props) => {
     getPos();
   }, [form.contract_id]);
 
+  const [invItems, setInvItems] = useState([]);
+
+  const getInvItems = async () => {
+    if (!form.pos) return;
+
+    try {
+      const res = await api.post(
+        "/commercial/get-invoiceable-po-items-by-pos",
+        {
+          ids: form.pos,
+        }
+      );
+      if (res.status === 200) setInvItems(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    getInvItems();
+  }, [form.pos]);
+
+  const handleItemChange = (index, field, value) => {
+    setInvItems((prev) => {
+      const updated = [...prev];
+      updated[index][field] = Number(value);
+
+      // Recalculate total
+      const qty = Number(updated[index].left_qty || 0);
+      const fob = Number(updated[index].fob || 0);
+
+      updated[index].total = qty * fob;
+
+      return updated;
+    });
+  };
+
   /** Validate */
   const validate = () => {
     let newErrors = {};
@@ -243,8 +280,6 @@ const CommercialInvoiceCreate = (props) => {
       {errors[name] && <small className="text-danger">{errors[name]}</small>}
     </div>
   );
-
-  const [invItems, setInvItems] = useState([]);
 
   return (
     <div className="create_technical_pack">
@@ -397,50 +432,138 @@ const CommercialInvoiceCreate = (props) => {
           <h6 className="text-center">
             <u>DETAILS OF ORDER AND PRODUCT</u>
           </h6>
-          <div className="Import_booking_item_table">
-            <table className="table text-start align-middle table-bordered table-hover mb-0">
+          <div className="Import_booking_item_table create_tp_body">
+            <table className="table text-start align-middle table-bordered mb-0">
               <thead className="bg-dark text-white">
                 <tr>
                   <th>SL</th>
                   <th>PO</th>
+                  <th>ITEM</th>
                   <th>COLOR</th>
                   <th>SIZE</th>
-                  <th>QTY</th>
+                  <th>QTY(PCS)</th>
                   <th>PACK QTY</th>
                   <th>CTN. QTY</th>
-                  <th>FOB</th>
-                  <th>TOTAL</th>
+                  <th>FOB(USD)</th>
+                  <th>TOTAL (USD)</th>
                 </tr>
               </thead>
+
               <tbody>
                 {invItems.map((item, index) => (
                   <tr key={index}>
                     <td>{index + 1}</td>
-                    <td>{item.po_number}</td>
-                    <td>{item.techpack?.title}</td>
+                    <td>{item.po?.po_number}</td>
+                    <td>{item.po?.techpack?.techpack_number}</td>
                     <td>{item.color}</td>
                     <td>{item.size}</td>
-                    <td>{item.qty}</td>
-                    <td>{item.pack_qty}</td>
-                    <td>{item.ctns_qty}</td>
-                    <td>{item.fob}</td>
-                    <td>{item.total}</td>
+
+                    {/* QTY */}
+                    <td>
+                      <input
+                        className="form-control"
+                        type="number"
+                        value={item.left_qty}
+                        onChange={(e) =>
+                          handleItemChange(index, "left_qty", e.target.value)
+                        }
+                      />
+                    </td>
+
+                    {/* PACK QTY */}
+                    <td>
+                      <input
+                        className="form-control"
+                        type="number"
+                        value={item.pack_qty}
+                        onChange={(e) =>
+                          handleItemChange(index, "pack_qty", e.target.value)
+                        }
+                      />
+                    </td>
+
+                    {/* CTN QTY */}
+                    <td>
+                      <input
+                        className="form-control"
+                        type="number"
+                        value={item.ctns_qty}
+                        onChange={(e) =>
+                          handleItemChange(index, "ctns_qty", e.target.value)
+                        }
+                      />
+                    </td>
+
+                    {/* FOB */}
+                    <td>
+                      <input
+                        className="form-control"
+                        readOnly
+                        type="number"
+                        value={item.fob}
+                        onChange={(e) =>
+                          handleItemChange(index, "fob", e.target.value)
+                        }
+                      />
+                    </td>
+
+                    {/* TOTAL */}
+                    <td>
+                      <input
+                        className="form-control"
+                        type="number"
+                        readOnly
+                        value={item.total || 0}
+                      />
+                    </td>
                   </tr>
                 ))}
 
+                {/* ===== TOTAL CALCULATION ROW ===== */}
                 <tr>
-                  <td colSpan={4}>
+                  <td colSpan={5}>
                     <strong>TOTAL</strong>
                   </td>
 
+                  {/* TOTAL QTY */}
                   <td>
-                    <strong>541000PCS</strong>
+                    <strong>
+                      {invItems.reduce(
+                        (sum, i) => sum + Number(i.left_qty || 0),
+                        0
+                      )}
+                    </strong>
                   </td>
-                  <td>50PCS</td>
-                  <td>4PCS</td>
+
+                  {/* TOTAL PACK QTY */}
+                  <td>
+                    <strong>
+                      {invItems.reduce(
+                        (sum, i) => sum + Number(i.pack_qty || 0),
+                        0
+                      )}
+                    </strong>
+                  </td>
+
+                  {/* TOTAL CTN QTY */}
+                  <td>
+                    <strong>
+                      {invItems.reduce(
+                        (sum, i) => sum + Number(i.ctns_qty || 0),
+                        0
+                      )}
+                    </strong>
+                  </td>
+
+                  {/* TOTAL AMOUNT (USD) */}
                   <td></td>
                   <td>
-                    <strong>20000 (USD)</strong>
+                    <strong>
+                      {invItems
+                        .reduce((sum, i) => sum + Number(i.total || 0), 0)
+                        .toFixed(2)}{" "}
+                      USD
+                    </strong>
                   </td>
                 </tr>
               </tbody>
