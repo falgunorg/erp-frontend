@@ -201,10 +201,9 @@ const CommercialInvoiceCreate = (props) => {
 
     const formData = new FormData();
 
-    // append all form fields automatically 
+    // append all form fields automatically
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-      
         value.forEach((v) => formData.append(`${key}`, v));
       } else {
         formData.append(key, value ?? "");
