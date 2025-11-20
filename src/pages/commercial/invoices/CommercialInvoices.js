@@ -4,7 +4,7 @@ import api from "services/api";
 
 const PAGE_SIZE = 10;
 
-const CommercialInvoices = () => {
+const CommercialInvoices = (props) => {
   const [invoices, setInvoices] = useState([]);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -54,15 +54,23 @@ const CommercialInvoices = () => {
     if (page > totalPages) setPage(totalPages);
   }, [totalPages, page]);
 
+  useEffect(() => {
+    props.setHeaderData({
+      pageName: "INVOICES",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "NEW INVOICE",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h3 className="mb-0">Commercial Invoices</h3>
-        <div className="d-flex gap-2">
-          <Link to="/commercial/invoices-create" className="btn btn-primary">
-            + New Invoice
-          </Link>
-        </div>
+      <div className="d-flex justify-content-end gap-2">
+        <Link to="/commercial/invoices-create" className="btn btn-primary">
+          + New Invoice
+        </Link>
       </div>
 
       <div className="card p-3 mb-3">

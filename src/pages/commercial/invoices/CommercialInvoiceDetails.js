@@ -47,7 +47,7 @@ const InvoiceTableRow = ({ label, value }) => (
   </tr>
 );
 
-const CommercialInvoiceDetails = () => {
+const CommercialInvoiceDetails = (props) => {
   const { id } = useParams();
   const [invoice, setInvoice] = useState(null);
   const printRef = useRef();
@@ -92,7 +92,20 @@ const CommercialInvoiceDetails = () => {
     element.style.backgroundColor = originalBg;
   };
 
+  
+  useEffect(() => {
+    props.setHeaderData({
+      pageName: "INVOICE DETAILS",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "NEW INVOICE",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
+
   if (!invoice) return <p>Loading...</p>;
+
 
   return (
     <div>

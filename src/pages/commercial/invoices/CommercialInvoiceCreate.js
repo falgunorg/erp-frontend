@@ -199,13 +199,26 @@ const CommercialInvoiceCreate = (props) => {
 
     if (!validate()) return;
 
+    const formData = new FormData();
+
+    // append all form fields automatically 
+    Object.entries(form).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+      
+        value.forEach((v) => formData.append(`${key}`, v));
+      } else {
+        formData.append(key, value ?? "");
+      }
+    });
+
+    // append invoice items once as JSON string
+    formData.append("invoice_items", JSON.stringify(invItems));
+
+    console.log("FORMDATA", formData);
+
     setSaving(true);
     try {
-      const res = await fetch("/commercial/commercial-invoices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await api.post("/commercial/commercial-invoices", formData);
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -282,6 +295,17 @@ const CommercialInvoiceCreate = (props) => {
       {errors[name] && <small className="text-danger">{errors[name]}</small>}
     </div>
   );
+
+  useEffect(() => {
+    props.setHeaderData({
+      pageName: "NEW INVOICE",
+      isNewButton: true,
+      newButtonLink: "",
+      newButtonText: "NEW INVOICE",
+      isInnerSearch: true,
+      innerSearchValue: "",
+    });
+  }, []);
 
   return (
     <div className="create_technical_pack">
