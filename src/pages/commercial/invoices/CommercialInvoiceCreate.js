@@ -159,6 +159,8 @@ const CommercialInvoiceCreate = (props) => {
     }
   };
 
+  console.log("INV ITEMS", invItems);
+
   useEffect(() => {
     getInvItems();
   }, [form.pos]);
