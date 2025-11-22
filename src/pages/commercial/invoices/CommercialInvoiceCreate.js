@@ -8,15 +8,11 @@ const emptyForm = {
   contract_id: "",
   invoice_no: "",
   inv_date: "",
-  exp_value: "",
-  inv_discount_value: "",
   exp_no: "",
   exp_date: "",
-  pos: [], // MUST be array for multi-select
+  pos: [],
   buyer_id: "",
   bank_id: "",
-  qty: "",
-  ctns_qty: "",
   ep_no: "",
   ep_date: "",
   export_shipping_bill_no: "",
@@ -54,11 +50,19 @@ const CommercialInvoiceCreate = (props) => {
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const history = useHistory();
-
   const [contracts, setContracts] = useState([]);
   const [pos, setPos] = useState([]);
   const [buyers, setBuyers] = useState([]);
   const [banks, setBanks] = useState([]);
+
+  const [shippingModes, setShippingModes] = useState([
+    "Sea",
+    "Air",
+    "Land",
+    "River",
+    "Sea/Air",
+    "Sea/Air/Road",
+  ]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,8 +163,6 @@ const CommercialInvoiceCreate = (props) => {
     }
   };
 
-  console.log("INV ITEMS", invItems);
-
   useEffect(() => {
     getInvItems();
   }, [form.pos]);
@@ -170,7 +172,6 @@ const CommercialInvoiceCreate = (props) => {
       const updated = [...prev];
       updated[index][field] = Number(value);
 
-      // Recalculate total
       const qty = Number(updated[index].left_qty || 0);
       const fob = Number(updated[index].fob || 0);
 
@@ -183,12 +184,9 @@ const CommercialInvoiceCreate = (props) => {
   /** Validate */
   const validate = () => {
     let newErrors = {};
-
     if (!form.contract_id) newErrors.contract_id = "Contract ID is required";
     if (!form.invoice_no) newErrors.invoice_no = "Invoice No is required";
     if (!form.inv_date) newErrors.inv_date = "Invoice Date is required";
-    if (!form.qty) newErrors.qty = "Quantity is required";
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -201,34 +199,33 @@ const CommercialInvoiceCreate = (props) => {
 
     const formData = new FormData();
 
-    // append all form fields automatically
+    // append all simple form fields
     Object.entries(form).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        value.forEach((v) => formData.append(`${key}`, v));
+        // POS ARRAY
+        value.forEach((v) => formData.append(`${key}[]`, v));
       } else {
         formData.append(key, value ?? "");
       }
     });
 
-    // append invoice items once as JSON string
+    // append invoice items as JSON
     formData.append("invoice_items", JSON.stringify(invItems));
-
-    console.log("FORMDATA", formData);
+    formData.append("pos_items", JSON.stringify(form.pos));
 
     setSaving(true);
+
     try {
       const res = await api.post("/commercial/commercial-invoices", formData);
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        alert("Failed: " + (body.message || res.statusText));
+      if (res.status !== 201) {
+        alert("Failed to create invoice");
         setSaving(false);
         return;
       }
 
-      const created = await res.json();
-      alert("Invoice created");
-      history.push(`/commercial/invoices/${created.id}`);
+      alert("Invoice created successfully");
+      history.push(`/commercial/invoices/${res.data.id}`);
     } catch (err) {
       alert("Error: " + err.message);
     } finally {
@@ -338,10 +335,6 @@ const CommercialInvoiceCreate = (props) => {
 
           {renderInput("invoice_no", "Invoice No *")}
           {renderInput("inv_date", "Invoice Date *", "date")}
-          {renderInput("exp_value", "Export Value", "number")}
-          {renderInput("inv_discount_value", "Discount Value", "number")}
-          {renderInput("exp_no", "EXP No")}
-          {renderInput("exp_date", "EXP Date", "date")}
 
           {renderSelect(
             "pos",
@@ -351,7 +344,7 @@ const CommercialInvoiceCreate = (props) => {
               label: p.po_number,
             })),
             true,
-            4
+            6
           )}
 
           {renderSelect(
@@ -374,14 +367,25 @@ const CommercialInvoiceCreate = (props) => {
             false
           )}
 
-          {renderInput("qty", "Quantity *", "number")}
-          {renderInput("ctns_qty", "CTNs Qty", "number")}
+          {renderInput("exp_no", "EXP No")}
+          {renderInput("exp_date", "EXP Date", "date")}
+
           {renderInput("ep_no", "EP No")}
           {renderInput("ep_date", "EP Date", "date")}
           {renderInput("export_shipping_bill_no", "Export Shipping Bill No")}
           {renderInput("shipping_bill_date", "Shipping Bill Date", "date")}
           {renderInput("ex_factory_date", "Ex Factory Date", "date")}
-          {renderInput("mode_of_shipment", "Mode Of Shipment")}
+
+          {renderSelect(
+            "mode_of_shipment",
+            "Mode Of Shipment",
+            shippingModes.map((s) => ({
+              value: s,
+              label: s,
+            })),
+            false
+          )}
+
           {renderInput("destination_country", "Destination Country")}
           {renderInput("forwarder", "Forwarder")}
           {renderInput("onboard_date", "Onboard Date", "date")}
@@ -556,7 +560,8 @@ const CommercialInvoiceCreate = (props) => {
                       {invItems.reduce(
                         (sum, i) => sum + Number(i.left_qty || 0),
                         0
-                      )}
+                      )}{" "}
+                      PCS
                     </strong>
                   </td>
 

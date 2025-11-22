@@ -105,13 +105,14 @@ const CommercialInvoices = (props) => {
               <th>Qty</th>
               <th>Export Value</th>
               <th>Buyer</th>
+              <th>Company</th>
               <th className="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
             {shown.length === 0 ? (
               <tr>
-                <td colSpan="8" className="text-center text-muted py-4">
+                <td colSpan="9" className="text-center text-muted py-4">
                   No invoices found
                 </td>
               </tr>
@@ -119,12 +120,21 @@ const CommercialInvoices = (props) => {
               shown.map((inv, idx) => (
                 <tr key={inv.id}>
                   <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
-                  <td>{inv.invoice_no}</td>
-                  <td>{inv.contract_id}</td>
+                  <td>
+                    <Link to={`/commercial/invoices-show/${inv.id}`}>
+                      {inv.invoice_no}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link to={`/commercial/contracts/details/${inv.contract?.id}`}>
+                      {inv.contract?.title}
+                    </Link>
+                  </td>
                   <td>{inv.inv_date}</td>
                   <td>{inv.qty}</td>
                   <td>{inv.exp_value ?? "-"}</td>
-                  <td>{inv.buyer_id ?? "-"}</td>
+                  <td>{inv.buyer?.name}</td>
+                  <td>{inv.contract?.company?.title}</td>
                   <td className="text-end">
                     <Link
                       className="btn btn-sm btn-outline-info me-1"
