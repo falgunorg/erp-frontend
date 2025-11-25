@@ -4,38 +4,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import api from "services/api";
 import Logo from "../../../assets/images/logos/logo-short.png";
-
-const CompanyHeader = ({ invoice }) => (
-  <div
-    className="d-flex justify-content-between align-items-start mb-4"
-    style={{ borderBottom: "2px solid #007bff", paddingBottom: "15px" }}
-  >
-    <div className="d-flex align-items-center">
-      <img
-        src={Logo}
-        alt="logo"
-        style={{ width: 100, height: 100, objectFit: "contain" }}
-        className="me-3"
-      />
-      <div>
-        <h4 className="mb-0 fw-bold text-primary">COMMERCIAL INVOICE</h4>
-        <div className="small text-muted">
-          {invoice?.contract?.company?.address}
-        </div>
-        <div className="small text-muted">
-          Phone: {invoice?.contract?.company?.phone ?? "-"}
-        </div>
-      </div>
-    </div>
-
-    <div className="text-end">
-      <div className="small text-muted">Invoice No</div>
-      <h5 className="mb-1">{invoice.invoice_no}</h5>
-      <div className="small text-muted">Date</div>
-      <h6>{invoice.inv_date}</h6>
-    </div>
-  </div>
-);
+import moment from "moment";
 
 const InvoiceTableRow = ({ label, value }) => (
   <tr>
@@ -94,8 +63,8 @@ const CommercialInvoiceDetails = (props) => {
   if (!invoice) return <p>Loading...</p>;
 
   return (
-    <div>
-      <div className="d-flex justify-content-end mb-3">
+    <div className="contract-page">
+      <div className="d-flex justify-content-end mb-3 no-print non_printing_area">
         <Link
           className="btn btn-outline-secondary me-2"
           to={`/commercial-invoices/${id}/edit`}
@@ -123,7 +92,7 @@ const CommercialInvoiceDetails = (props) => {
                 alt="logo"
                 style={{ width: 70, height: "auto", marginBottom: 10 }}
               />
-              <div>
+              <div className="text-uppercase">
                 <h4 className="fw-bold mb-1" style={{ letterSpacing: "1px" }}>
                   COMMERCIAL INVOICE
                 </h4>
@@ -134,7 +103,7 @@ const CommercialInvoiceDetails = (props) => {
             </div>
 
             <table
-              className="table-borderless text-end"
+              className="table-borderless text-end text-uppercase"
               style={{ fontSize: "14px" }}
             >
               <tbody>
@@ -144,7 +113,7 @@ const CommercialInvoiceDetails = (props) => {
                 </tr>
                 <tr>
                   <th className="text-end pe-3">Invoice Date:</th>
-                  <td>{invoice.inv_date}</td>
+                  <td>{moment(invoice.inv_date).format("MMM Do YYYY")}</td>
                 </tr>
                 <tr>
                   <th className="text-end pe-3">Contract No:</th>
@@ -195,7 +164,10 @@ const CommercialInvoiceDetails = (props) => {
                     value={invoice.destination_country}
                   />
                   <InvoiceTableRow label="EP No" value={invoice.ep_no} />
-                  <InvoiceTableRow label="EP Date" value={invoice.ep_date} />
+                  <InvoiceTableRow
+                    label="EP Date"
+                    value={moment(invoice.ep_date).format("MMM Do YYYY")}
+                  />
                 </tbody>
               </table>
             </div>
@@ -215,7 +187,7 @@ const CommercialInvoiceDetails = (props) => {
                   />
                   <InvoiceTableRow
                     label="Onboard Date"
-                    value={invoice.onboard_date}
+                    value={moment(invoice.onboard_date).format("MMM Do YYYY")}
                   />
                 </tbody>
               </table>
@@ -234,6 +206,7 @@ const CommercialInvoiceDetails = (props) => {
             <thead style={{ background: "#f2f2f2" }}>
               <tr>
                 <th>PO No</th>
+                <th>ITEM</th>
                 <th>Color</th>
                 <th>Size</th>
                 <th className="text-end">Qty (PCS)</th>
@@ -245,6 +218,7 @@ const CommercialInvoiceDetails = (props) => {
               {invoice.items?.map((it) => (
                 <tr key={it.id}>
                   <td>{it.po?.po_number}</td>
+                  <td>{it.po?.techpack?.techpack_number}</td>
                   <td>{it.color}</td>
                   <td>{it.size}</td>
                   <td className="text-end">{it.qty}</td>
@@ -269,12 +243,30 @@ const CommercialInvoiceDetails = (props) => {
           <div className="row mb-4 text-uppercase">
             <div className="col-6">
               <h6 className="fw-bold border-bottom pb-1">SUMMARY</h6>
-              <div>Contract Value: $ {invoice.contract?.contract_value}</div>
-              <div>Invoice Value: $ {invoice.exp_value}</div>
-              <div>Total Quantity: {invoice.qty} PCS</div>
-              <div>Gross Weight: {invoice.gross_weight ?? "-"}</div>
-              <div>Net Weight: {invoice.net_weight ?? "-"}</div>
-              <div>Total CBM: {invoice.total_cbm ?? "-"}</div>
+              <div>
+                <strong>
+                  Contract Value: $ {invoice.contract?.contract_value}
+                </strong>
+              </div>
+              <div>
+                <strong>Invoice Value: $ {invoice.exp_value}</strong>
+              </div>
+              <div>
+                <strong>Total Quantity: {invoice.qty} PCS</strong>
+              </div>
+              <br />
+              <div>
+                <strong>Gross Weight: {invoice.gross_weight ?? "-"}</strong>
+              </div>
+              <div>
+                <strong>Net Weight: {invoice.net_weight ?? "-"}</strong>
+              </div>
+              <div>
+                <strong>Total CBM: {invoice.total_cbm ?? "-"}</strong>
+              </div>
+              <div>
+                <strong>CTN SIZE: {invoice.ctn_size ?? "-"}</strong>
+              </div>
             </div>
 
             <div className="col-6">

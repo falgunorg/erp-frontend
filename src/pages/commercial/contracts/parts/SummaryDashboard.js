@@ -31,7 +31,130 @@ ChartJS.register(
   BarElement
 );
 
-const SummaryDashboard = ({ data, form }) => {
+const SummaryDashboard = ({ form }) => {
+  const totalInvoicesValue = form.invoices?.reduce(
+    (sum, item) => sum + Number(item.exp_value || 0),
+    0
+  );
+  const totalBacktoBackValue = form.lcs?.reduce(
+    (sum, item) => sum + Number(item.total || 0),
+    0
+  );
+
+  const totalBacktoBackBillsValue = form.bills?.reduce(
+    (sum, item) => sum + Number(item.contract_amount || 0),
+    0
+  );
+
+  const data = {
+    export: {
+      totalValue: form.contract_value,
+      rows: [
+        {
+          desc: "TOTAL EXPORT LC/CONTRACT VALUE",
+          ccy: "USD",
+          amount: form.contract_value,
+        },
+        {
+          desc: "TOTAL EXPORT BILL SUBMITTED",
+          ccy: "USD",
+          amount: totalInvoicesValue,
+        },
+        {
+          desc: "REPATAITE AMOUNT",
+          ccy: "USD",
+          amount: totalInvoicesValue,
+        },
+        {
+          desc: "REMAINING EXPORT",
+          ccy: "USD",
+          amount: form.contract_value - totalInvoicesValue,
+        },
+      ],
+    },
+    import: {
+      totalImport: totalBacktoBackValue,
+      rows: [
+        {
+          desc: "TOTAL BBLC AMOUNT FOR IMPORT",
+          ccy: "USD",
+          amount: totalBacktoBackValue,
+        },
+        { desc: "TOTAL ADVANCE PAYMENT FOR IMPORT", ccy: "USD", amount: 0.0 },
+        {
+          desc: "TOTAL BB BILL",
+          ccy: "USD",
+          amount: totalBacktoBackBillsValue,
+        },
+        { desc: "TOTAL BB BILL SETTLED", ccy: "USD", amount: 77011.61 },
+        {
+          desc: "BB BILL OUTSTANDING",
+          ccy: "USD",
+          amount: totalBacktoBackValue - totalBacktoBackBillsValue,
+        },
+        {
+          desc: "% BB IMPORT",
+          ccy: "%",
+          amount: form.contract_value
+            ? ((totalBacktoBackValue / form.contract_value) * 100).toFixed(2)
+            : 0,
+        },
+        { desc: "TOTAL IMPORT", ccy: "USD", amount: totalBacktoBackValue },
+      ],
+    },
+    packingCredit: {
+      rows: [
+        { desc: "PC DISBURSED", ccy: "BDT", amount: 0.0 },
+        { desc: "PC OUTSTANDING (PR.+INT.+Cal.)", ccy: "BDT", amount: 0.0 },
+      ],
+    },
+    edfLoan: {
+      rows: [
+        { desc: "EDF LOAN DISBURSED", ccy: "USD", amount: 0.0 },
+        {
+          desc: "EDF LOAN OUTSTANDING (PR.+INT.+Cal.)",
+          ccy: "USD",
+          amount: 0.0,
+        },
+      ],
+    },
+    forceLoan: {
+      rows: [
+        { desc: "FORCE LOAN DISBURSED", ccy: "BDT", amount: 217372.28 },
+        {
+          desc: "FORCE LOAN OUTSTANDING (PR.+INT.+Cal.)",
+          ccy: "BDT",
+          amount: 0.0,
+        },
+      ],
+    },
+    otherLoan: {
+      rows: [
+        { desc: "TOTAL OTHER LOAN DISBURSED", ccy: "BDT", amount: 0.0 },
+        {
+          desc: "TOTAL OTHER LOAN OUTSTANDING (PR.+INT.+Cal.)",
+          ccy: "BDT",
+          amount: 0.0,
+        },
+      ],
+    },
+    dfc: {
+      rows: [
+        { desc: "TOTAL CREDIT TO DFC", ccy: "USD", amount: 68112.93 },
+        {
+          desc: "TOTAL CREDIT FROM EXP. PROCEED",
+          ccy: "USD",
+          amount: 68112.93,
+        },
+        { desc: "TOTAL CREDIT FROM OTHERS", ccy: "USD", amount: 0.0 },
+        { desc: "TOTAL DEBIT FROM DFC", ccy: "USD", amount: 78814.04 },
+        { desc: "TOTAL BB PAYMENT", ccy: "USD", amount: 77011.61 },
+        { desc: "OTHER DEBIT", ccy: "USD", amount: 1802.43 },
+        { desc: "CURRENT DFC BALANCE", ccy: "USD", amount: -10701.11 },
+      ],
+    },
+  };
+
   // Pie Chart: Export vs Import
   const exportImportChart = {
     labels: ["Export Value", "Import Value"],

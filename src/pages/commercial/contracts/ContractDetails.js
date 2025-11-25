@@ -8,6 +8,7 @@ import SummaryDashboard from "./parts/SummaryDashboard";
 import BackToBack from "./parts/BackToBack";
 import PurchaseOrders from "./parts/PurchaseOrders";
 import BackToBackBills from "./parts/BackToBackBills";
+import ExportDocuments from "./parts/ExportDocuments";
 import api from "services/api";
 import swal from "sweetalert";
 
@@ -28,86 +29,6 @@ export default function ContractDetails(props) {
 
   const printRef = useRef();
   const [form, setForm] = useState({});
-
-  const summaryData = {
-    export: {
-      totalValue: 111078.92,
-      rows: [
-        {
-          desc: "TOTAL EXPORT LC/CONTRACT VALUE",
-          ccy: "USD",
-          amount: 111078.92,
-        },
-        { desc: "TOTAL EXPORT BILL SUBMITTED", ccy: "USD", amount: 70219.52 },
-        { desc: "TOTAL EXPORT BILL LIQUIDATED", ccy: "USD", amount: 70219.52 },
-        { desc: "LIQUIDATED AMOUNT", ccy: "USD", amount: 70174.52 },
-        { desc: "REMAINING EXPORT", ccy: "USD", amount: 40859.4 },
-      ],
-    },
-    import: {
-      totalImport: 77011.61,
-      rows: [
-        { desc: "TOTAL BBLC AMOUNT FOR IMPORT", ccy: "USD", amount: 77011.61 },
-        { desc: "TOTAL ADVANCE PAYMENT FOR IMPORT", ccy: "USD", amount: 0.0 },
-        { desc: "TOTAL BB BILL", ccy: "USD", amount: 77011.61 },
-        { desc: "TOTAL BB BILL SETTLED", ccy: "USD", amount: 77011.61 },
-        { desc: "BB BILL OUTSTANDING", ccy: "USD", amount: 0.0 },
-        { desc: "% BB IMPORT", ccy: "%", amount: 69.33 },
-        { desc: "TOTAL IMPORT", ccy: "USD", amount: 77011.61 },
-      ],
-    },
-    packingCredit: {
-      rows: [
-        { desc: "PC DISBURSED", ccy: "BDT", amount: 0.0 },
-        { desc: "PC OUTSTANDING (PR.+INT.+Cal.)", ccy: "BDT", amount: 0.0 },
-      ],
-    },
-    edfLoan: {
-      rows: [
-        { desc: "EDF LOAN DISBURSED", ccy: "USD", amount: 0.0 },
-        {
-          desc: "EDF LOAN OUTSTANDING (PR.+INT.+Cal.)",
-          ccy: "USD",
-          amount: 0.0,
-        },
-      ],
-    },
-    forceLoan: {
-      rows: [
-        { desc: "FORCE LOAN DISBURSED", ccy: "BDT", amount: 217372.28 },
-        {
-          desc: "FORCE LOAN OUTSTANDING (PR.+INT.+Cal.)",
-          ccy: "BDT",
-          amount: 0.0,
-        },
-      ],
-    },
-    otherLoan: {
-      rows: [
-        { desc: "TOTAL OTHER LOAN DISBURSED", ccy: "BDT", amount: 0.0 },
-        {
-          desc: "TOTAL OTHER LOAN OUTSTANDING (PR.+INT.+Cal.)",
-          ccy: "BDT",
-          amount: 0.0,
-        },
-      ],
-    },
-    dfc: {
-      rows: [
-        { desc: "TOTAL CREDIT TO DFC", ccy: "USD", amount: 68112.93 },
-        {
-          desc: "TOTAL CREDIT FROM EXP. PROCEED",
-          ccy: "USD",
-          amount: 68112.93,
-        },
-        { desc: "TOTAL CREDIT FROM OTHERS", ccy: "USD", amount: 0.0 },
-        { desc: "TOTAL DEBIT FROM DFC", ccy: "USD", amount: 78814.04 },
-        { desc: "TOTAL BB PAYMENT", ccy: "USD", amount: 77011.61 },
-        { desc: "OTHER DEBIT", ccy: "USD", amount: 1802.43 },
-        { desc: "CURRENT DFC BALANCE", ccy: "USD", amount: -10701.11 },
-      ],
-    },
-  };
 
   const handlePrint = () => window.print();
 
@@ -275,7 +196,7 @@ export default function ContractDetails(props) {
       <div className="p-3 bg-white">
         {activeTab === "Summary" && (
           <div className="summary_details_area contract-wrapper" ref={printRef}>
-            <SummaryDashboard data={summaryData} form={form} />
+            <SummaryDashboard form={form} />
           </div>
         )}
 
@@ -945,48 +866,7 @@ export default function ContractDetails(props) {
               </div>
               <br />
             </div>
-            <div className="section  table-responsive">
-              <table className="table table-bordered align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>INVOICE NO.</th>
-                    <th>INVOICE VAL.</th>
-                    <th>SHIPMENT DATE</th>
-                    <th>G.QTY</th>
-                    <th>FILES</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <Link to="#">INV-001</Link>
-                    </td>
-                    <td>$56000</td>
-                    <td>25-10-2025</td>
-                    <td>800 PCS</td>
-                    <td>inv-1.pdf, inv-2.pdf</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <Link to="#">INV-002</Link>
-                    </td>
-                    <td>$56000</td>
-                    <td>25-10-2025</td>
-                    <td>800 PCS</td>
-                    <td>inv-1.pdf, inv-2.pdf</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <Link to="#">INV-003</Link>
-                    </td>
-                    <td>$56000</td>
-                    <td>25-10-2025</td>
-                    <td>800 PCS</td>
-                    <td>inv-1.pdf, inv-2.pdf</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+            <ExportDocuments form={form} />
           </div>
         )}
       </div>

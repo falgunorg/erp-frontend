@@ -1,22 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import api from "services/api";
 import CustomSelect from "elements/CustomSelect";
 
-// ALL form fields
 const emptyForm = {
   contract_id: "",
   invoice_no: "",
   inv_date: "",
-  exp_value: "",
-  inv_discount_value: "",
   exp_no: "",
   exp_date: "",
-  pos: [], // MUST be array for multi-select
+  pos: [],
   buyer_id: "",
   bank_id: "",
-  qty: "",
-  ctns_qty: "",
   ep_no: "",
   ep_date: "",
   export_shipping_bill_no: "",
@@ -50,18 +45,42 @@ const emptyForm = {
 };
 
 const CommercialInvoiceEdit = (props) => {
+  const { id } = useParams();
+  const history = useHistory();
+
   const [form, setForm] = useState({ ...emptyForm });
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
-  const history = useHistory();
 
   const [contracts, setContracts] = useState([]);
   const [pos, setPos] = useState([]);
   const [buyers, setBuyers] = useState([]);
   const [banks, setBanks] = useState([]);
+  const [invItems, setInvItems] = useState([]);
 
+  const shippingModes = [
+    "Sea",
+    "Air",
+    "Land",
+    "River",
+    "Sea/Air",
+    "Sea/Air/Road",
+  ];
+
+  const draftAts = [
+    "AT SIGHT",
+    "60 DAYS",
+    "90 DAYS",
+    "120 DAYS",
+    "160 DAYS",
+    "190 DAYS",
+  ];
+
+  // ------------------------
+  // FETCH INITIAL DROPDOWNS
+  // ------------------------
   useEffect(() => {
-    const fetchData = async () => {
+    const loadDropdowns = async () => {
       try {
         const [b, bk] = await Promise.all([
           api.post("/common/buyers"),
@@ -70,13 +89,50 @@ const CommercialInvoiceEdit = (props) => {
         setBuyers(b.data?.data || []);
         setBanks(bk.data || []);
       } catch (err) {
-        console.error("Error fetching dropdown data:", err);
+        console.error("Dropdown error:", err);
       }
     };
-    fetchData();
+    loadDropdowns();
   }, []);
 
-  /** 🔥 UNIVERSAL CHANGE HANDLER (input + select + textarea) */
+  // --------------------------------------
+  // LOAD ALL CONTRACTS
+  // --------------------------------------
+  const getContracts = async () => {
+    try {
+      const res = await api.post("/merchandising/purchase-contracts");
+      if (res.status === 200) setContracts(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    getContracts();
+  }, []);
+
+  // -------------------------------------
+  // FETCH POS WHEN CONTRACT CHANGES
+  // -------------------------------------
+  const getPos = async () => {
+    if (!form.contract_id) return;
+    try {
+      const res = await api.post("/merchandising/pos-public", {
+        purchase_contract_id: form.contract_id,
+      });
+      setPos(res.data?.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    getPos();
+  }, [form.contract_id]);
+
+  // -------------------------------------
+  // HANDLE FORM VALUE CHANGE
+  // -------------------------------------
   const handleChange = async (name, value) => {
     if (name === "contract_id") {
       try {
@@ -84,10 +140,9 @@ const CommercialInvoiceEdit = (props) => {
           id: value,
         });
 
-        if (response.status === 200 && response.data) {
+        if (response.status === 200) {
           const data = response.data.data;
 
-          // Reset po_list when techpack changes
           setForm((prev) => ({
             ...prev,
             contract_id: value,
@@ -96,7 +151,7 @@ const CommercialInvoiceEdit = (props) => {
           }));
         }
       } catch (error) {
-        console.error("Error fetching technical package data:", error);
+        console.error("Contract fetch error:", error);
       }
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
@@ -109,69 +164,48 @@ const CommercialInvoiceEdit = (props) => {
     handleChange(e.target.name, e.target.value);
   };
 
-  /** Fetch contracts */
-  const getContracts = async () => {
+  // -------------------------------------
+  // LOAD EXISTING INVOICE
+  // -------------------------------------
+  const loadInvoice = async () => {
     try {
-      const res = await api.post("/merchandising/purchase-contracts");
-      if (res.status === 200) setContracts(res.data.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+      const res = await api.get(`/commercial/commercial-invoices/${id}`);
 
-  /** Fetch POs on contract change */
-  const getPos = async () => {
-    if (!form.contract_id) return;
+      const data = res.data;
 
-    try {
-      const res = await api.post("/merchandising/pos-public", {
-        purchase_contract_id: form.contract_id,
+      // Prefill form
+      setForm({
+        ...emptyForm,
+        ...data,
+        pos: data.pos ? JSON.parse(data.pos) : [],
       });
-      if (res.status === 200) setPos(res.data.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
-  useEffect(() => {
-    getContracts();
-  }, []);
-
-  useEffect(() => {
-    getPos();
-  }, [form.contract_id]);
-
-  const [invItems, setInvItems] = useState([]);
-
-  const getInvItems = async () => {
-    if (!form.pos) return;
-
-    try {
-      const res = await api.post(
-        "/commercial/get-invoiceable-po-items-by-pos",
-        {
-          ids: form.pos,
-        }
+      // Prefill items
+      setInvItems(
+        (data.items || []).map((item) => ({
+          ...item,
+          qty: item.qty,
+          total: Number(item.qty) * Number(item.fob),
+        }))
       );
-      if (res.status === 200) setInvItems(res.data || []);
     } catch (err) {
-      console.error(err);
+      console.error("Load invoice error:", err);
     }
   };
 
-  console.log("INV ITEMS", invItems);
-
   useEffect(() => {
-    getInvItems();
-  }, [form.pos]);
+    loadInvoice();
+  }, [id]);
 
+  // -------------------------------------
+  // HANDLE ITEM CHANGE
+  // -------------------------------------
   const handleItemChange = (index, field, value) => {
     setInvItems((prev) => {
       const updated = [...prev];
       updated[index][field] = Number(value);
 
-      // Recalculate total
-      const qty = Number(updated[index].left_qty || 0);
+      const qty = Number(updated[index].qty || 0);
       const fob = Number(updated[index].fob || 0);
 
       updated[index].total = qty * fob;
@@ -180,43 +214,54 @@ const CommercialInvoiceEdit = (props) => {
     });
   };
 
-  /** Validate */
+  // -------------------------------------
+  // VALIDATION
+  // -------------------------------------
   const validate = () => {
     let newErrors = {};
-
     if (!form.contract_id) newErrors.contract_id = "Contract ID is required";
     if (!form.invoice_no) newErrors.invoice_no = "Invoice No is required";
     if (!form.inv_date) newErrors.inv_date = "Invoice Date is required";
-    if (!form.qty) newErrors.qty = "Quantity is required";
+    if (!form.buyer_id) newErrors.buyer_id = "Buyer is required";
+    if (!form.bank_id) newErrors.bank_id = "Bank is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  /** Submit Handler */
+  // -------------------------------------
+  // UPDATE SUBMIT
+  // -------------------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validate()) return;
 
-    setSaving(true);
-    try {
-      const res = await fetch("/commercial/commercial-invoices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+    const formData = new FormData();
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        alert("Failed: " + (body.message || res.statusText));
-        setSaving(false);
-        return;
+    Object.entries(form).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach((v) => formData.append(`${key}[]`, v));
+      } else {
+        formData.append(key, value ?? "");
       }
+    });
 
-      const created = await res.json();
-      alert("Invoice created");
-      history.push(`/commercial/invoices/${created.id}`);
+    formData.append("invoice_items", JSON.stringify(invItems));
+    formData.append("pos_items", JSON.stringify(form.pos));
+
+    setSaving(true);
+
+    try {
+      const res = await api.post(
+        `/commercial/commercial-invoices/${id}?_method=PUT`,
+        formData
+      );
+
+      if (res.status !== 200) {
+        alert("Failed to update invoice");
+      } else {
+        history.push("/commercial/invoices");
+      }
     } catch (err) {
       alert("Error: " + err.message);
     } finally {
@@ -224,8 +269,10 @@ const CommercialInvoiceEdit = (props) => {
     }
   };
 
-  /** Render Helpers */
-  const renderInput = (name, label, type = "text", note = null) => (
+  // -------------------------------------
+  // RENDER HELPERS
+  // -------------------------------------
+  const renderInput = (name, label, type = "text") => (
     <div className="col-md-2 create_tp_body">
       <label className="form-label">{label}</label>
 
@@ -238,29 +285,22 @@ const CommercialInvoiceEdit = (props) => {
       />
 
       {errors[name] && <small className="text-danger">{errors[name]}</small>}
-
-      {note && <div className="form-text">{note}</div>}
     </div>
   );
 
-  const renderSelect = (
-    name,
-    label,
-    options = [],
-    isMulti = false,
-    col = 2
-  ) => (
+  const renderSelect = (name, label, options, isMulti = false, col = 2) => (
     <div className={`col-md-${col} create_tp_body`}>
       <label className="form-label">{label}</label>
+
       <CustomSelect
         isMulti={isMulti}
+        options={options}
         className={errors[name] ? "select_wo red-border" : "select_wo"}
         placeholder={`Select ${label}`}
-        options={options}
         value={
           isMulti
             ? options.filter((opt) =>
-                (form[name] ?? []).includes(String(opt.value))
+                (form[name] || []).includes(String(opt.value))
               )
             : options.find((opt) => String(opt.value) === String(form[name])) ||
               null
@@ -283,94 +323,84 @@ const CommercialInvoiceEdit = (props) => {
     </div>
   );
 
-  
   useEffect(() => {
     props.setHeaderData({
-      pageName: "NEW INVOICE",
+      pageName: "EDIT INVOICE",
       isNewButton: true,
-      newButtonLink: "",
       newButtonText: "NEW INVOICE",
-      isInnerSearch: true,
-      innerSearchValue: "",
+      newButtonLink: "/commercial/invoices/create",
+      isInnerSearch: false,
     });
   }, []);
 
+  // -------------------------------------
+  // RETURN PAGE UI (same as create)
+  // -------------------------------------
   return (
     <div className="create_technical_pack">
       <form onSubmit={handleSubmit}>
         <div className="d-flex gap-2 justify-content-end">
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? "Saving..." : "Create Invoice"}
+            {saving ? "Saving..." : "Update Invoice"}
           </button>
+
           <button
             type="button"
             className="btn btn-outline-secondary"
-            onClick={() => {
-              setForm({ ...emptyForm });
-              setErrors({});
-            }}
+            onClick={loadInvoice}
           >
             Reset
           </button>
         </div>
+
         <br />
+
+        {/* ---------------- FIELDS (same layout) ---------------- */}
         <div className="row">
           {renderSelect(
             "contract_id",
-            "Contract ID *",
-            contracts.map((c) => ({
-              value: c.id,
-              label: c.title,
-            })),
-            false
+            "Contract",
+            contracts.map((c) => ({ value: c.id, label: c.title }))
           )}
 
-          {renderInput("invoice_no", "Invoice No *")}
-          {renderInput("inv_date", "Invoice Date *", "date")}
-          {renderInput("exp_value", "Export Value", "number")}
-          {renderInput("inv_discount_value", "Discount Value", "number")}
-          {renderInput("exp_no", "EXP No")}
-          {renderInput("exp_date", "EXP Date", "date")}
+          {renderInput("invoice_no", "Invoice No")}
+          {renderInput("inv_date", "Invoice Date", "date")}
 
           {renderSelect(
             "pos",
             "POS",
-            pos.map((p) => ({
-              value: p.id,
-              label: p.po_number,
-            })),
+            pos.map((p) => ({ value: p.id, label: p.po_number })),
             true,
-            4
+            6
           )}
 
           {renderSelect(
             "buyer_id",
             "Buyer",
-            buyers.map((b) => ({
-              value: b.id,
-              label: b.name,
-            })),
-            false
+            buyers.map((b) => ({ value: b.id, label: b.name }))
           )}
 
           {renderSelect(
             "bank_id",
             "Bank",
-            banks.map((b) => ({
-              value: b.id,
-              label: b.title,
-            })),
-            false
+            banks.map((b) => ({ value: b.id, label: b.title }))
           )}
 
-          {renderInput("qty", "Quantity *", "number")}
-          {renderInput("ctns_qty", "CTNs Qty", "number")}
+          {renderInput("exp_no", "EXP No")}
+          {renderInput("exp_date", "EXP Date", "date")}
           {renderInput("ep_no", "EP No")}
           {renderInput("ep_date", "EP Date", "date")}
-          {renderInput("export_shipping_bill_no", "Export Shipping Bill No")}
+
+          {renderInput("export_shipping_bill_no", "Shipping Bill No")}
           {renderInput("shipping_bill_date", "Shipping Bill Date", "date")}
           {renderInput("ex_factory_date", "Ex Factory Date", "date")}
-          {renderInput("mode_of_shipment", "Mode Of Shipment")}
+
+          {renderSelect(
+            "mode_of_shipment",
+            "Mode Of Shipment",
+            shippingModes.map((s) => ({ value: s, label: s }))
+          )}
+
           {renderInput("destination_country", "Destination Country")}
           {renderInput("forwarder", "Forwarder")}
           {renderInput("onboard_date", "Onboard Date", "date")}
@@ -395,59 +425,43 @@ const CommercialInvoiceEdit = (props) => {
             "Buyer Bank Docs Receiving Date",
             "date"
           )}
-          {renderInput("payment_tenor", "Payment Tenor")}
-          {renderInput(
-            "proceed_realization_due_date",
-            "Realization Due Date",
-            "date"
+
+          {renderSelect(
+            "payment_tenor",
+            "Payment Tenor",
+            draftAts.map((d) => ({ value: d, label: d }))
           )}
-          {renderInput(
-            "export_proceed_realization_value",
-            "Proceed Realization Value",
-            "number"
-          )}
-          {renderInput(
-            "proceed_realization_date",
-            "Proceed Realization Date",
-            "date"
-          )}
-          {renderInput(
-            "short_realization_value",
-            "Short Realization Value",
-            "number"
-          )}
-          {renderInput(
-            "short_realization_percentage",
-            "Short Realization %",
-            "number"
-          )}
-          {renderInput("gross_weight", "Total Gross Weight", "number")}
-          {renderInput("net_weight", "Total Net Weight", "number")}
+
+          {renderInput("proceed_realization_due_date", "Proceed Due", "date")}
+          {renderInput("export_proceed_realization_value", "Proceed Value")}
+          {renderInput("proceed_realization_date", "Realization Date", "date")}
+          {renderInput("short_realization_value", "Short Value")}
+          {renderInput("short_realization_percentage", "Short %")}
+          {renderInput("gross_weight", "Gross Weight")}
+          {renderInput("net_weight", "Net Weight")}
           {renderInput("total_cbm", "Total CBM")}
           {renderInput("ctn_size", "CTN Size")}
 
           <div className="mb-3 col-12">
             <label className="form-label">Remarks</label>
             <textarea
-              className={`form-control ${errors.remarks ? "red-border" : ""}`}
+              className="form-control"
               name="remarks"
               rows={3}
               value={form.remarks}
               onChange={handleInputChange}
             ></textarea>
-
-            {errors.remarks && (
-              <small className="text-danger">{errors.remarks}</small>
-            )}
           </div>
         </div>
 
+        {/* ---------------- TABLE (unchanged) ---------------- */}
         <div className="row">
           <h6 className="text-center">
             <u>DETAILS OF ORDER AND PRODUCT</u>
           </h6>
+
           <div className="Import_booking_item_table create_tp_body">
-            <table className="table text-start align-middle table-bordered mb-0">
+            <table className="table table-bordered align-middle">
               <thead className="bg-dark text-white">
                 <tr>
                   <th>SL</th>
@@ -455,11 +469,11 @@ const CommercialInvoiceEdit = (props) => {
                   <th>ITEM</th>
                   <th>COLOR</th>
                   <th>SIZE</th>
-                  <th>QTY(PCS)</th>
-                  <th>PACK QTY</th>
-                  <th>CTN. QTY</th>
-                  <th>FOB(USD)</th>
-                  <th>TOTAL (USD)</th>
+                  <th>QTY</th>
+                  <th>PACK</th>
+                  <th>CTN</th>
+                  <th>FOB</th>
+                  <th>TOTAL</th>
                 </tr>
               </thead>
 
@@ -472,23 +486,21 @@ const CommercialInvoiceEdit = (props) => {
                     <td>{item.color}</td>
                     <td>{item.size}</td>
 
-                    {/* QTY */}
                     <td>
                       <input
-                        className="form-control"
                         type="number"
-                        value={item.left_qty}
+                        className="form-control"
+                        value={item.qty}
                         onChange={(e) =>
-                          handleItemChange(index, "left_qty", e.target.value)
+                          handleItemChange(index, "qty", e.target.value)
                         }
                       />
                     </td>
 
-                    {/* PACK QTY */}
                     <td>
                       <input
-                        className="form-control"
                         type="number"
+                        className="form-control"
                         value={item.pack_qty}
                         onChange={(e) =>
                           handleItemChange(index, "pack_qty", e.target.value)
@@ -496,11 +508,10 @@ const CommercialInvoiceEdit = (props) => {
                       />
                     </td>
 
-                    {/* CTN QTY */}
                     <td>
                       <input
-                        className="form-control"
                         type="number"
+                        className="form-control"
                         value={item.ctns_qty}
                         onChange={(e) =>
                           handleItemChange(index, "ctns_qty", e.target.value)
@@ -508,24 +519,18 @@ const CommercialInvoiceEdit = (props) => {
                       />
                     </td>
 
-                    {/* FOB */}
                     <td>
                       <input
                         className="form-control"
-                        readOnly
                         type="number"
+                        readOnly
                         value={item.fob}
-                        onChange={(e) =>
-                          handleItemChange(index, "fob", e.target.value)
-                        }
                       />
                     </td>
 
-                    {/* TOTAL */}
                     <td>
                       <input
                         className="form-control"
-                        type="number"
                         readOnly
                         value={item.total || 0}
                       />
@@ -533,23 +538,19 @@ const CommercialInvoiceEdit = (props) => {
                   </tr>
                 ))}
 
-                {/* ===== TOTAL CALCULATION ROW ===== */}
+                {/* TOTAL ROW */}
                 <tr>
                   <td colSpan={5}>
                     <strong>TOTAL</strong>
                   </td>
 
-                  {/* TOTAL QTY */}
                   <td>
                     <strong>
-                      {invItems.reduce(
-                        (sum, i) => sum + Number(i.left_qty || 0),
-                        0
-                      )}
+                      {invItems.reduce((sum, i) => sum + Number(i.qty || 0), 0)}{" "}
+                      PCS
                     </strong>
                   </td>
 
-                  {/* TOTAL PACK QTY */}
                   <td>
                     <strong>
                       {invItems.reduce(
@@ -559,7 +560,6 @@ const CommercialInvoiceEdit = (props) => {
                     </strong>
                   </td>
 
-                  {/* TOTAL CTN QTY */}
                   <td>
                     <strong>
                       {invItems.reduce(
@@ -569,8 +569,8 @@ const CommercialInvoiceEdit = (props) => {
                     </strong>
                   </td>
 
-                  {/* TOTAL AMOUNT (USD) */}
                   <td></td>
+
                   <td>
                     <strong>
                       {invItems

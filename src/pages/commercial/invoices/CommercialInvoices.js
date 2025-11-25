@@ -105,6 +105,7 @@ const CommercialInvoices = (props) => {
               <th>Qty</th>
               <th>Export Value</th>
               <th>Buyer</th>
+              <th>Destination</th>
               <th>Company</th>
               <th className="text-end">Actions</th>
             </tr>
@@ -112,7 +113,7 @@ const CommercialInvoices = (props) => {
           <tbody>
             {shown.length === 0 ? (
               <tr>
-                <td colSpan="9" className="text-center text-muted py-4">
+                <td colSpan="10" className="text-center text-muted py-4">
                   No invoices found
                 </td>
               </tr>
@@ -126,14 +127,17 @@ const CommercialInvoices = (props) => {
                     </Link>
                   </td>
                   <td>
-                    <Link to={`/commercial/contracts/details/${inv.contract?.id}`}>
+                    <Link
+                      to={`/commercial/contracts/details/${inv.contract?.id}`}
+                    >
                       {inv.contract?.title}
                     </Link>
                   </td>
                   <td>{inv.inv_date}</td>
-                  <td>{inv.qty}</td>
-                  <td>{inv.exp_value ?? "-"}</td>
+                  <td>{inv.qty} PCS</td>
+                  <td>$ {inv.exp_value ?? "-"}</td>
                   <td>{inv.buyer?.name}</td>
+                  <td>{inv.destination_country}</td>
                   <td>{inv.contract?.company?.title}</td>
                   <td className="text-end">
                     <Link

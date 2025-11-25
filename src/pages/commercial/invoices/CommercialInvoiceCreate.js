@@ -64,6 +64,15 @@ const CommercialInvoiceCreate = (props) => {
     "Sea/Air/Road",
   ]);
 
+  const [draftAts, setDraftAts] = useState([
+    "AT SIGHT",
+    "60 DAYS",
+    "90 DAYS",
+    "120 DAYS",
+    "160 DAYS",
+    "190 DAYS",
+  ]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -126,7 +135,6 @@ const CommercialInvoiceCreate = (props) => {
   /** Fetch POs on contract change */
   const getPos = async () => {
     if (!form.contract_id) return;
-
     try {
       const res = await api.post("/merchandising/pos-public", {
         purchase_contract_id: form.contract_id,
@@ -157,7 +165,17 @@ const CommercialInvoiceCreate = (props) => {
           ids: form.pos,
         }
       );
-      if (res.status === 200) setInvItems(res.data || []);
+      const items = (res.data || []).map((item) => {
+        const qty = Number(item.left_qty || 0);
+        const fob = Number(item.fob || 0);
+
+        return {
+          ...item,
+          total: qty * fob, // <-- auto calculate here
+        };
+      });
+
+      setInvItems(items);
     } catch (err) {
       console.error(err);
     }
@@ -224,8 +242,7 @@ const CommercialInvoiceCreate = (props) => {
         return;
       }
 
-      alert("Invoice created successfully");
-      history.push(`/commercial/invoices/${res.data.id}`);
+      history.push("/commercial/invoices");
     } catch (err) {
       alert("Error: " + err.message);
     } finally {
@@ -308,7 +325,7 @@ const CommercialInvoiceCreate = (props) => {
       <form onSubmit={handleSubmit}>
         <div className="d-flex gap-2 justify-content-end">
           <button type="submit" className="btn btn-primary" disabled={saving}>
-            {saving ? "Saving..." : "Create Invoice"}
+            {saving ? "SAVING..." : "SAVE"}
           </button>
           <button
             type="button"
@@ -369,13 +386,11 @@ const CommercialInvoiceCreate = (props) => {
 
           {renderInput("exp_no", "EXP No")}
           {renderInput("exp_date", "EXP Date", "date")}
-
           {renderInput("ep_no", "EP No")}
           {renderInput("ep_date", "EP Date", "date")}
           {renderInput("export_shipping_bill_no", "Export Shipping Bill No")}
           {renderInput("shipping_bill_date", "Shipping Bill Date", "date")}
           {renderInput("ex_factory_date", "Ex Factory Date", "date")}
-
           {renderSelect(
             "mode_of_shipment",
             "Mode Of Shipment",
@@ -385,7 +400,6 @@ const CommercialInvoiceCreate = (props) => {
             })),
             false
           )}
-
           {renderInput("destination_country", "Destination Country")}
           {renderInput("forwarder", "Forwarder")}
           {renderInput("onboard_date", "Onboard Date", "date")}
@@ -410,15 +424,24 @@ const CommercialInvoiceCreate = (props) => {
             "Buyer Bank Docs Receiving Date",
             "date"
           )}
-          {renderInput("payment_tenor", "Payment Tenor")}
+          {renderSelect(
+            "payment_tenor",
+            "Payment Tenor",
+            draftAts.map((d) => ({
+              value: d,
+              label: d,
+            })),
+            false
+          )}
+
           {renderInput(
             "proceed_realization_due_date",
-            "Realization Due Date",
+            "Proceed Realization Due Date",
             "date"
           )}
           {renderInput(
             "export_proceed_realization_value",
-            "Proceed Realization Value",
+            "Export Proceed Realization Value",
             "number"
           )}
           {renderInput(
