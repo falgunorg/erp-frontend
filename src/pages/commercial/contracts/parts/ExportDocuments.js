@@ -1,11 +1,59 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import api from "services/api";
 
 export default function ExportDocuments({ form }) {
-  console.log("CHECK INVOICES", form);
+  const handleBulkFileUpload = async (e) => {
+    const selectedFiles = e.target.files;
+
+    if (!selectedFiles || selectedFiles.length === 0) {
+      alert("No files selected!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("contract_id", form.id); // your contract id
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      formData.append("files[]", selectedFiles[i]);
+    }
+
+    try {
+      const res = await api.post(
+        "/commercial/invoices/bulk-file-upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (res.status === 200) {
+        console.log("Uploaded Files:", res.data.files);
+        alert("Bulk Files Uploaded Successfully!");
+      }
+    } catch (error) {
+      console.error("Upload Error:", error);
+      alert("File Upload Failed!");
+    }
+  };
+
   return (
     <div className="full_page">
       <div className="text-end">
+        <label for="multipleFiles" className="btn btn-sm btn-success me-2">
+          + UPLOAD MULTIPLE INVOICE FILES
+        </label>
+        <input
+          onChange={handleBulkFileUpload}
+          hidden
+          id="multipleFiles"
+          type="file"
+          name="files[]"
+          multiple
+        />
+
         <Link
           to="/commercial/invoices-create"
           className="btn btn-sm btn-primary"
