@@ -5,6 +5,10 @@ import jsPDF from "jspdf";
 import api from "services/api";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import moment from "moment";
+import $ from "jquery";
+import "jquery-mousewheel"; // must come after jquery
+import luckysheet from "luckysheet";
+// import "luckysheet/dist/luckysheet.css";
 
 const InvoiceTableRow = ({ label, value }) => (
   <tr>
@@ -50,6 +54,37 @@ const CommercialInvoiceDetails = (props) => {
   };
 
   useEffect(() => {
+    const init = () => {
+      luckysheet.create({
+        container: "luckysheet",
+        title: "Invoice",
+        lang: "en",
+        data: [
+          {
+            name: "Sheet1",
+            data: [
+              [{ value: "Item" }, { value: "Qty" }, { value: "Price" }],
+              [{ value: "Apple" }, { value: 5 }, { value: 10 }],
+            ],
+          },
+        ],
+        row: 10,
+        col: 10,
+        showtoolbar: true,
+        showsheetbar: true,
+      });
+    };
+
+    // wait one tick to ensure the container is mounted and visible
+    const timer = setTimeout(init, 50);
+
+    return () => {
+      clearTimeout(timer);
+      luckysheet.destroy();
+    };
+  }, []);
+
+  useEffect(() => {
     props.setHeaderData({
       pageName: "INVOICE DETAILS",
       isNewButton: true,
@@ -78,7 +113,14 @@ const CommercialInvoiceDetails = (props) => {
           Print
         </button>
       </div>
-
+      <div
+        id="luckysheet"
+        style={{
+          width: "100%",
+          height: "600px",
+          minHeight: "400px",
+        }}
+      />
       <div ref={printRef} style={{ background: "#fff", padding: "10px" }}>
         <div
           className="invoice-wrapper"

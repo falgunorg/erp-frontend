@@ -138,7 +138,8 @@ export default function Lcs(props) {
 
   useEffect(() => {
     const checkAccess = async () => {
-      if (props.userData?.department_title !== "Commercial") {
+      const allowedDepartments = ["Commercial", "Management", "IT"];
+      if (!allowedDepartments.includes(props.userData?.department_title)) {
         await swal({
           icon: "error",
           text: "You Cannot Access This Section.",
@@ -148,7 +149,7 @@ export default function Lcs(props) {
       }
     };
     checkAccess();
-  }, [props, history]);
+  }, [props.userData?.department_title, history]);
 
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;

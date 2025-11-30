@@ -337,7 +337,7 @@ export default function CreateLc(props) {
         icon: "error",
         text: "You cannot access this section.",
         closeOnClickOutside: false,
-      }).then(() => history.push("/dashboard"));
+      }).then(() => history.push("/commercial/lcs"));
     }
   }, [userData, history]);
 
