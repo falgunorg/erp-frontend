@@ -71,7 +71,8 @@ export default function ExportDocuments({ form }) {
               <th>BANK BILL NO</th>
               <th>QTY</th>
               <th>INVOICE VAL.</th>
-              <th>SHIPMENT DATE</th>
+
+              <th>ACTION</th>
             </tr>
           </thead>
           <tbody>
@@ -93,7 +94,11 @@ export default function ExportDocuments({ form }) {
                   <td>{inv.bank_bill_no}</td>
                   <td>{inv.qty} PCS</td>
                   <td>$ {inv.exp_value ?? "-"}</td>
-                  <td>{inv.inv_date}</td>
+                  <td>
+                    <a target="_blank" href={inv.file_path}>
+                      Details
+                    </a>
+                  </td>
                 </tr>
               ))
             )}

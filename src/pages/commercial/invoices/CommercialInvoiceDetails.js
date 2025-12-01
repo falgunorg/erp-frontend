@@ -5,10 +5,6 @@ import jsPDF from "jspdf";
 import api from "services/api";
 import Logo from "../../../assets/images/logos/logo-short.png";
 import moment from "moment";
-import $ from "jquery";
-import "jquery-mousewheel"; // must come after jquery
-import luckysheet from "luckysheet";
-// import "luckysheet/dist/luckysheet.css";
 
 const InvoiceTableRow = ({ label, value }) => (
   <tr>
@@ -54,37 +50,6 @@ const CommercialInvoiceDetails = (props) => {
   };
 
   useEffect(() => {
-    const init = () => {
-      luckysheet.create({
-        container: "luckysheet",
-        title: "Invoice",
-        lang: "en",
-        data: [
-          {
-            name: "Sheet1",
-            data: [
-              [{ value: "Item" }, { value: "Qty" }, { value: "Price" }],
-              [{ value: "Apple" }, { value: 5 }, { value: 10 }],
-            ],
-          },
-        ],
-        row: 10,
-        col: 10,
-        showtoolbar: true,
-        showsheetbar: true,
-      });
-    };
-
-    // wait one tick to ensure the container is mounted and visible
-    const timer = setTimeout(init, 50);
-
-    return () => {
-      clearTimeout(timer);
-      luckysheet.destroy();
-    };
-  }, []);
-
-  useEffect(() => {
     props.setHeaderData({
       pageName: "INVOICE DETAILS",
       isNewButton: true,
@@ -113,208 +78,227 @@ const CommercialInvoiceDetails = (props) => {
           Print
         </button>
       </div>
-      <div
-        id="luckysheet"
-        style={{
-          width: "100%",
-          height: "600px",
-          minHeight: "400px",
-        }}
-      />
-      <div ref={printRef} style={{ background: "#fff", padding: "10px" }}>
-        <div
-          className="invoice-wrapper"
-          style={{ fontSize: "13px", lineHeight: "1.4" }}
-        >
-          {/* Header */}
-          <div className="d-flex justify-content-between align-items-start pb-3">
-            <div className="d-flex gap_10">
-              <img
-                src={Logo}
-                alt="logo"
-                style={{ width: 70, height: "auto", marginBottom: 10 }}
-              />
-              <div className="text-uppercase">
-                <h4 className="fw-bold mb-1" style={{ letterSpacing: "1px" }}>
-                  COMMERCIAL INVOICE
-                </h4>
-                <div>{invoice?.contract?.company?.title}</div>
-                <div>{invoice?.contract?.company?.address}</div>
-                <div>Phone: {invoice?.contract?.company?.phone}</div>
-              </div>
-            </div>
 
-            <table
-              className="table-borderless text-end text-uppercase"
-              style={{ fontSize: "14px" }}
+      <div className="row">
+        <div className="col-6">
+          <div ref={printRef} style={{ background: "#fff", padding: "10px" }}>
+            <div
+              className="invoice-wrapper"
+              style={{ fontSize: "13px", lineHeight: "1.4" }}
             >
-              <tbody>
-                <tr>
-                  <th className="text-end pe-3">Invoice No:</th>
-                  <td>{invoice.invoice_no}</td>
-                </tr>
-                <tr>
-                  <th className="text-end pe-3">Invoice Date:</th>
-                  <td>{moment(invoice.inv_date).format("MMM Do YYYY")}</td>
-                </tr>
-                <tr>
-                  <th className="text-end pe-3">Contract No:</th>
-                  <td>{invoice.contract?.title}</td>
-                </tr>
-                <tr>
-                  <th className="text-end pe-3">Export No:</th>
-                  <td>{invoice.exp_no}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="row mb-4">
-            {/* Buyer */}
-            <div className="col-6 text-uppercase">
-              <h6 className="fw-bold border-bottom pb-1">BUYER / CONSIGNEE</h6>
-              <div>{invoice.buyer?.name}</div>
-              <div>
-                {invoice.buyer?.address}, {invoice.buyer?.country}
+              {/* Header */}
+              <div className="d-flex justify-content-between align-items-start pb-3">
+                <div className="d-flex gap_10">
+                  <img
+                    src={Logo}
+                    alt="logo"
+                    style={{ width: 70, height: "auto", marginBottom: 10 }}
+                  />
+                  <div className="text-uppercase">
+                    <h4
+                      className="fw-bold mb-1"
+                      style={{ letterSpacing: "1px" }}
+                    >
+                      COMMERCIAL INVOICE
+                    </h4>
+                    <div>{invoice?.contract?.company?.title}</div>
+                    <div>{invoice?.contract?.company?.address}</div>
+                    <div>Phone: {invoice?.contract?.company?.phone}</div>
+                  </div>
+                </div>
+
+                <table
+                  className="table-borderless text-end text-uppercase"
+                  style={{ fontSize: "14px" }}
+                >
+                  <tbody>
+                    <tr>
+                      <th className="text-end pe-3">Invoice No:</th>
+                      <td>{invoice.invoice_no}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-end pe-3">Invoice Date:</th>
+                      <td>{moment(invoice.inv_date).format("MMM Do YYYY")}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-end pe-3">Contract No:</th>
+                      <td>{invoice.contract?.title}</td>
+                    </tr>
+                    <tr>
+                      <th className="text-end pe-3">Export No:</th>
+                      <td>{invoice.exp_no}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <div>Phone: {invoice.buyer?.phone}</div>
-            </div>
+              <div className="row mb-4">
+                {/* Buyer */}
+                <div className="col-6 text-uppercase">
+                  <h6 className="fw-bold border-bottom pb-1">
+                    BUYER / CONSIGNEE
+                  </h6>
+                  <div>{invoice.buyer?.name}</div>
+                  <div>
+                    {invoice.buyer?.address}, {invoice.buyer?.country}
+                  </div>
+                  <div>Phone: {invoice.buyer?.phone}</div>
+                </div>
 
-            {/* Bank */}
-            <div className="col-6">
-              <h6 className="fw-bold border-bottom pb-1">CONSIGNEE BANK</h6>
-              <div>{invoice.bank?.title}</div>
-              <div>{invoice.bank?.address}</div>
-              <div>SWIFT: {invoice.bank?.swift_code}</div>
-              <div>ACC: {invoice.bank?.account_number}</div>
-            </div>
-          </div>
+                {/* Bank */}
+                <div className="col-6">
+                  <h6 className="fw-bold border-bottom pb-1">CONSIGNEE BANK</h6>
+                  <div>{invoice.bank?.title}</div>
+                  <div>{invoice.bank?.address}</div>
+                  <div>SWIFT: {invoice.bank?.swift_code}</div>
+                  <div>ACC: {invoice.bank?.account_number}</div>
+                </div>
+              </div>
 
-          {/* Export / Shipping Info */}
-          <div className="row mb-4 text-uppercase">
-            <div className="col-6">
-              <h6 className="fw-bold border-bottom pb-1">
-                SHIPPING / EXPORT DETAILS
+              {/* Export / Shipping Info */}
+              <div className="row mb-4 text-uppercase">
+                <div className="col-6">
+                  <h6 className="fw-bold border-bottom pb-1">
+                    SHIPPING / EXPORT DETAILS
+                  </h6>
+                  <table className="table table-sm table-borderless">
+                    <tbody>
+                      <InvoiceTableRow
+                        label="Mode of Shipment"
+                        value={invoice.mode_of_shipment}
+                      />
+                      <InvoiceTableRow
+                        label="Destination Country"
+                        value={invoice.destination_country}
+                      />
+                      <InvoiceTableRow label="EP No" value={invoice.ep_no} />
+                      <InvoiceTableRow
+                        label="EP Date"
+                        value={moment(invoice.ep_date).format("MMM Do YYYY")}
+                      />
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="col-6">
+                  <h6 className="fw-bold border-bottom pb-1">
+                    LOGISTICS DETAILS
+                  </h6>
+                  <table className="table table-sm table-borderless">
+                    <tbody>
+                      <InvoiceTableRow label="BL No" value={invoice.bl_no} />
+                      <InvoiceTableRow
+                        label="Container No"
+                        value={invoice.container_no}
+                      />
+                      <InvoiceTableRow
+                        label="Vessel Name"
+                        value={invoice.vessel_name}
+                      />
+                      <InvoiceTableRow
+                        label="Onboard Date"
+                        value={moment(invoice.onboard_date).format(
+                          "MMM Do YYYY"
+                        )}
+                      />
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <h6 className="fw-bold border-bottom pb-1 mb-2">
+                INVOICE ITEM DETAILS
               </h6>
-              <table className="table table-sm table-borderless">
-                <tbody>
-                  <InvoiceTableRow
-                    label="Mode of Shipment"
-                    value={invoice.mode_of_shipment}
-                  />
-                  <InvoiceTableRow
-                    label="Destination Country"
-                    value={invoice.destination_country}
-                  />
-                  <InvoiceTableRow label="EP No" value={invoice.ep_no} />
-                  <InvoiceTableRow
-                    label="EP Date"
-                    value={moment(invoice.ep_date).format("MMM Do YYYY")}
-                  />
-                </tbody>
-              </table>
-            </div>
 
-            <div className="col-6">
-              <h6 className="fw-bold border-bottom pb-1">LOGISTICS DETAILS</h6>
-              <table className="table table-sm table-borderless">
+              <table
+                className="table table-bordered table-sm mb-4"
+                style={{ fontSize: "13px" }}
+              >
+                <thead style={{ background: "#f2f2f2" }}>
+                  <tr>
+                    <th>PO No</th>
+                    <th>ITEM</th>
+                    <th>Color</th>
+                    <th>Size</th>
+                    <th className="text-end">Qty (PCS)</th>
+                    <th className="text-end">FOB</th>
+                    <th className="text-end">Amount</th>
+                  </tr>
+                </thead>
                 <tbody>
-                  <InvoiceTableRow label="BL No" value={invoice.bl_no} />
-                  <InvoiceTableRow
-                    label="Container No"
-                    value={invoice.container_no}
-                  />
-                  <InvoiceTableRow
-                    label="Vessel Name"
-                    value={invoice.vessel_name}
-                  />
-                  <InvoiceTableRow
-                    label="Onboard Date"
-                    value={moment(invoice.onboard_date).format("MMM Do YYYY")}
-                  />
+                  {invoice.items?.map((it) => (
+                    <tr key={it.id}>
+                      <td>{it.po?.po_number}</td>
+                      <td>{it.po?.techpack?.techpack_number}</td>
+                      <td>{it.color}</td>
+                      <td>{it.size}</td>
+                      <td className="text-end">{it.qty}</td>
+                      <td className="text-end">$ {it.fob}</td>
+                      <td className="text-end">$ {it.total}</td>
+                    </tr>
+                  ))}
                 </tbody>
+                <tfoot>
+                  <tr>
+                    <th colSpan="3" className="text-end">
+                      TOTAL:
+                    </th>
+                    <th className="text-end">{invoice.qty} PCS</th>
+                    <th></th>
+                    <th className="text-end">$ {invoice.exp_value}</th>
+                  </tr>
+                </tfoot>
               </table>
+
+              {/* Summary Section */}
+              <div className="row mb-4 text-uppercase">
+                <div className="col-6">
+                  <h6 className="fw-bold border-bottom pb-1">SUMMARY</h6>
+                  <div>
+                    <strong>
+                      Contract Value: $ {invoice.contract?.contract_value}
+                    </strong>
+                  </div>
+                  <div>
+                    <strong>Invoice Value: $ {invoice.exp_value}</strong>
+                  </div>
+                  <div>
+                    <strong>Total Quantity: {invoice.qty} PCS</strong>
+                  </div>
+                  <br />
+                  <div>
+                    <strong>Gross Weight: {invoice.gross_weight ?? "-"}</strong>
+                  </div>
+                  <div>
+                    <strong>Net Weight: {invoice.net_weight ?? "-"}</strong>
+                  </div>
+                  <div>
+                    <strong>Total CBM: {invoice.total_cbm ?? "-"}</strong>
+                  </div>
+                  <div>
+                    <strong>CTN SIZE: {invoice.ctn_size ?? "-"}</strong>
+                  </div>
+                </div>
+
+                <div className="col-6">
+                  <h6 className="fw-bold border-bottom pb-1">REMARKS</h6>
+                  <p style={{ minHeight: "50px" }}>
+                    {invoice.remarks ?? "N/A"}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-
-          {/* Items Table */}
-          <h6 className="fw-bold border-bottom pb-1 mb-2">
-            INVOICE ITEM DETAILS
-          </h6>
-
-          <table
-            className="table table-bordered table-sm mb-4"
-            style={{ fontSize: "13px" }}
-          >
-            <thead style={{ background: "#f2f2f2" }}>
-              <tr>
-                <th>PO No</th>
-                <th>ITEM</th>
-                <th>Color</th>
-                <th>Size</th>
-                <th className="text-end">Qty (PCS)</th>
-                <th className="text-end">FOB</th>
-                <th className="text-end">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.items?.map((it) => (
-                <tr key={it.id}>
-                  <td>{it.po?.po_number}</td>
-                  <td>{it.po?.techpack?.techpack_number}</td>
-                  <td>{it.color}</td>
-                  <td>{it.size}</td>
-                  <td className="text-end">{it.qty}</td>
-                  <td className="text-end">$ {it.fob}</td>
-                  <td className="text-end">$ {it.total}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr>
-                <th colSpan="3" className="text-end">
-                  TOTAL:
-                </th>
-                <th className="text-end">{invoice.qty} PCS</th>
-                <th></th>
-                <th className="text-end">$ {invoice.exp_value}</th>
-              </tr>
-            </tfoot>
-          </table>
-
-          {/* Summary Section */}
-          <div className="row mb-4 text-uppercase">
-            <div className="col-6">
-              <h6 className="fw-bold border-bottom pb-1">SUMMARY</h6>
-              <div>
-                <strong>
-                  Contract Value: $ {invoice.contract?.contract_value}
-                </strong>
-              </div>
-              <div>
-                <strong>Invoice Value: $ {invoice.exp_value}</strong>
-              </div>
-              <div>
-                <strong>Total Quantity: {invoice.qty} PCS</strong>
-              </div>
-              <br />
-              <div>
-                <strong>Gross Weight: {invoice.gross_weight ?? "-"}</strong>
-              </div>
-              <div>
-                <strong>Net Weight: {invoice.net_weight ?? "-"}</strong>
-              </div>
-              <div>
-                <strong>Total CBM: {invoice.total_cbm ?? "-"}</strong>
-              </div>
-              <div>
-                <strong>CTN SIZE: {invoice.ctn_size ?? "-"}</strong>
-              </div>
-            </div>
-
-            <div className="col-6">
-              <h6 className="fw-bold border-bottom pb-1">REMARKS</h6>
-              <p style={{ minHeight: "50px" }}>{invoice.remarks ?? "N/A"}</p>
-            </div>
+        </div>
+        <div className="col-6">
+          <div style={{ width: "100%", height: "calc(100vh - 125px)" }}>
+            <iframe
+              src={invoice.file_path}
+              title="PDF Viewer"
+              width="100%"
+              height="100%"
+              style={{ border: "none" }}
+            ></iframe>
           </div>
         </div>
       </div>

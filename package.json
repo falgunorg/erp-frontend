@@ -27,6 +27,7 @@
     "@mui/material": "^5.18.0",
     "@mui/x-charts": "^8.15.0",
     "@mui/x-date-pickers": "^5.0.15",
+    "@nutrient-sdk/viewer": "^1.9.1",
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^11.2.7",
     "axios": "^0.24.0",
