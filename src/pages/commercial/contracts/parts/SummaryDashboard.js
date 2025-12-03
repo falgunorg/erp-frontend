@@ -80,7 +80,7 @@ const SummaryDashboard = ({ form }) => {
           ccy: "USD",
           amount: totalBacktoBackValue,
         },
-        { desc: "TOTAL ADVANCE PAYMENT FOR IMPORT", ccy: "USD", amount: 0.0 },
+
         {
           desc: "TOTAL BB BILL",
           ccy: "USD",
@@ -261,7 +261,6 @@ const SummaryDashboard = ({ form }) => {
           {renderTable("Packing Credit (PC)", data.packingCredit.rows)}
           {renderTable("EDF Loan", data.edfLoan.rows)}
           {renderTable("Force Loan", data.forceLoan.rows)}
-          {renderTable("Other Demand Loan", data.otherLoan.rows)}
           {renderTable("DFC", data.dfc.rows)}
         </Grid>
 

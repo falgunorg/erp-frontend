@@ -3,35 +3,31 @@ import { Link } from "react-router-dom";
 import api from "services/api";
 
 export default function ExportDocuments({ form }) {
-  const handleBulkFileUpload = async (e) => {
-    const selectedFiles = e.target.files;
 
-    if (!selectedFiles || selectedFiles.length === 0) {
-      alert("No files selected!");
+
+  
+  const handleBulkFileUpload = async (e) => {
+    const file = e.target.files[0]; // only one file
+
+    if (!file) {
+      alert("No file selected!");
       return;
     }
 
     const formData = new FormData();
     formData.append("contract_id", form.id); // your contract id
-
-    for (let i = 0; i < selectedFiles.length; i++) {
-      formData.append("files[]", selectedFiles[i]);
-    }
+    formData.append("file", file); // single file only
 
     try {
-      const res = await api.post(
-        "/commercial/invoices/bulk-file-upload",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const res = await api.post("/commercial/invoices/import", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       if (res.status === 200) {
-        console.log("Uploaded Files:", res.data.files);
-        alert("Bulk Files Uploaded Successfully!");
+        console.log("Uploaded File:", res.data.file);
+        alert("File Imported Successfully!");
       }
     } catch (error) {
       console.error("Upload Error:", error);
@@ -42,16 +38,17 @@ export default function ExportDocuments({ form }) {
   return (
     <div className="full_page">
       <div className="text-end">
-        <label for="multipleFiles" className="btn btn-sm btn-success me-2">
-          + UPLOAD MULTIPLE INVOICE FILES
+        <label htmlFor="singleFile" className="btn btn-sm btn-success me-2">
+          + IMPORT EXCEL
         </label>
+
         <input
           onChange={handleBulkFileUpload}
           hidden
-          id="multipleFiles"
+          id="singleFile"
           type="file"
-          name="files[]"
-          multiple
+          name="file"
+          accept=".xlsx,.xls" // optional but recommended
         />
 
         <Link

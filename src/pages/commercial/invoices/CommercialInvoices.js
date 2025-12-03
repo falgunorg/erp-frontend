@@ -54,6 +54,34 @@ const CommercialInvoices = (props) => {
     if (page > totalPages) setPage(totalPages);
   }, [totalPages, page]);
 
+  const handleBulkFileUpload = async (e) => {
+    const file = e.target.files[0]; // only one file
+
+    if (!file) {
+      alert("No file selected!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file); // single file only
+
+    try {
+      const res = await api.post("/commercial/invoices/import", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (res.status === 200) {
+        console.log("Uploaded File:", res.data.file);
+        alert("File Imported Successfully!");
+      }
+    } catch (error) {
+      console.error("Upload Error:", error);
+      alert("File Upload Failed!");
+    }
+  };
+
   useEffect(() => {
     props.setHeaderData({
       pageName: "INVOICES",
@@ -68,6 +96,18 @@ const CommercialInvoices = (props) => {
   return (
     <div>
       <div className="d-flex justify-content-end gap-2">
+        <label htmlFor="singleFile" className="btn btn-sm btn-success me-2">
+          + IMPORT EXCEL
+        </label>
+
+        <input
+          onChange={handleBulkFileUpload}
+          hidden
+          id="singleFile"
+          type="file"
+          name="file"
+          accept=".xlsx,.xls" // optional but recommended
+        />
         <Link to="/commercial/invoices-create" className="btn btn-primary">
           + New Invoice
         </Link>
@@ -100,7 +140,7 @@ const CommercialInvoices = (props) => {
             <tr>
               <th>#</th>
               <th>Invoice No</th>
-              <th>Contract ID</th>
+              <th>Contract</th>
               <th>Invoice Date</th>
               <th>Qty</th>
               <th>Export Value</th>
@@ -110,6 +150,7 @@ const CommercialInvoices = (props) => {
               <th className="text-end">Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {shown.length === 0 ? (
               <tr>
@@ -121,24 +162,50 @@ const CommercialInvoices = (props) => {
               shown.map((inv, idx) => (
                 <tr key={inv.id}>
                   <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
+
+                  {/* Invoice Number */}
                   <td>
                     <Link to={`/commercial/invoices-show/${inv.id}`}>
                       {inv.invoice_no}
                     </Link>
                   </td>
+
+                  {/* Contract Title */}
                   <td>
-                    <Link
-                      to={`/commercial/contracts/details/${inv.contract?.id}`}
-                    >
-                      {inv.contract?.title}
-                    </Link>
+                    {inv.contract ? (
+                      <Link
+                        to={`/commercial/contracts/details/${inv.contract.id}`}
+                      >
+                        {inv.contract.title}
+                      </Link>
+                    ) : (
+                      "-"
+                    )}
                   </td>
-                  <td>{inv.inv_date}</td>
-                  <td>{inv.qty} PCS</td>
+
+                  {/* Invoice Date */}
+                  <td>
+                    {inv.inv_date
+                      ? new Date(inv.inv_date).toLocaleDateString()
+                      : "-"}
+                  </td>
+
+                  {/* Quantity */}
+                  <td>{inv.pcs_qty ? `${inv.pcs_qty} PCS` : "-"}</td>
+
+                  {/* Export Value */}
                   <td>$ {inv.exp_value ?? "-"}</td>
-                  <td>{inv.buyer?.name}</td>
-                  <td>{inv.destination_country}</td>
-                  <td>{inv.contract?.company?.title}</td>
+
+                  {/* Buyer */}
+                  <td>{inv.contract?.buyer?.name ?? "-"}</td>
+
+                  {/* Destination */}
+                  <td>{inv.destination_country ?? "-"}</td>
+
+                  {/* Company */}
+                  <td>{inv.contract?.company?.title ?? "-"}</td>
+
+                  {/* Actions */}
                   <td className="text-end">
                     <Link
                       className="btn btn-sm btn-outline-info me-1"
@@ -146,12 +213,14 @@ const CommercialInvoices = (props) => {
                     >
                       View
                     </Link>
+
                     <Link
                       className="btn btn-sm btn-outline-warning me-1"
                       to={`/commercial/invoices-edit/${inv.id}`}
                     >
                       Edit
                     </Link>
+
                     <button
                       className="btn btn-sm btn-outline-danger"
                       onClick={() => deleteInvoice(inv.id)}
