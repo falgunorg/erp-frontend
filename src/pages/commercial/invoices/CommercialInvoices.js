@@ -75,6 +75,7 @@ const CommercialInvoices = (props) => {
       if (res.status === 200) {
         console.log("Uploaded File:", res.data.file);
         alert("File Imported Successfully!");
+        window.location.reload();
       }
     } catch (error) {
       console.error("Upload Error:", error);

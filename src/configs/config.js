@@ -1,13 +1,13 @@
-// var configEnv = "development";
+var configEnv = "development";
 // var configEnv = "staging";
-var configEnv = "production";
+// var configEnv = "production";
 // var configEnv = "orgserver";
 
 var config = {
   //######### Staging config ##########
   orgserver: {
     appUrl: "https://erp.falgun.org",
-    apiUrl: "https://erpapi.falgun.org/api",  
+    apiUrl: "https://erpapi.falgun.org/api",
     staticUrl: "https://erpapi.falgun.org/api",
     debug: true,
   },
