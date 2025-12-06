@@ -4,44 +4,50 @@ import api from "services/api";
 import CustomSelect from "elements/CustomSelect";
 
 // ALL form fields
+
 const emptyForm = {
   contract_id: "",
+  style_po_no: "",
+  item_name: "",
+  order_buyer: "",
+  export_lc_contract_no: "",
+  bank_name: "",
   invoice_no: "",
   inv_date: "",
+  pcs_qty: "",
+  ctns_qty: "",
   exp_no: "",
   exp_date: "",
-  pos: [],
-  buyer_id: "",
-  bank_id: "",
+  exp_value: "",
   ep_no: "",
   ep_date: "",
   export_shipping_bill_no: "",
   shipping_bill_date: "",
   ex_factory_date: "",
-  mode_of_shipment: "",
+  mode_of_shpment: "",
   destination_country: "",
-  forwarder: "",
-  onboard_date: "",
-  freight_charge: "",
+  carrier_forwarder_name: "",
   bl_no: "",
-  bl_relase_date: "",
+  shipped_onboard_date: "",
+  bl_release_date: "",
   container_no: "",
   vessel_name: "",
-  ic_received_date: "",
-  bank_docs_submit_date: "",
+  bank_docs_sub_date: "",
   bank_bill_no: "",
   bank_to_bank_sending_docs_courier_awb_no: "",
-  buyer_bank_docs_receiveing_date: "",
-  payment_tenor: "",
-  proceed_realization_due_date: "",
+  courier_awb_date: "",
   export_proceed_realization_value: "",
   proceed_realization_date: "",
   short_realization_value: "",
   short_realization_percentage: "",
-  gross_weight: "",
-  net_weight: "",
-  total_cbm: "",
-  ctn_size: "",
+  freight_charges_air_prepaid: "",
+  fob_value: "",
+  discount_value: "",
+  gross_weight_kg: "",
+  net_weight_kg: "",
+  payment_tenor: "",
+  packing_list_rcvd_date: "",
+  ic_received_date: "",
   remarks: "",
 };
 
@@ -90,27 +96,20 @@ const CommercialInvoiceCreate = (props) => {
   }, []);
 
   /** 🔥 UNIVERSAL CHANGE HANDLER (input + select + textarea) */
-  const handleChange = async (name, value) => {
+  const handleChange = (name, value) => {
     if (name === "contract_id") {
-      try {
-        const response = await api.post("/commercial/contracts/show", {
-          id: value,
-        });
+      // Find contract details from already-fetched contracts
+      const selectedContract = contracts.find(
+        (item) => item.id === parseInt(value)
+      );
 
-        if (response.status === 200 && response.data) {
-          const data = response.data.data;
-
-          // Reset po_list when techpack changes
-          setForm((prev) => ({
-            ...prev,
-            contract_id: value,
-            buyer_id: data.buyer?.id || "",
-            bank_id: data.seller_bank_id || "",
-          }));
-        }
-      } catch (error) {
-        console.error("Error fetching technical package data:", error);
-      }
+      setForm((prev) => ({
+        ...prev,
+        contract_id: value,
+        buyer_id: selectedContract?.buyer?.id || "",
+        bank_id: selectedContract?.seller_bank_id || "",
+      }));
+      setPos(selectedContract.pos);
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -125,21 +124,8 @@ const CommercialInvoiceCreate = (props) => {
   /** Fetch contracts */
   const getContracts = async () => {
     try {
-      const res = await api.post("/merchandising/purchase-contracts");
+      const res = await api.post("/commercial/contracts");
       if (res.status === 200) setContracts(res.data.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  /** Fetch POs on contract change */
-  const getPos = async () => {
-    if (!form.contract_id) return;
-    try {
-      const res = await api.post("/merchandising/pos-public", {
-        purchase_contract_id: form.contract_id,
-      });
-      if (res.status === 200) setPos(res.data.data || []);
     } catch (err) {
       console.error(err);
     }
@@ -148,10 +134,6 @@ const CommercialInvoiceCreate = (props) => {
   useEffect(() => {
     getContracts();
   }, []);
-
-  useEffect(() => {
-    getPos();
-  }, [form.contract_id]);
 
   const [invItems, setInvItems] = useState([]);
 
@@ -208,6 +190,8 @@ const CommercialInvoiceCreate = (props) => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  console.log("POS", pos);
 
   /** Submit Handler */
   const handleSubmit = async (e) => {
@@ -342,20 +326,16 @@ const CommercialInvoiceCreate = (props) => {
         <div className="row">
           {renderSelect(
             "contract_id",
-            "Contract ID *",
+            "EXP LC / CONTRACT *",
             contracts.map((c) => ({
               value: c.id,
               label: c.title,
             })),
             false
           )}
-
-          {renderInput("invoice_no", "Invoice No *")}
-          {renderInput("inv_date", "Invoice Date *", "date")}
-
           {renderSelect(
             "pos",
-            "POS",
+            "POs",
             pos.map((p) => ({
               value: p.id,
               label: p.po_number,
@@ -364,16 +344,10 @@ const CommercialInvoiceCreate = (props) => {
             6
           )}
 
-          {renderSelect(
-            "buyer_id",
-            "Buyer",
-            buyers.map((b) => ({
-              value: b.id,
-              label: b.name,
-            })),
-            false
-          )}
-
+          {renderInput("style_po_no", "Style / PO No")}
+          {renderInput("item_name", "Item Name")}
+          {renderInput("order_buyer", "Order Buyer")}
+          {renderInput("export_lc_contract_no", "Export LC / Contract No")}
           {renderSelect(
             "bank_id",
             "Bank",
@@ -383,14 +357,23 @@ const CommercialInvoiceCreate = (props) => {
             })),
             false
           )}
+          {renderInput("invoice_no", "Invoice No *")}
+          {renderInput("inv_date", "Invoice Date *", "date")}
+
+          {renderInput("pcs_qty", "PCS Qty", "number")}
+          {renderInput("ctns_qty", "CTNS Qty", "number")}
 
           {renderInput("exp_no", "EXP No")}
           {renderInput("exp_date", "EXP Date", "date")}
+          {renderInput("exp_value", "EXP Value", "number")}
+
           {renderInput("ep_no", "EP No")}
           {renderInput("ep_date", "EP Date", "date")}
+
           {renderInput("export_shipping_bill_no", "Export Shipping Bill No")}
           {renderInput("shipping_bill_date", "Shipping Bill Date", "date")}
           {renderInput("ex_factory_date", "Ex Factory Date", "date")}
+
           {renderSelect(
             "mode_of_shipment",
             "Mode Of Shipment",
@@ -400,30 +383,69 @@ const CommercialInvoiceCreate = (props) => {
             })),
             false
           )}
+
           {renderInput("destination_country", "Destination Country")}
-          {renderInput("forwarder", "Forwarder")}
-          {renderInput("onboard_date", "Onboard Date", "date")}
-          {renderInput("freight_charge", "Freight Charge", "number")}
+
+          {renderInput("carrier_forwarder_name", "Carrier / Forwarder Name")}
+          {renderInput("shipped_onboard_date", "Shipped Onboard Date", "date")}
           {renderInput("bl_no", "BL No")}
-          {renderInput("bl_relase_date", "BL Release Date", "date")}
-          {renderInput("container_no", "Container No")}
-          {renderInput("vessel_name", "Vessel Name")}
-          {renderInput("ic_received_date", "IC Received Date", "date")}
+          {renderInput("bl_release_date", "BL Release Date", "date")}
           {renderInput(
-            "bank_docs_submit_date",
-            "Bank Docs Submit Date",
+            "bl_relase_date",
+            "BL Relase Date (typo from backend)",
             "date"
           )}
+
+          {renderInput("container_no", "Container No")}
+          {renderInput("vessel_name", "Vessel Name")}
+          {renderInput("bank_docs_sub_date", "Bank Docs Submit Date")}
           {renderInput("bank_bill_no", "Bank Bill No")}
           {renderInput(
             "bank_to_bank_sending_docs_courier_awb_no",
             "Courier AWB No"
           )}
+          {renderInput("courier_awb_date", "Courier AWB Date", "date")}
+
           {renderInput(
-            "buyer_bank_docs_receiveing_date",
-            "Buyer Bank Docs Receiving Date",
+            "export_proceed_realization_value",
+            "Export Proceed Realization Value",
+            "number"
+          )}
+
+          {renderInput(
+            "proceed_realization_due_date",
+            "Proceed Realization Due Date",
             "date"
           )}
+
+          {renderInput(
+            "short_realization_value",
+            "Short Realization Value",
+            "number"
+          )}
+
+          {renderInput(
+            "proceed_realization_date",
+            "Proceed Realization Date",
+            "date"
+          )}
+
+          {renderInput(
+            "freight_charges_air_prepaid",
+            "Freight Charges Air Prepaid",
+            "number"
+          )}
+          {renderInput(
+            "short_realization_percentage",
+            "Short Realization %",
+            "number"
+          )}
+
+          {renderInput("fob_value", "FOB Value", "number")}
+          {renderInput("discount_value", "Discount Value", "number")}
+
+          {renderInput("gross_weight_kg", "Gross Weight (KG)", "number")}
+          {renderInput("net_weight_kg", "Net Weight (KG)", "number")}
           {renderSelect(
             "payment_tenor",
             "Payment Tenor",
@@ -435,35 +457,13 @@ const CommercialInvoiceCreate = (props) => {
           )}
 
           {renderInput(
-            "proceed_realization_due_date",
-            "Proceed Realization Due Date",
+            "packing_list_rcvd_date",
+            "Packing List Received Date",
             "date"
           )}
-          {renderInput(
-            "export_proceed_realization_value",
-            "Export Proceed Realization Value",
-            "number"
-          )}
-          {renderInput(
-            "proceed_realization_date",
-            "Proceed Realization Date",
-            "date"
-          )}
-          {renderInput(
-            "short_realization_value",
-            "Short Realization Value",
-            "number"
-          )}
-          {renderInput(
-            "short_realization_percentage",
-            "Short Realization %",
-            "number"
-          )}
-          {renderInput("gross_weight", "Total Gross Weight", "number")}
-          {renderInput("net_weight", "Total Net Weight", "number")}
-          {renderInput("total_cbm", "Total CBM")}
-          {renderInput("ctn_size", "CTN Size")}
+          {renderInput("ic_received_date", "IC Received Date", "date")}
 
+          {/* Remarks */}
           <div className="mb-3 col-12">
             <label className="form-label">Remarks</label>
             <textarea

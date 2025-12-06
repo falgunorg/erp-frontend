@@ -604,7 +604,11 @@ export default function ContractDetails(props) {
                     <strong>4. Notify Party:</strong>
                   </div>
                   <div className="col-8">
-                    <p>{form.notify_party}</p>
+                    <p
+                      dangerouslySetInnerHTML={{
+                        __html: form.notify_party,
+                      }}
+                    />
                   </div>
                 </div>
 

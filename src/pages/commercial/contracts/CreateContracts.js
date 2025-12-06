@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import api from "services/api";
 import swal from "sweetalert";
 import Logo from "../../../assets/images/logos/logo-short.png";
@@ -6,6 +6,7 @@ import { useHistory, Link } from "react-router-dom";
 import CustomSelect from "elements/CustomSelect";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
+import JEditor from "elements/JEditor";
 
 export default function CreateContracts(props) {
   const history = useHistory();
@@ -146,7 +147,7 @@ export default function CreateContracts(props) {
     buyer_address: "",
     buyer_phone: "",
     buyer_email: "",
-    notify_party: "",
+
     buyer_bank_name: "",
     buyer_bank_address: "",
     buyer_bank_phone: "",
@@ -166,6 +167,10 @@ export default function CreateContracts(props) {
     agent_commission_clause: "",
   });
 
+  const [notifyParty, setNotifyParty] = useState("");
+  const handleMsgChange = (value) => {
+    setNotifyParty(value);
+  };
   const steps = [
     "Contract Details",
     "Buyer Information",
@@ -212,11 +217,6 @@ export default function CreateContracts(props) {
               .join(", "),
             buyer_phone: buyer.phone || "",
             buyer_email: buyer.email || "",
-            notify_party: buyer.notify_parties.map((p) => ({
-              id: p.id,
-              title: p.title,
-              address: p.address,
-            })),
           };
         }
       }
@@ -259,8 +259,6 @@ export default function CreateContracts(props) {
       console.error("Error updating form:", error);
     }
   };
-
-  console.log("NOTIFY PARTY", form.notify_party);
 
   const getFilteredPorts = () => {
     const mode = form.mode_of_shipment;
@@ -341,6 +339,7 @@ export default function CreateContracts(props) {
       setSpinner(true);
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v || ""));
+      fd.append("notify_party", notifyParty);
       const res = await api.post("/commercial/contracts/create", fd);
       if (res.status === 200) {
         swal("Success!", "Purchase contract saved successfully.", "success");
@@ -464,7 +463,7 @@ export default function CreateContracts(props) {
                       }
                     />
                   </div>
-                  <div className="col-lg-6">
+                  <div className="col-lg-12">
                     <label className="form-label">Buyer Address</label>
                     <textarea
                       rows="2"
@@ -475,37 +474,9 @@ export default function CreateContracts(props) {
                       }
                     />
                   </div>
-                  <div className="col-lg-6">
+                  <div className="col-lg-12">
                     <label className="form-label">Notify Party</label>
-
-                    <textarea
-                      rows="4"
-                      className="form-control"
-                      value={
-                        form.notify_party
-                          ? form.notify_party
-                              .map(
-                                (p, i) =>
-                                  `${i + 1}\n${p.title || ""}\n${
-                                    p.address || ""
-                                  }`
-                              )
-                              .join("\n\n")
-                          : ""
-                      }
-                      onChange={(e) =>
-                        handleChange("notify_party", e.target.value)
-                      }
-                    />
-
-                    {/* <textarea
-                      rows="2"
-                      className="form-control"
-                      value={form.notify_party}
-                      onChange={(e) =>
-                        handleChange("notify_party", e.target.value)
-                      }
-                    /> */}
+                    <JEditor onChange={handleMsgChange} />
                   </div>
                 </div>
               </div>
