@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useHistory, Link } from "react-router-dom";
 import api from "services/api";
 import formatMoney from "services/moneyFormatter";
+import { Modal, Button } from "react-bootstrap";
 
 export default function Contracts(props) {
   const history = useHistory();
@@ -87,6 +88,67 @@ export default function Contracts(props) {
         .map((c) => c.contract_date.split("-")[0])
     ),
   ];
+
+  //Revised area
+
+  const [reviseModal, setReviseModal] = useState(false);
+  const [selectedContract, setSelectedContract] = useState({});
+
+  // revise form data
+  const [reviseForm, setReviseForm] = useState({
+    qty: "",
+    value: "",
+    remarks: "",
+  });
+
+  const openReviseModal = (contract) => {
+    setSelectedContract(contract);
+
+    // preload current values
+    setReviseForm({
+      qty: contract.qty,
+      value: contract.contract_value,
+      remarks: contract.remarks ?? "",
+    });
+
+    setReviseModal(true);
+  };
+
+  const closeReviseModal = () => {
+    setSelectedContract({});
+    setReviseForm({ qty: "", value: "", remarks: "" });
+    setReviseModal(false);
+  };
+
+  const handleReviseChange = (name, value) => {
+    setReviseForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const submitRevisedModal = async () => {
+    try {
+      const response = await api.post(
+        `/commercial/contracts/${selectedContract.id}/revision`,
+        {
+          qty: reviseForm.qty,
+          value: reviseForm.value,
+          remarks: reviseForm.remarks,
+        }
+      );
+
+      if (response.status === 201) {
+        alert("Revision created successfully!");
+
+        // Optional: update the contract in UI without reload
+        selectedContract.qty = reviseForm.qty;
+        selectedContract.contract_value = reviseForm.value;
+
+        closeReviseModal();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to create revision!");
+    }
+  };
 
   // ✅ Set header data
   useEffect(() => {
@@ -206,10 +268,16 @@ export default function Contracts(props) {
                     </Link>
                     <Link
                       to={`/commercial/contracts/edit/${c.id}`}
-                      className="btn btn-sm btn-outline-warning"
+                      className="btn btn-sm btn-outline-warning me-2"
                     >
                       Edit
                     </Link>
+                    <button
+                      onClick={() => openReviseModal(c)}
+                      className="btn btn-sm btn-outline-info"
+                    >
+                      Revise
+                    </button>
                   </td>
                 </tr>
               ))
@@ -223,6 +291,84 @@ export default function Contracts(props) {
           </tbody>
         </table>
       </div>
+
+      <Modal size="md" show={reviseModal} onHide={closeReviseModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Revise Contract</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <div className="row">
+            <div className="col-6">
+              <div className="form-group">
+                <label>Current QTY</label>
+                <input
+                  readOnly
+                  value={selectedContract.qty}
+                  className="form-control"
+                  type="number"
+                />
+              </div>
+            </div>
+
+            <div className="col-6">
+              <div className="form-group">
+                <label>Revise QTY</label>
+                <input
+                  className="form-control"
+                  type="number"
+                  value={reviseForm.qty}
+                  onChange={(e) => handleReviseChange("qty", e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-6">
+              <div className="form-group">
+                <label>Current Value</label>
+                <input
+                  readOnly
+                  value={selectedContract.contract_value}
+                  className="form-control"
+                  type="number"
+                />
+              </div>
+            </div>
+
+            <div className="col-6">
+              <div className="form-group">
+                <label>Revise Value</label>
+                <input
+                  className="form-control"
+                  type="number"
+                  value={reviseForm.value}
+                  onChange={(e) => handleReviseChange("value", e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Remarks</label>
+            <textarea
+              className="form-control"
+              value={reviseForm.remarks}
+              onChange={(e) => handleReviseChange("remarks", e.target.value)}
+            ></textarea>
+          </div>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeReviseModal}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={submitRevisedModal}>
+            Save
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
