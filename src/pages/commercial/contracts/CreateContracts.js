@@ -141,13 +141,13 @@ export default function CreateContracts(props) {
   const [form, setForm] = useState({
     title: "",
     contract_date: "",
+    qty: "",
     contract_value: "",
     contract_type: "fob",
     buyer_id: "",
     buyer_address: "",
     buyer_phone: "",
     buyer_email: "",
-
     buyer_bank_name: "",
     buyer_bank_address: "",
     buyer_bank_phone: "",
@@ -303,7 +303,8 @@ export default function CreateContracts(props) {
           form.title &&
           form.contract_date &&
           form.contract_type &&
-          form.contract_value
+          form.contract_value &&
+          form.qty
         );
       case 1:
         return form.buyer_id && form.buyer_bank_name && form.buyer_bank_swift;
@@ -361,7 +362,7 @@ export default function CreateContracts(props) {
           <div className="card create_tp_body">
             <div className="card-header fw-bold bg-light">Contract Details</div>
             <div className="card-body row g-3">
-              <div className="col-lg-6">
+              <div className="col-lg-4">
                 <label className="form-label">
                   Contract / Export Lc No <span className="text-danger">*</span>
                 </label>
@@ -384,6 +385,19 @@ export default function CreateContracts(props) {
                   }
                 />
               </div>
+
+              <div className="col-lg-2">
+                <label className="form-label">
+                  QTY (PCS)<span className="text-danger">*</span>
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  step={0.1}
+                  value={form.qty}
+                  onChange={(e) => handleChange("qty", e.target.value)}
+                />
+              </div>
               <div className="col-lg-2">
                 <label className="form-label">
                   Contract Value <span className="text-danger">*</span>
@@ -391,6 +405,7 @@ export default function CreateContracts(props) {
                 <input
                   type="number"
                   className="form-control"
+                  step={0.1}
                   value={form.contract_value}
                   onChange={(e) =>
                     handleChange("contract_value", e.target.value)

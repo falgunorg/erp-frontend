@@ -232,6 +232,7 @@ export default function Contracts(props) {
               <th>Buyer</th>
               <th>Port of Loading</th>
               <th>Port of Discharge</th>
+              <th className="text-end">QTY</th>
               <th className="text-end">Contract Value</th>
               <th className="text-end">PO Value</th>
               <th className="text-end">BBLC Value</th>
@@ -253,6 +254,7 @@ export default function Contracts(props) {
                   <td>{c.buyer?.name}</td>
                   <td>{c.port_of_loading}</td>
                   <td>{c.port_of_discharge}</td>
+                  <td className="text-end">{c.qty} PCS</td>
                   <td className="text-end">
                     {formatMoney(c.contract_value)} USD
                   </td>
