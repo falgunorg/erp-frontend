@@ -106,8 +106,10 @@ export default function Contracts(props) {
 
     // preload current values
     setReviseForm({
+      date: "",
       qty: contract.qty,
       value: contract.contract_value,
+      agent_commission: contract.agent_commission,
       remarks: contract.remarks ?? "",
     });
 
@@ -116,7 +118,13 @@ export default function Contracts(props) {
 
   const closeReviseModal = () => {
     setSelectedContract({});
-    setReviseForm({ qty: "", value: "", remarks: "" });
+    setReviseForm({
+      date: "",
+      qty: "",
+      value: "",
+      agent_commission: "",
+      remarks: "",
+    });
     setReviseModal(false);
   };
 
@@ -129,8 +137,10 @@ export default function Contracts(props) {
       const response = await api.post(
         `/commercial/contracts/${selectedContract.id}/revision`,
         {
+          date: reviseForm.date,
           qty: reviseForm.qty,
           value: reviseForm.value,
+          agent_commission: reviseForm.agent_commission,
           remarks: reviseForm.remarks,
         }
       );
@@ -141,6 +151,8 @@ export default function Contracts(props) {
         // Optional: update the contract in UI without reload
         selectedContract.qty = reviseForm.qty;
         selectedContract.contract_value = reviseForm.value;
+        selectedContract.qty = reviseForm.qty;
+        selectedContract.agent_commission = reviseForm.agent_commission;
 
         closeReviseModal();
       }
@@ -303,6 +315,19 @@ export default function Contracts(props) {
           <div className="row">
             <div className="col-6">
               <div className="form-group">
+                <label>Date</label>
+                <input
+                  value={selectedContract.date}
+                  className="form-control"
+                  type="date"
+                  onChange={(e) => handleReviseChange("date", e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-6">
+              <div className="form-group">
                 <label>Current QTY</label>
                 <input
                   readOnly
@@ -347,6 +372,34 @@ export default function Contracts(props) {
                   type="number"
                   value={reviseForm.value}
                   onChange={(e) => handleReviseChange("value", e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-6">
+              <div className="form-group">
+                <label>Current Agent Commission</label>
+                <input
+                  readOnly
+                  value={selectedContract.agent_commission}
+                  className="form-control"
+                  type="number"
+                />
+              </div>
+            </div>
+
+            <div className="col-6">
+              <div className="form-group">
+                <label>Revise Agent Commission</label>
+                <input
+                  className="form-control"
+                  type="number"
+                  value={reviseForm.agent_commission}
+                  onChange={(e) =>
+                    handleReviseChange("agent_commission", e.target.value)
+                  }
                 />
               </div>
             </div>

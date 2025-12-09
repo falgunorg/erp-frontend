@@ -266,10 +266,13 @@ const SummaryDashboard = ({ form }) => {
             <table className="table table-bordered table-striped">
               <thead className="table-dark">
                 <tr>
+                  <th>Date</th>
                   <th>Revision No</th>
                   <th>Qty</th>
                   <th>Change</th>
                   <th>Contract Value</th>
+                  <th>Change</th>
+                  <th>Agent Commission</th>
                   <th>Change</th>
                 </tr>
               </thead>
@@ -293,20 +296,29 @@ const SummaryDashboard = ({ form }) => {
                       ? "text-danger"
                       : "";
 
+                  const commissionChangeColor =
+                    rev.commission_change > 0
+                      ? "text-success"
+                      : rev.commission_change < 0
+                      ? "text-danger"
+                      : "";
+
                   return (
                     <tr key={index}>
+                      {/* DATE */}
+                      <td>
+                        {rev.date
+                          ? new Date(rev.date).toLocaleDateString()
+                          : "—"}
+                      </td>
+
                       {/* Revision No */}
-                      <td
-                        style={{
-                          fontWeight:
-                            isInitial || isCurrent ? "bold" : "normal",
-                        }}
-                      >
+                      <td style={{ fontWeight: "bold" }}>
                         {isInitial
                           ? "Initial"
                           : isCurrent
                           ? "Current"
-                          : `Revision ${rev.revision_no}`}
+                          : `Amendment ${rev.revision_no}`}
                       </td>
 
                       {/* QTY */}
@@ -332,68 +344,17 @@ const SummaryDashboard = ({ form }) => {
                           ? `+${Number(rev.value_change).toLocaleString()}`
                           : Number(rev.value_change).toLocaleString()}
                       </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
 
-          <div className="table-responsive mt-3 d-none">
-            <table className="table table-bordered table-striped">
-              <thead className="table-dark">
-                <tr>
-                  <th>Revision No</th>
-                  <th>Qty</th>
-                  <th>Change</th>
-                  <th>Contract Value</th>
-                  <th>Change</th>
-                </tr>
-              </thead>
+                      {/* Agent Commission */}
+                      <td>{Number(rev.agent_commission).toLocaleString()}</td>
 
-              <tbody>
-                {form.revision_history?.map((rev, index) => {
-                  const isInitial = rev.revision_no === "initial";
-                  const isCurrent = rev.revision_no === "current";
-
-                  return (
-                    <tr key={index}>
-                      {/* Revision No */}
-                      <td
-                        style={{
-                          fontWeight:
-                            isInitial || isCurrent ? "bold" : "normal",
-                        }}
-                      >
-                        {isInitial
-                          ? "Initial"
-                          : isCurrent
-                          ? "Current"
-                          : `Revision ${rev.revision_no}`}
-                      </td>
-
-                      {/* QTY */}
-                      <td>{rev.qty.toLocaleString()}</td>
-
-                      {/* Qty Change */}
-                      <td>
-                        {rev.qty_change === null
+                      {/* Agent Commission Change */}
+                      <td className={commissionChangeColor}>
+                        {rev.commission_change === null
                           ? "—"
-                          : rev.qty_change > 0
-                          ? `+${rev.qty_change.toLocaleString()}`
-                          : rev.qty_change.toLocaleString()}
-                      </td>
-
-                      {/* Contract Value */}
-                      <td>{Number(rev.value).toLocaleString()}</td>
-
-                      {/* Contract Value Change */}
-                      <td>
-                        {rev.value_change === null
-                          ? "—"
-                          : rev.value_change > 0
-                          ? `+${Number(rev.value_change).toLocaleString()}`
-                          : Number(rev.value_change).toLocaleString()}
+                          : rev.commission_change > 0
+                          ? `+${Number(rev.commission_change).toLocaleString()}`
+                          : Number(rev.commission_change).toLocaleString()}
                       </td>
                     </tr>
                   );

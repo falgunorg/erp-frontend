@@ -143,6 +143,7 @@ export default function CreateContracts(props) {
     contract_date: "",
     qty: "",
     contract_value: "",
+    agent_commission: "",
     contract_type: "fob",
     buyer_id: "",
     buyer_address: "",
@@ -362,7 +363,7 @@ export default function CreateContracts(props) {
           <div className="card create_tp_body">
             <div className="card-header fw-bold bg-light">Contract Details</div>
             <div className="card-body row g-3">
-              <div className="col-lg-4">
+              <div className="col-lg-3">
                 <label className="form-label">
                   Contract / Export Lc No <span className="text-danger">*</span>
                 </label>
@@ -372,7 +373,7 @@ export default function CreateContracts(props) {
                   onChange={(e) => handleChange("title", e.target.value)}
                 />
               </div>
-              <div className="col-lg-2">
+              <div className="col">
                 <label className="form-label">
                   Contract Date <span className="text-danger">*</span>
                 </label>
@@ -386,7 +387,7 @@ export default function CreateContracts(props) {
                 />
               </div>
 
-              <div className="col-lg-2">
+              <div className="col">
                 <label className="form-label">
                   QTY (PCS)<span className="text-danger">*</span>
                 </label>
@@ -398,7 +399,7 @@ export default function CreateContracts(props) {
                   onChange={(e) => handleChange("qty", e.target.value)}
                 />
               </div>
-              <div className="col-lg-2">
+              <div className="col">
                 <label className="form-label">
                   Contract Value <span className="text-danger">*</span>
                 </label>
@@ -412,7 +413,20 @@ export default function CreateContracts(props) {
                   }
                 />
               </div>
-              <div className="col-lg-2">
+
+              <div className="col">
+                <label className="form-label">Agent Commission</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  step={0.1}
+                  value={form.agent_commission}
+                  onChange={(e) =>
+                    handleChange("agent_commission", e.target.value)
+                  }
+                />
+              </div>
+              <div className="col">
                 <label className="form-label">
                   Contract Type <span className="text-danger">*</span>
                 </label>
