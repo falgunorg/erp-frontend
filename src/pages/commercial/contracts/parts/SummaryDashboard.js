@@ -262,8 +262,8 @@ const SummaryDashboard = ({ form }) => {
       <Grid container spacing={3}>
         {/* LEFT SIDE: Tables */}
         <Grid item xs={6} md={6}>
-          <div className="table-responsive mt-3">
-            <table className="table table-bordered table-striped">
+          <div className="table-responsive rounded">
+            <table className="table table-bordered table-striped rounded">
               <thead className="table-dark">
                 <tr>
                   <th>Date</th>

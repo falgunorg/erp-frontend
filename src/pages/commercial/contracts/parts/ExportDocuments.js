@@ -3,9 +3,6 @@ import { Link } from "react-router-dom";
 import api from "services/api";
 
 export default function ExportDocuments({ form }) {
-
-
-  
   const handleBulkFileUpload = async (e) => {
     const file = e.target.files[0]; // only one file
 
@@ -28,7 +25,7 @@ export default function ExportDocuments({ form }) {
       if (res.status === 200) {
         console.log("Uploaded File:", res.data.file);
         alert("File Imported Successfully!");
-         window.location.reload();
+        window.location.reload();
       }
     } catch (error) {
       console.error("Upload Error:", error);
@@ -69,8 +66,6 @@ export default function ExportDocuments({ form }) {
               <th>BANK BILL NO</th>
               <th>QTY</th>
               <th>INVOICE VAL.</th>
-
-              <th>ACTION</th>
             </tr>
           </thead>
           <tbody>
@@ -90,13 +85,8 @@ export default function ExportDocuments({ form }) {
                     </Link>
                   </td>
                   <td>{inv.bank_bill_no}</td>
-                  <td>{inv.qty} PCS</td>
+                  <td>{inv.pcs_qty} PCS</td>
                   <td>$ {inv.exp_value ?? "-"}</td>
-                  <td>
-                    <a target="_blank" href={inv.file_path}>
-                      Details
-                    </a>
-                  </td>
                 </tr>
               ))
             )}

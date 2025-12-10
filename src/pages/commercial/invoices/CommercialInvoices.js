@@ -1,19 +1,110 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "services/api";
+import CustomSelect from "elements/CustomSelect";
+import Pagination from "elements/Pagination";
 
 const PAGE_SIZE = 10;
 
 const CommercialInvoices = (props) => {
   const [invoices, setInvoices] = useState([]);
-  const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
 
+  const [contracts, setContracts] = useState([]);
+  const [buyers, setBuyers] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [banks, setBanks] = useState([]);
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const [b, c, bk, con] = await Promise.all([
+          api.post("/common/buyers"),
+          api.post("/common/companies", { type: "own" }),
+          api.get("/common/banks"),
+          api.post("/commercial/contracts"),
+        ]);
+        setBuyers(b.data?.data || []);
+        setCompanies(c.data?.data || []);
+        setBanks(bk.data || []);
+        setContracts(con.data.data || []);
+      } catch (err) {
+        console.error("Error fetching dropdown data:", err);
+      }
+    };
+    fetchOptions();
+  }, []);
+
+  const shippingModes = ["Sea", "Air", "Land", "River", "Sea/Air"];
+
+  const [form, setForm] = useState({
+    search: "",
+    contract_id: "",
+    buyer_id: "",
+    company_id: "",
+    bank_id: "",
+    from_date: "",
+    to_date: "",
+    mode_of_shipment: "",
+  });
+
+  const handleChange = (name, value) => {
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const renderSelect = (name, label, options) => (
+    <div className="col create_tp_body">
+      <label className="form-label">{label}</label>
+
+      <CustomSelect
+        isMulti={false}
+        options={options}
+        className="select_wo"
+        placeholder={`Select ${label}`}
+        value={
+          options.find((opt) => String(opt.value) === String(form[name])) ||
+          null
+        }
+        onChange={(selected) =>
+          handleChange(name, selected ? String(selected.value) : "")
+        }
+      />
+    </div>
+  );
+
+  const renderInput = (name, label, type = "text") => (
+    <div className="col create_tp_body">
+      <label className="form-label">{label}</label>
+
+      <input
+        type={type}
+        className="form-control"
+        name={name}
+        value={form[name] ?? ""}
+        onChange={(e) => handleChange(name, e.target.value)}
+      />
+    </div>
+  );
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [from, setFrom] = useState(0);
+  const [to, setTo] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [links, setLinks] = useState([]);
   const fetchData = async () => {
     try {
-      const res = await api.get("/commercial/commercial-invoices");
-      const data = await res.data;
+      const res = await api.get(
+        "/commercial/commercial-invoices?page=" + currentPage,
+        form
+      );
+      const data = await res.data.data;
       setInvoices(Array.isArray(data) ? data.reverse() : []);
+
+      setLinks(res.data.links);
+      setFrom(res.data.from);
+      setTo(res.data.to);
+      setTotal(res.data.total);
     } catch (err) {
       console.error(err);
       alert("Failed to load invoices");
@@ -22,7 +113,9 @@ const CommercialInvoices = (props) => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [currentPage, form]);
+
+  console.log("INCOICES", invoices);
 
   const deleteInvoice = async (id) => {
     if (!window.confirm("Delete this invoice?")) return;
@@ -35,24 +128,6 @@ const CommercialInvoices = (props) => {
       alert("Delete failed");
     }
   };
-
-  // client-side search
-  const filtered = invoices.filter((inv) => {
-    const q = query.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      (inv.invoice_no || "").toString().toLowerCase().includes(q) ||
-      (inv.contract_id || "").toString().toLowerCase().includes(q) ||
-      (inv.buyer_id || "").toString().toLowerCase().includes(q)
-    );
-  });
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const shown = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [totalPages, page]);
 
   const handleBulkFileUpload = async (e) => {
     const file = e.target.files[0]; // only one file
@@ -95,8 +170,8 @@ const CommercialInvoices = (props) => {
   }, []);
 
   return (
-    <div>
-      <div className="d-flex justify-content-end gap-2">
+    <div className="create_technical_pack">
+      <div className="d-flex justify-content-end gap-2 ">
         <label htmlFor="singleFile" className="btn btn-sm btn-success me-2">
           + IMPORT EXCEL
         </label>
@@ -113,27 +188,38 @@ const CommercialInvoices = (props) => {
           + New Invoice
         </Link>
       </div>
-
-      <div className="card p-3 mb-3">
-        <div className="row g-2">
-          <div className="col-md-6">
-            <input
-              className="form-control"
-              placeholder="Search by invoice no, contract id or buyer id..."
-              value={query}
-              onChange={(e) => {
-                setQuery(e.target.value);
-                setPage(1);
-              }}
-            />
-          </div>
-          <div className="col-md-6 text-end">
-            <small className="text-muted">
-              Total: {filtered.length} result(s)
-            </small>
-          </div>
-        </div>
+      <hr />
+      <div className="row">
+        {renderInput("search", "Search")}
+        {renderSelect(
+          "contract_id",
+          "Contract",
+          contracts.map((c) => ({ value: c.id, label: c.title }))
+        )}
+        {renderSelect(
+          "buyer_id",
+          "Buyer",
+          buyers.map((c) => ({ value: c.id, label: c.name }))
+        )}
+        {renderSelect(
+          "company_id",
+          "Company",
+          companies.map((c) => ({ value: c.id, label: c.title }))
+        )}
+        {renderSelect(
+          "bank_id",
+          "Bank",
+          banks.map((c) => ({ value: c.id, label: c.title }))
+        )}
+        {renderInput("from_date", "From Date", "date")}
+        {renderInput("to_date", "To Date", "date")}
+        {renderSelect(
+          "mode_of_shipment",
+          "Shipping Mode",
+          shippingModes.map((c) => ({ value: c, label: c }))
+        )}
       </div>
+      <br />
 
       <div className="table-responsive">
         <table className="table table-hover align-middle">
@@ -153,14 +239,14 @@ const CommercialInvoices = (props) => {
           </thead>
 
           <tbody>
-            {shown.length === 0 ? (
+            {invoices.length === 0 ? (
               <tr>
                 <td colSpan="10" className="text-center text-muted py-4">
                   No invoices found
                 </td>
               </tr>
             ) : (
-              shown.map((inv, idx) => (
+              invoices.map((inv, idx) => (
                 <tr key={inv.id}>
                   <td>{(page - 1) * PAGE_SIZE + idx + 1}</td>
 
@@ -235,52 +321,15 @@ const CommercialInvoices = (props) => {
           </tbody>
         </table>
       </div>
+      <h6 className="text-center">
+        Showing {from} To {to} From {total}
+      </h6>
 
-      <div className="d-flex justify-content-between align-items-center mt-3">
-        <div>
-          <small className="text-muted">
-            Showing {Math.min(filtered.length, (page - 1) * PAGE_SIZE + 1)} -{" "}
-            {Math.min(filtered.length, page * PAGE_SIZE)} of {filtered.length}
-          </small>
-        </div>
-
-        <div>
-          <nav>
-            <ul className="pagination mb-0">
-              <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                <button
-                  className="page-link"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                >
-                  Prev
-                </button>
-              </li>
-
-              {Array.from({ length: totalPages }).map((_, i) => (
-                <li
-                  key={i}
-                  className={`page-item ${page === i + 1 ? "active" : ""}`}
-                >
-                  <button className="page-link" onClick={() => setPage(i + 1)}>
-                    {i + 1}
-                  </button>
-                </li>
-              ))}
-
-              <li
-                className={`page-item ${page === totalPages ? "disabled" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                >
-                  Next
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </div>
+      <Pagination
+        links={links}
+        setCurrentPage={setCurrentPage}
+        currentPage={currentPage}
+      />
     </div>
   );
 };

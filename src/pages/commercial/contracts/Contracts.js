@@ -246,6 +246,9 @@ export default function Contracts(props) {
               <th>Port of Discharge</th>
               <th className="text-end">QTY</th>
               <th className="text-end">Contract Value</th>
+              <th className="text-end">Agent Commission</th>
+
+              <th className="text-end">Net Value</th>
               <th className="text-end">PO Value</th>
               <th className="text-end">BBLC Value</th>
               <th className="text-end">EXP Value</th>
@@ -269,6 +272,12 @@ export default function Contracts(props) {
                   <td className="text-end">{c.qty} PCS</td>
                   <td className="text-end">
                     {formatMoney(c.contract_value)} USD
+                  </td>
+                  <td className="text-end">
+                    {formatMoney(c.agent_commission)} USD
+                  </td>
+                  <td className="text-end">
+                    {formatMoney(c.contract_value - c.agent_commission)} USD
                   </td>
                   <td className="text-end">{formatMoney(c.po_value)} USD</td>
                   <td className="text-end">{formatMoney(c.bblc_value)} USD</td>
@@ -297,7 +306,7 @@ export default function Contracts(props) {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="text-center text-muted">
+                <td colSpan="10" className="text-center text-muted">
                   No contracts found.
                 </td>
               </tr>
