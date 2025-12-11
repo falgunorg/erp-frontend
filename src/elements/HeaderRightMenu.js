@@ -17,6 +17,8 @@ import {
   HeaderWhatsappIcon,
   HeaderWhatsappActiveIcon,
   HeaderSearchIcon,
+  GoForward,
+  GoBack,
 } from "./SvgIcons";
 
 export default function HeaderRightMenu(props) {
@@ -135,6 +137,12 @@ export default function HeaderRightMenu(props) {
         </>
       )}
 
+      <div className="item me-2">
+        <GoBack />
+      </div>
+      <div className="item me-2">
+        <GoForward />
+      </div>
       <div onClick={toggleExpand} className="item me-2">
         <Link to="#" className="#">
           {expandSearch ? (

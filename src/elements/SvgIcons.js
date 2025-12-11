@@ -436,36 +436,16 @@ export const ArrowLeftIcon = (props) => (
   </svg>
 );
 export const ArrowRightIcon = (props) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="7.156"
-    height="9.121"
-    viewBox="0 0 7.156 9.121"
-  >
-    <path
-      id="Polygon_176"
-      data-name="Polygon 176"
-      d="M3.659,1.308a1,1,0,0,1,1.682,0L8.01,5.459A1,1,0,0,1,7.168,7H1.832A1,1,0,0,1,.99,5.459Z"
-      transform="translate(7.156 0.122) rotate(91)"
-      fill="#707070"
-    ></path>
-  </svg>
+  <i
+    style={{ color: "#707070", fontSize: "16px" }}
+    className="fa fa-angle-right"
+  ></i>
 );
 export const ArrowDownIcon = (props) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="9"
-    height="7"
-    viewBox="0 0 9 7"
-  >
-    <path
-      id="Polygon_29"
-      data-name="Polygon 29"
-      d="M3.659,1.308a1,1,0,0,1,1.682,0L8.01,5.459A1,1,0,0,1,7.168,7H1.832A1,1,0,0,1,.99,5.459Z"
-      transform="translate(9 7) rotate(180)"
-      fill="#707070"
-    ></path>
-  </svg>
+  <i
+    style={{ color: "#707070", fontSize: "16px" }}
+    className="fa fa-angle-down"
+  ></i>
 );
 export const MailIcon = (props) => (
   <svg
@@ -901,6 +881,109 @@ export const HeaderWhatsappActiveIcon = (props) => (
       <path d="M17.102 14.652c-.624-.402-.885.08-.885.08s-.684.883-.905 1.124c-.219.241-.32.421-.982.161-.663-.262-1.627-.965-2.33-1.607-.6-.548-1.445-1.787-1.748-2.289-.301-.502-.059-.643-.059-.643s.381-.342.822-.863c.443-.522.182-1.085.182-1.085l-1.024-2.651c-.193-.371-1.246-.482-1.748-.181C7.923 7 6.858 8.125 6.858 9.691c0 1.193-.061 1.506 1.687 4.117s4.086 3.995 4.8 4.338c.965.461 2.39 1.145 3.535 1.064s2.268-.783 2.75-1.729c.482-.943.082-1.405.082-1.405s-1.857-.937-2.61-1.424"></path>
       <path d="M13.355 0C6.278 0 .521 5.758.521 12.834c0 2.629 1.356 5.57 1.902 6.645L0 26.374l6.996-2.39c1.019.492 3.753 1.682 6.359 1.682 7.076 0 12.832-5.757 12.832-12.832C26.188 5.758 20.432 0 13.355 0m0 23.616c-2.692 0-5.769-1.628-5.8-1.644l-.394-.211-3.828 1.308 1.325-3.768-.226-.403c-.019-.033-1.862-3.371-1.862-6.064 0-5.946 4.838-10.783 10.784-10.783 5.945 0 10.783 4.837 10.783 10.783.002 5.945-4.836 10.782-10.782 10.782"></path>
     </g>
+  </svg>
+);
+
+export const GoForward = (props) => (
+  <svg
+    width="26"
+    height="26"
+    viewBox="0 0 26 26"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g filter="url(#filter0_d_164_2)">
+      <rect x="3" width="20" height="20" rx="3" fill="#EEEEEF" />
+    </g>
+    <path d="M17 10L11 14.3301V5.66987L17 10Z" fill="#707070" />
+    <defs>
+      <filter
+        id="filter0_d_164_2"
+        x="0"
+        y="0"
+        width="26"
+        height="26"
+        filterUnits="userSpaceOnUse"
+        color-interpolation-filters="sRGB"
+      >
+        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feColorMatrix
+          in="SourceAlpha"
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          result="hardAlpha"
+        />
+        <feOffset dy="3" />
+        <feGaussianBlur stdDeviation="1.5" />
+        <feComposite in2="hardAlpha" operator="out" />
+        <feColorMatrix
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.160784 0"
+        />
+        <feBlend
+          mode="normal"
+          in2="BackgroundImageFix"
+          result="effect1_dropShadow_164_2"
+        />
+        <feBlend
+          mode="normal"
+          in="SourceGraphic"
+          in2="effect1_dropShadow_164_2"
+          result="shape"
+        />
+      </filter>
+    </defs>
+  </svg>
+);
+export const GoBack = (props) => (
+  <svg
+    width="26"
+    height="26"
+    viewBox="0 0 26 26"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g filter="url(#filter0_d_165_2)">
+      <rect x="3" width="20" height="20" rx="3" fill="#EEEEEF" />
+    </g>
+    <path d="M8 10L14 5.66987L14 14.3301L8 10Z" fill="#707070" />
+    <defs>
+      <filter
+        id="filter0_d_165_2"
+        x="0"
+        y="0"
+        width="26"
+        height="26"
+        filterUnits="userSpaceOnUse"
+        color-interpolation-filters="sRGB"
+      >
+        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feColorMatrix
+          in="SourceAlpha"
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+          result="hardAlpha"
+        />
+        <feOffset dy="3" />
+        <feGaussianBlur stdDeviation="1.5" />
+        <feComposite in2="hardAlpha" operator="out" />
+        <feColorMatrix
+          type="matrix"
+          values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.160784 0"
+        />
+        <feBlend
+          mode="normal"
+          in2="BackgroundImageFix"
+          result="effect1_dropShadow_165_2"
+        />
+        <feBlend
+          mode="normal"
+          in="SourceGraphic"
+          in2="effect1_dropShadow_165_2"
+          result="shape"
+        />
+      </filter>
+    </defs>
   </svg>
 );
 

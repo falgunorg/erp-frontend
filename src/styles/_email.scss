@@ -242,11 +242,11 @@
   display: grid;
   grid-template-columns: 50.5% 49.5%;
   .actions_left {
-    margin-top: -1px;
+    margin-top: -3px;
     .dropdown {
       button {
-        min-width: 100px;
-        height: 25px;
+        min-width: 97px;
+        height: 20px;
         background: none;
         border-radius: 3px;
         border: none;
@@ -279,8 +279,8 @@
       }
     }
     button {
-      min-width: 100px;
-      height: 25px;
+      min-width: 95px;
+      height: 20px;
       // background: $light-gray-4;
       background: none;
       border-radius: 3px;
@@ -304,6 +304,7 @@
   }
 
   .actions_right {
+    margin-top: -3px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -384,7 +385,7 @@
   /* Handle */
   &::-webkit-scrollbar-thumb {
     background: #9d9d9d; // White color for the scrollbar thumb
-    width: 3px; // Thumb width is 4px
+    width: 2px; // Thumb width is 4px
     border-radius: 3px !important;
     border: 0.2px solid #9d9d9d !important;
     height: 100px;
@@ -624,16 +625,15 @@
 
     .single_mail_item {
       display: grid;
-      grid-template-columns: 2.5% 50.5% 17% 10% 20%;
+      grid-template-columns: 5% 72% 23%;
       align-items: center;
       cursor: pointer;
-      border: 1px solid #dee2e6; // Uniform border on all sides
-      border-top: none; // Only first item should have a top border
-      height: 25px;
+      border: 1px solid #dee2e6;
+      border-top: none;
 
-      &:first-child {
-        border-top: 1px solid #dee2e6; // Top border for the first item only
-      }
+      // &:first-child {
+      //   border-top: 1px solid #dee2e6; // Top border for the first item only
+      // }
 
       &:hover {
         background: $theme_color_v1;
@@ -662,6 +662,16 @@
 
         .show_when_hover {
           display: inline-block;
+        }
+      }
+
+      .email_context {
+        .email_subject {
+          font-weight: 500 !important;
+        }
+        .email_sender_wo {
+          display: grid;
+          grid-template-columns: 50% 50%;
         }
       }
 
@@ -694,6 +704,9 @@
         .step_border {
           border-left: 1px solid $light-gray-1;
           padding-right: 7px;
+        }
+        &.submail_indicator {
+          text-overflow: unset !important;
         }
       }
 
@@ -792,10 +805,9 @@
 
       .single_mail_item {
         display: grid;
-        grid-template-columns: 2.5% 49.7% 17.5% 10.1% 20% !important;
-
-        &:nth-child(2) {
-          margin-left: -15px; // Use padding instead of margin
+        grid-template-columns: 5% 72% 23% !important;
+        .email_context {
+          margin-left: -10px !important;
         }
       }
     }

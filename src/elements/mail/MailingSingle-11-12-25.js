@@ -11,6 +11,7 @@ const MailingSingle = ({
   handleItemClick,
   handleContextMenu,
   toggleSelectChange,
+
   selectedMailIds,
   mailMinimize,
   mailFolder,
@@ -83,7 +84,7 @@ const MailingSingle = ({
       onDoubleClick={() => handleDoubleClick(item)}
     >
       <div
-        className="submail_indicator mail_text text-center"
+        className="mail_text text-center"
         style={{
           paddingLeft:
             item.isRead === false
@@ -119,26 +120,33 @@ const MailingSingle = ({
               </Link>
             )}
       </div>
-      <div className="email_context">
-        <div
-          // style={{ marginLeft: isSubMail ? "-10px" : "0px" }}
-          title={item.subject}
-          className={item.isRead === false ? "mail_text email_subject unread" : "mail_text email_subject"}
-        >
-          {item.subject ? item.subject : "No Subject"}
-        </div>
-        <div className="email_sender_wo">
-          <div title={item.sender?.emailAddress?.name} className="mail_text">
-            {item.sender?.emailAddress?.name}
-          </div>
-          <div title={item.workOrder} className="mail_text">
-            <span className="step_border"></span>
-            {item.workOrder}
-          </div>
-        </div>
+
+      <div
+        style={{ marginLeft: isSubMail ? "-10px" : "0px" }}
+        title={item.subject}
+        className={item.isRead === false ? "mail_text unread" : "mail_text"}
+      >
+        {item.subject ? item.subject : "No Subject"}
       </div>
-      <div className="email_dateTime text-end">
-        <div className="icons-area me-2">
+      <div title={item.sender?.emailAddress?.name} className="mail_text">
+        <span className="step_border"></span>
+        {item.sender?.emailAddress?.name}
+      </div>
+      <div title={item.workOrder} className="mail_text">
+        <span className="step_border"></span>
+        {item.workOrder}
+      </div>
+      <div
+        title={mailMinimize.formatDate(item.receivedDateTime)}
+        className="mail_text dateTime"
+      >
+        <span className="step_border"></span>
+        <div className="date_area">
+          {" "}
+          {mailMinimize.formatDate(item.receivedDateTime)}
+        </div>
+        <div className="icons-area">
+          {/* Display flag and delete icons */}
           {item.flag?.flagStatus === "notFlagged" ? (
             <svg
               className="me-1"
@@ -231,9 +239,24 @@ const MailingSingle = ({
               />
             </svg>
           )}
-        </div>
-        <div className="date_area mail_text me-1">
-          {mailMinimize.formatDate(item.receivedDateTime)}
+
+          {/* {mailFolder.folderName === "Deleted Items" ? (
+            <>
+              <i
+                onClick={() => mailMinimize.handleRestore(item.id)}
+                className="fa fa-recycle text-success"
+              ></i>
+              <i
+                onClick={() => handlePermanentDelete(item.id)}
+                className="fa fa-trash text-danger"
+              ></i>
+            </>
+          ) : (
+            <i
+              onClick={() => handleDelete(item.id)}
+              className="fa fa-trash text-danger"
+            ></i>
+          )} */}
         </div>
       </div>
     </div>
