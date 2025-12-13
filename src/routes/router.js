@@ -285,6 +285,10 @@ import CommercialInvoiceCreate from "pages/commercial/invoices/CommercialInvoice
 import CommercialInvoiceDetails from "pages/commercial/invoices/CommercialInvoiceDetails";
 import CommercialInvoiceEdit from "pages/commercial/invoices/CommercialInvoiceEdit";
 
+//role permission
+
+import RolePermissionManager from "pages/admin/role-permissions/RolePermissionManager";
+
 function OpenRoutes() {
   return (
     <BrowserRouter>
@@ -1282,6 +1286,11 @@ class PrivateRoutes extends Component {
             exact
             path="/commercial/invoices-show/:id?"
             component={CommercialInvoiceDetails}
+          ></PrivateRoute>
+          <PrivateRoute
+            exact
+            path="/admin/role-permission"
+            component={RolePermissionManager}
           ></PrivateRoute>
           <Redirect path="*" to="/dashboard" />
         </Switch>

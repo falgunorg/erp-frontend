@@ -71,7 +71,7 @@ const buttons = [
               id="B"
               transform="translate(0 11)"
               font-size="12"
-              font-family="Arial-BoldMT, Arial"
+              font-family: "Inter", sans-serif"
               font-weight="700"
             >
               <tspan x="0" y="0">
@@ -98,7 +98,7 @@ const buttons = [
               id="I"
               transform="translate(0 11)"
               font-size="12"
-              font-family="Arial-ItalicMT, Arial"
+              font-family: "Inter", sans-serif"
               font-style="italic"
             >
               <tspan x="0" y="0">
@@ -125,7 +125,7 @@ const buttons = [
               id="U"
               transform="translate(0 11)"
               font-size="12"
-              font-family="ArialMT, Arial"
+              font-family: "Inter", sans-serif"
             >
               <tspan x="0" y="0">
                 U
@@ -152,7 +152,8 @@ const buttons = [
               id="S"
               transform="translate(1.75 11)"
               font-size="12"
-              font-family="ArialMT, Arial"
+             
+              font-family: "Inter", sans-serif"
             >
               <tspan x="0" y="0">
                 S
@@ -189,7 +190,7 @@ const buttons = [
               id="H"
               transform="translate(0 11)"
               font-size="12"
-              font-family="ArialMT, Arial"
+              font-family: "Inter", sans-serif"
             >
               <tspan x="0" y="0">
                 H

@@ -1,6 +1,8 @@
-@import url("https://fonts.googleapis.com/css?family=Inconsolata:700");
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -27,7 +29,7 @@ a,
 }
 
 .body {
-  font-family: "Myriad Pro";
+  font-family: "Inter", sans-serif;
   background-image: -webkit-gradient(
     linear,
     left top,
@@ -1016,7 +1018,7 @@ iframe {
 }
 
 .searcbox input {
-  font-family: "Inconsolata", monospace;
+  font-family: "Inter", sans-serif;
   position: absolute;
   margin: auto;
   top: 0;
@@ -5304,7 +5306,7 @@ header {
   .progress_container
   .CircularProgressbar-path {
   stroke: #10294f;
-  strokeLinecap: unset;
+  strokelinecap: unset;
 }
 
 .right_area
@@ -6101,7 +6103,7 @@ header {
 .banner .banner_text_section .banner_description {
   color: #0e2852;
   font-size: 23px;
-  font-family: "Myriad Pro", serif;
+  font-family: "Inter", sans-serif;
   font-weight: regular;
   letter-spacing: 12px;
   margin-bottom: 30px;
@@ -6593,7 +6595,7 @@ header {
 .single_game .provider_name {
   font-size: 8px;
   text-transform: uppercase;
-  font-family: "Helvetica";
+  font-family: "Inter", sans-serif;
 }
 
 .single_game .game_name {
@@ -7897,7 +7899,7 @@ header {
 }
 
 .login_modal .modal_headline {
-  font-family: "Cairo", sans-serif;
+ font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 24px;
@@ -7933,7 +7935,7 @@ header {
   width: 100px;
   border-radius: 25px;
   line-height: 36px;
-  font-family: "Cairo", sans-serif;
+   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 14px;
@@ -7974,7 +7976,7 @@ header {
 }
 
 .login_modal .form_area .input_item .name {
-  font-family: "Cairo", sans-serif;
+   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 12px;
@@ -8000,7 +8002,7 @@ header {
   background: #050a1e;
   color: white;
   height: 48px;
-  font-family: "Cairo", sans-serif;
+   font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: normal;
   font-size: 14px;
@@ -8043,7 +8045,7 @@ header {
   height: 44px;
   background: #863ab7;
   color: white;
-  font-family: "Cairo", sans-serif;
+ font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: bold;
   font-size: 12px;
@@ -8074,7 +8076,7 @@ header {
 }
 
 .login_modal .privacy_text {
-  font-family: "Cairo", sans-serif;
+ font-family: "Inter", sans-serif;
   font-style: normal;
   font-weight: 600;
   font-size: 12px;
@@ -8139,7 +8141,7 @@ header {
 .reg_check_area .check_area .check_text {
   display: inline-block;
   color: #fff;
-  font-family: "Cairo", sans-serif;
+  font-family: "Inter", sans-serif;
   width: calc(100% - 35px);
   vertical-align: top;
   line-height: 20px;
@@ -9693,4 +9695,3 @@ header {
   width: 25px;
   margin-right: 2px;
 }
-

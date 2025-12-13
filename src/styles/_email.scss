@@ -182,27 +182,27 @@
 
 .css-igs3ac {
   border-style: unset !important;
-  font-family: "Helvetica Neue" !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 .css-p1olib-MuiAutocomplete-endAdornment {
   display: none !important;
-  font-family: "Helvetica Neue" !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 .css-1tw9w9k-MuiAutocomplete-root {
   line-height: 100% !important;
-  font-family: "Helvetica Neue" !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 .autocomplete-container {
   position: relative !important;
   width: 100% !important;
-  font-family: "Helvetica Neue" !important;
+  font-family: "Inter", sans-serif !important;
 
   .css-1d3z3hw-MuiOutlinedInput-notchedOutline {
     border: none !important;
-    font-family: "Helvetica Neue" !important;
+    font-family: "Inter", sans-serif !important;
   }
 
   .select_all_button {
@@ -214,12 +214,12 @@
 
 .css-38raov-MuiButtonBase-root-MuiChip-root {
   height: unset !important;
-  font-family: "Helvetica Neue" !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 .css-1tw9w9k-MuiAutocomplete-root .MuiOutlinedInput-root {
   padding: 0 !important;
-  font-family: "Helvetica Neue" !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 .css-6od3lo-MuiChip-label {
@@ -228,7 +228,7 @@
   padding-left: 5px !important;
   padding-right: 8px !important;
   line-height: 100% !important;
-  font-family: "Helvetica Neue" !important;
+  font-family: "Inter", sans-serif !important;
 }
 
 .MuiChip-deleteIcon {
@@ -359,9 +359,11 @@
   height: calc(100vh - 112px);
   gap: 11px;
   overflow-x: hidden;
+  font-family: "Inter", sans-serif !important;
 }
 
 .email-sidebar {
+  font-family: "Inter", sans-serif !important;
   width: 11.43%;
   overflow-y: auto;
   position: relative;
@@ -400,9 +402,10 @@
     margin-bottom: 20px;
 
     .folder_name {
-      font-size: 14px;
+      font-size: 16px;
       margin-bottom: 10px;
       font-weight: 500;
+      font-family: "Inter", sans-serif !important;
     }
 
     ul {
@@ -420,7 +423,7 @@
           gap: 10px;
           justify-content: space-between;
           font-size: 11px;
-          font-family: "Helvetica Neue";
+          font-family: "Inter", sans-serif !important;
 
           &.flex_button {
             padding: 0;
@@ -469,6 +472,7 @@
   padding: 0 0 10px 0;
   overflow: hidden;
   transition: width 0.3s;
+  font-family: "Inter", sans-serif !important;
 
   &.collapsed {
     width: 0px;
@@ -490,6 +494,7 @@
       gap: 10px;
       align-items: baseline;
       padding-left: 5px;
+      font-family: "Inter", sans-serif !important;
 
       .filter_btn {
         height: 20px;
@@ -584,7 +589,7 @@
     padding-bottom: 40px;
     scroll-behavior: smooth;
     outline: none;
-
+    font-family: "Inter", sans-serif !important;
     scrollbar-color: #9d9d9d #f5f5f5;
 
     &::-webkit-scrollbar {
@@ -624,6 +629,7 @@
     }
 
     .single_mail_item {
+      font-family: "Inter", sans-serif !important;
       display: grid;
       grid-template-columns: 5% 72% 23%;
       align-items: center;
@@ -667,7 +673,7 @@
 
       .email_context {
         .email_subject {
-          font-weight: 500 !important;
+          font-weight: 600 !important;
         }
         .email_sender_wo {
           display: grid;
@@ -964,7 +970,7 @@
       .to_send_area {
         display: grid;
         grid-template-columns: 70px auto 190px 115px;
-        font-family: "Helvetica Neue" !important;
+        font-family: "Inter", sans-serif !important;
 
         .sentbtn {
           button {
@@ -984,19 +990,19 @@
         .to_cc {
           .to_field {
             border-bottom: 1px solid $light-gray-1 !important;
-            font-family: "Helvetica Neue" !important;
+            font-family: "Inter", sans-serif !important;
             // height: 18px;
           }
 
           .recepient_AutoComplete {
             line-height: normal !important;
-            font-family: "Helvetica Neue" !important;
+            font-family: "Inter", sans-serif !important;
             .custom-label {
               top: 10px !important;
               left: -11px !important;
               color: #555 !important;
               font-size: 12px;
-              font-family: "Helvetica Neue" !important;
+              font-family: "Inter", sans-serif !important;
             }
 
             .MuiInputBase-root {
@@ -1006,11 +1012,11 @@
 
           .cc_field {
             border-bottom: 1px solid $light-gray-1 !important;
-            font-family: "Helvetica Neue" !important;
+            font-family: "Inter", sans-serif !important;
             //  height: 18px;
 
             .bcc_toggle {
-              font-family: "Helvetica Neue" !important;
+              font-family: "Inter", sans-serif !important;
               color: #b7b7b7;
             }
           }
@@ -1020,12 +1026,12 @@
             border: none !important;
             font-size: 11px !important;
             line-height: 100%;
-            font-family: "Helvetica Neue" !important;
+            font-family: "Inter", sans-serif !important;
           }
 
           .css-1d3z3hw-MuiOutlinedInput-notchedOutline {
             border-style: unset !important;
-            font-family: "Helvetica Neue" !important;
+            font-family: "Inter", sans-serif !important;
           }
         }
 

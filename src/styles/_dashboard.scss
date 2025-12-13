@@ -5,7 +5,7 @@
   flex-direction: column;
   align-items: center;
   // margin-top: 20px;
-  font-family: 'Helvetica Neue';
+   font-family: "Inter", sans-serif !important;
 
   .camera-preview-container {
     display: flex;
@@ -127,7 +127,7 @@
 .react-calendar {
   background: none !important;
   border: none !important;
-  font-family: 'Helvetica Neue';
+  font-family: "Inter", sans-serif !important;
 
   .weekend {
     background-color: #f2dede;

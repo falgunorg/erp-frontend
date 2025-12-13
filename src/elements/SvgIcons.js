@@ -418,22 +418,10 @@ export const SortActiveIcon = (props) => (
   </svg>
 );
 export const ArrowLeftIcon = (props) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="7"
-    height="9"
-    viewBox="0 0 7 9"
-  >
-    <g id="Group_58" data-name="Group 58" transform="translate(-257 -120)">
-      <path
-        id="Polygon_176"
-        data-name="Polygon 176"
-        d="M3.659,1.308a1,1,0,0,1,1.682,0L8.01,5.459A1,1,0,0,1,7.168,7H1.832A1,1,0,0,1,.99,5.459Z"
-        transform="translate(257 129) rotate(-90)"
-        fill="#707070"
-      ></path>
-    </g>
-  </svg>
+  <i
+    style={{ color: "#707070", fontSize: "16px" }}
+    className="fa fa-angle-left"
+  ></i>
 );
 export const ArrowRightIcon = (props) => (
   <i

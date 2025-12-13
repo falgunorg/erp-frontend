@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import api from "services/api";
 import auth from "services/auth";
 import AppContext from "contexts/AppContext";
+import { useHistory } from "react-router-dom";
 
 import {
   HeaderBarIcon,
@@ -22,6 +23,7 @@ import {
 } from "./SvgIcons";
 
 export default function HeaderRightMenu(props) {
+  const history = useHistory();
   const { updateUserObj } = useContext(AppContext);
   const logout = async (ev) => {
     ev.preventDefault();
@@ -137,11 +139,31 @@ export default function HeaderRightMenu(props) {
         </>
       )}
 
-      <div className="item me-2">
-        <GoBack />
+      <div className="item mt-2">
+        <button
+          onClick={() => history.goBack()}
+          style={{
+            background: "none",
+            padding: "0",
+            margin: "0",
+            border: "none",
+          }}
+        >
+          <GoBack />
+        </button>
       </div>
-      <div className="item me-2">
-        <GoForward />
+      <div className="item me-2 mt-2">
+        <button
+          onClick={() => history.goForward()}
+          style={{
+            background: "none",
+            padding: "0",
+            margin: "0",
+            border: "none",
+          }}
+        >
+          <GoForward />
+        </button>
       </div>
       <div onClick={toggleExpand} className="item me-2">
         <Link to="#" className="#">

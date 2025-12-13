@@ -1,134 +1,176 @@
 export const CommercialPermissions = {
   "Asst. General Manager": [
     {
-      path: "/commercial/proformas",
-      label: "Pro. Invoices",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/contracts",
+      label: "PLC",
     },
+    {
+      path: "/merchandising/proformas",
+      label: "PI",
+    },
+
     {
       path: "/commercial/lcs",
-      label: "LC",
-      icon: "fas fa-chevron-right me-1",
+      label: "BB",
     },
     {
-      path: "/merchandising/purchase-contracts",
-      label: "PC/JOBS",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/invoices",
+      label: "INV",
     },
+
+    {
+      path: "/accounts/bb-bills",
+      label: "BBBL",
+    },
+
     {
       path: "/commercial/hscodes",
-      label: "HS CODE",
-      icon: "fas fa-chevron-right me-1",
+      label: "HS",
     },
   ],
   Manager: [
     {
-      path: "/commercial/proformas",
-      label: "Pro. Invoices",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/contracts",
+      label: "PLC",
     },
+    {
+      path: "/merchandising/proformas",
+      label: "PI",
+    },
+
     {
       path: "/commercial/lcs",
-      label: "LC",
-      icon: "fas fa-chevron-right me-1",
+      label: "BB",
     },
     {
-      path: "/merchandising/purchase-contracts",
-      label: "PC/JOBS",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/invoices",
+      label: "INV",
     },
+
+    {
+      path: "/accounts/bb-bills",
+      label: "BBBL",
+    },
+
     {
       path: "/commercial/hscodes",
-      label: "HS CODE",
-      icon: "fas fa-chevron-right me-1",
+      label: "HS",
     },
   ],
   "Assistant Manager": [
     {
-      path: "/commercial/proformas",
-      label: "Pro. Invoices",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/contracts",
+      label: "PLC",
     },
+    {
+      path: "/merchandising/proformas",
+      label: "PI",
+    },
+
     {
       path: "/commercial/lcs",
-      label: "LC",
-      icon: "fas fa-chevron-right me-1",
+      label: "BB",
     },
     {
-      path: "/merchandising/purchase-contracts",
-      label: "PC/JOBS",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/invoices",
+      label: "INV",
     },
+
+    {
+      path: "/accounts/bb-bills",
+      label: "BBBL",
+    },
+
     {
       path: "/commercial/hscodes",
-      label: "HS CODE",
-      icon: "fas fa-chevron-right me-1",
+      label: "HS",
     },
   ],
   Executive: [
     {
-      path: "/commercial/proformas",
-      label: "Pro. Invoices",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/contracts",
+      label: "PLC",
     },
+    {
+      path: "/merchandising/proformas",
+      label: "PI",
+    },
+
     {
       path: "/commercial/lcs",
-      label: "LC",
-      icon: "fas fa-chevron-right me-1",
+      label: "BB",
     },
     {
-      path: "/merchandising/purchase-contracts",
-      label: "PC/JOBS",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/invoices",
+      label: "INV",
     },
+
+    {
+      path: "/accounts/bb-bills",
+      label: "BBBL",
+    },
+
     {
       path: "/commercial/hscodes",
-      label: "HS CODE",
-      icon: "fas fa-chevron-right me-1",
+      label: "HS",
     },
   ],
   "Jr. Executive": [
     {
-      path: "/commercial/proformas",
-      label: "Pro. Invoices",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/contracts",
+      label: "PLC",
     },
+    {
+      path: "/merchandising/proformas",
+      label: "PI",
+    },
+
     {
       path: "/commercial/lcs",
-      label: "LC",
-      icon: "fas fa-chevron-right me-1",
+      label: "BB",
     },
     {
-      path: "/merchandising/purchase-contracts",
-      label: "PC/JOBS",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/invoices",
+      label: "INV",
     },
+
+    {
+      path: "/accounts/bb-bills",
+      label: "BBBL",
+    },
+
     {
       path: "/commercial/hscodes",
-      label: "HS CODE",
-      icon: "fas fa-chevron-right me-1",
+      label: "HS",
     },
   ],
   "Sr. Executive": [
     {
-      path: "/commercial/proformas",
-      label: "Pro. Invoices",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/contracts",
+      label: "PLC",
     },
+    {
+      path: "/merchandising/proformas",
+      label: "PI",
+    },
+
     {
       path: "/commercial/lcs",
-      label: "LC",
-      icon: "fas fa-chevron-right me-1",
+      label: "BB",
     },
     {
-      path: "/merchandising/purchase-contracts",
-      label: "PC/JOBS",
-      icon: "fas fa-chevron-right me-1",
+      path: "/commercial/invoices",
+      label: "INV",
     },
+
+    {
+      path: "/accounts/bb-bills",
+      label: "BBBL",
+    },
+
     {
       path: "/commercial/hscodes",
-      label: "HS CODE",
-      icon: "fas fa-chevron-right me-1",
+      label: "HS",
     },
   ],
 };
