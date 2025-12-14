@@ -40,7 +40,7 @@ export default function RequisitionDetails(props) {
   const [requisitionItems, setRequisitionItems] = useState([]);
   const getRequisition = async () => {
     setSpinner(true);
-    var response = await api.post("/substore/requisitions-show", { id: params.id });
+    var response = await api.post("/requisitions-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setRequisition(response.data.data);
       setRequisitionItems(response.data.data.requisition_items);
@@ -50,7 +50,7 @@ export default function RequisitionDetails(props) {
 
   const toggleStatus = async (status) => {
     setSpinner(true);
-    var response = await api.post("/substore/requisitions-toggle-status", {
+    var response = await api.post("/requisitions-toggle-status", {
       id: requisition.id,
       status: status,
     });
@@ -74,7 +74,7 @@ export default function RequisitionDetails(props) {
       <div className="create_page_heading">
         <div className="page_name">Requisition Details</div>
         <div className="actions">
-          <Link to="#" onClick={PrintPdf} className="btn btn-info btn-sm">
+          <Link onClick={PrintPdf} className="btn btn-info btn-sm">
             <i className="fas fa-print"></i>
           </Link>
 

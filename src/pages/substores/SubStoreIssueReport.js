@@ -48,7 +48,7 @@ export default function SubStoreIssueReport(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/common/companies", {
+    var response = await api.post("/companies", {
       type: "Own",
     });
 
@@ -63,7 +63,7 @@ export default function SubStoreIssueReport(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async (issue_type) => {
     setSpinner(true);
-    var response = await api.post("/admin/employees", {
+    var response = await api.post("/employees", {
       issue_type: "Self",
       without_me: true,
     });
@@ -75,7 +75,7 @@ export default function SubStoreIssueReport(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substore/substores");
+    var response = await api.post("/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.company_wise);
     } else {
@@ -158,7 +158,7 @@ export default function SubStoreIssueReport(props) {
   const getReports = async () => {
     if (validateForm()) {
       setSpinner(true);
-      var response = await api.post("/substore/substores-issue-report", filterData);
+      var response = await api.post("/substores-issue-report", filterData);
       if (response.status === 200 && response.data) {
         setReports(response.data.data);
         setReportSummary(response.data.reportSummary);
@@ -215,7 +215,6 @@ export default function SubStoreIssueReport(props) {
             NEW ISSUE
           </button>
           <Link
-          to="#"
             onClick={handleGoBack}
             className="btn btn-danger rounded-circle"
           >

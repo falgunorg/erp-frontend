@@ -13,7 +13,7 @@ export default function OpenSubstore(props) {
   const [parts, setParts] = useState([]);
   const getParts = async () => {
     setSpinner(true);
-    var response = await api.post("/substore/parts");
+    var response = await api.post("/parts");
     if (response.status === 200 && response.data) {
       setParts(response.data.data);
     }
@@ -24,7 +24,7 @@ export default function OpenSubstore(props) {
 
   const getCompanies = async () => {
     setSpinner(true);
-    var response = await api.post("/common/companies");
+    var response = await api.post("/companies");
     if (response.status === 200 && response.data) {
       setCompanies(response.data.data);
     }
@@ -66,7 +66,7 @@ export default function OpenSubstore(props) {
       formData.append("company_id", formDataSet.company_id);
       formData.append("qty", formDataSet.qty);
 
-      var response = await api.post("/substore/substores-open", formData);
+      var response = await api.post("/substores-open", formData);
       if (response.status === 200 && response.data) {
         setFormDataSet({});
         setErrors({});

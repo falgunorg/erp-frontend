@@ -4,7 +4,6 @@ import api from "services/api";
 import Spinner from "../../../elements/Spinner";
 import moment from "moment/moment";
 import swal from "sweetalert";
-import Logo from "../../../assets/images/logos/logo-short.png";
 import formatMoney from "services/moneyFormatter";
 export default function Proformas(props) {
   const userInfo = props.userData;

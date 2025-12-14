@@ -42,7 +42,7 @@ export default function Parts(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/substore/parts", {
+    var response = await api.post("/parts", {
       search: searchValue,
       page: currentPage,
       type: filterType,
@@ -121,7 +121,7 @@ export default function Parts(props) {
 
   const [units, setUnits] = useState([]);
   const getUnits = async () => {
-    var response = await api.post("/common/units");
+    var response = await api.post("/units");
     if (response.status === 200 && response.data) {
       setUnits(response.data.data);
     } else {
@@ -140,7 +140,7 @@ export default function Parts(props) {
     data.append("photo", file);
     data.append("id", item.id);
     try {
-      const response = await api.post("/substore/parts-upload-photo", data);
+      const response = await api.post("/parts-upload-photo", data);
       if (response.status === 200 && response.data) {
         swal({
           title: "Update Success",
@@ -175,7 +175,7 @@ export default function Parts(props) {
     }));
   };
   const handleSaveClick = async () => {
-    var response = await api.post("/substore/parts-update", editedItem);
+    var response = await api.post("/parts-update", editedItem);
     if (response.status === 200 && response.data) {
       setEditIndex(null);
       getParts();

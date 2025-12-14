@@ -32,7 +32,7 @@ export default function PendingRequisitions(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/substore/requisitions-pending?page=" + currentPage, {
+    var response = await api.post("/requisitions-pending?page=" + currentPage, {
       department: userInfo.department_title,
       designation: userInfo.designation_title,
     });

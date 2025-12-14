@@ -19,6 +19,7 @@ export default function Requisitions(props) {
     setClickedIndex(index);
   };
   const userInfo = props.userData;
+  console.log("USER",userInfo);
   const [spinner, setSpinner] = useState(false);
   // const [currentPage, setCurrentPage] = useState(1);
 
@@ -62,7 +63,7 @@ export default function Requisitions(props) {
   const getRequisitions = async () => {
     setSpinner(true);
     // Send the correct page parameter to the API request
-    var response = await api.post("/substore/requisitions?page=" + currentPage, {
+    var response = await api.post("/requisitions?page=" + currentPage, {
       department: userInfo.department_title,
       designation: userInfo.designation_title,
       from_date: filterData.from_date,
@@ -369,7 +370,6 @@ export default function Requisitions(props) {
                 </td>
                 <td>
                   <Link
-                  to="#"
                     onClick={() => handleItemClick(item.id)}
                     className="btn btn-success btn-sm"
                   >

@@ -13,7 +13,7 @@ export default function CreateQuickRequisition(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async () => {
     setSpinner(true);
-    var response = await api.post("/admin/employees", {
+    var response = await api.post("/employees", {
       recommended_group: true,
       without_me: true,
     });
@@ -28,7 +28,7 @@ export default function CreateQuickRequisition(props) {
   const [parts, setParts] = useState([]);
   const getParts = async () => {
     setSpinner(true);
-    var response = await api.post("/substore/parts-required-purchase");
+    var response = await api.post("/parts-required-purchase");
     if (response.status === 200 && response.data) {
       setParts(response.data.parts);
     }
@@ -128,7 +128,7 @@ export default function CreateQuickRequisition(props) {
       data.append("label", formDataSet.label);
       data.append("requisition_items", JSON.stringify(requisitionItems));
       setSpinner(true);
-      var response = await api.post("/substore/requisitions-create", data);
+      var response = await api.post("/requisitions-create", data);
       if (response.status === 200 && response.data) {
         history.push("/requisitions-details/" + response.data.data.id);
       } else {
@@ -238,7 +238,6 @@ export default function CreateQuickRequisition(props) {
                       </strong>
                     </div>
                     <Link
-                      to="#"
                       className="btn btn-sm btn-outline-success"
                       onClick={() => addRow(item)}
                     >
@@ -385,7 +384,6 @@ export default function CreateQuickRequisition(props) {
                               }
                             />
                             <Link
-                              to="#"
                               className="btn btn-sm btn-outline-danger"
                               onClick={() => removeRow(index)}
                             >

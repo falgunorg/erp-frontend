@@ -13,6 +13,7 @@ export default function RolePermissionManager() {
     label: "",
     path: "",
     icon: "",
+    description: "",
   });
 
   /* ---------------- LOAD DATA ---------------- */
@@ -46,7 +47,7 @@ export default function RolePermissionManager() {
 
   const createMenu = async () => {
     await api.post("/admin/menus", form);
-    setForm({ label: "", path: "", icon: "" });
+    setForm({ label: "", path: "", icon: "", description: "" });
     loadMenus();
   };
 
@@ -113,6 +114,14 @@ export default function RolePermissionManager() {
                   className="form-control"
                   placeholder="Icon class (optional)"
                   value={form.icon}
+                  onChange={(e) => setForm({ ...form, icon: e.target.value })}
+                />
+              </div>
+              <div className="mb-3">
+                <input
+                  className="form-control"
+                  placeholder="Short Desc(optional)"
+                  value={form.description}
                   onChange={(e) => setForm({ ...form, icon: e.target.value })}
                 />
               </div>

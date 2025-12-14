@@ -40,7 +40,7 @@ export default function SubStore(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/substore/substores", {
+    var response = await api.post("/substores", {
       search: searchValue,
       page: currentPage,
       type: params.type,
@@ -71,7 +71,7 @@ export default function SubStore(props) {
     data.append("photo", file);
     data.append("id", item.part_id);
     try {
-      const response = await api.post("/substore/parts-upload-photo", data);
+      const response = await api.post("/parts-upload-photo", data);
       if (response.status === 200 && response.data) {
         swal({
           title: "Update Success",
@@ -283,7 +283,6 @@ export default function SubStore(props) {
 
                   <td>
                     <Link
-                      to="#"
                       onClick={() => handleItemClick(item.id)}
                       className="btn btn-sm btn-success"
                     >

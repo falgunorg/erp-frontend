@@ -17,7 +17,7 @@ export default function EditRequisition(props) {
   const [units, setUnits] = useState([]);
   const getUnits = async () => {
     setSpinner(true);
-    var response = await api.post("/common/units");
+    var response = await api.post("/units");
     if (response.status === 200 && response.data) {
       setUnits(response.data.data);
     }
@@ -27,7 +27,7 @@ export default function EditRequisition(props) {
   const [employees, setEmployees] = useState([]);
   const getEmployees = async () => {
     setSpinner(true);
-    var response = await api.post("/admin/employees", {
+    var response = await api.post("/employees", {
       recommended_group: true,
       without_me: true,
     });
@@ -43,7 +43,7 @@ export default function EditRequisition(props) {
   const [parts, setParts] = useState([]);
   const getParts = async () => {
     setSpinner(true);
-    var response = await api.post("/substore/parts");
+    var response = await api.post("/parts");
     if (response.status === 200 && response.data) {
       setParts(response.data.data);
     }
@@ -134,7 +134,7 @@ export default function EditRequisition(props) {
       data.append("requisition_items", JSON.stringify(requisitionItems));
       data.append("id", formDataSet.id);
       setSpinner(true);
-      var response = await api.post("/substore/requisitions-update", data);
+      var response = await api.post("/requisitions-update", data);
       if (response.status === 200 && response.data) {
         history.push("/requisitions");
       } else {
@@ -146,7 +146,7 @@ export default function EditRequisition(props) {
 
   const getRequisition = async () => {
     setSpinner(true);
-    var response = await api.post("/substore/requisitions-show", { id: params.id });
+    var response = await api.post("/requisitions-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setFormDataSet(response.data.data);
       setRequisitionItems(response.data.data.requisition_items);
@@ -446,7 +446,7 @@ export default function EditRequisition(props) {
                               handleItemChange(index, "remarks", e.target.value)
                             }
                           />
-                          <Link to="#">
+                          <Link>
                             <i
                               onClick={() => removeRow(index)}
                               className="fa fa-times text-danger"
@@ -461,7 +461,7 @@ export default function EditRequisition(props) {
                     <td className="border_none" colSpan={4}></td>
                     <td className="border_none">
                       <div className="add_row text-end">
-                        <Link to="#" className="btn btn-info btn-sm" onClick={addRow}>
+                        <Link className="btn btn-info btn-sm" onClick={addRow}>
                           Add Row
                         </Link>
                       </div>

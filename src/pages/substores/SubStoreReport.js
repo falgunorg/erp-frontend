@@ -47,7 +47,7 @@ export default function SubStoreReport(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/common/companies", {
+    var response = await api.post("/companies", {
       type: "Own",
     });
 
@@ -62,7 +62,7 @@ export default function SubStoreReport(props) {
   const [substores, setSubstores] = useState([]);
   const getSubstores = async () => {
     setSpinner(true);
-    var response = await api.post("/substore/substores");
+    var response = await api.post("/substores");
     if (response.status === 200 && response.data) {
       setSubstores(response.data.company_wise);
     } else {
@@ -141,7 +141,7 @@ export default function SubStoreReport(props) {
   const getReports = async () => {
     if (validateForm()) {
       setSpinner(true);
-      var response = await api.post("/substore/substores-report", filterData);
+      var response = await api.post("/substores-report", filterData);
       if (response.status === 200 && response.data) {
         setReports(response.data.data);
         setReportSummary(response.data.reportSummary);
@@ -188,7 +188,6 @@ export default function SubStoreReport(props) {
         <div className="page_name">SubStore Report</div>
         <div className="actions">
           <Link
-            to="#"
             onClick={handleGoBack}
             className="btn btn-danger rounded-circle"
           >

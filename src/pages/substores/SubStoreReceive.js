@@ -22,7 +22,7 @@ export default function SubStoreReceive(props) {
   const getRequisitions = async () => {
     setSpinner(true);
     try {
-      const response = await api.post("/substore/requisitions-for-receive");
+      const response = await api.post("/requisitions-for-receive");
       if (response.status === 200 && response.data) {
         setRequisitions(response.data.data);
       }
@@ -41,7 +41,7 @@ export default function SubStoreReceive(props) {
 
     setSpinner(true);
     try {
-      const response = await api.post("/substore/requisitions-show", {
+      const response = await api.post("/requisitions-show", {
         id: formData.requisition_id,
       });
       if (response.status === 200 && response.data) {

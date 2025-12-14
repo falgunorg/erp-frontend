@@ -85,7 +85,7 @@ export default function WorkOrders(props) {
 
   return (
     <div className="purchase_order_page">
-     <div className="purchase_action_header non_printing_area">
+      <div className="purchase_action_header non_printing_area">
         <div className="actions_left">
           <button className="active">New PC</button>
           <button>Edit</button>

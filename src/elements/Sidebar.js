@@ -2,9 +2,6 @@ import React, { useState, useContext } from "react";
 import auth from "services/auth";
 import AppContext from "contexts/AppContext";
 import { Link, useLocation } from "react-router-dom";
-import { hasPermission } from "../routes/permissions/CheckPermissions";
-import { rolesPermissions } from "../routes/permissions/PermissionsConfig";
-
 import ls from "services/ls";
 
 import {
@@ -29,10 +26,9 @@ import {
 export default function Sidebar(props) {
   const location = useLocation();
   const pathname = location.pathname;
-  const { updateUserObj } = useContext(AppContext);
   const themeMode = "bg_light";
 
-  console.log("HASPERMISSION", hasPermission);
+  const userData = auth.getUser();
 
   return (
     <div className={`falgun_app_sidebar ${themeMode}`}>
@@ -149,31 +145,17 @@ export default function Sidebar(props) {
         <div className="dynamic_area">
           <div className="permission_menus">
             <ul className="submenu">
-              {(() => {
-                const userData = auth.getUser();
-
-                const department = userData?.department_title?.trim();
-                const designation = userData?.designation_title?.trim();
-
-                const menus =
-                  rolesPermissions?.[department]?.[designation] || [];
-
-                return menus.map((item, index) => {
-                  if (!hasPermission(userData, item.path)) return null;
-
-                  return (
-                    <li key={index}>
-                      <Link
-                        to={item.path}
-                        title={item.label}
-                        className={pathname === item.path ? "active" : ""}
-                      >
-                        {item.label}
-                      </Link>
-                    </li>
-                  );
-                });
-              })()}
+              {userData?.menus?.map((item, index) => (
+                <li key={index}>
+                  <Link
+                    to={item.path}
+                    title={item.label}
+                    className={pathname === item.path ? "active" : ""}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

@@ -16,7 +16,7 @@ export default function SubStoreDetails(props) {
   const [issues, setIssues] = useState([]);
   const getStore = async () => {
     setSpinner(true);
-    var response = await api.post("/substore/substores-show", { id: params.id });
+    var response = await api.post("/substores-show", { id: params.id });
     if (response.status === 200 && response.data) {
       setStore(response.data.data);
       setReceives(response.data.data.receives);
@@ -44,7 +44,7 @@ export default function SubStoreDetails(props) {
         // Create an async function inside the then block to handle the async operation
         (async () => {
           try {
-            var response = await api.post("/substore/substores-issue-undo", {
+            var response = await api.post("/substores-issue-undo", {
               id: id,
             });
 
@@ -88,7 +88,7 @@ export default function SubStoreDetails(props) {
         // Create an async function inside the then block to handle the async operation
         (async () => {
           try {
-            var response = await api.post("/substore/substores-receive-undo", {
+            var response = await api.post("/substores-receive-undo", {
               id: id,
             });
 
@@ -127,7 +127,6 @@ export default function SubStoreDetails(props) {
         <div className="page_name">Sub Store Details</div>
         <div className="actions">
           <Link
-          to="#"
             onClick={() => history.goBack()}
             className="btn btn-danger rounded-circle"
           >

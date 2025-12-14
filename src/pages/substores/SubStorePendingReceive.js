@@ -19,7 +19,7 @@ export default function SubStorePendingReceive(props) {
   const getRequisitionItems = async () => {
     setSpinner(true);
     try {
-      const response = await api.post("/substore/substores-pending-receive");
+      const response = await api.post("/substores-pending-receive");
       if (response.status === 200 && response.data) {
         setRequisitionItems(response.data.data);
       } else {

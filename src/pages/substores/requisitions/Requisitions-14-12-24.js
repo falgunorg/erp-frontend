@@ -68,7 +68,7 @@ export default function Requisitions(props) {
     setSpinner(true);
 
     // Send the correct page parameter to the API request
-    var response = await api.post("/substore/requisitions?page=" + currentPage, {
+    var response = await api.post("/requisitions?page=" + currentPage, {
       department: userInfo.department_title,
       designation: userInfo.designation_title,
       from_date: filterData.from_date,
