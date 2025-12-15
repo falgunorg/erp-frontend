@@ -19,8 +19,13 @@ import Issues from "../pages/store/issues/Issues";
 import IssueItem from "../pages/store/issues/IssueItem";
 import IssueReport from "../pages/store/issues/IssueReport";
 
-// RETURNS (missing import fixed)
+// RETURNS
 import ReturnRequest from "../pages/store/return-request/ReturnRequest";
+
+// LEFT OVER STORE
+import LeftOverStores from "../pages/store/left-overs/LeftOverStores";
+import CreateLeftOverStore from "../pages/store/left-overs/CreateLeftOverStore";
+import LeftOverStoreDetails from "../pages/store/left-overs/LeftOverStoreDetails";
 
 const prefix = "/store";
 
@@ -66,6 +71,22 @@ const storeRoutes = [
     exact
     path={`${prefix}/issue/report`}
     component={IssueReport}
+  />,
+
+  <PrivateRoute
+    exact
+    path={`${prefix}/left-overs`}
+    component={LeftOverStores}
+  />,
+  <PrivateRoute
+    exact
+    path={`${prefix}/left-overs-details/:id?`}
+    component={LeftOverStoreDetails}
+  />,
+  <PrivateRoute
+    exact
+    path={`${prefix}/left-overs-create`}
+    component={CreateLeftOverStore}
   />,
 ];
 

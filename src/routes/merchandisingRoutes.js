@@ -1,6 +1,14 @@
 import React from "react";
 import PrivateRoute from "./PrivateRoute";
+
 //get components
+
+// sample order request
+import Sors from "../pages/merchandising/sor/Sors";
+import CreateSor from "../pages/merchandising/sor/CreateSor";
+import EditSor from "../pages/merchandising/sor/EditSor";
+import SorDetails from "../pages/merchandising/sor/SorDetails";
+
 import TechnicalPackages from "pages/merchandising/techpacks/TechnicalPackages";
 import CostSheets from "pages/merchandising/costing/CostSheets";
 import BudgetSheets from "pages/merchandising/budgets/BudgetSheets";
@@ -23,7 +31,6 @@ import EditProforma from "../pages/merchandising/proformas/EditProforma";
 import ProformaDetails from "../pages/merchandising/proformas/ProformaDetails";
 import ProformaOverview from "../pages/merchandising/proformas/ProformaOverview";
 
-
 const prefix = "/merchandising";
 const merchandisingRoutes = [
   <PrivateRoute
@@ -31,6 +38,16 @@ const merchandisingRoutes = [
     path={`${prefix}/technical-packages/:id?`}
     component={TechnicalPackages}
   />,
+
+  <PrivateRoute exact path={`${prefix}/sors`} component={Sors} />,
+  <PrivateRoute exact path={`${prefix}/sors-edit/:id?`} component={EditSor} />,
+  <PrivateRoute
+    exact
+    path={`${prefix}/sors-details/:id?`}
+    component={SorDetails}
+  />,
+  <PrivateRoute exact path={`${prefix}/sors-create`} component={CreateSor} />,
+
   <PrivateRoute
     exact
     path={`${prefix}/cost-sheets/:id?`}
@@ -84,11 +101,7 @@ const merchandisingRoutes = [
     path={`${prefix}/bookings-manager/:id?`}
     component={BookingManager}
   />,
-  <PrivateRoute
-    exact
-    path={`${prefix}/proformas`}
-    component={Proformas}
-  />,
+  <PrivateRoute exact path={`${prefix}/proformas`} component={Proformas} />,
   <PrivateRoute
     exact
     path={`${prefix}/proformas-create`}
