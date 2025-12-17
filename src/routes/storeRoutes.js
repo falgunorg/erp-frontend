@@ -12,7 +12,6 @@ import StoreDetails from "../pages/store/StoreDetails";
 import StoreSummary from "../pages/store/StoreSummary";
 
 // RECEIVES
-import Receives from "../pages/store/receives/Grns";
 
 // ISSUES
 import Issues from "../pages/store/issues/Issues";
@@ -45,7 +44,7 @@ const storeRoutes = [
     path={`${prefix}/receives-create`}
     component={ReceiveItem}
   />,
-  <PrivateRoute exact path={`${prefix}/receives`} component={Grns} />,
+  <PrivateRoute exact path={`${prefix}/grns`} component={Grns} />,
   <PrivateRoute
     exact
     path={`${prefix}/receives/report`}
@@ -60,8 +59,6 @@ const storeRoutes = [
 
   <PrivateRoute exact path="/stores" component={Stores} />,
   <PrivateRoute exact path="/stores-details/:id?" component={StoreDetails} />,
-
-  <PrivateRoute exact path={`${prefix}/receives`} component={Receives} />,
 
   <PrivateRoute exact path={`${prefix}/returns`} component={ReturnRequest} />,
 

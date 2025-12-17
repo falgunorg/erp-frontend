@@ -220,20 +220,7 @@ export default function SampleStore(props) {
     props.setSection("sample");
   }, []);
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      const allowedDepartments = ["Merchandising", "Sample"];
-      if (!allowedDepartments.includes(props.userData?.department_title)) {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props.userData?.department_title, history]);
+ 
 
   return (
     <div className="create_edit_page">

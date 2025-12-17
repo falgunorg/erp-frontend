@@ -75,7 +75,7 @@ export default function PurchaseOrders(props) {
   const [selectedPo, setSelectedPo] = useState();
   const handlePoDetails = (po) => {
     setSelectedPo(po);
-    history.push("/purchase-orders/" + po.id);
+    history.push("/merchandising/purchase-orders/" + po.id);
     setRenderArea("details");
   };
 
@@ -97,7 +97,7 @@ export default function PurchaseOrders(props) {
             "The purchase order has been deleted.",
             "success"
           ).then(() => {
-            history.push("/purchase-orders");
+            history.push("/merchandising/purchase-orders");
             window.location.reload();
           });
         }
@@ -109,7 +109,7 @@ export default function PurchaseOrders(props) {
 
   useEffect(async () => {
     if (params.id) {
-      history.push("/purchase-orders/" + params.id);
+      history.push("/merchandising/purchase-orders/" + params.id);
       setRenderArea("details");
     } else {
       setRenderArea("blank");

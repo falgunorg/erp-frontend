@@ -178,20 +178,7 @@ export default function AdminSampleStore(props) {
     props.setSection("sample");
   }, []);
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (props.userData?.role !== "Admin") {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props, history]);
+  
 
   return (
     <div className="create_edit_page">

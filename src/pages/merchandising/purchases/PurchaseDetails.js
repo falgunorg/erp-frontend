@@ -64,27 +64,7 @@ export default function PurchaseDetails(props) {
     props.setSection("merchandising");
   }, []);
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      const allowedDepartments = [
-        "Merchandising",
-        "Planing",
-        "Commercial",
-        "Management",
-        "Accounts & Finance",
-        "IT",
-      ];
-      if (!allowedDepartments.includes(props.userData?.department_title)) {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props.userData?.department_title, history]);
+  
 
   return (
     <div className="create_edit_page">

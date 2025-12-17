@@ -75,20 +75,20 @@ export default function AdminDesignDetails(props) {
     props.setSection("development");
   }, []);
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (props.userData?.role !== "Admin") {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
+  // useEffect(() => {
+  //   const checkAccess = async () => {
+  //     if (props.userData?.role !== "Admin") {
+  //       await swal({
+  //         icon: "error",
+  //         text: "You Cannot Access This Section.",
+  //         closeOnClickOutside: false,
+  //       });
 
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props, history]);
+  //       history.push("/dashboard");
+  //     }
+  //   };
+  //   checkAccess();
+  // }, [props, history]);
 
   return (
     <div className="create_edit_page">

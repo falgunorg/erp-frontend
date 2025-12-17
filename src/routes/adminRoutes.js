@@ -100,7 +100,6 @@ const adminRoutes = [
     path={`${prefix}/sample-stores`}
     component={AdminSampleStore}
   />,
-
   <PrivateRoute exact path={`${prefix}/sors`} component={AdminSors} />,
   <PrivateRoute
     exact

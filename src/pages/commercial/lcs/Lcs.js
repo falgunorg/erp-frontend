@@ -136,20 +136,7 @@ export default function Lcs(props) {
     return () => clearTimeout(delay);
   }, [searchValue]);
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      const allowedDepartments = ["Commercial", "Management", "IT"];
-      if (!allowedDepartments.includes(props.userData?.department_title)) {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props.userData?.department_title, history]);
+  
 
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;

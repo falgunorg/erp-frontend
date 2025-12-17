@@ -92,20 +92,7 @@ export default function ReturnRequest(props) {
     props.setSection("stores");
   }, []);
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (props.userData?.department_title !== "Store") {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props, history]);
+  
 
   return (
     <div className="create_edit_page">

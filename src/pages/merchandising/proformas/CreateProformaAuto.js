@@ -367,20 +367,7 @@ export default function CreateProformaAuto(props) {
     validateDuplicatePiItem();
   }, [piItems]);
 
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (props.userData?.department_title !== "Merchandising") {
-        await swal({
-          icon: "error",
-          text: "You Cannot Access This Section.",
-          closeOnClickOutside: false,
-        });
-
-        history.push("/dashboard");
-      }
-    };
-    checkAccess();
-  }, [props, history]);
+  
 
   useEffect(async () => {
     getContracts();
