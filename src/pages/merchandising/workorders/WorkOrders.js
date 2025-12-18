@@ -58,7 +58,7 @@ export default function WorkOrders(props) {
 
   const [selectedWo, setSelectedWo] = useState();
   const handlePoDetails = (wo) => {
-    history.push("/work-orders/" + wo.id);
+    history.push("/merchandising/work-orders/" + wo.id);
     setRenderArea("details");
     setSelectedWo(wo);
   };
@@ -80,7 +80,7 @@ export default function WorkOrders(props) {
         if (response.status === 200 && response.data) {
           swal("Deleted!", "The work order has been deleted.", "success").then(
             () => {
-              history.push("/work-orders");
+              history.push("/merchandising/work-orders");
               window.location.reload();
             }
           );

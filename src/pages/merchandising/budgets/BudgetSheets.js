@@ -72,7 +72,7 @@ export default function BudgetSheets(props) {
 
   const handleClick = (id) => {
     setSelectedBudgetId(id);
-    history.push("/budget-sheets/" + id);
+    history.push("/merchandising/budget-sheets/" + id);
     setRenderArea("details");
   };
 
@@ -91,7 +91,7 @@ export default function BudgetSheets(props) {
         if (response.status === 200 && response.data) {
           swal("Deleted!", "The budget has been deleted.", "success").then(
             () => {
-              history.push("/budget-sheets");
+              history.push("/merchandising/budget-sheets");
               window.location.reload();
             }
           );

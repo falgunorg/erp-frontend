@@ -64,7 +64,7 @@ export default function CostSheets(props) {
 
   const handleClick = (id) => {
     setSelectedCostId(id);
-    history.push("/cost-sheets/" + id);
+    history.push("/merchandising/cost-sheets/" + id);
     setRenderArea("details");
   };
 
@@ -85,7 +85,7 @@ export default function CostSheets(props) {
         if (response.status === 200 && response.data) {
           swal("Deleted!", "The costing has been deleted.", "success").then(
             () => {
-              history.push("/cost-sheets");
+              history.push("/merchandising/cost-sheets");
               window.location.reload();
             }
           );

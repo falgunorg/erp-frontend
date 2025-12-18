@@ -261,12 +261,6 @@ export default function RolePermissionManager() {
                                 >
                                   Select All
                                 </button>
-                                <button
-                                  className="btn btn-outline-danger btn-sm"
-                                  onClick={() => toggleDepartment(dep.id, [])}
-                                >
-                                  Unselect All
-                                </button>
                               </div>
 
                               {/* Designations */}
