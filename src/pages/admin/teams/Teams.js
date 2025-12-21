@@ -252,7 +252,7 @@ export default function Teams(props) {
                             <i className="fa fa-eye mr-10 text-success"></i>
                           </Link>
                           <Link to={"/admin/teams/edit/" + item.id}>
-                            <i className="fa fa-pen mr-10 text-info"></i>
+                            <i className="fas fa-pen mr-10 text-info"></i>
                           </Link>
                         </td>
                       </tr>
@@ -307,7 +307,7 @@ export default function Teams(props) {
                           <i className="fa fa-eye mr-10 text-success"></i>
                         </Link>
                         <Link to={"/admin/teams/edit/" + item.id}>
-                          <i className="fa fa-pen mr-10 text-info"></i>
+                          <i className="fas fa-pen mr-10 text-info"></i>
                         </Link>
                       </td>
                     </tr>

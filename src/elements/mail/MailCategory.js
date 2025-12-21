@@ -116,7 +116,7 @@ export default function MailCategory() {
               <div style={{ fontSize: "9px", color: "#707070" }}>
                 <i
                   style={{ cursor: "pointer" }}
-                  className="fa fa-pen me-2"
+                  className="fas fa-pen me-2"
                   onClick={() => openModal("edit", category)}
                 ></i>
                 <i

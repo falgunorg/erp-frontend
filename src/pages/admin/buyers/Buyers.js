@@ -224,7 +224,7 @@ export default function Buyers(props) {
                         <td>
                           <>
                             <Link onClick={() => openEditModal(item.id)}>
-                              <i className="fa fa-pen"></i>
+                              <i className="fas fa-pen"></i>
                             </Link>
                           </>
                         </td>
@@ -243,7 +243,7 @@ export default function Buyers(props) {
                       <td>
                         <>
                           <Link onClick={() => openEditModal(item.id)}>
-                            <i className="fa fa-pen"></i>
+                            <i className="fas fa-pen"></i>
                           </Link>
                         </>
                       </td>

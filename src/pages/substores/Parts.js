@@ -437,7 +437,7 @@ export default function Parts(props) {
                         ) : (
                           <i
                             onClick={() => handleEditClick(index, item)}
-                            className="fa fa-pen text-falgun"
+                            className="fas fa-pen text-falgun"
                             style={{
                               fontSize: "15px",
                               cursor: "pointer",

@@ -292,7 +292,7 @@ export default function PartRequests(props) {
                                 className="btn btn-warning btn-sm"
                                 to={"/part-requests-edit/" + item.id}
                               >
-                                <i className="fa fa-pen"></i>
+                                <i className="fas fa-pen"></i>
                               </Link>
                             ) : null}
 
@@ -407,7 +407,7 @@ export default function PartRequests(props) {
                               className="btn btn-warning btn-sm"
                               to={"/part-requests-edit/" + item.id}
                             >
-                              <i className="fa fa-pen"></i>
+                              <i className="fas fa-pen"></i>
                             </Link>
                           ) : null}
 

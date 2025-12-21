@@ -129,7 +129,7 @@ export default function Suppliers(props) {
                   {props.userData.userId === item.added_by && (
                     <>
                       <Link to={"/admin/suppliers/edit/" + item.id}>
-                        <i className="fa fa-pen"></i>
+                        <i className="fas fa-pen"></i>
                       </Link>
                     </>
                   )}

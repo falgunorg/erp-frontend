@@ -200,7 +200,7 @@ export default function Employees(props) {
                 <td>
                   <>
                     <Link to={"/admin/employees/edit/" + item.id}>
-                      <i className="fa fa-pen"></i>
+                      <i className="fas fa-pen"></i>
                     </Link>
                     <Link
                       to="#"

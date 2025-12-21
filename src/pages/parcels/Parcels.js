@@ -255,7 +255,7 @@ export default function Parcels(props) {
                       item.user_id === props.userData.userId ? (
                         <>
                           <Link to={"/parcels-edit/" + item.tracking_number}>
-                            <i className="fa fa-pen me-2 text-falgun"></i>
+                            <i className="fas fa-pen me-2 text-falgun"></i>
                           </Link>
 
                           <Link to="#" onClick={() => handleDelete(item.id)}>

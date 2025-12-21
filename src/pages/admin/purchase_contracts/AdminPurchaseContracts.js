@@ -573,7 +573,7 @@ export default function AdminPurchaseContracts(props) {
                       </Link>
 
                       <Link to="#" onClick={(id) => openEditForm(item.id)}>
-                        <i className="fa fa-pen"></i>
+                        <i className="fas fa-pen"></i>
                       </Link>
                     </>
                   </td>

@@ -404,7 +404,7 @@ export default function Requisitions(props) {
                         className="btn btn-warning btn-sm"
                         to={"/requisitions-edit/" + item.id}
                       >
-                        <i className="fa fa-pen"></i>
+                        <i className="fas fa-pen"></i>
                       </Link>
                     ) : null}
                   </td>

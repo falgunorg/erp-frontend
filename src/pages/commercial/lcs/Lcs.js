@@ -398,7 +398,7 @@ export default function Lcs(props) {
                   <td className="text-end">{item.total} USD</td>
                   <td>
                     <Link to={"/commercial/lcs-edit/" + item.id}>
-                      <i className="fa fa-pen"></i>
+                      <i className="fas fa-pen"></i>
                     </Link>
                     <Link
                       style={{ marginLeft: "10px" }}

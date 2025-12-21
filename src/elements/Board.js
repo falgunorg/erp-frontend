@@ -298,7 +298,7 @@ const Board = () => {
                         <i
                           onClick={() => toggleEditing(columnId)}
                           style={{ marginLeft: "5px", cursor: "pointer" }}
-                          className="fa fa-pen"
+                          className="fas fa-pen"
                         ></i>
                       </span>
                     </h6>

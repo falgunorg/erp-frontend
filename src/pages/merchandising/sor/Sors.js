@@ -434,7 +434,7 @@ export default function Sors(props) {
                           {/* {props.userData?.userId === item.user_id &&
                             item.status === "Pending" && (
                               <Link to={"/merchandising/sors-edit/" + item.id}>
-                                <i className="fa fa-pen mr-10 text-info"></i>
+                                <i className="fas fa-pen mr-10 text-info"></i>
                               </Link>
                             )} */}
                         </td>
@@ -504,7 +504,7 @@ export default function Sors(props) {
                         {/* {props.userData?.userId === item.user_id &&
                         item.status === "Pending" && (
                           <Link to={"/merchandising/sors-edit/" + item.id}>
-                            <i className="fa fa-pen mr-10 text-info"></i>
+                            <i className="fas fa-pen mr-10 text-info"></i>
                           </Link>
                         )} */}
                       </td>

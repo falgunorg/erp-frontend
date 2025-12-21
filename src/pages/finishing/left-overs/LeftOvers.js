@@ -256,7 +256,7 @@ export default function LeftOvers(props) {
                       {props.userData?.userId === item.user_id &&
                         item.status === "Pending" && (
                           <Link to={"/finishing/left-overs-edit/" + item.id}>
-                            <i className="fa fa-pen text-danger"></i>
+                            <i className="fas fa-pen text-danger"></i>
                           </Link>
                         )}
                     </div>

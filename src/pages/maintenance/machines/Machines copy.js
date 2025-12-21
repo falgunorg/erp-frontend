@@ -201,7 +201,7 @@ export default function Machines(props) {
                 <td>{item.status}</td>
                 <td>
                   <Link to={"/maintenance/machines-edit/" + item.id}>
-                    <i className="fa fa-pen"></i>
+                    <i className="fas fa-pen"></i>
                   </Link>
                 </td>
               </tr>

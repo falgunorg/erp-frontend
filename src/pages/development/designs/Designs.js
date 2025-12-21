@@ -367,7 +367,7 @@ export default function Sors(props) {
                           {props.userData.userId === item.user_id &&
                           item.status === "Pending" ? (
                             <Link to={"/development/designs-edit/" + item.id}>
-                              <i className="fa fa-pen"></i>
+                              <i className="fas fa-pen"></i>
                             </Link>
                           ) : null}
                         </td>
@@ -418,7 +418,7 @@ export default function Sors(props) {
                         {props.userData.userId === item.user_id &&
                         item.status === "Pending" ? (
                           <Link to={"/development/designs-edit/" + item.id}>
-                            <i className="fa fa-pen"></i>
+                            <i className="fas fa-pen"></i>
                           </Link>
                         ) : null}
                       </td>

@@ -306,7 +306,7 @@ export default function MyRequests() {
                           setFormData(item);
                           openModal();
                         }}
-                        className="fa fa-pen text-warning me-2"
+                        className="fas fa-pen text-warning me-2"
                       ></i>
                       <i
                         onClick={() => deleteLeave(item.id)}

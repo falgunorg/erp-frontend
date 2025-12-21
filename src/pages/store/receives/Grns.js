@@ -507,7 +507,7 @@ const Grns = (props) => {
                     onClick={() => handleEdit(grn)}
                     className="btn btn-sm btn-warning me-2"
                   >
-                    <i className="fa fa-pen"></i>
+                    <i className="fas fa-pen"></i>
                   </button>
                   <button
                     onClick={() => deleteGrn(grn.id)}

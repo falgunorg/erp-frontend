@@ -484,7 +484,7 @@ export default function SampleStore(props) {
                           item.used < 1 ? (
                             <>
                               <Link to={"/sample/stores-edit/" + item.id}>
-                                <i className="fa fa-pen margin-10 text-info"></i>
+                                <i className="fas fa-pen margin-10 text-info"></i>
                               </Link>
                             </>
                           ) : null}
@@ -535,7 +535,7 @@ export default function SampleStore(props) {
                         item.used < 1 ? (
                           <>
                             <Link to={"/sample/stores-edit/" + item.id}>
-                              <i className="fa fa-pen margin-10 text-info"></i>
+                              <i className="fas fa-pen margin-10 text-info"></i>
                             </Link>
                           </>
                         ) : null}

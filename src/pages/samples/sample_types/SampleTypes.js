@@ -270,7 +270,7 @@ export default function SampleTypes(props) {
                                 to="#"
                                 onClick={() => openEditModal(item.id)}
                               >
-                                <i className="fa fa-pen"></i>
+                                <i className="fas fa-pen"></i>
                               </Link>
                             </>
                           )}
@@ -290,7 +290,7 @@ export default function SampleTypes(props) {
                         {props.userData?.userId === item.user_id && (
                           <>
                             <Link to="#" onClick={() => openEditModal(item.id)}>
-                              <i className="fa fa-pen"></i>
+                              <i className="fas fa-pen"></i>
                             </Link>
                           </>
                         )}

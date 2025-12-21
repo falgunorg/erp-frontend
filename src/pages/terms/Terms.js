@@ -202,7 +202,7 @@ export default function Terms(props) {
                         <td>
                           <>
                             <Link to="#" onClick={() => openEditModal(item.id)}>
-                              <i className="fa fa-pen"></i>
+                              <i className="fas fa-pen"></i>
                             </Link>
                           </>
                         </td>
@@ -218,7 +218,7 @@ export default function Terms(props) {
                       <td>
                         <>
                           <Link to="#" onClick={() => openEditModal(item.id)}>
-                            <i className="fa fa-pen"></i>
+                            <i className="fas fa-pen"></i>
                           </Link>
                         </>
                       </td>

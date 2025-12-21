@@ -502,7 +502,7 @@ const Issues = (props) => {
                     onClick={() => handleEdit(grn)}
                     className="btn btn-sm me-2 btn-warning"
                   >
-                    <i className="fa fa-pen"></i>
+                    <i className="fas fa-pen"></i>
                   </button>
                   <button
                     onClick={() => deleteIssue(grn.id)}

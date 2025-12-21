@@ -15,7 +15,7 @@ export default function Proformas(props) {
     from_date: "",
     to_date: "",
     status: "",
-    num_of_row: 20,
+    num_of_row: 50,
   });
   const filterChange = (event) => {
     setFilterData({ ...filterData, [event.target.name]: event.target.value });
@@ -25,7 +25,7 @@ export default function Proformas(props) {
       from_date: "",
       to_date: "",
       status: "",
-      num_of_row: 20,
+      num_of_row: 50,
     });
   };
 
@@ -58,8 +58,6 @@ export default function Proformas(props) {
   useEffect(async () => {
     props.setSection("merchandising");
   }, []);
-
- 
 
   useEffect(async () => {
     props.setHeaderData({
@@ -239,7 +237,7 @@ export default function Proformas(props) {
                             <Link
                               to={"/merchandising/proformas-edit/" + item.id}
                             >
-                              <i className="fa fa-pen"></i>
+                              <i className="fas fa-pen"></i>
                             </Link>
                           ) : null}
                         </td>
@@ -281,7 +279,7 @@ export default function Proformas(props) {
                         (item.status === "Pending" ||
                           item.status === "Rejected") ? (
                           <Link to={"/merchandising/proformas-edit/" + item.id}>
-                            <i className="fa fa-pen"></i>
+                            <i className="fas fa-pen"></i>
                           </Link>
                         ) : null}
                       </td>
