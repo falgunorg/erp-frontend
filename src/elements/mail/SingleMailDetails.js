@@ -507,7 +507,7 @@ export default function SingleMailDetails(props) {
                       <ZoomOutIcon />
                     </button>
 
-                    <button
+                    {/* <button
                       onClick={() => {
                         props.setIsComposing(true);
                         props.setMailSendType("Reply");
@@ -530,7 +530,7 @@ export default function SingleMailDetails(props) {
                       }}
                     >
                       Forward
-                    </button>
+                    </button> */}
 
                     <Dropdown className="moreToggleButton" onClick={moreToggle}>
                       <Dropdown.Toggle

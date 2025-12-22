@@ -1497,8 +1497,8 @@
       }
     }
     .attachments {
-      max-height: 80px;
-      overflow-y: auto;
+      // max-height: 80px;
+      // overflow-y: auto;
       &::-webkit-scrollbar {
         // width: 5px; // Total scrollbar width, slightly increased to account for the empty space
       }
