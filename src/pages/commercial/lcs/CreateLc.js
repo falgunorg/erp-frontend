@@ -7,6 +7,8 @@ import CustomSelect from "elements/CustomSelect";
 import moment from "moment";
 import MultipleFileInput from "elements/techpack/MultipleFileInput";
 import QuailEditor from "elements/QuailEditor";
+import Autocomplete from "@mui/material/Autocomplete";
+import TextField from "@mui/material/TextField";
 
 export default function CreateLc(props) {
   const userData = props.userData;
@@ -28,44 +30,28 @@ export default function CreateLc(props) {
     { title: "Payra Port", type: "sea", district: "Patuakhali" },
     { title: "Matarbari Deep Sea Port", type: "sea", district: "Cox’s Bazar" },
 
-    { title: "Dhaka River Port (Sadarghat)", type: "river", district: "Dhaka" },
-    { title: "Narayanganj River Port", type: "river", district: "Narayanganj" },
-    { title: "Barisal River Port", type: "river", district: "Barisal" },
-    { title: "Ashuganj River Port", type: "river", district: "Brahmanbaria" },
-    { title: "Khulna River Port", type: "river", district: "Khulna" },
-    { title: "Noapara River Port", type: "river", district: "Jashore" },
-    { title: "Chandpur River Port", type: "river", district: "Chandpur" },
-    { title: "Patuakhali River Port", type: "river", district: "Patuakhali" },
-    { title: "Bhola River Port", type: "river", district: "Bhola" },
-    { title: "Goalanda River Port", type: "river", district: "Rajbari" },
-    { title: "Baghabari River Port", type: "river", district: "Sirajganj" },
-    { title: "Sirajganj River Port", type: "river", district: "Sirajganj" },
-    { title: "Narsingdi River Port", type: "river", district: "Narsingdi" },
-    { title: "Kurigram River Port", type: "river", district: "Kurigram" },
-    { title: "Aricha River Port", type: "river", district: "Manikganj" },
-
-    { title: "Benapole Land Port", type: "land", district: "Jashore" },
-    { title: "Burimari Land Port", type: "land", district: "Lalmonirhat" },
-    { title: "Hilli Land Port", type: "land", district: "Dinajpur" },
-    { title: "Bhomra Land Port", type: "land", district: "Satkhira" },
-    { title: "Akhaura Land Port", type: "land", district: "Brahmanbaria" },
-    { title: "Tamabil Land Port", type: "land", district: "Sylhet" },
-    { title: "Sonahat Land Port", type: "land", district: "Kurigram" },
-    { title: "Darshana Land Port", type: "land", district: "Chuadanga" },
+    { title: "Benapole Land Port", type: "road", district: "Jashore" },
+    { title: "Burimari Land Port", type: "road", district: "Lalmonirhat" },
+    { title: "Hilli Land Port", type: "road", district: "Dinajpur" },
+    { title: "Bhomra Land Port", type: "road", district: "Satkhira" },
+    { title: "Akhaura Land Port", type: "road", district: "Brahmanbaria" },
+    { title: "Tamabil Land Port", type: "road", district: "Sylhet" },
+    { title: "Sonahat Land Port", type: "road", district: "Kurigram" },
+    { title: "Darshana Land Port", type: "road", district: "Chuadanga" },
     {
       title: "Teknaf Land Port (with Myanmar)",
-      type: "land",
+      type: "road",
       district: "Cox’s Bazar",
     },
-    { title: "Banglabandha Land Port", type: "land", district: "Panchagarh" },
+    { title: "Banglabandha Land Port", type: "road", district: "Panchagarh" },
     {
       title: "Gobrakura–Karaitali Land Port",
-      type: "land",
+      type: "road",
       district: "Mymensingh",
     },
-    { title: "Bibir Bazar Land Port", type: "land", district: "Cumilla" },
-    { title: "Nangalkot Land Port", type: "land", district: "Cumilla" },
-    { title: "Kawkhali Land Port", type: "land", district: "Rangamati" },
+    { title: "Bibir Bazar Land Port", type: "road", district: "Cumilla" },
+    { title: "Nangalkot Land Port", type: "road", district: "Cumilla" },
+    { title: "Kawkhali Land Port", type: "road", district: "Rangamati" },
 
     {
       title: "Hazrat Shahjalal International Airport",
@@ -84,17 +70,194 @@ export default function CreateLc(props) {
     { title: "Saidpur Airport", type: "air", district: "Nilphamari" },
     { title: "Rajshahi Airport", type: "air", district: "Rajshahi" },
     {
-      title: "Tejgaon Airport (Dhaka, military)",
-      type: "air",
-      district: "Dhaka",
-    },
-    {
       title: "Thakurgaon Airport (non-operational)",
       type: "air",
       district: "Thakurgaon",
     },
     { title: "Ishurdi Airport", type: "air", district: "Pabna" },
-    { title: "Comilla Airport", type: "air", district: "Cumilla" },
+    { title: "APPLICANT'S FACTORY", type: "road", district: "" },
+  ];
+
+  const foreignPorts = [
+    { title: "Port of Shanghai", type: "sea", country: "China" },
+    { title: "Port of Ningbo-Zhoushan", type: "sea", country: "China" },
+    { title: "Port of Shenzhen", type: "sea", country: "China" },
+    { title: "Port of Guangzhou", type: "sea", country: "China" },
+    { title: "Port of Qingdao", type: "sea", country: "China" },
+    { title: "Port of Tianjin", type: "sea", country: "China" },
+    { title: "Any Port of China", type: "sea", country: "China" },
+    {
+      title: "Shanghai Pudong International Airport",
+      type: "air",
+      country: "China",
+    },
+    {
+      title: "Guangzhou Baiyun International Airport",
+      type: "air",
+      country: "China",
+    },
+    {
+      title: "Shenzhen Bao'an International Airport",
+      type: "air",
+      country: "China",
+    },
+
+    // --- VIETNAM ---
+    {
+      title: "Port of Ho Chi Minh City (Cat Lai)",
+      type: "sea",
+      country: "Vietnam",
+    },
+    { title: "Port of Hai Phong", type: "sea", country: "Vietnam" },
+    { title: "Port of Da Nang", type: "sea", country: "Vietnam" },
+    {
+      title: "Cai Mep International Terminal",
+      type: "sea",
+      country: "Vietnam",
+    },
+
+    {
+      title: "Any Port Of Vietnam",
+      type: "sea",
+      country: "Vietnam",
+    },
+    {
+      title: "Tan Son Nhat International Airport",
+      type: "air",
+      country: "Vietnam",
+    },
+    { title: "Noi Bai International Airport", type: "air", country: "Vietnam" },
+
+    // --- TAIWAN ---
+    { title: "Port of Kaohsiung", type: "sea", country: "Taiwan" },
+    { title: "Port of Keelung", type: "sea", country: "Taiwan" },
+    { title: "Port of Taichung", type: "sea", country: "Taiwan" },
+    { title: "Any Port of Taiwan", type: "sea", country: "Taiwan" },
+    { title: "Taoyuan International Airport", type: "air", country: "Taiwan" },
+    {
+      title: "Kaohsiung International Airport",
+      type: "air",
+      country: "Taiwan",
+    },
+
+    // --- INDIA ---
+    {
+      title: "Jawaharlal Nehru Port (Nhava Sheva)",
+      type: "sea",
+      country: "India",
+    },
+    {
+      title: "Syama Prasad Mookerjee Port (Kolkata)",
+      type: "sea",
+      country: "India",
+    },
+    { title: "Mundra Port", type: "sea", country: "India" },
+    { title: "Chennai Port", type: "sea", country: "India" },
+    { title: "Haldia Dock Complex", type: "sea", country: "India" },
+    {
+      title: "Indira Gandhi International Airport (Delhi)",
+      type: "air",
+      country: "India",
+    },
+    {
+      title: "Chhatrapati Shivaji Maharaj International Airport (Mumbai)",
+      type: "air",
+      country: "India",
+    },
+    { title: "Chennai International Airport", type: "air", country: "India" },
+    {
+      title: "Netaji Subhash Chandra Bose International Airport (Kolkata)",
+      type: "air",
+      country: "India",
+    },
+
+    {
+      title: "Petrapole Land Port (Benapole side)",
+      type: "road",
+      country: "India",
+    },
+    {
+      title: "Ghojadanga Land Customs Station (Bhomra side)",
+      type: "road",
+      country: "India",
+    },
+    {
+      title: "Changrabandha Land Port (Burimari side)",
+      type: "road",
+      country: "India",
+    },
+    {
+      title: "Mahadipur Land Port (Sonamasjid side)",
+      type: "road",
+      country: "India",
+    },
+    { title: "Hili Land Port (Hili side)", type: "road", country: "India" },
+    {
+      title: "Fulbari Land Port (Banglabandha side)",
+      type: "road",
+      country: "India",
+    },
+    {
+      title: "Ramnagar/Agartala Land Port (Akhaura side)",
+      type: "road",
+      country: "India",
+    },
+    { title: "Dauki Land Port (Tamabil side)", type: "road", country: "India" }, // Connects to Sylhet region (Meghalaya border)
+    {
+      title: "Sutarkandi Land Port (Sheola side)",
+      type: "road",
+      country: "India",
+    },
+    {
+      title: "Gede Land Customs Station (Darshana side)",
+      type: "road",
+      country: "India",
+    },
+    {
+      title: "BENEFICIARY'S FACTORY",
+      type: "road",
+      country: "",
+    },
+  ];
+
+  const epzs = [
+    {
+      title: "Chattogram Export Processing Zone",
+      type: "road",
+      district: "Chattogram",
+    },
+    { title: "Dhaka Export Processing Zone", type: "road", district: "Dhaka" },
+    {
+      title: "Cumilla Export Processing Zone",
+      type: "road",
+      district: "Cumilla",
+    },
+    {
+      title: "Adamjee Export Processing Zone",
+      type: "road",
+      district: "Narayanganj",
+    },
+    {
+      title: "Karnaphuli Export Processing Zone",
+      type: "road",
+      district: "Chattogram",
+    },
+    {
+      title: "Mongla Export Processing Zone",
+      type: "road",
+      district: "Bagerhat",
+    },
+    {
+      title: "Ishwardi Export Processing Zone",
+      type: "road",
+      district: "Pabna",
+    },
+
+    {
+      title: "Uttara Export Processing Zone",
+      type: "road",
+      district: "Nilphamari",
+    },
   ];
 
   const [formDataSet, setFormDataSet] = useState({
@@ -104,6 +267,7 @@ export default function CreateLc(props) {
     lc_number: "",
     draft_at: "",
     apply_date: "",
+    bb_type: "",
     issued_date: "",
     commodity: "",
     mode_of_shipment: "",
@@ -114,6 +278,8 @@ export default function CreateLc(props) {
     freight_charge: "",
     description: "",
   });
+
+  console.log("gerdgh", formDataSet);
 
   // --- Fetchers ---
   const getContracts = async () => {
@@ -204,10 +370,7 @@ export default function CreateLc(props) {
         return bangladeshPorts.filter((p) => p.type === "air");
 
       case "Land":
-        return bangladeshPorts.filter((p) => p.type === "land");
-
-      case "River":
-        return bangladeshPorts.filter((p) => p.type === "river");
+        return bangladeshPorts.filter((p) => p.type === "road");
 
       case "Sea/Air":
         return bangladeshPorts.filter(
@@ -216,7 +379,35 @@ export default function CreateLc(props) {
 
       case "Sea/Air/Road":
         return bangladeshPorts.filter(
-          (p) => p.type === "sea" || p.type === "air" || p.type === "land"
+          (p) => p.type === "sea" || p.type === "air" || p.type === "road"
+        );
+
+      default:
+        return [];
+    }
+  };
+
+  const getFilteredForeignPorts = () => {
+    const mode = formDataSet.mode_of_shipment;
+
+    if (!mode) return [];
+
+    switch (mode) {
+      case "Sea":
+        return foreignPorts.filter((p) => p.type === "sea");
+
+      case "Air":
+        return foreignPorts.filter((p) => p.type === "air");
+
+      case "Land":
+        return foreignPorts.filter((p) => p.type === "road");
+
+      case "Sea/Air":
+        return foreignPorts.filter((p) => p.type === "sea" || p.type === "air");
+
+      case "Sea/Air/Road":
+        return foreignPorts.filter(
+          (p) => p.type === "sea" || p.type === "air" || p.type === "road"
         );
 
       default:
@@ -225,7 +416,7 @@ export default function CreateLc(props) {
   };
 
   const filteredPorts = getFilteredPorts();
-
+  const filteredForeignPorts = getFilteredForeignPorts();
   const totalNetWeight = filteredProformas.reduce((sum, p) => {
     // normalize p.total to a number safely
     const raw = p && p.net_weight != null ? String(p.net_weight) : "0";
@@ -566,6 +757,29 @@ export default function CreateLc(props) {
                   )}
                 </div>
               </div>
+
+              <div className="col-lg-3">
+                <div className="form-group">
+                  <label className="form-label">
+                    BB Type <span className="text-danger">*</span>
+                  </label>
+                  <select
+                    tabIndex={0}
+                    onChange={(e) => handleChange("bb_type", e.target.value)}
+                    name="bb_type"
+                    value={formDataSet.bb_type}
+                    className="form-select"
+                  >
+                    <option value="">Select Type</option>
+                    <option value="Local">Local</option>
+                    <option value="Foreign">Foreign</option>
+                    <option value="Local (EPZ)">Local (EPZ)</option>
+                  </select>
+                  {errors.bb_type && (
+                    <div className="errorMsg">{errors.bb_type}</div>
+                  )}
+                </div>
+              </div>
               <div className="col-lg-3">
                 <label className="form-label">
                   Mode of Shipment <span className="text-danger">*</span>
@@ -582,7 +796,7 @@ export default function CreateLc(props) {
                   <option value="Sea">Sea</option>
                   <option value="Air">Air</option>
                   <option value="Land">Road</option>
-                  <option value="River">River</option>
+
                   <option value="Sea/Air">Sea/Air</option>
                   <option value="Sea/Air/Road">Sea/Air/Road</option>
                 </select>
@@ -593,42 +807,70 @@ export default function CreateLc(props) {
 
               <div className="col-lg-3">
                 <label className="form-label">Port of Loading</label>
-                <input
-                  className="form-control"
-                  value={formDataSet.port_of_loading}
-                  onChange={(e) =>
-                    handleChange("port_of_loading", e.target.value)
+
+                <Autocomplete
+                  className="recepient_AutoComplete"
+                  freeSolo
+                  // Corrected: Use template literal to join title and country
+                  options={
+                    formDataSet.bb_type === "Local (EPZ)"
+                      ? epzs.map((e) => e.title)
+                      : filteredForeignPorts.map(
+                          (item) => `${item.title} | ${item.country}`
+                        )
                   }
+                  // Ensure value is always a string to prevent controlled/uncontrolled warnings
+                  value={formDataSet.port_of_loading || ""}
+                  onChange={(event, newValue) =>
+                    handleChange("port_of_loading", newValue)
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Select ports"
+                      variant="outlined"
+                      // Ensure the TextField handles the value properly
+                      onChange={(e) =>
+                        handleChange("port_of_loading", e.target.value)
+                      }
+                      InputLabelProps={{
+                        shrink: true,
+                        className: "custom-label",
+                      }}
+                    />
+                  )}
                 />
               </div>
 
               <div className="col-lg-3">
                 <label className="form-label">Port of Discharge</label>
+                <Autocomplete
+                  className="recepient_AutoComplete"
+                  freeSolo
+                  // Corrected: Use template literal to join title and country
 
-                <CustomSelect
-                  placeholder="Select"
-                  onChange={(selectedOption) =>
-                    handleChange("port_of_discharge", selectedOption.value)
+                  options={filteredPorts.map(
+                    (item) => `${item.title} | ${item.district}`
+                  )}
+                  // Ensure value is always a string to prevent controlled/uncontrolled warnings
+                  value={formDataSet.port_of_discharge || ""}
+                  onChange={(event, newValue) =>
+                    handleChange("port_of_discharge", newValue)
                   }
-                  value={
-                    bangladeshPorts.find(
-                      (item) => item.title === formDataSet.port_of_discharge
-                    )
-                      ? {
-                          value: formDataSet.port_of_discharge,
-                          label:
-                            bangladeshPorts.find(
-                              (item) =>
-                                item.title === formDataSet.port_of_discharge
-                            ).title || "",
-                        }
-                      : null
-                  }
-                  name="port_of_discharge"
-                  options={filteredPorts.map((item) => ({
-                    value: item.title,
-                    label: `${item.title} (${item.district})`,
-                  }))}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Select ports"
+                      // Ensure the TextField handles the value properly
+                      onChange={(e) =>
+                        handleChange("port_of_discharge", e.target.value)
+                      }
+                      InputLabelProps={{
+                        shrink: true,
+                        className: "custom-label",
+                      }}
+                    />
+                  )}
                 />
               </div>
 
@@ -677,6 +919,17 @@ export default function CreateLc(props) {
                     type="number"
                     value={totalAmount.toFixed(2)}
                     className="form-control"
+                  />
+                </div>
+              </div>
+              <div className="col-lg-9">
+                <div className="form-group">
+                  <label className="form-label">Attatchments</label>
+                  <MultipleFileInput
+                    label="Attatchments"
+                    inputId="Attatchments"
+                    selectedFiles={selectedFiles}
+                    setSelectedFiles={setSelectedFiles}
                   />
                 </div>
               </div>
@@ -756,14 +1009,6 @@ export default function CreateLc(props) {
                   onContentChange={(val) => handleChange("description", val)}
                 />
               </div>
-            </div>
-            <div className="col-lg-12 mt-3">
-              <MultipleFileInput
-                label="Attatchments"
-                inputId="Attatchments"
-                selectedFiles={selectedFiles}
-                setSelectedFiles={setSelectedFiles}
-              />
             </div>
           </div>
         </div>

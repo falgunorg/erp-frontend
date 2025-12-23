@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react"; // Added useMemo
 import auth from "services/auth";
 import ls from "services/ls";
 import { Link, useLocation } from "react-router-dom";
@@ -24,41 +24,43 @@ export default function Sidebar(props) {
   const pathname = location.pathname;
   const themeMode = "bg_light";
 
-  const userData = auth.getUser();
+  // Fix 1: Memoize userData to prevent reference changes on every render
+  const userData = useMemo(() => auth.getUser(), []); 
 
-  // Load menu order from localStorage if exists
   const [menus, setMenus] = useState(() => {
     const savedOrder = localStorage.getItem("menuOrder");
-    if (savedOrder) {
+    if (savedOrder && userData?.menus) {
       const parsedOrder = JSON.parse(savedOrder);
-      return parsedOrder
+      const orderedMenus = parsedOrder
         .map((id) => userData.menus.find((menu) => menu.id === id))
         .filter(Boolean);
+      
+      // If the saved order doesn't cover all menus (e.g. new permissions added), 
+      // you might want to append missing ones here.
+      return orderedMenus.length > 0 ? orderedMenus : userData.menus;
     }
     return userData?.menus || [];
   });
 
-  // Reset menus if userData changes
+  // Fix 2: Use a specific ID or stringified version to avoid infinite loops
   useEffect(() => {
-    if (!localStorage.getItem("menuOrder")) {
-      setMenus(userData?.menus || []);
+    const hasSavedOrder = localStorage.getItem("menuOrder");
+    if (!hasSavedOrder && userData?.menus) {
+      setMenus(userData.menus);
     }
-  }, [userData]);
+  }, [userData?.id, userData?.menus?.length]); // More stable dependencies
 
-  // Load custom labels
   const [customLabels, setCustomLabels] = useState(() => {
     const saved = localStorage.getItem("menuLabels");
     return saved ? JSON.parse(saved) : {};
   });
 
-  // Function to rename menu
   const renameMenu = (id, newLabel) => {
     const updated = { ...customLabels, [id]: newLabel };
     setCustomLabels(updated);
     localStorage.setItem("menuLabels", JSON.stringify(updated));
   };
 
-  // Handle drag end
   const handleDragEnd = (result) => {
     if (!result.destination) return;
 
@@ -77,7 +79,8 @@ export default function Sidebar(props) {
     <div className={`falgun_app_sidebar ${themeMode}`}>
       <nav className={`navbar ${themeMode}`} style={{ display: "block" }}>
         <div className="fixed_area">
-          {location.pathname === "/mailbox" && !props.resizeToggle && (
+          {/* Use specific condition to avoid constant toggling */}
+          {pathname === "/mailbox" && !props.resizeToggle && (
             <button
               onClick={() => {
                 const newToggleValue = !props.resizeToggle;
@@ -86,59 +89,51 @@ export default function Sidebar(props) {
               }}
               className="resizeToggle sidebarMenu"
             >
-              {props.resizeToggle ? <ArrowLeftIcon /> : <ArrowRightIcon />}
+               <ArrowRightIcon />
             </button>
+          )}
+          {/* Optional: Add the close button for when it is toggled */}
+          {pathname === "/mailbox" && props.resizeToggle && (
+             <button
+             onClick={() => {
+               const newToggleValue = !props.resizeToggle;
+               ls.set("resizeToggle", newToggleValue);
+               props.setResizeToggle(newToggleValue);
+             }}
+             className="resizeToggle sidebarMenu"
+           >
+              <ArrowLeftIcon />
+           </button>
           )}
 
           <div className="common_icon_menus">
             <ul>
               <li>
-                <Link
-                  to="/mailbox"
-                  className={pathname === "/mailbox" ? "active" : ""}
-                >
+                <Link to="/mailbox" className={pathname === "/mailbox" ? "active" : ""}>
                   <div className="border_design"></div>
                   <span className="icon_shadow">
-                    <span className="inactive">
-                      <MailIcon />
-                    </span>
-                    <span className="active">
-                      <MailActiveIcon />
-                    </span>
+                    <span className="inactive"><MailIcon /></span>
+                    <span className="active"><MailActiveIcon /></span>
                   </span>
                   <div className="link_text">Mail</div>
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/schedules"
-                  className={pathname === "/schedules" ? "active" : ""}
-                >
+                <Link to="/schedules" className={pathname === "/schedules" ? "active" : ""}>
                   <div className="border_design"></div>
                   <span className="icon_shadow">
-                    <span className="inactive">
-                      <ScheduleIcon />
-                    </span>
-                    <span className="active">
-                      <ScheduleActiveIcon />
-                    </span>
+                    <span className="inactive"><ScheduleIcon /></span>
+                    <span className="active"><ScheduleActiveIcon /></span>
                   </span>
                   <div className="link_text">Schedule</div>
                 </Link>
               </li>
               <li>
-                <Link
-                  to="/tasks"
-                  className={pathname === "/tasks" ? "active" : ""}
-                >
+                <Link to="/tasks" className={pathname === "/tasks" ? "active" : ""}>
                   <div className="border_design"></div>
                   <span className="icon_shadow">
-                    <span className="inactive">
-                      <TaskIcon />
-                    </span>
-                    <span className="active">
-                      <TaskActiveIcon />
-                    </span>
+                    <span className="inactive"><TaskIcon /></span>
+                    <span className="active"><TaskActiveIcon /></span>
                   </span>
                   <div className="link_text">Task</div>
                 </Link>
@@ -152,24 +147,16 @@ export default function Sidebar(props) {
             <DragDropContext onDragEnd={handleDragEnd}>
               <Droppable droppableId="menu">
                 {(provided) => (
-                  <ul
-                    className="submenu"
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
+                  <ul className="submenu" {...provided.droppableProps} ref={provided.innerRef}>
                     {menus.map((item, index) => (
-                      <Draggable
-                        key={item.id}
-                        draggableId={String(item.id)}
-                        index={index}
-                      >
+                      <Draggable key={item.id} draggableId={String(item.id)} index={index}>
                         {(provided) => (
                           <li
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             onContextMenu={(e) => {
-                              e.preventDefault(); // prevent the default browser menu
+                              e.preventDefault();
                               const newName = prompt(
                                 "Enter new name for menu",
                                 customLabels[item.id] || item.label
